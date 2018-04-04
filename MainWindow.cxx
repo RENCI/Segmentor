@@ -5,37 +5,57 @@
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 #include <vtkSphereSource.h>
+#include <vtkCubeSource.h>
 #include <vtkSmartPointer.h>
 
 // Constructor
 MainWindow::MainWindow()
 {
-  this->setupUi(this);
+	this->setupUi(this);
 
-  vtkNew<vtkGenericOpenGLRenderWindow> renderWindow;
-  qvtkWidget->SetRenderWindow(renderWindow);
+	vtkNew<vtkGenericOpenGLRenderWindow> renderWindowLeft;
+	this->qvtkWidgetLeft->SetRenderWindow(renderWindowLeft);
 
-  // Sphere
-  vtkSmartPointer<vtkSphereSource> sphereSource =
-    vtkSmartPointer<vtkSphereSource>::New();
-  sphereSource->Update();
-  vtkSmartPointer<vtkPolyDataMapper> sphereMapper =
-    vtkSmartPointer<vtkPolyDataMapper>::New();
-  sphereMapper->SetInputConnection(sphereSource->GetOutputPort());
-  vtkSmartPointer<vtkActor> sphereActor =
-    vtkSmartPointer<vtkActor>::New();
-  sphereActor->SetMapper(sphereMapper);
+	vtkNew<vtkGenericOpenGLRenderWindow> renderWindowRight;
+	this->qvtkWidgetRight->SetRenderWindow(renderWindowRight);
 
-  // VTK Renderer
-  vtkSmartPointer<vtkRenderer> renderer =
-    vtkSmartPointer<vtkRenderer>::New();
-  renderer->AddActor(sphereActor);
+	// Sphere
+	vtkSmartPointer<vtkSphereSource> sphereSource =
+		vtkSmartPointer<vtkSphereSource>::New();
+	sphereSource->Update();
+	vtkSmartPointer<vtkPolyDataMapper> sphereMapper =
+		vtkSmartPointer<vtkPolyDataMapper>::New();
+	sphereMapper->SetInputConnection(sphereSource->GetOutputPort());
+	vtkSmartPointer<vtkActor> sphereActor =
+		vtkSmartPointer<vtkActor>::New();
+	sphereActor->SetMapper(sphereMapper);
 
-  // VTK/Qt wedded
-  this->qvtkWidget->GetRenderWindow()->AddRenderer(renderer);
+	// Cube
+	vtkSmartPointer<vtkCubeSource> cubeSource =
+		vtkSmartPointer<vtkCubeSource>::New();
+	cubeSource->Update();
+	vtkSmartPointer<vtkPolyDataMapper> cubeMapper =
+		vtkSmartPointer<vtkPolyDataMapper>::New();
+	cubeMapper->SetInputConnection(cubeSource->GetOutputPort());
+	vtkSmartPointer<vtkActor> cubeActor =
+		vtkSmartPointer<vtkActor>::New();
+	cubeActor->SetMapper(cubeMapper);
 
-  // Set up action signals and slots
-  connect(this->actionExit, SIGNAL(triggered()), this, SLOT(slotExit()));
+	// VTK Renderers
+	vtkSmartPointer<vtkRenderer> rendererLeft =
+		vtkSmartPointer<vtkRenderer>::New();
+	rendererLeft->AddActor(sphereActor);
+
+	vtkSmartPointer<vtkRenderer> rendererRight =
+		vtkSmartPointer<vtkRenderer>::New();
+	rendererRight->AddActor(cubeActor);
+
+	// VTK/Qt wedded
+	this->qvtkWidgetLeft->GetRenderWindow()->AddRenderer(rendererLeft);
+	this->qvtkWidgetRight->GetRenderWindow()->AddRenderer(rendererRight);
+
+	// Set up action signals and slots
+	connect(this->actionExit, SIGNAL(triggered()), this, SLOT(slotExit()));
 };
 
 void MainWindow::slotExit()
