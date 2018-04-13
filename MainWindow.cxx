@@ -46,7 +46,7 @@ void MainWindow::on_actionOpen_triggered() {
 	QString fileName = QFileDialog::getOpenFileName(this,
 		"Open Volume",
 		"",
-		"All Files (*);;VTK XML ImageData Files (.vti)");
+		"All Files (*.*);;VTK XML ImageData Files (*.vti)");
 
 	// Check for file name
 	if (fileName == "") {
@@ -55,6 +55,9 @@ void MainWindow::on_actionOpen_triggered() {
 
 	if (dataPipeline->OpenData(fileName.toStdString())) {
 		std::cout << "OPEN" << std::endl;
+
+		volumePipeline->SetInput(dataPipeline->GetOutput());
+		slicePipeline->SetInput(dataPipeline->GetOutput());
 	}
 	else {
 		std::cout << "NO OPEN" << std::endl;

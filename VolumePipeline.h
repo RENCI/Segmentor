@@ -3,6 +3,7 @@
 
 #include <vtkSmartPointer.h>
 
+class vtkAlgorithm;
 class vtkRenderer;
 class vtkRenderWindowInteractor;
 
@@ -11,6 +12,8 @@ public:
 
   VolumePipeline(vtkRenderWindowInteractor* rwi);
   ~VolumePipeline();
+
+  void SetInput(vtkAlgorithm* input);
 
 protected:
 

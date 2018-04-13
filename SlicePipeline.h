@@ -3,14 +3,17 @@
 
 #include <vtkSmartPointer.h>
 
+class vtkAlgorithm;
 class vtkRenderer;
 class vtkRenderWindowInteractor;
 
 class SlicePipeline {
 public:
 
-  SlicePipeline(vtkRenderWindowInteractor* rwi);
-  ~SlicePipeline();
+	SlicePipeline(vtkRenderWindowInteractor* rwi);
+	~SlicePipeline();
+
+	void SetInput(vtkAlgorithm* input);
 
 protected:
 
