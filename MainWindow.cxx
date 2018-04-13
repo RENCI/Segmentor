@@ -1,7 +1,6 @@
 #include "MainWindow.h"
 
-#include "VolumePipeline.h"
-#include "SlicePipeline.h"
+#include <QFileDialog>
 
 #include <vtkGenericOpenGLRenderWindow.h>
 #include <vtkPolyDataMapper.h>
@@ -11,27 +10,58 @@
 #include <vtkCubeSource.h>
 #include <vtkSmartPointer.h>
 
+#include "DataPipeline.h"
+#include "VolumePipeline.h"
+#include "SlicePipeline.h"
+
 // Constructor
-MainWindow::MainWindow()
-{
-	this->setupUi(this);
+MainWindow::MainWindow() {
+	// Create the GUI from the Qt Designer file
+	setupUi(this);
 	
 	// Create render windows
 	vtkNew<vtkGenericOpenGLRenderWindow> renderWindowLeft;
-	this->qvtkWidgetLeft->SetRenderWindow(renderWindowLeft);
+	qvtkWidgetLeft->SetRenderWindow(renderWindowLeft);
 
 	vtkNew<vtkGenericOpenGLRenderWindow> renderWindowRight;
-	this->qvtkWidgetRight->SetRenderWindow(renderWindowRight);
+	qvtkWidgetRight->SetRenderWindow(renderWindowRight);
 
 	// Create VTK pipelines
-	this->volumePipeline = new VolumePipeline(this->qvtkWidgetLeft->GetInteractor());
-	this->slicePipeline = new SlicePipeline(this->qvtkWidgetRight->GetInteractor());
-
-	// Set up action signals and slots
-	connect(this->actionExit, SIGNAL(triggered()), this, SLOT(slotExit()));
+	dataPipeline = new DataPipeline();
+	volumePipeline = new VolumePipeline(this->qvtkWidgetLeft->GetInteractor());
+	slicePipeline = new SlicePipeline(this->qvtkWidgetRight->GetInteractor());
 };
 
-void MainWindow::slotExit()
-{
-  qApp->exit();
+MainWindow::~MainWindow() {
+	// Clean up
+	delete dataPipeline;
+	delete volumePipeline;
+	delete slicePipeline;
+
+	qApp->exit();
+}
+
+void MainWindow::on_actionOpen_triggered() {
+	// Open a file dialog to read the file
+	QString fileName = QFileDialog::getOpenFileName(this,
+		"Open Volume",
+		"",
+		"All Files (*);;VTK XML ImageData Files (.vti)");
+
+	// Check for file name
+	if (fileName == "") {
+		return;
+	}
+
+	if (dataPipeline->OpenData(fileName.toStdString())) {
+		std::cout << "OPEN" << std::endl;
+	}
+	else {
+		std::cout << "NO OPEN" << std::endl;
+	}
+}
+
+void MainWindow::on_actionExit_triggered() {
+	// Exit Qt
+	qApp->exit();
 }
