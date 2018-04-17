@@ -3,7 +3,7 @@
 
 #include <vtkSmartPointer.h>
 
-class vtkAlgorithm;
+class vtkImageData;
 class vtkRenderer;
 class vtkRenderWindowInteractor;
 
@@ -13,7 +13,7 @@ public:
 	SlicePipeline(vtkRenderWindowInteractor* rwi);
 	~SlicePipeline();
 
-	void SetInput(vtkAlgorithm* input);
+	void SetInput(vtkImageData* input);
 
 protected:
 

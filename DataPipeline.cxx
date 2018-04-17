@@ -1,6 +1,6 @@
 #include "DataPipeline.h"
 
-#include <vtkAlgorithm.h>
+#include <vtkImageData.h>
 #include <vtkXMLImageDataReader.h>
 
 DataPipeline::DataPipeline() {
@@ -14,13 +14,14 @@ bool DataPipeline::OpenData(const std::string& fileName) {
 	// Load data
 	vtkSmartPointer<vtkXMLImageDataReader> reader = vtkSmartPointer<vtkXMLImageDataReader>::New();
 	reader->SetFileName(fileName.c_str());
+	reader->Update();
 
 	// Set output
-	output = reader;
+	output = reader->GetOutput();
 
 	return true;
 }
 
-vtkAlgorithm* DataPipeline::GetOutput() {
+vtkImageData* DataPipeline::GetOutput() {
 	return output;
 }

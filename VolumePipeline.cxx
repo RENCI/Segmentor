@@ -1,16 +1,17 @@
 #include "VolumePipeline.h"
 
-#include <vtkActor.h>
-#include <vtkAlgorithmOutput.h>
 #include <vtkColorTransferFunction.h>
+#include <vtkImageData.h>
+#include <vtkImageResample.h>
 #include <vtkPiecewiseFunction.h>
-#include <vtkPolyDataMapper.h>
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkSmartVolumeMapper.h>
 #include <vtkVolume.h>
 #include <vtkVolumeProperty.h>
+
+#include <vtkOpenGLGPUVolumeRayCastMapper.h>
 
 double rescale(double value, double min, double max) {
 	return min + (max - min) * value;
@@ -25,15 +26,22 @@ VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* rwi) {
 VolumePipeline::~VolumePipeline() {
 }
 
-void VolumePipeline::SetInput(vtkAlgorithm* input) {
-	double minValue = 10.0;
-	double maxValue = 255.0;
+void VolumePipeline::SetInput(vtkImageData* input) {
+	// Get image info
+	double minValue = input->GetScalarRange()[0];
+	double maxValue = input->GetScalarRange()[1];
+
+	// Resize
+	double mag[3] = { 0.1, 0.1, 0.1 };
+	vtkSmartPointer<vtkImageResample> resample = vtkSmartPointer<vtkImageResample>::New();
+	resample->GetMagnificationFactors(mag);
+	resample->SetInputDataObject(input);
 
 	// Volume mapper
 	vtkSmartPointer<vtkSmartVolumeMapper> volumeMapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
 	volumeMapper->SetBlendModeToComposite();
 	volumeMapper->SetRequestedRenderModeToRayCast();
-	volumeMapper->SetInputConnection(input->GetOutputPort());
+	volumeMapper->SetInputConnection(resample->GetOutputPort());
   
 	// Volume property
 	vtkSmartPointer<vtkVolumeProperty> volumeProperty = vtkSmartPointer<vtkVolumeProperty>::New();

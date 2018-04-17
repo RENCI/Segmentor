@@ -46,7 +46,8 @@ void MainWindow::on_actionOpen_triggered() {
 	// Open a file dialog to read the file
 	QString fileName = QFileDialog::getOpenFileName(this,
 		"Open Volume",
-		"",
+		"E:/borland/data/BRAIN_I/Sample/",
+//		"",
 		"All Files (*.*);;VTK XML ImageData Files (*.vti)");
 
 	// Check for file name
