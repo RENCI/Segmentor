@@ -3,8 +3,6 @@
 #include <vtkAlgorithm.h>
 #include <vtkXMLImageDataReader.h>
 
-#include <vtkSphereSource.h>
-
 DataPipeline::DataPipeline() {
 	output = nullptr;
 }
@@ -13,9 +11,12 @@ DataPipeline::~DataPipeline() {
 }
 
 bool DataPipeline::OpenData(const std::string& fileName) {
-	std::cout << fileName << std::endl;
+	// Load data
+	vtkSmartPointer<vtkXMLImageDataReader> reader = vtkSmartPointer<vtkXMLImageDataReader>::New();
+	reader->SetFileName(fileName.c_str());
 
-	output = vtkSmartPointer<vtkSphereSource>::New();
+	// Set output
+	output = reader;
 
 	return true;
 }

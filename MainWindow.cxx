@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 
 #include <QFileDialog>
+#include <QMessageBox>
 
 #include <vtkGenericOpenGLRenderWindow.h>
 #include <vtkPolyDataMapper.h>
@@ -54,13 +55,13 @@ void MainWindow::on_actionOpen_triggered() {
 	}
 
 	if (dataPipeline->OpenData(fileName.toStdString())) {
-		std::cout << "OPEN" << std::endl;
-
 		volumePipeline->SetInput(dataPipeline->GetOutput());
 		slicePipeline->SetInput(dataPipeline->GetOutput());
 	}
 	else {
-		std::cout << "NO OPEN" << std::endl;
+		QMessageBox errorMessage;
+		errorMessage.setText("Could not open file.");
+		errorMessage.exec();
 	}
 }
 
