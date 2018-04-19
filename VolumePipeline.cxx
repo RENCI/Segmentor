@@ -28,14 +28,22 @@ VolumePipeline::~VolumePipeline() {
 
 void VolumePipeline::SetInput(vtkImageData* input) {
 	// Get image info
-	double minValue = input->GetScalarRange()[0];
-	double maxValue = input->GetScalarRange()[1];
+//	double minValue = input->GetScalarRange()[0];
+//	double maxValue = input->GetScalarRange()[1];
 
 	// Resize
-	double mag[3] = { 0.1, 0.1, 0.1 };
+	double mag[3] = { 1, 1, 1 };
 	vtkSmartPointer<vtkImageResample> resample = vtkSmartPointer<vtkImageResample>::New();
 	resample->GetMagnificationFactors(mag);
 	resample->SetInputDataObject(input);
+	resample->Update();
+
+	double minValue = resample->GetOutput()->GetScalarRange()[0];
+	double maxValue = resample->GetOutput()->GetScalarRange()[1];
+
+	double minVisible = rescale(0.05, minValue, maxValue);
+
+	double gradientValue = 5.0;
 
 	// Volume mapper
 	vtkSmartPointer<vtkSmartVolumeMapper> volumeMapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
@@ -45,22 +53,30 @@ void VolumePipeline::SetInput(vtkImageData* input) {
   
 	// Volume property
 	vtkSmartPointer<vtkVolumeProperty> volumeProperty = vtkSmartPointer<vtkVolumeProperty>::New();
-	volumeProperty->ShadeOff();
+	volumeProperty->ShadeOn();
 	volumeProperty->SetInterpolationType(VTK_LINEAR_INTERPOLATION);
 
-	// Opacity transfer function
-	vtkSmartPointer<vtkPiecewiseFunction> opacityFunction = vtkSmartPointer<vtkPiecewiseFunction>::New();
-	opacityFunction->AddPoint(0.0, 0.0);
-	opacityFunction->AddPoint(minValue, 0.0);
-	opacityFunction->AddPoint(maxValue, 1.0);
-	volumeProperty->SetScalarOpacity(opacityFunction);
+	// Scalar opacity transfer function
+/*
+	vtkSmartPointer<vtkPiecewiseFunction> scalarOpacityFunction = vtkSmartPointer<vtkPiecewiseFunction>::New();
+	scalarOpacityFunction->AddPoint(minValue, 1.0);
+	scalarOpacityFunction->AddPoint(minVisible, 1.0);
+	scalarOpacityFunction->AddPoint(maxValue, 1.0);
+	volumeProperty->SetScalarOpacity(scalarOpacityFunction);
+*/
+
+	// Gradient opacity transfer function
+	vtkSmartPointer<vtkPiecewiseFunction> gradientOpacityFunction = vtkSmartPointer<vtkPiecewiseFunction>::New();
+	gradientOpacityFunction->AddPoint(0, 0.0);
+	gradientOpacityFunction->AddPoint(gradientValue, 0.0);
+	gradientOpacityFunction->AddPoint(gradientValue + 1, 1.0);
+	gradientOpacityFunction->AddPoint(maxValue - minValue, 1.0);
+	volumeProperty->SetGradientOpacity(gradientOpacityFunction);
 
 	// Color transfer function
 	vtkSmartPointer<vtkColorTransferFunction> colorFunction = vtkSmartPointer<vtkColorTransferFunction>::New();
-	colorFunction->AddRGBPoint(0.0, 0.0, 0.0, 0.0);
-	colorFunction->AddRGBPoint(minValue, 0.0, 0.0, 0.0);
-	colorFunction->AddRGBPoint(rescale(1.0 / 3.0, minValue, maxValue), 1.0, 0.0, 0.0);
-	colorFunction->AddRGBPoint(rescale(2.0 / 3.0, minValue, maxValue), 1.0, 1.0, 0.0);
+	colorFunction->AddRGBPoint(minValue, 1.0, 0.0, 0.0);
+	colorFunction->AddRGBPoint(rescale(0.5, minValue, maxValue), 1.0, 1.0, 0.0);
 	colorFunction->AddRGBPoint(maxValue, 1.0, 1.0, 1.0);
 	volumeProperty->SetColor(colorFunction);
 

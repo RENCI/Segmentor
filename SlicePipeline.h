@@ -9,14 +9,12 @@ class vtkRenderWindowInteractor;
 
 class SlicePipeline {
 public:
-
 	SlicePipeline(vtkRenderWindowInteractor* rwi);
 	~SlicePipeline();
 
 	void SetInput(vtkImageData* input);
 
 protected:
-
 	// Rendering
 	vtkSmartPointer<vtkRenderer> renderer;
 };

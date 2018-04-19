@@ -10,7 +10,6 @@ class vtkImageData;
 
 class DataPipeline {
 public:
-
 	DataPipeline();
 	~DataPipeline();
 

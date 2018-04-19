@@ -11,9 +11,7 @@ class SlicePipeline;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
   Q_OBJECT
-
 public:
-
 	MainWindow();
 	virtual ~MainWindow();
 
@@ -28,7 +26,6 @@ public slots:
 	virtual void on_actionExit_triggered();
 
 protected:
-
 	// The visualization pipeline objects
 	DataPipeline *dataPipeline;
 	VolumePipeline *volumePipeline;

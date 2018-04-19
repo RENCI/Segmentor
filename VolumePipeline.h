@@ -9,14 +9,12 @@ class vtkRenderWindowInteractor;
 
 class VolumePipeline {
 public:
-
   VolumePipeline(vtkRenderWindowInteractor* rwi);
   ~VolumePipeline();
 
   void SetInput(vtkImageData* input);
 
 protected:
-
 	// Rendering
 	vtkSmartPointer<vtkRenderer> renderer;
 };
