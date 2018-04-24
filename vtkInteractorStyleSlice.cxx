@@ -1,8 +1,7 @@
 #include "vtkInteractorStyleSlice.h"
 
-#include "vtkAbstractPicker.h"
+#include "vtkCellPicker.h"
 #include "vtkObjectFactory.h"
-#include "vtkPropPicker.h"
 #include "vtkRenderWindowInteractor.h"
 
 vtkStandardNewMacro(vtkInteractorStyleSlice);
@@ -11,8 +10,7 @@ vtkStandardNewMacro(vtkInteractorStyleSlice);
 vtkInteractorStyleSlice::vtkInteractorStyleSlice() {
 	this->MouseMoved = false;
 
-	this->Picker = vtkSmartPointer<vtkPropPicker>::New();
-	this->Picker->PickFromListOn();
+	this->Picker = vtkSmartPointer<vtkCellPicker>::New();
 }
 
 //----------------------------------------------------------------------------
@@ -30,14 +28,17 @@ void vtkInteractorStyleSlice::OnLeftButtonDown() {
 void vtkInteractorStyleSlice::OnLeftButtonUp() {
 	if (!this->MouseMoved) {
 		vtkRenderWindowInteractor* interactor = this->GetInteractor();
-		vtkAbstractPicker* picker = this->Interactor->GetPicker();
 
-		picker->Pick(interactor->GetEventPosition()[0], interactor->GetEventPosition()[1], 0, this->CurrentRenderer);
-		double picked[3];
-		picker->GetPickPosition(picked);
+		// Pick at the mouse location provided by the interactor
+		int pick = this->Picker->Pick(interactor->GetEventPosition()[0], interactor->GetEventPosition()[1], 0.0, this->CurrentRenderer);
 
-		cout << interactor->GetEventPosition()[0] << " " << interactor->GetEventPosition()[1] << endl;
-		cout << picked[0] << " " << picked[1] << " " << picked[2] << endl;
+		if (pick) {
+			int* p = this->Picker->GetPointIJK();
+
+			cout << p[0] << " " << p[1] << " " << p[2] << endl;
+
+
+		}
 	}
 
 	vtkInteractorStyleImage::OnLeftButtonUp();

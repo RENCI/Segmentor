@@ -1,12 +1,10 @@
 #ifndef vtkInteractorStyleSlice_H
 #define vtkInteractorStyleSlice_H
 
+#include <vtkCellPicker.h>
 #include <vtkInteractorStyleImage.h>
-
 #include <vtkSetGet.h>
 #include <vtkSmartPointer.h>
-
-#include <vtkPropPicker.h>
 
 class vtkInteractorStyleSlice : public vtkInteractorStyleImage {
 public:
@@ -18,15 +16,13 @@ public:
 	void OnLeftButtonUp() override;
 	void OnMouseMove() override;
 
-	vtkGetObjectMacro(Picker, vtkPropPicker);
-
 protected:
 	vtkInteractorStyleSlice();
 	~vtkInteractorStyleSlice() override;
 
 	bool MouseMoved;
 
-	vtkPropPicker* Picker;
+	vtkSmartPointer<vtkCellPicker> Picker;
 
 private:
 	vtkInteractorStyleSlice(const vtkInteractorStyleSlice&) = delete;
