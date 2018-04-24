@@ -5,7 +5,6 @@
 
 #include <vtkSmartPointer.h>
 
-class vtkAlgorithm;
 class vtkImageData;
 
 class DataPipeline {
@@ -14,11 +13,14 @@ public:
 	~DataPipeline();
 
 	bool OpenData(const std::string& fileName);
-	vtkImageData* GetOutput();
+
+	vtkImageData* GetData();
+	vtkImageData* GetLabels();
 
 protected:
 	// The data
-	vtkSmartPointer<vtkImageData> output;
+	vtkSmartPointer<vtkImageData> data;
+	vtkSmartPointer<vtkImageData> labels;
 };
 
 #endif

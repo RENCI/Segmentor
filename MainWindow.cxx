@@ -56,8 +56,8 @@ void MainWindow::on_actionOpen_triggered() {
 	}
 
 	if (dataPipeline->OpenData(fileName.toStdString())) {
-		volumePipeline->SetInput(dataPipeline->GetOutput());
-		slicePipeline->SetInput(dataPipeline->GetOutput());
+		volumePipeline->SetInput(dataPipeline->GetData());
+		slicePipeline->SetInput(dataPipeline->GetData(), dataPipeline->GetLabels());
 	}
 	else {
 		QMessageBox errorMessage;

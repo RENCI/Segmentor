@@ -36,8 +36,6 @@ void vtkInteractorStyleSlice::OnLeftButtonUp() {
 			int* p = this->Picker->GetPointIJK();
 
 			cout << p[0] << " " << p[1] << " " << p[2] << endl;
-
-
 		}
 	}
 

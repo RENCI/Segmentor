@@ -12,7 +12,7 @@ public:
 	SlicePipeline(vtkRenderWindowInteractor* rwi);
 	~SlicePipeline();
 
-	void SetInput(vtkImageData* input);
+	void SetInput(vtkImageData* data, vtkImageData* labels);
 
 protected:
 	// Rendering

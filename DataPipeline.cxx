@@ -4,7 +4,8 @@
 #include <vtkXMLImageDataReader.h>
 
 DataPipeline::DataPipeline() {
-	output = nullptr;
+	data = nullptr;
+	labels = vtkSmartPointer<vtkImageData>::New();
 }
 
 DataPipeline::~DataPipeline() {
@@ -17,11 +18,30 @@ bool DataPipeline::OpenData(const std::string& fileName) {
 	reader->Update();
 
 	// Set output
-	output = reader->GetOutput();
+	data = reader->GetOutput();
+
+	// Create label volume
+	labels->CopyStructure(data);
+	labels->AllocateScalars(VTK_UNSIGNED_INT, 1);
+
+	int* dims = labels->GetDimensions();
+
+	for (int z = 0; z < dims[2]; z++) {
+		for (int y = 0; y < dims[1]; y++) {
+			for (int x = 0; x < dims[0]; x++) {
+				unsigned int* pixel = static_cast<unsigned int*>(labels->GetScalarPointer(x, y, z));
+				pixel[0] = ((int)x / 50) % 2;
+			}
+		}
+	}
 
 	return true;
 }
 
-vtkImageData* DataPipeline::GetOutput() {
-	return output;
+vtkImageData* DataPipeline::GetData() {
+	return data;
+}
+
+vtkImageData* DataPipeline::GetLabels() {
+	return labels;
 }
