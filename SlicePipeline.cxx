@@ -54,7 +54,7 @@ vtkSmartPointer<vtkImageSlice> LabelSlice(vtkImageData* labels) {
 	labelColors->SetNumberOfTableValues(2);
 	labelColors->SetRange(0.0, 1.0);
 	labelColors->SetTableValue(0, 0.0, 0.0, 0.0, 0.0); //label 0 is transparent
-	labelColors->SetTableValue(1, 0.0, 1.0, 0.0, 1.0); //label 1 is opaque and green
+	labelColors->SetTableValue(1, 0.0, 1.0, 0.0, 0.75); //label 1 is green
 	labelColors->Build();
 
 	// Image property
@@ -87,6 +87,7 @@ void SlicePipeline::SetInput(vtkImageData* data, vtkImageData* labels) {
 	vtkSmartPointer<vtkInteractorStyleSlice> style = vtkSmartPointer<vtkInteractorStyleSlice>::New();
 	style->SetInteractionModeToImage3D();
 	style->SetCurrentImageNumber(0);
+	style->SetLabels(labels);
 
 	vtkRenderWindowInteractor* interactor = renderer->GetRenderWindow()->GetInteractor();
 	interactor->SetInteractorStyle(style);

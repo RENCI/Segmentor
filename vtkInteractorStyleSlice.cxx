@@ -9,8 +9,8 @@ vtkStandardNewMacro(vtkInteractorStyleSlice);
 //----------------------------------------------------------------------------
 vtkInteractorStyleSlice::vtkInteractorStyleSlice() {
 	this->MouseMoved = false;
-
 	this->Picker = vtkSmartPointer<vtkCellPicker>::New();
+	this->Labels = nullptr;
 }
 
 //----------------------------------------------------------------------------
@@ -33,9 +33,16 @@ void vtkInteractorStyleSlice::OnLeftButtonUp() {
 		int pick = this->Picker->Pick(interactor->GetEventPosition()[0], interactor->GetEventPosition()[1], 0.0, this->CurrentRenderer);
 
 		if (pick) {
+			// Get the point coordinate for the pick event
 			int* p = this->Picker->GetPointIJK();
 
-			cout << p[0] << " " << p[1] << " " << p[2] << endl;
+			// Toggle the label
+			unsigned int* label = static_cast<unsigned int*>(this->Labels->GetScalarPointer(p));
+			label[0] = !label[0];
+			this->Labels->Modified();
+
+			// Render
+			interactor->Render();
 		}
 	}
 
