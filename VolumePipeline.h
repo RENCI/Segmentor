@@ -14,6 +14,8 @@ public:
 
   void SetInput(vtkImageData* input);
 
+  vtkRenderer* GetRenderer();
+
 protected:
 	// Rendering
 	vtkSmartPointer<vtkRenderer> renderer;

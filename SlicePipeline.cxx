@@ -53,8 +53,8 @@ vtkSmartPointer<vtkImageSlice> LabelSlice(vtkImageData* labels) {
 	vtkSmartPointer<vtkLookupTable> labelColors = vtkSmartPointer<vtkLookupTable>::New();
 	labelColors->SetNumberOfTableValues(2);
 	labelColors->SetRange(0.0, 1.0);
-	labelColors->SetTableValue(0, 0.0, 0.0, 0.0, 0.0); //label 0 is transparent
-	labelColors->SetTableValue(1, 0.0, 1.0, 0.0, 0.75); //label 1 is green
+	labelColors->SetTableValue(0, 0.0, 0.0, 0.0, 0.0);	//label 0 is transparent
+	labelColors->SetTableValue(1, 0.0, 1.0, 0.0, 0.75);	//label 1 is green
 	labelColors->Build();
 
 	// Image property
@@ -97,4 +97,8 @@ void SlicePipeline::SetInput(vtkImageData* data, vtkImageData* labels) {
 	renderer->AddActor(LabelSlice(labels));
 	renderer->ResetCamera();
 	renderer->GetRenderWindow()->Render();
+}
+
+vtkRenderer* SlicePipeline::GetRenderer() {
+	return renderer;
 }

@@ -18,7 +18,7 @@ public:
 	void OnLeftButtonUp() override;
 	void OnMouseMove() override;
 
-	vtkSetObjectMacro(Labels, vtkImageData)
+	vtkSetObjectMacro(Labels, vtkImageData);
 	vtkGetObjectMacro(Labels, vtkImageData);
 
 protected:

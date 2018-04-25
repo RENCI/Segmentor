@@ -3,23 +3,40 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
+#include <vtkCallbackCommand.h>
+#include <vtkCamera.h>
 #include <vtkGenericOpenGLRenderWindow.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkRenderer.h>
-#include <vtkRenderWindow.h>
-#include <vtkSphereSource.h>
-#include <vtkCubeSource.h>
 #include <vtkSmartPointer.h>
+#include <vtkRenderer.h>
 
 #include "DataPipeline.h"
 #include "VolumePipeline.h"
 #include "SlicePipeline.h"
 
+void sliceViewChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+	double r = 5;
+
+	vtkCamera* sliceCamera = reinterpret_cast<vtkCamera*>(caller);
+
+	vtkRenderer* volumeRenderer = reinterpret_cast<vtkRenderer*>(clientData);
+	vtkCamera* volumeCamera = volumeRenderer->GetActiveCamera();
+
+	volumeCamera->SetFocalPoint(sliceCamera->GetFocalPoint());
+	volumeCamera->SetPosition(sliceCamera->GetPosition());
+	volumeCamera->SetViewUp(sliceCamera->GetViewUp());
+
+	volumeRenderer->ResetCameraClippingRange();
+
+	volumeCamera->SetClippingRange(volumeCamera->GetDistance() - r, volumeCamera->GetClippingRange()[1]);
+
+	volumeRenderer->GetRenderWindow()->Render();
+}
+
 // Constructor
 MainWindow::MainWindow() {
 	// Create the GUI from the Qt Designer file
 	setupUi(this);
-	
+
 	// Create render windows
 	vtkNew<vtkGenericOpenGLRenderWindow> renderWindowLeft;
 	qvtkWidgetLeft->SetRenderWindow(renderWindowLeft);
@@ -31,7 +48,14 @@ MainWindow::MainWindow() {
 	dataPipeline = new DataPipeline();
 	volumePipeline = new VolumePipeline(this->qvtkWidgetLeft->GetInteractor());
 	slicePipeline = new SlicePipeline(this->qvtkWidgetRight->GetInteractor());
-};
+
+	// Callbacks
+	vtkSmartPointer <vtkCallbackCommand> sliceCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+	sliceCallback->SetCallback(sliceViewChange);
+	sliceCallback->SetClientData(volumePipeline->GetRenderer());
+
+	slicePipeline->GetRenderer()->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, sliceCallback);
+}
 
 MainWindow::~MainWindow() {
 	// Clean up

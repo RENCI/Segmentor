@@ -90,3 +90,7 @@ void VolumePipeline::SetInput(vtkImageData* input) {
 	renderer->ResetCamera();
 	renderer->GetRenderWindow()->Render();
 }
+
+vtkRenderer* VolumePipeline::GetRenderer() {
+	return renderer;
+}

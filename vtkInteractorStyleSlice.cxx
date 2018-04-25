@@ -38,8 +38,10 @@ void vtkInteractorStyleSlice::OnLeftButtonUp() {
 
 			// Toggle the label
 			unsigned int* label = static_cast<unsigned int*>(this->Labels->GetScalarPointer(p));
-			label[0] = !label[0];
+			label[0] = label[0] > 0 ? 0 : 1;
 			this->Labels->Modified();
+
+			// XXX: May need to create a vtk filter wrapper around the image data to make sure it is updated correctly
 
 			// Render
 			interactor->Render();
