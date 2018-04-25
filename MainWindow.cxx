@@ -14,7 +14,7 @@
 #include "SlicePipeline.h"
 
 void sliceViewChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
-	double r = 5;
+	double r = 0;
 
 	vtkCamera* sliceCamera = reinterpret_cast<vtkCamera*>(caller);
 
@@ -80,7 +80,7 @@ void MainWindow::on_actionOpen_triggered() {
 	}
 
 	if (dataPipeline->OpenData(fileName.toStdString())) {
-		volumePipeline->SetInput(dataPipeline->GetData());
+		volumePipeline->SetInput(dataPipeline->GetData(), dataPipeline->GetLabels());
 		slicePipeline->SetInput(dataPipeline->GetData(), dataPipeline->GetLabels());
 	}
 	else {

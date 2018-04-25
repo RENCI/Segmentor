@@ -12,7 +12,7 @@ public:
   VolumePipeline(vtkRenderWindowInteractor* rwi);
   ~VolumePipeline();
 
-  void SetInput(vtkImageData* input);
+  void SetInput(vtkImageData* input, vtkImageData* labels);
 
   vtkRenderer* GetRenderer();
 

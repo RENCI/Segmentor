@@ -17,7 +17,7 @@
 #include <vtkImageProperty.h>
 #include <vtkImageSlice.h>
 
-vtkSmartPointer<vtkImageSlice> DataSlice(vtkImageData* data) {
+vtkSmartPointer<vtkImageSlice> dataSlice(vtkImageData* data) {
 	// Get image info
 	double minValue = data->GetScalarRange()[0];
 	double maxValue = data->GetScalarRange()[1];
@@ -42,7 +42,7 @@ vtkSmartPointer<vtkImageSlice> DataSlice(vtkImageData* data) {
 	return slice;
 }
 
-vtkSmartPointer<vtkImageSlice> LabelSlice(vtkImageData* labels) {
+vtkSmartPointer<vtkImageSlice> labelSlice(vtkImageData* labels) {
 	// Mapper
 	vtkSmartPointer<vtkImageResliceMapper> mapper = vtkSmartPointer<vtkImageResliceMapper>::New();
 	mapper->SetInputDataObject(labels);
@@ -93,8 +93,8 @@ void SlicePipeline::SetInput(vtkImageData* data, vtkImageData* labels) {
 	interactor->SetInteractorStyle(style);
 
 	// Render
-	renderer->AddActor(DataSlice(data));
-	renderer->AddActor(LabelSlice(labels));
+	renderer->AddActor(dataSlice(data));
+	renderer->AddActor(labelSlice(labels));
 	renderer->ResetCamera();
 	renderer->GetRenderWindow()->Render();
 }

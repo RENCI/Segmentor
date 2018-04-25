@@ -30,6 +30,7 @@ bool DataPipeline::OpenData(const std::string& fileName) {
 		for (int y = 0; y < dims[1]; y++) {
 			for (int x = 0; x < dims[0]; x++) {
 				static_cast<unsigned int*>(labels->GetScalarPointer(x, y, z))[0] = 0;
+//				static_cast<unsigned int*>(labels->GetScalarPointer(x, y, z))[0] = ((int)x / 50) % 2;
 			}
 		}
 	}
