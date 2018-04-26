@@ -15,7 +15,6 @@
 
 #include <vtkOpenGLGPUVolumeRayCastMapper.h>
 
-
 #include <vtkGlyph3DMapper.h>
 #include <vtkGeometryFilter.h>
 #include <vtkImageDataGeometryFilter.h>
@@ -24,8 +23,35 @@
 
 #include <vtkDiscreteMarchingCubes.h>
 
+#include <vtkContourFilter.h>
+
 double rescale(double value, double min, double max) {
 	return min + (max - min) * value;
+}
+
+vtkSmartPointer<vtkActor> dataGeometry(vtkImageData* data) {
+	// Get image info
+	double minValue = data->GetScalarRange()[0];
+	double maxValue = data->GetScalarRange()[1];
+
+	double minVisible = rescale(0.05, minValue, maxValue);
+
+	double gradientValue = 5.0;
+
+	// Contour
+	vtkSmartPointer<vtkContourFilter> contour = vtkSmartPointer<vtkContourFilter>::New();
+	contour->SetValue(0, 30.0);
+	contour->SetInputDataObject(data);
+
+	// Mapper
+	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputConnection(contour->GetOutputPort());
+
+	// Actor
+	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+	actor->SetMapper(mapper);
+
+	return actor;
 }
 
 vtkSmartPointer<vtkVolume> dataVolume(vtkImageData* data) {
@@ -119,12 +145,14 @@ vtkSmartPointer<vtkActor> labelGeometry(vtkImageData* labels) {
 	labelColors->SetTableValue(1, 0.0, 1.0, 0.0, 1.0);	//label 1 is green
 	labelColors->Build();
 
+	// Mapper
 	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	mapper->SetLookupTable(labelColors);
 	mapper->SetScalarModeToUseCellData();
 	mapper->SetColorModeToMapScalars();
 	mapper->SetInputConnection(cubes->GetOutputPort());
 
+	// Actor
 	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
 	actor->SetMapper(mapper);
 
@@ -180,7 +208,8 @@ void VolumePipeline::SetInput(vtkImageData* data, vtkImageData* labels) {
 	// Render
 //	renderer->AddViewProp(labelVolume(labels));
 	renderer->AddViewProp(labelGeometry(labels));
-	renderer->AddViewProp(dataVolume(data));
+//	renderer->AddViewProp(dataVolume(data));
+	renderer->AddViewProp(dataGeometry(data));
 	renderer->ResetCamera();
 	renderer->GetRenderWindow()->Render();
 }

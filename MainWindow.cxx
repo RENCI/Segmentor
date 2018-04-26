@@ -14,7 +14,7 @@
 #include "SlicePipeline.h"
 
 void sliceViewChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
-	double r = 0;
+	double r = 10;
 
 	vtkCamera* sliceCamera = reinterpret_cast<vtkCamera*>(caller);
 
