@@ -3,7 +3,9 @@
 
 #include <vtkSmartPointer.h>
 
+class vtkContourFilter;
 class vtkImageData;
+class vtkImageSlice;
 class vtkRenderer;
 class vtkRenderWindowInteractor;
 
@@ -19,6 +21,10 @@ public:
 protected:
 	// Rendering
 	vtkSmartPointer<vtkRenderer> renderer;
+
+	// Slices
+	vtkSmartPointer<vtkImageSlice> CreateDataSlice(vtkImageData* data);
+	vtkSmartPointer<vtkImageSlice> CreateLabelSlice(vtkImageData* labels);
 };
 
 #endif

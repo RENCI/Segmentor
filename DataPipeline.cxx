@@ -2,6 +2,9 @@
 
 #include <vtkImageData.h>
 #include <vtkXMLImageDataReader.h>
+#include <vtkImageChangeInformation.h>
+#include <vtkImageConnectivityFilter.h>
+#include <vtkImageResample.h>
 
 DataPipeline::DataPipeline() {
 	data = nullptr;
@@ -12,28 +15,41 @@ DataPipeline::~DataPipeline() {
 }
 
 bool DataPipeline::OpenData(const std::string& fileName) {
+	double zScale = 2.0;
+
 	// Load data
 	vtkSmartPointer<vtkXMLImageDataReader> reader = vtkSmartPointer<vtkXMLImageDataReader>::New();
 	reader->SetFileName(fileName.c_str());
-	reader->Update();
 
-	// Set output
-	data = reader->GetOutput();
+	// Match output dims and resolution
+	vtkSmartPointer<vtkImageChangeInformation> info = vtkSmartPointer<vtkImageChangeInformation>::New();
+	info->SetInputConnection(reader->GetOutputPort());
+	info->SetOutputSpacing(1.0, 1.0, zScale);
 
-	// Create label volume
-	labels->CopyStructure(data);
-	labels->AllocateScalars(VTK_UNSIGNED_INT, 1);
+	// Resample in z
+	vtkSmartPointer<vtkImageResample> resample = vtkSmartPointer<vtkImageResample>::New();
+	resample->SetInputConnection(info->GetOutputPort()); 
+	resample->SetAxisMagnificationFactor(2, zScale);
+	resample->Update();
 
-	int* dims = labels->GetDimensions();
+	// Set data output
+	this->data = resample->GetOutput();
 
-	for (int z = 0; z < dims[2]; z++) {
-		for (int y = 0; y < dims[1]; y++) {
-			for (int x = 0; x < dims[0]; x++) {
-				static_cast<unsigned int*>(labels->GetScalarPointer(x, y, z))[0] = 0;
-//				static_cast<unsigned int*>(labels->GetScalarPointer(x, y, z))[0] = ((int)x / 50) % 2;
-			}
-		}
-	}
+	this->data->PrintSelf(std::cout, vtkIndent(2));
+
+	// Generate labels
+	double minValue = data->GetScalarRange()[0];
+	double maxValue = data->GetScalarRange()[1];
+
+	vtkSmartPointer<vtkImageConnectivityFilter> connectivity = vtkSmartPointer<vtkImageConnectivityFilter>::New();
+	connectivity->SetScalarRange((maxValue - minValue) * 0.3, maxValue);
+	connectivity->SetInputConnection(resample->GetOutputPort());
+	connectivity->Update();
+	
+	// Set label output
+	this->labels = connectivity->GetOutput();
+
+	this->labels->PrintSelf(std::cout, vtkIndent(2));
 
 	return true;
 }

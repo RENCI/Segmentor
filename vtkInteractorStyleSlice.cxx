@@ -27,6 +27,7 @@ void vtkInteractorStyleSlice::OnLeftButtonDown() {
 //----------------------------------------------------------------------------
 void vtkInteractorStyleSlice::OnLeftButtonUp() {
 	if (!this->MouseMoved) {
+/*
 		vtkRenderWindowInteractor* interactor = this->GetInteractor();
 
 		// Pick at the mouse location provided by the interactor
@@ -46,6 +47,7 @@ void vtkInteractorStyleSlice::OnLeftButtonUp() {
 			// Render
 			interactor->Render();
 		}
+*/
 	}
 
 	vtkInteractorStyleImage::OnLeftButtonUp();

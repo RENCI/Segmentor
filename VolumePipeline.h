@@ -3,9 +3,13 @@
 
 #include <vtkSmartPointer.h>
 
+class vtkActor;
+class vtkAlgorithmOutput;
+class vtkDiscreteMarchingCubes;	// XXX: Look into vtkDiscreteFlyingEdges3D
 class vtkImageData;
 class vtkRenderer;
 class vtkRenderWindowInteractor;
+class vtkVolume;
 
 class VolumePipeline {
 public:
@@ -15,10 +19,17 @@ public:
   void SetInput(vtkImageData* input, vtkImageData* labels);
 
   vtkRenderer* GetRenderer();
+  vtkAlgorithmOutput* GetContour();
 
 protected:
 	// Rendering
 	vtkSmartPointer<vtkRenderer> renderer;
+
+	// Contour
+	vtkSmartPointer<vtkDiscreteMarchingCubes> contour;
+
+	vtkSmartPointer<vtkActor> CreateGeometry(vtkImageData* data);
+	vtkSmartPointer<vtkVolume> CreateVolume(vtkImageData* data);
 };
 
 #endif

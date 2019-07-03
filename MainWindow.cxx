@@ -13,7 +13,34 @@
 #include "VolumePipeline.h"
 #include "SlicePipeline.h"
 
+bool firstCallback = true;
+
+void volumeViewChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+	if (!firstCallback) return;
+
+	firstCallback = false;
+
+	double r = 10;
+
+	vtkCamera* volumeCamera = reinterpret_cast<vtkCamera*>(caller);
+
+	vtkRenderer* sliceRenderer = reinterpret_cast<vtkRenderer*>(clientData);
+	vtkCamera* sliceCamera = sliceRenderer->GetActiveCamera();
+
+	sliceCamera->SetFocalPoint(volumeCamera->GetFocalPoint());
+	sliceCamera->SetPosition(volumeCamera->GetPosition());
+	sliceCamera->SetViewUp(volumeCamera->GetViewUp());
+
+	sliceRenderer->GetRenderWindow()->Render();
+
+	firstCallback = true;
+}
+
 void sliceViewChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+	if (!firstCallback) return;
+
+	firstCallback = false;
+
 	double r = 10;
 
 	vtkCamera* sliceCamera = reinterpret_cast<vtkCamera*>(caller);
@@ -30,6 +57,8 @@ void sliceViewChange(vtkObject* caller, unsigned long eventId, void* clientData,
 	volumeCamera->SetClippingRange(volumeCamera->GetDistance() - r, volumeCamera->GetClippingRange()[1]);
 
 	volumeRenderer->GetRenderWindow()->Render();
+
+	firstCallback = true;
 }
 
 // Constructor
@@ -50,6 +79,12 @@ MainWindow::MainWindow() {
 	slicePipeline = new SlicePipeline(this->qvtkWidgetRight->GetInteractor());
 
 	// Callbacks
+	vtkSmartPointer <vtkCallbackCommand> volumeCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+	volumeCallback->SetCallback(volumeViewChange);
+	volumeCallback->SetClientData(slicePipeline->GetRenderer());
+
+	volumePipeline->GetRenderer()->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, volumeCallback);
+
 	vtkSmartPointer <vtkCallbackCommand> sliceCallback = vtkSmartPointer<vtkCallbackCommand>::New();
 	sliceCallback->SetCallback(sliceViewChange);
 	sliceCallback->SetClientData(volumePipeline->GetRenderer());

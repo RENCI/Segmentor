@@ -4,6 +4,8 @@
 
 #include <vtkActor.h>
 #include <vtkCallbackCommand.h>
+#include <vtkContourFilter.h>
+#include <vtkCutter.h>
 #include <vtkImageData.h>
 #include <vtkImageMapToColors.h>
 #include <vtkImageProperty.h>
@@ -11,13 +13,15 @@
 #include <vtkImageSlice.h>
 #include <vtkLookupTable.h>
 #include <vtkObject.h>
+#include <vtkPlane.h>
+#include <vtkPolyDataMapper.h>
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkImageProperty.h>
 #include <vtkImageSlice.h>
 
-vtkSmartPointer<vtkImageSlice> dataSlice(vtkImageData* data) {
+vtkSmartPointer<vtkImageSlice> SlicePipeline::CreateDataSlice(vtkImageData* data) {
 	// Get image info
 	double minValue = data->GetScalarRange()[0];
 	double maxValue = data->GetScalarRange()[1];
@@ -42,7 +46,31 @@ vtkSmartPointer<vtkImageSlice> dataSlice(vtkImageData* data) {
 	return slice;
 }
 
-vtkSmartPointer<vtkImageSlice> labelSlice(vtkImageData* labels) {
+vtkSmartPointer<vtkImageSlice> SlicePipeline::CreateLabelSlice(vtkImageData* labels) {
+	// Number of labels
+	int maxLabel = labels->GetScalarRange()[1];
+
+	std::cout << maxLabel << std::endl;
+
+	// Colors from ColorBrewer
+	const int numColors = 6;
+	double colors[numColors][3] = {
+		{ 228, 26, 28 },
+		{ 55, 126, 184 },
+		{ 77, 175, 74 },
+		{ 152, 78, 163 },
+		{ 255, 127, 0 },
+		{ 255, 255, 51 }
+	};
+
+	for (int i = 0; i < numColors; i++) {
+		for (int j = 0; j < 3; j++) {
+			colors[i][j] /= 255.0;
+		}
+	}
+
+	double opacity = 0.25;
+
 	// Mapper
 	vtkSmartPointer<vtkImageResliceMapper> mapper = vtkSmartPointer<vtkImageResliceMapper>::New();
 	mapper->SetInputDataObject(labels);
@@ -51,10 +79,13 @@ vtkSmartPointer<vtkImageSlice> labelSlice(vtkImageData* labels) {
 
 	// Label colors
 	vtkSmartPointer<vtkLookupTable> labelColors = vtkSmartPointer<vtkLookupTable>::New();
-	labelColors->SetNumberOfTableValues(2);
-	labelColors->SetRange(0.0, 1.0);
-	labelColors->SetTableValue(0, 0.0, 0.0, 0.0, 0.0);	//label 0 is transparent
-	labelColors->SetTableValue(1, 0.0, 1.0, 0.0, 0.75);	//label 1 is green
+	labelColors->SetNumberOfTableValues(maxLabel + 1);
+	labelColors->SetRange(0, maxLabel);
+	labelColors->SetTableValue(0, 0.0, 0.0, 0.0, 0.0);
+	for (int i = 1; i <= maxLabel; i++) {
+		double* c = colors[(i - 1) % numColors];
+		labelColors->SetTableValue(i, c[0], c[1], c[2], opacity);
+	}
 	labelColors->Build();
 
 	// Image property
@@ -73,8 +104,31 @@ vtkSmartPointer<vtkImageSlice> labelSlice(vtkImageData* labels) {
 	return slice;
 }
 
+/*
+vtkSmartPointer<vtkActor> contourSlice(vtkContourFilter* contour) {
+	// Plane
+	vtkSmartPointer<vtkPlane> plane = vtkSmartPointer<vtkPlane>::New();
+	plane->SetOrigin(0, 0, 100);
+	plane->SetNormal(0, 0, 1);
+
+	vtkSmartPointer<vtkCutter> cut = vtkSmartPointer<vtkCutter>::New();
+	cut->SetCutFunction(plane);
+	cut->SetInputConnection(contour->GetOutputPort());
+
+	// Mapper
+	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputConnection(cut->GetOutputPort());
+
+	// Actor
+	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+	actor->SetMapper(mapper);
+
+	return actor;
+}
+*/
+
 SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* rwi) {
-	this->renderer = vtkSmartPointer<vtkRenderer>::New();
+	renderer = vtkSmartPointer<vtkRenderer>::New();
 
 	rwi->GetRenderWindow()->AddRenderer(renderer);
 }
@@ -93,8 +147,9 @@ void SlicePipeline::SetInput(vtkImageData* data, vtkImageData* labels) {
 	interactor->SetInteractorStyle(style);
 
 	// Render
-	renderer->AddActor(dataSlice(data));
-	renderer->AddActor(labelSlice(labels));
+	renderer->AddActor(CreateDataSlice(data));
+	renderer->AddActor(CreateLabelSlice(labels));
+//	renderer->AddActor(contourSlice(contour));
 	renderer->ResetCamera();
 	renderer->GetRenderWindow()->Render();
 }

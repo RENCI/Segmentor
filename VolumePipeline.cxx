@@ -4,6 +4,7 @@
 #include <vtkColorTransferFunction.h>
 #include <vtkImageData.h>
 #include <vtkImageResample.h>
+#include <vtkInteractorStyle.h>
 #include <vtkPiecewiseFunction.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkRenderer.h>
@@ -23,28 +24,69 @@
 
 #include <vtkDiscreteMarchingCubes.h>
 
-#include <vtkContourFilter.h>
-
 double rescale(double value, double min, double max) {
 	return min + (max - min) * value;
 }
 
-vtkSmartPointer<vtkActor> dataGeometry(vtkImageData* data) {
+vtkSmartPointer<vtkActor> VolumePipeline::CreateGeometry(vtkImageData* data) {
 	// Get image info
 	double minValue = data->GetScalarRange()[0];
 	double maxValue = data->GetScalarRange()[1];
-
-	double minVisible = rescale(0.05, minValue, maxValue);
-
-	double gradientValue = 5.0;
+	
+	int maxLabel = data->GetScalarRange()[1];
 
 	// Contour
-	vtkSmartPointer<vtkContourFilter> contour = vtkSmartPointer<vtkContourFilter>::New();
-	contour->SetValue(0, 30.0);
+	for (int i = 0; i < maxLabel; i++) {
+		contour->SetValue(i, i + 1);
+	}
 	contour->SetInputDataObject(data);
+
+
+	// Colors from ColorBrewer
+	const int numColors = 6;
+	double colors[numColors][3] = {
+		{ 228, 26, 28 },
+		{ 55, 126, 184 },
+		{ 77, 175, 74 },
+		{ 152, 78, 163 },
+		{ 255, 127, 0 },
+		{ 255, 255, 51 }
+	};
+
+	for (int i = 0; i < numColors; i++) {
+		for (int j = 0; j < 3; j++) {
+			colors[i][j] /= 255.0;
+		}
+	}
+
+	contour->Update();
+	std::cout << "******************************************" << std::endl;
+	std::cout << maxLabel << std::endl;
+	std::cout << contour->GetOutput()->GetScalarRange()[1] << std::endl;
+	contour->GetOutput()->PrintSelf(std::cout, vtkIndent(2));
+
+
+	
+
+	// Label colors
+	vtkSmartPointer<vtkLookupTable> labelColors = vtkSmartPointer<vtkLookupTable>::New();
+	labelColors->SetNumberOfTableValues(maxLabel + 1);
+	labelColors->SetRange(0, maxLabel);
+	labelColors->SetTableValue(0, 0.0, 0.0, 0.0, 0.0);
+	for (int i = 1; i <= maxLabel; i++) {
+		double* c = colors[(i - 1) % numColors];
+		labelColors->SetTableValue(i, c[0], c[1], c[2], 1.0);
+	}
+	labelColors->Build();
 
 	// Mapper
 	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetLookupTable(labelColors);
+	mapper->ScalarVisibilityOn();
+	mapper->SetScalarModeToUseCellData();
+	//mapper->UseLookupTableScalarRangeOn();
+	//mapper->SetColorModeToMapScalars();
+	//mapper->SelectColorArray("RegionId");
 	mapper->SetInputConnection(contour->GetOutputPort());
 
 	// Actor
@@ -54,7 +96,7 @@ vtkSmartPointer<vtkActor> dataGeometry(vtkImageData* data) {
 	return actor;
 }
 
-vtkSmartPointer<vtkVolume> dataVolume(vtkImageData* data) {
+vtkSmartPointer<vtkVolume> VolumePipeline::CreateVolume(vtkImageData* data) {
 /*
 	// Resize
 	double mag[3] = { 1, 1, 1 };
@@ -197,6 +239,7 @@ vtkSmartPointer<vtkVolume> labelVolume(vtkImageData* labels) {
 
 VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* rwi) {
 	this->renderer = vtkSmartPointer<vtkRenderer>::New();
+	this->contour = vtkSmartPointer<vtkDiscreteMarchingCubes>::New();
 
 	rwi->GetRenderWindow()->AddRenderer(renderer);
 }
@@ -205,15 +248,19 @@ VolumePipeline::~VolumePipeline() {
 }
 
 void VolumePipeline::SetInput(vtkImageData* data, vtkImageData* labels) {
+	// Interaction
+	reinterpret_cast<vtkInteractorStyle*>(renderer->GetRenderWindow()->GetInteractor()->GetInteractorStyle())->AutoAdjustCameraClippingRangeOff();
+
 	// Render
-//	renderer->AddViewProp(labelVolume(labels));
-	renderer->AddViewProp(labelGeometry(labels));
-//	renderer->AddViewProp(dataVolume(data));
-	renderer->AddViewProp(dataGeometry(data));
+	renderer->AddViewProp(CreateGeometry(labels));
 	renderer->ResetCamera();
 	renderer->GetRenderWindow()->Render();
 }
 
 vtkRenderer* VolumePipeline::GetRenderer() {
 	return renderer;
+}
+
+vtkAlgorithmOutput* VolumePipeline::GetContour() {
+	return contour->GetOutputPort();
 }
