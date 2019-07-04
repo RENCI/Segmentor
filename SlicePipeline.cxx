@@ -50,17 +50,21 @@ vtkSmartPointer<vtkImageSlice> SlicePipeline::CreateLabelSlice(vtkImageData* lab
 	// Number of labels
 	int maxLabel = labels->GetScalarRange()[1];
 
-	std::cout << maxLabel << std::endl;
-
 	// Colors from ColorBrewer
-	const int numColors = 6;
+	const int numColors = 12;
 	double colors[numColors][3] = {
-		{ 228, 26, 28 },
-		{ 55, 126, 184 },
-		{ 77, 175, 74 },
-		{ 152, 78, 163 },
-		{ 255, 127, 0 },
-		{ 255, 255, 51 }
+		{ 166,206,227 },
+		{ 31,120,180 },
+		{ 178,223,138 },
+		{ 51,160,44 },
+		{ 251,154,153 },
+		{ 227,26,28 },
+		{ 253,191,111 },
+		{ 255,127,0 },
+		{ 202,178,214 },
+		{ 106,61,154 },
+		{ 255,255,153 },
+		{ 177,89,40 }
 	};
 
 	for (int i = 0; i < numColors; i++) {

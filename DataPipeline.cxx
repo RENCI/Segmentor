@@ -4,7 +4,9 @@
 #include <vtkXMLImageDataReader.h>
 #include <vtkImageChangeInformation.h>
 #include <vtkImageConnectivityFilter.h>
+#include <vtkImageOpenClose3D.h>
 #include <vtkImageResample.h>
+#include <vtkImageThreshold.h>
 
 DataPipeline::DataPipeline() {
 	data = nullptr;
@@ -35,15 +37,30 @@ bool DataPipeline::OpenData(const std::string& fileName) {
 	// Set data output
 	this->data = resample->GetOutput();
 
-	this->data->PrintSelf(std::cout, vtkIndent(2));
-
-	// Generate labels
+	// Filter
 	double minValue = data->GetScalarRange()[0];
 	double maxValue = data->GetScalarRange()[1];
 
+	vtkSmartPointer<vtkImageThreshold> threshold = vtkSmartPointer<vtkImageThreshold>::New();
+	threshold->ThresholdByUpper(minValue + (maxValue - minValue) * 0.15);
+	threshold->SetInValue(255);
+	threshold->SetOutValue(0);
+	threshold->ReplaceInOn();
+	threshold->ReplaceOutOn();
+	threshold->SetOutputScalarTypeToUnsignedChar();
+	threshold->SetInputConnection(resample->GetOutputPort());
+
+	vtkSmartPointer<vtkImageOpenClose3D> openClose = vtkSmartPointer<vtkImageOpenClose3D>::New();
+	openClose->SetKernelSize(10, 10, 10);
+	openClose->SetOpenValue(0);
+	openClose->SetCloseValue(255);
+	openClose->SetInputConnection(threshold->GetOutputPort());
+
+	// Generate labels
 	vtkSmartPointer<vtkImageConnectivityFilter> connectivity = vtkSmartPointer<vtkImageConnectivityFilter>::New();
-	connectivity->SetScalarRange((maxValue - minValue) * 0.3, maxValue);
-	connectivity->SetInputConnection(resample->GetOutputPort());
+	connectivity->SetScalarRange(255, 255);
+	connectivity->SetLabelScalarTypeToInt();
+	connectivity->SetInputConnection(openClose->GetOutputPort());
 	connectivity->Update();
 	
 	// Set label output

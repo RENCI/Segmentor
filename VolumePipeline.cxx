@@ -23,6 +23,7 @@
 #include <vtkLookupTable.h>
 
 #include <vtkDiscreteMarchingCubes.h>
+#include <vtkWindowedSincPolyDataFilter.h>
 
 double rescale(double value, double min, double max) {
 	return min + (max - min) * value;
@@ -36,21 +37,39 @@ vtkSmartPointer<vtkActor> VolumePipeline::CreateGeometry(vtkImageData* data) {
 	int maxLabel = data->GetScalarRange()[1];
 
 	// Contour
-	for (int i = 0; i < maxLabel; i++) {
-		contour->SetValue(i, i + 1);
-	}
+	contour->GenerateValues(maxLabel, 1, maxLabel);
 	contour->SetInputDataObject(data);
 
+	// Smoother
+	int smoothingIterations = 15;
+	double passBand = 0.0001;
+	double featureAngle = 120.0;
+
+	vtkSmartPointer<vtkWindowedSincPolyDataFilter> smoother = vtkSmartPointer<vtkWindowedSincPolyDataFilter>::New();
+	smoother->SetInputConnection(contour->GetOutputPort());
+	smoother->SetNumberOfIterations(smoothingIterations);
+	smoother->BoundarySmoothingOff();
+	smoother->FeatureEdgeSmoothingOff();
+	smoother->SetFeatureAngle(featureAngle);
+	smoother->SetPassBand(passBand);
+	smoother->NonManifoldSmoothingOn();
+	smoother->NormalizeCoordinatesOn();
 
 	// Colors from ColorBrewer
-	const int numColors = 6;
+	const int numColors = 12;
 	double colors[numColors][3] = {
-		{ 228, 26, 28 },
-		{ 55, 126, 184 },
-		{ 77, 175, 74 },
-		{ 152, 78, 163 },
-		{ 255, 127, 0 },
-		{ 255, 255, 51 }
+		{ 166,206,227 },
+		{ 31,120,180 },
+		{ 178,223,138 },
+		{ 51,160,44 },
+		{ 251,154,153 },
+		{ 227,26,28 },
+		{ 253,191,111 },
+		{ 255,127,0 },
+		{ 202,178,214 },
+		{ 106,61,154 },
+		{ 255,255,153 },
+		{ 177,89,40 }
 	};
 
 	for (int i = 0; i < numColors; i++) {
@@ -58,15 +77,6 @@ vtkSmartPointer<vtkActor> VolumePipeline::CreateGeometry(vtkImageData* data) {
 			colors[i][j] /= 255.0;
 		}
 	}
-
-	contour->Update();
-	std::cout << "******************************************" << std::endl;
-	std::cout << maxLabel << std::endl;
-	std::cout << contour->GetOutput()->GetScalarRange()[1] << std::endl;
-	contour->GetOutput()->PrintSelf(std::cout, vtkIndent(2));
-
-
-	
 
 	// Label colors
 	vtkSmartPointer<vtkLookupTable> labelColors = vtkSmartPointer<vtkLookupTable>::New();
@@ -83,14 +93,12 @@ vtkSmartPointer<vtkActor> VolumePipeline::CreateGeometry(vtkImageData* data) {
 	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	mapper->SetLookupTable(labelColors);
 	mapper->ScalarVisibilityOn();
-	mapper->SetScalarModeToUseCellData();
-	//mapper->UseLookupTableScalarRangeOn();
-	//mapper->SetColorModeToMapScalars();
-	//mapper->SelectColorArray("RegionId");
-	mapper->SetInputConnection(contour->GetOutputPort());
+	mapper->UseLookupTableScalarRangeOn();
+	mapper->SetInputConnection(smoother->GetOutputPort());
 
 	// Actor
 	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+	actor->GetProperty()->BackfaceCullingOn();
 	actor->SetMapper(mapper);
 
 	return actor;
