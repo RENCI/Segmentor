@@ -23,7 +23,9 @@
 #include <vtkLookupTable.h>
 
 #include <vtkDiscreteMarchingCubes.h>
+#include <vtkDiscreteFlyingEdges3D.h>
 #include <vtkWindowedSincPolyDataFilter.h>
+#include <vtkProperty.h>
 
 double rescale(double value, double min, double max) {
 	return min + (max - min) * value;
@@ -39,12 +41,14 @@ vtkSmartPointer<vtkActor> VolumePipeline::CreateGeometry(vtkImageData* data) {
 	// Contour
 	contour->GenerateValues(maxLabel, 1, maxLabel);
 	contour->SetInputDataObject(data);
+	contour->ComputeNormalsOff();
+	contour->ComputeGradientsOff();
 
 	// Smoother
 	int smoothingIterations = 15;
 	double passBand = 0.0001;
 	double featureAngle = 120.0;
-
+	
 	vtkSmartPointer<vtkWindowedSincPolyDataFilter> smoother = vtkSmartPointer<vtkWindowedSincPolyDataFilter>::New();
 	smoother->SetInputConnection(contour->GetOutputPort());
 	smoother->SetNumberOfIterations(smoothingIterations);
@@ -82,23 +86,21 @@ vtkSmartPointer<vtkActor> VolumePipeline::CreateGeometry(vtkImageData* data) {
 	vtkSmartPointer<vtkLookupTable> labelColors = vtkSmartPointer<vtkLookupTable>::New();
 	labelColors->SetNumberOfTableValues(maxLabel + 1);
 	labelColors->SetRange(0, maxLabel);
-	labelColors->SetTableValue(0, 0.0, 0.0, 0.0, 0.0);
+	labelColors->SetTableValue(0, 0.0, 0.0, 0.0);
 	for (int i = 1; i <= maxLabel; i++) {
 		double* c = colors[(i - 1) % numColors];
-		labelColors->SetTableValue(i, c[0], c[1], c[2], 1.0);
+		labelColors->SetTableValue(i, c[0], c[1], c[2]);
 	}
 	labelColors->Build();
 
 	// Mapper
 	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	mapper->SetLookupTable(labelColors);
-	mapper->ScalarVisibilityOn();
 	mapper->UseLookupTableScalarRangeOn();
 	mapper->SetInputConnection(smoother->GetOutputPort());
 
 	// Actor
 	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
-	actor->GetProperty()->BackfaceCullingOn();
 	actor->SetMapper(mapper);
 
 	return actor;
@@ -247,7 +249,7 @@ vtkSmartPointer<vtkVolume> labelVolume(vtkImageData* labels) {
 
 VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* rwi) {
 	this->renderer = vtkSmartPointer<vtkRenderer>::New();
-	this->contour = vtkSmartPointer<vtkDiscreteMarchingCubes>::New();
+	this->contour = vtkSmartPointer<vtkDiscreteFlyingEdges3D>::New();
 
 	rwi->GetRenderWindow()->AddRenderer(renderer);
 }

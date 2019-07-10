@@ -5,7 +5,7 @@
 
 class vtkActor;
 class vtkAlgorithmOutput;
-class vtkDiscreteMarchingCubes;	// XXX: Look into vtkDiscreteFlyingEdges3D
+class vtkDiscreteFlyingEdges3D;
 class vtkImageData;
 class vtkRenderer;
 class vtkRenderWindowInteractor;
@@ -26,7 +26,7 @@ protected:
 	vtkSmartPointer<vtkRenderer> renderer;
 
 	// Contour
-	vtkSmartPointer<vtkDiscreteMarchingCubes> contour;
+	vtkSmartPointer<vtkDiscreteFlyingEdges3D> contour;
 
 	vtkSmartPointer<vtkActor> CreateGeometry(vtkImageData* data);
 	vtkSmartPointer<vtkVolume> CreateVolume(vtkImageData* data);
