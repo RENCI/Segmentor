@@ -29,6 +29,9 @@ protected:
 	// The data
 	vtkSmartPointer<vtkImageData> data;
 	vtkSmartPointer<vtkImageData> labels;
+
+	double OtsuThreshold(vtkImageData* image);
+	double OtsuCriterion(vtkImageData* image, const std::vector<int>& histogram, const std::vector<int>& values, double sigma, int count, int bin);
 };
 
 #endif
