@@ -257,7 +257,7 @@ VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* rwi) {
 VolumePipeline::~VolumePipeline() {
 }
 
-void VolumePipeline::SetInput(vtkImageData* data, vtkImageData* labels) {
+void VolumePipeline::SetSegmentationData(vtkImageData* labels) {
 	// Interaction
 	reinterpret_cast<vtkInteractorStyle*>(renderer->GetRenderWindow()->GetInteractor()->GetInteractorStyle())->AutoAdjustCameraClippingRangeOff();
 

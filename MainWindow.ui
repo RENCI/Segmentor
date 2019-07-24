@@ -36,19 +36,63 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionOpen"/>
+    <addaction name="actionOpen_Image_File"/>
+    <addaction name="actionOpen_Image_Stack"/>
+    <addaction name="separator"/>
+    <addaction name="actionOpen_Segmentation_File"/>
+    <addaction name="actionOpen_Segmentation_Stack"/>
+    <addaction name="separator"/>
+    <addaction name="actionSave_Segmentation_Data"/>
+    <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
+   <widget class="QMenu" name="menuAnalyze">
+    <property name="title">
+     <string>Analyze</string>
+    </property>
+    <addaction name="actionSegment_Volume"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuAnalyze"/>
   </widget>
-  <action name="actionOpen">
+  <action name="actionOpen_Image_File">
    <property name="text">
-    <string>Open...</string>
+    <string>Open Image File...</string>
    </property>
   </action>
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionOpen_Image_Stack">
+   <property name="text">
+    <string>Open Image Stack</string>
+   </property>
+  </action>
+  <action name="actionOpen_Segmentation_File">
+   <property name="text">
+    <string>Open Segmentation File...</string>
+   </property>
+  </action>
+  <action name="actionOpen_Segmentation_Stack">
+   <property name="text">
+    <string>Open Segmentation Stack</string>
+   </property>
+  </action>
+  <action name="actionSegment_Volume">
+   <property name="text">
+    <string>Segment Volume</string>
+   </property>
+  </action>
+  <action name="actionSave_Segmentation_Data">
+   <property name="text">
+    <string>Save Segmentation Data...</string>
+   </property>
+  </action>
+  <action name="actionSave_Segmentation_Stack">
+   <property name="text">
+    <string>Save Segmentation Stack...</string>
    </property>
   </action>
  </widget>

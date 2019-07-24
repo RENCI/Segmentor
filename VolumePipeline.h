@@ -16,7 +16,7 @@ public:
   VolumePipeline(vtkRenderWindowInteractor* rwi);
   ~VolumePipeline();
 
-  void SetInput(vtkImageData* input, vtkImageData* labels);
+  void SetSegmentationData(vtkImageData* labels);
 
   vtkRenderer* GetRenderer();
   vtkAlgorithmOutput* GetContour();

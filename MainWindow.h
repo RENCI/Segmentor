@@ -4,6 +4,7 @@
 #include "ui_MainWindow.h"
 
 #include <QMainWindow>
+#include <QSettings>
 
 class DataPipeline;
 class VolumePipeline;
@@ -22,7 +23,16 @@ public slots:
 	// on_<widget name>_<signal name>(<signal parameters>).
 
 	// Menu events
-	virtual void on_actionOpen_triggered();
+	virtual void on_actionOpen_Image_File_triggered();
+	virtual void on_actionOpen_Image_Stack_triggered();
+
+	virtual void on_actionOpen_Segmentation_File_triggered();
+	virtual void on_actionOpen_Segmentation_Stack_triggered();
+
+	virtual void on_actionSave_Segmentation_Data_triggered();
+
+	virtual void on_actionSegment_Volume_triggered();
+
 	virtual void on_actionExit_triggered();
 
 protected:
@@ -30,6 +40,11 @@ protected:
 	DataPipeline *dataPipeline;
 	VolumePipeline *volumePipeline;
 	SlicePipeline *slicePipeline;
+
+
+	QString defaultDirectoryKey;
+	QString GetDefaultDirectory();
+	void SetDefaultDirectory(QString fileName);
 };
 
 #endif

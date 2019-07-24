@@ -9,6 +9,9 @@ int main(int argc, char** argv)
   QSurfaceFormat::setDefaultFormat(QVTKOpenGLWidget::defaultFormat());
 
   QApplication app(argc, argv);
+  app.setApplicationName("Segmentor");
+  app.setOrganizationName("RENCI");
+  app.setOrganizationDomain("renci.org");
 
   MainWindow mainWindow;
   mainWindow.show();
