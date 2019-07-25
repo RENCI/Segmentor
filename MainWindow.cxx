@@ -119,6 +119,7 @@ void MainWindow::on_actionOpen_Image_File_triggered() {
 
 	SetDefaultDirectory(fileName);
 
+	// Load image
 	if (dataPipeline->OpenImageFile(fileName.toStdString())) {
 		slicePipeline->SetImageData(dataPipeline->GetData());
 	}
@@ -133,8 +134,7 @@ void MainWindow::on_actionOpen_Image_Stack_triggered() {
 	// Open a file dialog to read the file
 	QString fileName = QFileDialog::getOpenFileName(this,
 		"Open Volume",
-		"E:/borland/data/BRAIN_I/Sample/",
-		//		"",
+		GetDefaultDirectory(),
 		"All files (*.*);;TIFF (*.tif *.tiff)");
 
 	// Check for file name
@@ -142,27 +142,36 @@ void MainWindow::on_actionOpen_Image_Stack_triggered() {
 		return;
 	}
 
+	SetDefaultDirectory(fileName);
+
+	// Get all files in directory
 	QFileInfo fileInfo(fileName);
-	QDir directory(fileInfo.absoluteDir());
-/*
-	if (dataPipeline->OpenData(fileName.toStdString())) {
-		volumePipeline->SetInput(dataPipeline->GetData(), dataPipeline->GetLabels());
-		slicePipeline->SetInput(dataPipeline->GetData(), dataPipeline->GetLabels());
+	QDir directory = fileInfo.absoluteDir();
+	QFileInfoList fileInfoList = fileInfo.absoluteDir().entryInfoList(QDir::Files, QDir::Name);
+
+	// Get file names
+	std::vector<std::string> fileNames;
+
+	for (int i = 0; i < fileInfoList.length(); i++) {
+		fileNames.push_back(fileInfoList.at(i).absoluteFilePath().toStdString());
+	}
+
+	// Load images
+	if (dataPipeline->OpenImageStack(fileNames)) {
+		slicePipeline->SetImageData(dataPipeline->GetData());
 	}
 	else {
 		QMessageBox errorMessage;
-		errorMessage.setText("Could not open file.");
+		errorMessage.setText("Could not open files.");
 		errorMessage.exec();
 	}
-*/
 }
 
 void MainWindow::on_actionOpen_Segmentation_File_triggered() {
 	// Open a file dialog to read the file
 	QString fileName = QFileDialog::getOpenFileName(this,
 		"Open Segmentation Data",
-		"E:/borland/data/BRAIN_I/Sample/",
-		//		"",
+		GetDefaultDirectory(),
 		"All files (*.*);;NIfTI (*.nii);;VTK XML ImageData (*.vti)");
 
 	// Check for file name
@@ -170,6 +179,9 @@ void MainWindow::on_actionOpen_Segmentation_File_triggered() {
 		return;
 	}
 
+	SetDefaultDirectory(fileName);
+
+	// Load segmentation data
 	if (dataPipeline->OpenSegmentationFile(fileName.toStdString())) {
 		volumePipeline->SetSegmentationData(dataPipeline->GetLabels());
 		slicePipeline->SetSegmentationData(dataPipeline->GetLabels());
@@ -185,42 +197,53 @@ void MainWindow::on_actionOpen_Segmentation_Stack_triggered() {
 	// Open a file dialog to read the file
 	QString fileName = QFileDialog::getOpenFileName(this,
 		"Open Segmentation Data",
-		"E:/borland/data/BRAIN_I/Sample/",
-		//		"",
+		GetDefaultDirectory(),
 		"All files (*.*);;TIFF (*.tif *.tiff)");
 
 	// Check for file name
 	if (fileName == "") {
 		return;
 	}
-/*
-	QFileInfo fileInfo(fileName);
-	QDir directory(fileInfo.absoluteDir());
 
-	if (dataPipeline->OpenData(fileName.toStdString())) {
-		volumePipeline->SetInput(dataPipeline->GetData(), dataPipeline->GetLabels());
-		slicePipeline->SetInput(dataPipeline->GetData(), dataPipeline->GetLabels());
+	SetDefaultDirectory(fileName);
+
+	// Get all files in directory
+	QFileInfo fileInfo(fileName);
+	QDir directory = fileInfo.absoluteDir();
+	QFileInfoList fileInfoList = fileInfo.absoluteDir().entryInfoList(QDir::Files, QDir::Name);
+
+	// Get file names
+	std::vector<std::string> fileNames;
+
+	for (int i = 0; i < fileInfoList.length(); i++) {
+		fileNames.push_back(fileInfoList.at(i).absoluteFilePath().toStdString());
+	}
+
+	// Load segmentation data
+	if (dataPipeline->OpenSegmentationStack(fileNames)) {
+		volumePipeline->SetSegmentationData(dataPipeline->GetLabels());
+		slicePipeline->SetSegmentationData(dataPipeline->GetLabels());
 	}
 	else {
 		QMessageBox errorMessage;
-		errorMessage.setText("Could not open file.");
+		errorMessage.setText("Could not open files.");
 		errorMessage.exec();
 	}
-*/
 }
 
 void MainWindow::on_actionSave_Segmentation_Data_triggered() {
 	// Open a file dialog to save the file
 	QString fileName = QFileDialog::getSaveFileName(this,
-		"Save Segmentation Data",
-		"E:/borland/data/BRAIN_I/Sample/",
-		//		"",
+		"Save Segmentation Data", 
+		GetDefaultDirectory(),
 		"All files (*.*);;TIFF (*.tif);;NIfTI (*.nii);;VTK XML ImageData (*.vti)");
 
 	// Check for file name
 	if (fileName == "") {
 		return;
 	}
+
+	SetDefaultDirectory(fileName);
 
 	if (!dataPipeline->SaveSegmentationData(fileName.toStdString())) {
 		QMessageBox errorMessage;
@@ -247,8 +270,8 @@ QString MainWindow::GetDefaultDirectory() {
 }
 
 void MainWindow::SetDefaultDirectory(QString fileName) {
-	QSettings settings;
-	QDir directory;
+	QFileInfo fileInfo(fileName);
 
-	settings.setValue(defaultDirectoryKey, directory.absoluteFilePath(fileName));
+	QSettings settings;
+	settings.setValue(defaultDirectoryKey, fileInfo.absoluteDir().absolutePath());
 }

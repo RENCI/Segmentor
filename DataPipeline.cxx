@@ -10,6 +10,7 @@
 #include <vtkImageThreshold.h>
 #include <vtkNIFTIImageReader.h>
 #include <vtkNIFTIImageWriter.h>
+#include <vtkStringArray.h>
 #include <vtkTIFFReader.h>
 #include <vtkTIFFWriter.h>
 
@@ -24,11 +25,13 @@ DataPipeline::~DataPipeline() {
 bool DataPipeline::OpenImageFile(const std::string& fileName) {
 	double zScale = 2.0;
 
-	// Load data
+	// Create filter that will consume the output of the reader
 	vtkSmartPointer<vtkImageChangeInformation> info = vtkSmartPointer<vtkImageChangeInformation>::New();
 
+	// Get the file extension
 	std::string extension = fileName.substr(fileName.find_last_of(".") + 1);
 
+	// Load the data
 	if (extension == "vti") {
 		vtkSmartPointer<vtkXMLImageDataReader> reader = vtkSmartPointer<vtkXMLImageDataReader>::New();
 		reader->SetFileName(fileName.c_str());
@@ -59,29 +62,74 @@ bool DataPipeline::OpenImageFile(const std::string& fileName) {
 }
 
 bool DataPipeline::OpenImageStack(const std::vector<std::string>& fileNames) {
-	return false;
-}
+	double zScale = 2.0;
 
-bool DataPipeline::OpenSegmentationFile(const std::string& fileName) {
-	//double zScale = 2.0;
+	// Create filter that will consume the output of the reader
+	vtkSmartPointer<vtkImageChangeInformation> info = vtkSmartPointer<vtkImageChangeInformation>::New();
 
-	// Load data
-	vtkSmartPointer<vtkXMLImageDataReader> reader = vtkSmartPointer<vtkXMLImageDataReader>::New();
-	reader->SetFileName(fileName.c_str());
+	// Get the file extension
+	std::string extension = fileNames[0].substr(fileNames[0].find_last_of(".") + 1);
+
+	// Set file names to pass to VTK
+	vtkSmartPointer<vtkStringArray> names = vtkSmartPointer<vtkStringArray>::New();
+	names->SetNumberOfValues(fileNames.size());
+
+	for (int i = 0; i < fileNames.size(); i++) {
+		names->SetValue(i, fileNames[i].c_str());
+	}
+
+	// Load the data
+	if (extension == "tif" || extension == "tiff") {
+		vtkSmartPointer<vtkTIFFReader> reader = vtkSmartPointer<vtkTIFFReader>::New();
+		reader->SetFileNames(names);
+		info->SetInputConnection(reader->GetOutputPort());
+	}
+	else {
+		return false;
+	}
 
 	// Match output dims and resolution
-	vtkSmartPointer<vtkImageChangeInformation> info = vtkSmartPointer<vtkImageChangeInformation>::New();
-	info->SetInputConnection(reader->GetOutputPort());
-	//info->SetOutputSpacing(1.0, 1.0, zScale);
-	info->Update();
+	info->SetOutputSpacing(1.0, 1.0, zScale);
 
-/*
 	// Resample in z
 	vtkSmartPointer<vtkImageResample> resample = vtkSmartPointer<vtkImageResample>::New();
 	resample->SetInputConnection(info->GetOutputPort());
 	resample->SetAxisMagnificationFactor(2, zScale);
 	resample->Update();
-*/
+
+	// Set data output
+	data = resample->GetOutput();
+
+	return true;
+}
+
+bool DataPipeline::OpenSegmentationFile(const std::string& fileName) {
+	double zScale = 2.0;
+
+	// Create filter that will consume the output of the reader
+	vtkSmartPointer<vtkImageChangeInformation> info = vtkSmartPointer<vtkImageChangeInformation>::New();
+
+	// Get the file extension
+	std::string extension = fileName.substr(fileName.find_last_of(".") + 1);
+
+	// Load the data
+	if (extension == "vti") {
+		vtkSmartPointer<vtkXMLImageDataReader> reader = vtkSmartPointer<vtkXMLImageDataReader>::New();
+		reader->SetFileName(fileName.c_str());
+		info->SetInputConnection(reader->GetOutputPort());
+	}
+	else if (extension == "nii") {
+		vtkSmartPointer<vtkNIFTIImageReader> reader = vtkSmartPointer<vtkNIFTIImageReader>::New();
+		reader->SetFileName(fileName.c_str());
+		info->SetInputConnection(reader->GetOutputPort());
+	}
+	else {
+		return false;
+	}
+
+	// Match output dims and resolution
+	info->SetOutputSpacing(1.0, 1.0, zScale);
+	info->Update();
 
 	// Set label output
 	labels = info->GetOutput();
@@ -90,7 +138,40 @@ bool DataPipeline::OpenSegmentationFile(const std::string& fileName) {
 }
 
 bool DataPipeline::OpenSegmentationStack(const std::vector<std::string>& fileNames) {
-	return false;
+	double zScale = 2.0;
+
+	// Create filter that will consume the output of the reader
+	vtkSmartPointer<vtkImageChangeInformation> info = vtkSmartPointer<vtkImageChangeInformation>::New();
+
+	// Get the file extension
+	std::string extension = fileNames[0].substr(fileNames[0].find_last_of(".") + 1);
+
+	// Set file names to pass to VTK
+	vtkSmartPointer<vtkStringArray> names = vtkSmartPointer<vtkStringArray>::New();
+	names->SetNumberOfValues(fileNames.size());
+
+	for (int i = 0; i < fileNames.size(); i++) {
+		names->SetValue(i, fileNames[i].c_str());
+	}
+
+	// Load the data
+	if (extension == "tif" || extension == "tiff") {
+		vtkSmartPointer<vtkTIFFReader> reader = vtkSmartPointer<vtkTIFFReader>::New();
+		reader->SetFileNames(names);
+		info->SetInputConnection(reader->GetOutputPort());
+	}
+	else {
+		return false;
+	}
+
+	// Match output dims and resolution
+	info->SetOutputSpacing(1.0, 1.0, zScale);
+	info->Update();
+
+	// Set label output
+	labels = info->GetOutput();
+
+	return true;
 }
 
 bool DataPipeline::SaveSegmentationData(const std::string& fileName) {
@@ -108,8 +189,17 @@ bool DataPipeline::SaveSegmentationData(const std::string& fileName) {
 		writer->SetInputDataObject(labels);
 		writer->Update();
 	}
-	else if (extension == "tif") {
+	else if (extension == "tif" || extension == "tiff") {
+		std::string prefix = fileName.substr(0, fileName.find_last_of("."));
 
+		std::cout << prefix << std::endl;
+
+		vtkSmartPointer<vtkTIFFWriter> writer = vtkSmartPointer<vtkTIFFWriter>::New();
+		writer->SetFilePrefix(prefix.c_str());
+		writer->SetFilePattern("%s_%04d.tif");
+		writer->SetFileDimensionality(2);
+		writer->SetInputDataObject(labels);
+		writer->Update();
 	}
 	else {
 		return false;
@@ -146,7 +236,7 @@ void DataPipeline::SegmentVolume() {
 	// Generate labels
 	vtkSmartPointer<vtkImageConnectivityFilter> connectivity = vtkSmartPointer<vtkImageConnectivityFilter>::New();
 	connectivity->SetScalarRange(255, 255);
-	connectivity->SetLabelScalarTypeToInt();
+	connectivity->SetLabelScalarTypeToUnsignedShort();
 	connectivity->SetInputConnection(openClose->GetOutputPort());
 	connectivity->Update();
 

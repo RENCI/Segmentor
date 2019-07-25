@@ -67,7 +67,7 @@
   </action>
   <action name="actionOpen_Image_Stack">
    <property name="text">
-    <string>Open Image Stack</string>
+    <string>Open Image Stack...</string>
    </property>
   </action>
   <action name="actionOpen_Segmentation_File">
@@ -77,7 +77,7 @@
   </action>
   <action name="actionOpen_Segmentation_Stack">
    <property name="text">
-    <string>Open Segmentation Stack</string>
+    <string>Open Segmentation Stack...</string>
    </property>
   </action>
   <action name="actionSegment_Volume">
