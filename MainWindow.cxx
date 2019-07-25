@@ -68,7 +68,9 @@ MainWindow::MainWindow() {
 	// Create the GUI from the Qt Designer file
 	setupUi(this);
 
-	defaultDirectoryKey = "default_directory";
+	// Default directory keys
+	defaultImageDirectoryKey = "default_image_directory";
+	defaultSegmentationDirectoryKey = "default_segmentation_directory";
 
 	// Create render windows
 	vtkNew<vtkGenericOpenGLRenderWindow> renderWindowLeft;
@@ -109,7 +111,7 @@ void MainWindow::on_actionOpen_Image_File_triggered() {
 	// Open a file dialog to read the file
 	QString fileName = QFileDialog::getOpenFileName(this,
 		"Open Volume",
-		GetDefaultDirectory(),
+		GetDefaultDirectory(defaultImageDirectoryKey),
 		"All files (*.*);;NIfTI (*.nii);;VTK XML ImageData (*.vti)");
 
 	// Check for file name
@@ -117,7 +119,7 @@ void MainWindow::on_actionOpen_Image_File_triggered() {
 		return;
 	}
 
-	SetDefaultDirectory(fileName);
+	SetDefaultDirectory(defaultImageDirectoryKey, fileName);
 
 	// Load image
 	if (dataPipeline->OpenImageFile(fileName.toStdString())) {
@@ -134,7 +136,7 @@ void MainWindow::on_actionOpen_Image_Stack_triggered() {
 	// Open a file dialog to read the file
 	QString fileName = QFileDialog::getOpenFileName(this,
 		"Open Volume",
-		GetDefaultDirectory(),
+		GetDefaultDirectory(defaultImageDirectoryKey),
 		"All files (*.*);;TIFF (*.tif *.tiff)");
 
 	// Check for file name
@@ -142,7 +144,7 @@ void MainWindow::on_actionOpen_Image_Stack_triggered() {
 		return;
 	}
 
-	SetDefaultDirectory(fileName);
+	SetDefaultDirectory(defaultImageDirectoryKey, fileName);
 
 	// Get all files in directory
 	QFileInfo fileInfo(fileName);
@@ -171,7 +173,7 @@ void MainWindow::on_actionOpen_Segmentation_File_triggered() {
 	// Open a file dialog to read the file
 	QString fileName = QFileDialog::getOpenFileName(this,
 		"Open Segmentation Data",
-		GetDefaultDirectory(),
+		GetDefaultDirectory(defaultSegmentationDirectoryKey),
 		"All files (*.*);;NIfTI (*.nii);;VTK XML ImageData (*.vti)");
 
 	// Check for file name
@@ -179,7 +181,7 @@ void MainWindow::on_actionOpen_Segmentation_File_triggered() {
 		return;
 	}
 
-	SetDefaultDirectory(fileName);
+	SetDefaultDirectory(defaultSegmentationDirectoryKey, fileName);
 
 	// Load segmentation data
 	if (dataPipeline->OpenSegmentationFile(fileName.toStdString())) {
@@ -197,7 +199,7 @@ void MainWindow::on_actionOpen_Segmentation_Stack_triggered() {
 	// Open a file dialog to read the file
 	QString fileName = QFileDialog::getOpenFileName(this,
 		"Open Segmentation Data",
-		GetDefaultDirectory(),
+		GetDefaultDirectory(defaultSegmentationDirectoryKey),
 		"All files (*.*);;TIFF (*.tif *.tiff)");
 
 	// Check for file name
@@ -205,7 +207,7 @@ void MainWindow::on_actionOpen_Segmentation_Stack_triggered() {
 		return;
 	}
 
-	SetDefaultDirectory(fileName);
+	SetDefaultDirectory(defaultSegmentationDirectoryKey, fileName);
 
 	// Get all files in directory
 	QFileInfo fileInfo(fileName);
@@ -234,8 +236,8 @@ void MainWindow::on_actionOpen_Segmentation_Stack_triggered() {
 void MainWindow::on_actionSave_Segmentation_Data_triggered() {
 	// Open a file dialog to save the file
 	QString fileName = QFileDialog::getSaveFileName(this,
-		"Save Segmentation Data", 
-		GetDefaultDirectory(),
+		"Save Segmentation Data",
+		GetDefaultDirectory(defaultSegmentationDirectoryKey),
 		"All files (*.*);;TIFF (*.tif);;NIfTI (*.nii);;VTK XML ImageData (*.vti)");
 
 	// Check for file name
@@ -243,7 +245,7 @@ void MainWindow::on_actionSave_Segmentation_Data_triggered() {
 		return;
 	}
 
-	SetDefaultDirectory(fileName);
+	SetDefaultDirectory(defaultSegmentationDirectoryKey, fileName);
 
 	if (!dataPipeline->SaveSegmentationData(fileName.toStdString())) {
 		QMessageBox errorMessage;
@@ -263,15 +265,15 @@ void MainWindow::on_actionExit_triggered() {
 	qApp->exit();
 }
 
-QString MainWindow::GetDefaultDirectory() {
+QString MainWindow::GetDefaultDirectory(QString key) {
 	QSettings settings;
 
-	return settings.value(defaultDirectoryKey).toString();
+	return settings.value(key).toString();
 }
 
-void MainWindow::SetDefaultDirectory(QString fileName) {
+void MainWindow::SetDefaultDirectory(QString key, QString fileName) {
 	QFileInfo fileInfo(fileName);
 
 	QSettings settings;
-	settings.setValue(defaultDirectoryKey, fileInfo.absoluteDir().absolutePath());
+	settings.setValue(key, fileInfo.absoluteDir().absolutePath());
 }

@@ -41,10 +41,12 @@ protected:
 	VolumePipeline *volumePipeline;
 	SlicePipeline *slicePipeline;
 
+	// Default directories
+	QString defaultImageDirectoryKey;
+	QString defaultSegmentationDirectoryKey;
 
-	QString defaultDirectoryKey;
-	QString GetDefaultDirectory();
-	void SetDefaultDirectory(QString fileName);
+	QString GetDefaultDirectory(QString key);
+	void SetDefaultDirectory(QString key, QString fileName);
 };
 
 #endif
