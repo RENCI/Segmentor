@@ -13,7 +13,6 @@ vtkStandardNewMacro(vtkInteractorStyleSlice);
 vtkInteractorStyleSlice::vtkInteractorStyleSlice() {
 	this->MouseMoved = false;
 	this->Picker = vtkSmartPointer<vtkCellPicker>::New();
-	this->Labels = nullptr;
 	this->volumePipeline = nullptr;
 	this->slicePipeline = nullptr;
 }
@@ -23,39 +22,102 @@ vtkInteractorStyleSlice::~vtkInteractorStyleSlice() {
 }
 
 //----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::StartPaint()
+{
+	if (this->State != VTKIS_NONE)
+	{
+		return;
+	}
+	this->StartState(VTKIS_PAINT);
+
+/*
+	// Get the last (the topmost) image
+	this->SetCurrentImageNumber(this->CurrentImageNumber);
+
+	if (this->HandleObservers &&
+		this->HasObserver(vtkCommand::StartWindowLevelEvent))
+	{
+		this->InvokeEvent(vtkCommand::StartWindowLevelEvent, this);
+	}
+	else
+	{
+		if (this->CurrentImageProperty)
+		{
+			vtkImageProperty *property = this->CurrentImageProperty;
+			this->WindowLevelInitial[0] = property->GetColorWindow();
+			this->WindowLevelInitial[1] = property->GetColorLevel();
+		}
+	}
+*/
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::EndPaint()
+{
+	if (this->State != VTKIS_PAINT)
+	{
+		return;
+	}
+	if (this->HandleObservers)
+	{
+		//this->InvokeEvent(vtkCommand::EndWindowLevelEvent, this);
+	}
+	this->StopState();
+}
+
+//----------------------------------------------------------------------------
 void vtkInteractorStyleSlice::OnLeftButtonDown() {
 	this->MouseMoved = false;
 
-	vtkInteractorStyleImage::OnLeftButtonDown();
+	int x = this->Interactor->GetEventPosition()[0];
+	int y = this->Interactor->GetEventPosition()[1];
+
+	this->FindPokedRenderer(x, y);
+	if (this->CurrentRenderer == nullptr)
+	{
+		return;
+	}
+
+	// Redefine this button to handle painting
+//	this->GrabFocus(this->EventCallbackCommand);
+
+	if (this->Interactor->GetAltKey()) {		
+		this->StartPaint();
+	}
+	else
+	{
+		this->Superclass::OnLeftButtonDown();
+	}
 }
 
 //----------------------------------------------------------------------------
 void vtkInteractorStyleSlice::OnLeftButtonUp() {
 	if (!this->MouseMoved) {
-/*
-		vtkRenderWindowInteractor* interactor = this->GetInteractor();
-
 		// Pick at the mouse location provided by the interactor
-		int pick = this->Picker->Pick(interactor->GetEventPosition()[0], interactor->GetEventPosition()[1], 0.0, this->CurrentRenderer);
+		int pick = this->Picker->Pick(this->Interactor->GetEventPosition()[0], this->Interactor->GetEventPosition()[1], 0.0, this->CurrentRenderer);
 
-		if (pick) {
+		if (pick && this->slicePipeline) {
 			// Get the point coordinate for the pick event
 			int* p = this->Picker->GetPointIJK();
 
-			// Toggle the label
-			unsigned int* label = static_cast<unsigned int*>(this->Labels->GetScalarPointer(p));
-			label[0] = label[0] > 0 ? 0 : 1;
-			this->Labels->Modified();
-
-			// XXX: May need to create a vtk filter wrapper around the image data to make sure it is updated correctly
-
-			// Render
-			interactor->Render();
+			if (this->State == VTKIS_PAINT) {
+				this->slicePipeline->Paint(p[0], p[1], p[2]);
+			}
+			else {
+				this->slicePipeline->PickLabel(p[0], p[1], p[2]);
+			}
 		}
-*/
 	}
-
-	vtkInteractorStyleImage::OnLeftButtonUp();
+	
+	if (this->State == VTKIS_PAINT) {
+		this->EndPaint();
+		if (this->Interactor)
+		{
+			this->ReleaseFocus();
+		}
+	}
+	
+	this->Superclass::OnLeftButtonUp();
 }
 
 //----------------------------------------------------------------------------
@@ -64,14 +126,15 @@ void vtkInteractorStyleSlice::OnMouseMove() {
 
 	this->MouseMoved = true;
 
-	vtkRenderWindowInteractor* interactor = this->GetInteractor();
 
 	// Pick at the mouse location provided by the interactor
-	int pick = this->Picker->Pick(interactor->GetEventPosition()[0], interactor->GetEventPosition()[1], 0.0, this->CurrentRenderer);
+	int pick = this->Picker->Pick(this->Interactor->GetEventPosition()[0], this->Interactor->GetEventPosition()[1], 0.0, this->CurrentRenderer);
 
 	if (pick && this->slicePipeline && this->volumePipeline) {
 		// Get the point coordinate for the pick event
 		int* p = this->Picker->GetPointIJK();
+
+		// XXX: Probably cleaner to use observers for events, rather than passing in the pipelines
 
 		// Update probes
 		this->volumePipeline->ShowProbe();
@@ -91,7 +154,13 @@ void vtkInteractorStyleSlice::OnMouseMove() {
 		this->volumePipeline->Render();
 	}
 
-	vtkInteractorStyleImage::OnMouseMove();
+	if (this->State == VTKIS_PAINT) {
+		this->FindPokedRenderer(this->Interactor->GetEventPosition()[0], this->Interactor->GetEventPosition()[1]);
+		this->Paint();
+		//this->InvokeEvent(vtkCommand::InteractionEvent, nullptr);
+	}
+
+	this->Superclass::OnMouseMove();
 }
 
 //----------------------------------------------------------------------------
@@ -104,6 +173,18 @@ void vtkInteractorStyleSlice::SetSlicePipeline(SlicePipeline* pipeline) {
 	this->slicePipeline = pipeline;
 }
 
+//----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::Paint()
+{
+	// Pick at the mouse location provided by the interactor
+	int pick = this->Picker->Pick(this->Interactor->GetEventPosition()[0], this->Interactor->GetEventPosition()[1], 0.0, this->CurrentRenderer);
+
+	if (pick && this->slicePipeline) {
+		// Get the point coordinate for the pick event
+		int* p = this->Picker->GetPointIJK();
+		this->slicePipeline->Paint(p[0], p[1], p[2]);
+	}
+}
 
 //----------------------------------------------------------------------------
 void vtkInteractorStyleSlice::PrintSelf(ostream& os, vtkIndent indent) {

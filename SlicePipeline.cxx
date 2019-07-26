@@ -31,8 +31,13 @@
 #include <vtkCubeSource.h>
 
 SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* rwi) {
+	labels = nullptr;
+	label = 0;
+	labelSlice = nullptr;
+
 	renderer = vtkSmartPointer<vtkRenderer>::New();
 	rwi->GetRenderWindow()->AddRenderer(renderer);
+	rwi->SetNumberOfFlyFrames(5);
 
 	plane = vtkSmartPointer<vtkPlane>::New();
 
@@ -62,13 +67,12 @@ void SlicePipeline::SetImageData(vtkImageData* data) {
 	Render();
 }
 
-void SlicePipeline::SetSegmentationData(vtkImageData* labels) {
-	// Interaction
-	style->SetLabels(labels);
+void SlicePipeline::SetSegmentationData(vtkImageData* data) {
+	labels = data;
+	CreateLabelSlice(labels);
 
 	// Render
-	renderer->AddActor(CreateLabelSlice(labels));
-	//	renderer->AddActor(CreateLabelSlice2(labels));
+	renderer->AddActor(labelSlice);
 	renderer->ResetCamera();
 	Render();
 }
@@ -85,13 +89,35 @@ void SlicePipeline::SetProbePosition(double x, double y, double z) {
 	vtkPlane::ProjectPoint(p1, cam->GetFocalPoint(), cam->GetDirectionOfProjection(), p2);
 	
 	if (sqrt(vtkMath::Distance2BetweenPoints(p1, p2)) < 1) {
-		probe->GetProperty()->SetColor(1.0, 1.0, 1.0);
+		probe->GetProperty()->SetOpacity(1);
 	}
 	else {
-		probe->GetProperty()->SetColor(0.5, 0.0, 0.0);
+		probe->GetProperty()->SetOpacity(0.5);
 	}	
 
 	probe->SetPosition(p2);
+}
+
+void SlicePipeline::PickLabel(int x, int y, int z) {
+	// Toggle the label
+	label = static_cast<unsigned short*>(this->labels->GetScalarPointer(x, y, z))[0];
+
+	if (label > 0) {
+		double color[3];
+		labelSlice->GetProperty()->GetLookupTable()->GetColor(label, color);
+		probe->GetProperty()->SetColor(color);
+	}
+	else {
+		probe->GetProperty()->SetColor(1, 1, 1);
+	}
+}
+
+void SlicePipeline::Paint(int x, int y, int z) {
+	// Toggle the label
+	unsigned short* p = static_cast<unsigned short*>(this->labels->GetScalarPointer(x, y, z));
+	p[0] = label;
+	labels->Modified();	
+	Render();
 }
 
 void SlicePipeline::Render() {
@@ -156,7 +182,7 @@ vtkSmartPointer<vtkImageSlice> SlicePipeline::CreateDataSlice(vtkImageData* data
 	return slice;
 }
 
-vtkSmartPointer<vtkImageSlice> SlicePipeline::CreateLabelSlice(vtkImageData* labels) {
+void SlicePipeline::CreateLabelSlice(vtkImageData* labels) {
 	// Number of labels
 	int maxLabel = labels->GetScalarRange()[1];
 
@@ -164,17 +190,17 @@ vtkSmartPointer<vtkImageSlice> SlicePipeline::CreateLabelSlice(vtkImageData* lab
 	const int numColors = 12;
 	double colors[numColors][3] = {
 		{ 166,206,227 },
-	{ 31,120,180 },
-	{ 178,223,138 },
-	{ 51,160,44 },
-	{ 251,154,153 },
-	{ 227,26,28 },
-	{ 253,191,111 },
-	{ 255,127,0 },
-	{ 202,178,214 },
-	{ 106,61,154 },
-	{ 255,255,153 },
-	{ 177,89,40 }
+		{ 31,120,180 },
+		{ 178,223,138 },
+		{ 51,160,44 },
+		{ 251,154,153 },
+		{ 227,26,28 },
+		{ 253,191,111 },
+		{ 255,127,0 },
+		{ 202,178,214 },
+		{ 106,61,154 },
+		{ 255,255,153 },
+		{ 177,89,40 }
 	};
 
 	for (int i = 0; i < numColors; i++) {
@@ -209,13 +235,11 @@ vtkSmartPointer<vtkImageSlice> SlicePipeline::CreateLabelSlice(vtkImageData* lab
 	property->UseLookupTableScalarRangeOn();
 
 	// Slice
-	vtkSmartPointer<vtkImageSlice> slice = vtkSmartPointer<vtkImageSlice>::New();
-	slice->SetMapper(mapper);
-	slice->SetProperty(property);
-	slice->PickableOff();
-	slice->DragableOff();
-
-	return slice;
+	labelSlice = vtkSmartPointer<vtkImageSlice>::New();
+	labelSlice->SetMapper(mapper);
+	labelSlice->SetProperty(property);
+	labelSlice->PickableOff();
+	labelSlice->DragableOff();
 }
 
 vtkSmartPointer<vtkActor> SlicePipeline::CreateLabelSlice2(vtkImageData* labels) {
@@ -226,17 +250,17 @@ vtkSmartPointer<vtkActor> SlicePipeline::CreateLabelSlice2(vtkImageData* labels)
 	const int numColors = 12;
 	double colors[numColors][3] = {
 		{ 166,206,227 },
-	{ 31,120,180 },
-	{ 178,223,138 },
-	{ 51,160,44 },
-	{ 251,154,153 },
-	{ 227,26,28 },
-	{ 253,191,111 },
-	{ 255,127,0 },
-	{ 202,178,214 },
-	{ 106,61,154 },
-	{ 255,255,153 },
-	{ 177,89,40 }
+		{ 31,120,180 },
+		{ 178,223,138 },
+		{ 51,160,44 },
+		{ 251,154,153 },
+		{ 227,26,28 },
+		{ 253,191,111 },
+		{ 255,127,0 },
+		{ 202,178,214 },
+		{ 106,61,154 },
+		{ 255,255,153 },
+		{ 177,89,40 }
 	};
 
 	for (int i = 0; i < numColors; i++) {

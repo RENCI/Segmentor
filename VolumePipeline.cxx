@@ -38,6 +38,7 @@ double rescale(double value, double min, double max) {
 VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* rwi) {
 	renderer = vtkSmartPointer<vtkRenderer>::New();
 	rwi->GetRenderWindow()->AddRenderer(renderer);
+	rwi->SetNumberOfFlyFrames(5);
 
 	contour = vtkSmartPointer<vtkDiscreteFlyingEdges3D>::New();
 

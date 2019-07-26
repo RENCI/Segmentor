@@ -10,18 +10,22 @@ class vtkCellPicker;
 class SlicePipeline;
 class VolumePipeline;
 
+// Interaction flags
+#define VTKIS_PAINT 2048
+
 class vtkInteractorStyleSlice : public vtkInteractorStyleImage {
 public:
 	static vtkInteractorStyleSlice* New();
 	vtkTypeMacro(vtkInteractorStyleSlice, vtkInteractorStyleImage);
 	void PrintSelf(ostream& os, vtkIndent indent) override;
 
+	void OnMouseMove() override;
 	void OnLeftButtonDown() override;
 	void OnLeftButtonUp() override;
-	void OnMouseMove() override;
 
-	vtkSetObjectMacro(Labels, vtkImageData);
-	vtkGetObjectMacro(Labels, vtkImageData);
+	virtual void Paint();
+	virtual void StartPaint();
+	virtual void EndPaint();
 
 	void SetVolumePipeline(VolumePipeline* pipeline);
 	void SetSlicePipeline(SlicePipeline* pipeline);
@@ -33,8 +37,6 @@ protected:
 	bool MouseMoved;
 
 	vtkSmartPointer<vtkCellPicker> Picker;
-	
-	vtkImageData* Labels;
 
 	VolumePipeline* volumePipeline;
 	SlicePipeline* slicePipeline;

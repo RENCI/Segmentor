@@ -11,6 +11,7 @@ vtkStandardNewMacro(vtkInteractorStyleVolume);
 
 //----------------------------------------------------------------------------
 vtkInteractorStyleVolume::vtkInteractorStyleVolume() {
+	this->MouseMoved = false;
 	this->Picker = vtkSmartPointer<vtkCellPicker>::New();
 	this->volumePipeline = nullptr;
 	this->slicePipeline = nullptr;
@@ -22,11 +23,28 @@ vtkInteractorStyleVolume::~vtkInteractorStyleVolume() {
 
 //----------------------------------------------------------------------------
 void vtkInteractorStyleVolume::OnLeftButtonDown() {
+	this->MouseMoved = false;
+
 	vtkInteractorStyleTrackballCamera::OnLeftButtonDown();
 }
 
 //----------------------------------------------------------------------------
 void vtkInteractorStyleVolume::OnLeftButtonUp() {
+	if (!this->MouseMoved) {
+/*
+		vtkRenderWindowInteractor* interactor = this->Interactor;
+
+		// Pick at the mouse location provided by the interactor
+		int pick = this->Picker->Pick(interactor->GetEventPosition()[0], interactor->GetEventPosition()[1], 0.0, this->CurrentRenderer);
+
+		if (pick && this->slicePipeline && this->volumePipeline) {
+			// Get the point coordinate for the pick event
+			int* p = this->Picker->GetPointIJK();
+			this->slicePipeline->PickLabel(p[0], p[1], p[2]);
+		}
+*/
+	}
+
 	vtkInteractorStyleTrackballCamera::OnLeftButtonUp();
 }
 
@@ -34,10 +52,10 @@ void vtkInteractorStyleVolume::OnLeftButtonUp() {
 void vtkInteractorStyleVolume::OnMouseMove() {
 	if (!this->CurrentRenderer) return;
 
-	vtkRenderWindowInteractor* interactor = this->GetInteractor();
+	this->MouseMoved = false;
 
 	// Pick at the mouse location provided by the interactor
-	int pick = this->Picker->Pick(interactor->GetEventPosition()[0], interactor->GetEventPosition()[1], 0.0, this->CurrentRenderer);
+	int pick = this->Picker->Pick(this->Interactor->GetEventPosition()[0], this->Interactor->GetEventPosition()[1], 0.0, this->CurrentRenderer);
 
 	if (pick && this->volumePipeline && this->slicePipeline) {
 		// Get the point coordinate for the pick event

@@ -19,10 +19,13 @@ public:
 	~SlicePipeline();
 
 	void SetImageData(vtkImageData* data);
-	void SetSegmentationData(vtkImageData* labels);
+	void SetSegmentationData(vtkImageData* data);
 
 	void ShowProbe(bool show = true);
 	void SetProbePosition(double x, double y, double z);
+
+	void PickLabel(int x, int y, int z);
+	void Paint(int x, int y, int z);
 
 	void Render();
 
@@ -31,12 +34,19 @@ public:
 	vtkPlane* GetPlane();
 
 protected:
+	// Data
+	vtkSmartPointer<vtkImageData> labels;
+	unsigned short label;
+
 	// Rendering
 	vtkSmartPointer<vtkRenderer> renderer;
 	vtkSmartPointer<vtkInteractorStyleSlice> style;
 
 	// Plane for slicing
 	vtkSmartPointer<vtkPlane> plane;
+
+	// Slices
+	vtkSmartPointer<vtkImageSlice> labelSlice;
 
 	// Probe
 	vtkSmartPointer<vtkActor> probe;
@@ -45,7 +55,7 @@ protected:
 
 	// Slices
 	vtkSmartPointer<vtkImageSlice> CreateDataSlice(vtkImageData* data);
-	vtkSmartPointer<vtkImageSlice> CreateLabelSlice(vtkImageData* labels);
+	void CreateLabelSlice(vtkImageData* labels);
 	vtkSmartPointer<vtkActor> CreateLabelSlice2(vtkImageData* labels);
 };
 

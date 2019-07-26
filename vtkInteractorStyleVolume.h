@@ -28,6 +28,8 @@ protected:
 	vtkInteractorStyleVolume();
 	~vtkInteractorStyleVolume() override;
 
+	bool MouseMoved;
+
 	vtkSmartPointer<vtkCellPicker> Picker;
 
 	VolumePipeline* volumePipeline;
