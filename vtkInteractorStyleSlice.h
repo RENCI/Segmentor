@@ -7,6 +7,8 @@
 #include <vtkSmartPointer.h>
 
 class vtkCellPicker;
+class SlicePipeline;
+class VolumePipeline;
 
 class vtkInteractorStyleSlice : public vtkInteractorStyleImage {
 public:
@@ -21,6 +23,9 @@ public:
 	vtkSetObjectMacro(Labels, vtkImageData);
 	vtkGetObjectMacro(Labels, vtkImageData);
 
+	void SetVolumePipeline(VolumePipeline* pipeline);
+	void SetSlicePipeline(SlicePipeline* pipeline);
+
 protected:
 	vtkInteractorStyleSlice();
 	~vtkInteractorStyleSlice() override;
@@ -30,6 +35,9 @@ protected:
 	vtkSmartPointer<vtkCellPicker> Picker;
 	
 	vtkImageData* Labels;
+
+	VolumePipeline* volumePipeline;
+	SlicePipeline* slicePipeline;
 
 private:
 	vtkInteractorStyleSlice(const vtkInteractorStyleSlice&) = delete;

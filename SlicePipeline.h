@@ -21,7 +21,13 @@ public:
 	void SetImageData(vtkImageData* data);
 	void SetSegmentationData(vtkImageData* labels);
 
+	void ShowProbe(bool show = true);
+	void SetProbePosition(double x, double y, double z);
+
+	void Render();
+
 	vtkRenderer* GetRenderer();
+	vtkInteractorStyleSlice* GetInteractorStyle();
 	vtkPlane* GetPlane();
 
 protected:
@@ -31,6 +37,11 @@ protected:
 
 	// Plane for slicing
 	vtkSmartPointer<vtkPlane> plane;
+
+	// Probe
+	vtkSmartPointer<vtkActor> probe;
+	void CreateProbe();
+	void UpdateProbe(vtkImageData* data);
 
 	// Slices
 	vtkSmartPointer<vtkImageSlice> CreateDataSlice(vtkImageData* data);

@@ -1,5 +1,7 @@
 #include "VolumePipeline.h"
 
+#include "vtkInteractorStyleVolume.h"
+
 #include <vtkActor.h>
 #include <vtkColorTransferFunction.h>
 #include <vtkImageData.h>
@@ -27,15 +29,95 @@
 #include <vtkWindowedSincPolyDataFilter.h>
 #include <vtkProperty.h>
 
+#include <vtkCubeSource.h>
+
 double rescale(double value, double min, double max) {
 	return min + (max - min) * value;
+}
+
+VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* rwi) {
+	renderer = vtkSmartPointer<vtkRenderer>::New();
+	rwi->GetRenderWindow()->AddRenderer(renderer);
+
+	contour = vtkSmartPointer<vtkDiscreteFlyingEdges3D>::New();
+
+	// Interaction
+	style = vtkSmartPointer<vtkInteractorStyleVolume>::New();
+	style->SetVolumePipeline(this);
+
+	vtkRenderWindowInteractor* interactor = renderer->GetRenderWindow()->GetInteractor();
+	interactor->SetInteractorStyle(style);
+
+	CreateProbe();
+}
+
+VolumePipeline::~VolumePipeline() {
+}
+
+void VolumePipeline::SetSegmentationData(vtkImageData* labels) {
+	// Interaction
+//	reinterpret_cast<vtkInteractorStyle*>(renderer->GetRenderWindow()->GetInteractor()->GetInteractorStyle())->AutoAdjustCameraClippingRangeOff();
+
+	// Update probe
+	UpdateProbe(labels);
+	probe->VisibilityOn();
+
+	// Render
+	renderer->AddViewProp(CreateGeometry(labels));
+	renderer->ResetCamera();
+	renderer->GetRenderWindow()->Render();
+}
+
+void VolumePipeline::ShowProbe(bool show) {
+	probe->SetVisibility(show);
+}
+
+void VolumePipeline::SetProbePosition(double x, double y, double z) {
+	probe->SetPosition(x, y, z);
+}
+
+void VolumePipeline::Render() {
+	renderer->GetRenderWindow()->Render();
+}
+
+vtkRenderer* VolumePipeline::GetRenderer() {
+	return renderer;
+}
+
+vtkInteractorStyleVolume* VolumePipeline::GetInteractorStyle() {
+	return style;
+}
+
+vtkAlgorithmOutput* VolumePipeline::GetContour() {
+	return contour->GetOutputPort();
+}
+
+void VolumePipeline::CreateProbe() {
+	vtkSmartPointer<vtkCubeSource> source = vtkSmartPointer<vtkCubeSource>::New();
+
+	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputConnection(source->GetOutputPort());
+
+	probe = vtkSmartPointer<vtkActor>::New();
+	probe->SetMapper(mapper);
+	probe->GetProperty()->SetRepresentationToWireframe();
+	probe->GetProperty()->LightingOff();
+	probe->VisibilityOff();
+	probe->PickableOff();
+
+	renderer->AddActor(probe);
+}
+
+void VolumePipeline::UpdateProbe(vtkImageData* data) {
+	probe->SetPosition(data->GetCenter());
+	probe->SetScale(data->GetSpacing());
 }
 
 vtkSmartPointer<vtkActor> VolumePipeline::CreateGeometry(vtkImageData* data) {
 	// Get image info
 	double minValue = data->GetScalarRange()[0];
 	double maxValue = data->GetScalarRange()[1];
-	
+
 	int maxLabel = data->GetScalarRange()[1];
 
 	// Contour
@@ -48,7 +130,7 @@ vtkSmartPointer<vtkActor> VolumePipeline::CreateGeometry(vtkImageData* data) {
 	int smoothingIterations = 15;
 	double passBand = 0.0001;
 	double featureAngle = 120.0;
-	
+
 	vtkSmartPointer<vtkWindowedSincPolyDataFilter> smoother = vtkSmartPointer<vtkWindowedSincPolyDataFilter>::New();
 	smoother->SetInputConnection(contour->GetOutputPort());
 	smoother->SetNumberOfIterations(smoothingIterations);
@@ -63,17 +145,17 @@ vtkSmartPointer<vtkActor> VolumePipeline::CreateGeometry(vtkImageData* data) {
 	const int numColors = 12;
 	double colors[numColors][3] = {
 		{ 166,206,227 },
-		{ 31,120,180 },
-		{ 178,223,138 },
-		{ 51,160,44 },
-		{ 251,154,153 },
-		{ 227,26,28 },
-		{ 253,191,111 },
-		{ 255,127,0 },
-		{ 202,178,214 },
-		{ 106,61,154 },
-		{ 255,255,153 },
-		{ 177,89,40 }
+	{ 31,120,180 },
+	{ 178,223,138 },
+	{ 51,160,44 },
+	{ 251,154,153 },
+	{ 227,26,28 },
+	{ 253,191,111 },
+	{ 255,127,0 },
+	{ 202,178,214 },
+	{ 106,61,154 },
+	{ 255,255,153 },
+	{ 177,89,40 }
 	};
 
 	for (int i = 0; i < numColors; i++) {
@@ -107,7 +189,7 @@ vtkSmartPointer<vtkActor> VolumePipeline::CreateGeometry(vtkImageData* data) {
 }
 
 vtkSmartPointer<vtkVolume> VolumePipeline::CreateVolume(vtkImageData* data) {
-/*
+	/*
 	// Resize
 	double mag[3] = { 1, 1, 1 };
 	vtkSmartPointer<vtkImageResample> resample = vtkSmartPointer<vtkImageResample>::New();
@@ -117,7 +199,7 @@ vtkSmartPointer<vtkVolume> VolumePipeline::CreateVolume(vtkImageData* data) {
 
 	double minValue = resample->GetOutput()->GetScalarRange()[0];
 	double maxValue = resample->GetOutput()->GetScalarRange()[1];
-*/
+	*/
 	// Get image info
 	double minValue = data->GetScalarRange()[0];
 	double maxValue = data->GetScalarRange()[1];
@@ -170,7 +252,7 @@ vtkSmartPointer<vtkVolume> VolumePipeline::CreateVolume(vtkImageData* data) {
 }
 
 vtkSmartPointer<vtkActor> labelGeometry(vtkImageData* labels) {
-/*
+	/*
 	vtkSmartPointer<vtkThreshold> threshold = vtkSmartPointer<vtkThreshold>::New();
 	threshold->ThresholdByUpper(1);
 	threshold->SetInputDataObject(labels);
@@ -180,12 +262,12 @@ vtkSmartPointer<vtkActor> labelGeometry(vtkImageData* labels) {
 
 	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	mapper->SetInputConnection(geometry->GetOutputPort());
-*/
-/*
+	*/
+	/*
 	vtkSmartPointer<vtkGlyph3DMapper> mapper = vtkSmartPointer<vtkGlyph3DMapper>::New();
 	mapper->MaskingOn();
 	mapper->SetInputDataObject(labels);
-*/
+	*/
 	vtkSmartPointer<vtkDiscreteMarchingCubes> cubes = vtkSmartPointer<vtkDiscreteMarchingCubes>::New();
 	cubes->SetInputDataObject(labels);
 
@@ -213,64 +295,36 @@ vtkSmartPointer<vtkActor> labelGeometry(vtkImageData* labels) {
 
 /*
 vtkSmartPointer<vtkVolume> labelVolume(vtkImageData* labels) {
-	// Volume mapper
-	vtkSmartPointer<vtkSmartVolumeMapper> volumeMapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
-	volumeMapper->SetBlendModeToComposite();
-	volumeMapper->SetRequestedRenderModeToRayCast();
-	volumeMapper->SetInputDataObject(labels);
+// Volume mapper
+vtkSmartPointer<vtkSmartVolumeMapper> volumeMapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
+volumeMapper->SetBlendModeToComposite();
+volumeMapper->SetRequestedRenderModeToRayCast();
+volumeMapper->SetInputDataObject(labels);
 
-	// Volume property
-	vtkSmartPointer<vtkVolumeProperty> volumeProperty = vtkSmartPointer<vtkVolumeProperty>::New();
-	volumeProperty->ShadeOff();
-	volumeProperty->SetInterpolationType(VTK_LINEAR_INTERPOLATION);
+// Volume property
+vtkSmartPointer<vtkVolumeProperty> volumeProperty = vtkSmartPointer<vtkVolumeProperty>::New();
+volumeProperty->ShadeOff();
+volumeProperty->SetInterpolationType(VTK_LINEAR_INTERPOLATION);
 
-	// Scalar opacity transfer function
-	vtkSmartPointer<vtkPiecewiseFunction> scalarOpacityFunction = vtkSmartPointer<vtkPiecewiseFunction>::New();
-	scalarOpacityFunction->AddPoint(0, 0.0);
-	scalarOpacityFunction->AddPoint(1, 1.0);
-	scalarOpacityFunction->ClampingOn();
-	volumeProperty->SetScalarOpacity(scalarOpacityFunction);
+// Scalar opacity transfer function
+vtkSmartPointer<vtkPiecewiseFunction> scalarOpacityFunction = vtkSmartPointer<vtkPiecewiseFunction>::New();
+scalarOpacityFunction->AddPoint(0, 0.0);
+scalarOpacityFunction->AddPoint(1, 1.0);
+scalarOpacityFunction->ClampingOn();
+volumeProperty->SetScalarOpacity(scalarOpacityFunction);
 
-	// Color transfer function
-	vtkSmartPointer<vtkColorTransferFunction> colorFunction = vtkSmartPointer<vtkColorTransferFunction>::New();
-	colorFunction->AddRGBPoint(0, 0.0, 0.0, 0.0);
-	colorFunction->AddRGBPoint(1.0, 0.0, 1.0, 0.0);
-	colorFunction->ClampingOn();
-	volumeProperty->SetColor(colorFunction);
+// Color transfer function
+vtkSmartPointer<vtkColorTransferFunction> colorFunction = vtkSmartPointer<vtkColorTransferFunction>::New();
+colorFunction->AddRGBPoint(0, 0.0, 0.0, 0.0);
+colorFunction->AddRGBPoint(1.0, 0.0, 1.0, 0.0);
+colorFunction->ClampingOn();
+volumeProperty->SetColor(colorFunction);
 
-	// Volume
-	vtkSmartPointer<vtkVolume> volume = vtkSmartPointer<vtkVolume>::New();
-	volume->SetMapper(volumeMapper);
-	volume->SetProperty(volumeProperty);
+// Volume
+vtkSmartPointer<vtkVolume> volume = vtkSmartPointer<vtkVolume>::New();
+volume->SetMapper(volumeMapper);
+volume->SetProperty(volumeProperty);
 
-	return volume;
+return volume;
 }
 */
-
-VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* rwi) {
-	this->renderer = vtkSmartPointer<vtkRenderer>::New();
-	this->contour = vtkSmartPointer<vtkDiscreteFlyingEdges3D>::New();
-
-	rwi->GetRenderWindow()->AddRenderer(renderer);
-}
-
-VolumePipeline::~VolumePipeline() {
-}
-
-void VolumePipeline::SetSegmentationData(vtkImageData* labels) {
-	// Interaction
-	reinterpret_cast<vtkInteractorStyle*>(renderer->GetRenderWindow()->GetInteractor()->GetInteractorStyle())->AutoAdjustCameraClippingRangeOff();
-
-	// Render
-	renderer->AddViewProp(CreateGeometry(labels));
-	renderer->ResetCamera();
-	renderer->GetRenderWindow()->Render();
-}
-
-vtkRenderer* VolumePipeline::GetRenderer() {
-	return renderer;
-}
-
-vtkAlgorithmOutput* VolumePipeline::GetContour() {
-	return contour->GetOutputPort();
-}

@@ -9,6 +9,9 @@
 #include <vtkSmartPointer.h>
 #include <vtkRenderer.h>
 
+#include <vtkInteractorStyleSlice.h>
+#include <vtkInteractorStyleVolume.h>
+
 #include "DataPipeline.h"
 #include "VolumePipeline.h"
 #include "SlicePipeline.h"
@@ -29,7 +32,7 @@ void volumeViewChange(vtkObject* caller, unsigned long eventId, void* clientData
 	sliceCamera->SetPosition(volumeCamera->GetPosition());
 	sliceCamera->SetViewUp(volumeCamera->GetViewUp());
 
-	sliceCamera->SetClippingRange(volumeCamera->GetDistance(), volumeCamera->GetClippingRange()[1]);
+	sliceCamera->SetClippingRange(volumeCamera->GetDistance() - 1, volumeCamera->GetDistance() + 1);
 
 	sliceRenderer->GetRenderWindow()->Render();
 
@@ -41,7 +44,7 @@ void sliceViewChange(vtkObject* caller, unsigned long eventId, void* clientData,
 
 	firstCallback = false;
 
-	double r = 0;
+	double r = 10;
 
 	vtkCamera* sliceCamera = reinterpret_cast<vtkCamera*>(caller);
 
@@ -54,11 +57,10 @@ void sliceViewChange(vtkObject* caller, unsigned long eventId, void* clientData,
 
 	volumeRenderer->ResetCameraClippingRange();
 
-	volumeCamera->SetClippingRange(volumeCamera->GetDistance() - r, volumeCamera->GetClippingRange()[1]);
+//	volumeCamera->SetClippingRange(volumeCamera->GetDistance() - r, volumeCamera->GetClippingRange()[1]);
+//	volumeCamera->SetClippingRange(volumeCamera->GetDistance() - 0.5, volumeCamera->GetDistance() + 0.5);
 
 	volumeRenderer->GetRenderWindow()->Render();
-
-
 
 	firstCallback = true;
 }
@@ -83,6 +85,9 @@ MainWindow::MainWindow() {
 	dataPipeline = new DataPipeline();
 	volumePipeline = new VolumePipeline(this->qvtkWidgetLeft->GetInteractor());
 	slicePipeline = new SlicePipeline(this->qvtkWidgetRight->GetInteractor());
+
+	volumePipeline->GetInteractorStyle()->SetSlicePipeline(slicePipeline);
+	slicePipeline->GetInteractorStyle()->SetVolumePipeline(volumePipeline);
 
 	// Callbacks
 	vtkSmartPointer <vtkCallbackCommand> volumeCallback = vtkSmartPointer<vtkCallbackCommand>::New();

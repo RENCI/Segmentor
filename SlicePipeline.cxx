@@ -4,6 +4,7 @@
 
 #include <vtkActor.h>
 #include <vtkCallbackCommand.h>
+#include <vtkCamera.h>
 #include <vtkContourFilter.h>
 #include <vtkCutter.h>
 #include <vtkImageData.h>
@@ -27,6 +28,109 @@
 
 #include <vtkDataSetMapper.h>
 
+#include <vtkCubeSource.h>
+
+SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* rwi) {
+	renderer = vtkSmartPointer<vtkRenderer>::New();
+	rwi->GetRenderWindow()->AddRenderer(renderer);
+
+	plane = vtkSmartPointer<vtkPlane>::New();
+
+	// Interaction
+	style = vtkSmartPointer<vtkInteractorStyleSlice>::New();
+	style->SetInteractionModeToImage3D();
+	style->SetCurrentImageNumber(0);
+	style->SetSlicePipeline(this);
+
+	vtkRenderWindowInteractor* interactor = renderer->GetRenderWindow()->GetInteractor();
+	interactor->SetInteractorStyle(style);
+
+	CreateProbe();
+}
+
+SlicePipeline::~SlicePipeline() {
+}
+
+void SlicePipeline::SetImageData(vtkImageData* data) {	
+	// Update probe
+	UpdateProbe(data);
+	probe->VisibilityOn();
+
+	// Render
+	renderer->AddActor(CreateDataSlice(data));
+	renderer->ResetCamera();
+	Render();
+}
+
+void SlicePipeline::SetSegmentationData(vtkImageData* labels) {
+	// Interaction
+	style->SetLabels(labels);
+
+	// Render
+	renderer->AddActor(CreateLabelSlice(labels));
+	//	renderer->AddActor(CreateLabelSlice2(labels));
+	renderer->ResetCamera();
+	Render();
+}
+
+void SlicePipeline::ShowProbe(bool show) {
+	probe->SetVisibility(show);
+}
+
+void SlicePipeline::SetProbePosition(double x, double y, double z) {
+	vtkCamera* cam = renderer->GetActiveCamera();
+
+	double p1[3] = { x , y, z };
+	double p2[3];
+	vtkPlane::ProjectPoint(p1, cam->GetFocalPoint(), cam->GetDirectionOfProjection(), p2);
+	
+	if (sqrt(vtkMath::Distance2BetweenPoints(p1, p2)) < 1) {
+		probe->GetProperty()->SetColor(1.0, 1.0, 1.0);
+	}
+	else {
+		probe->GetProperty()->SetColor(0.5, 0.0, 0.0);
+	}	
+
+	probe->SetPosition(p2);
+}
+
+void SlicePipeline::Render() {
+	renderer->GetRenderWindow()->Render();
+}
+
+vtkRenderer* SlicePipeline::GetRenderer() {
+	return renderer;
+}
+
+vtkInteractorStyleSlice* SlicePipeline::GetInteractorStyle() {
+	return style;
+}
+
+vtkPlane* SlicePipeline::GetPlane() {
+	return plane;
+}
+
+void SlicePipeline::CreateProbe() {
+	vtkSmartPointer<vtkCubeSource> source = vtkSmartPointer<vtkCubeSource>::New();
+
+	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputConnection(source->GetOutputPort());
+
+	probe = vtkSmartPointer<vtkActor>::New();
+	probe->SetMapper(mapper);	
+	probe->GetProperty()->SetRepresentationToWireframe();
+	probe->GetProperty()->LightingOff();
+	probe->VisibilityOff();
+	probe->PickableOff();
+
+	renderer->AddActor(probe);
+}
+
+void SlicePipeline::UpdateProbe(vtkImageData* data) {
+	probe->SetPosition(data->GetCenter());
+	probe->SetScale(data->GetSpacing());
+}
+
 vtkSmartPointer<vtkImageSlice> SlicePipeline::CreateDataSlice(vtkImageData* data) {
 	// Get image info
 	double minValue = data->GetScalarRange()[0];
@@ -37,7 +141,7 @@ vtkSmartPointer<vtkImageSlice> SlicePipeline::CreateDataSlice(vtkImageData* data
 	mapper->SetInputDataObject(data);
 	mapper->SliceFacesCameraOn();
 	mapper->SliceAtFocalPointOn();
-	
+
 	// Image property
 	vtkSmartPointer<vtkImageProperty> property = vtkSmartPointer<vtkImageProperty>::New();
 	property->SetInterpolationTypeToNearest();
@@ -60,17 +164,17 @@ vtkSmartPointer<vtkImageSlice> SlicePipeline::CreateLabelSlice(vtkImageData* lab
 	const int numColors = 12;
 	double colors[numColors][3] = {
 		{ 166,206,227 },
-		{ 31,120,180 },
-		{ 178,223,138 },
-		{ 51,160,44 },
-		{ 251,154,153 },
-		{ 227,26,28 },
-		{ 253,191,111 },
-		{ 255,127,0 },
-		{ 202,178,214 },
-		{ 106,61,154 },
-		{ 255,255,153 },
-		{ 177,89,40 }
+	{ 31,120,180 },
+	{ 178,223,138 },
+	{ 51,160,44 },
+	{ 251,154,153 },
+	{ 227,26,28 },
+	{ 253,191,111 },
+	{ 255,127,0 },
+	{ 202,178,214 },
+	{ 106,61,154 },
+	{ 255,255,153 },
+	{ 177,89,40 }
 	};
 
 	for (int i = 0; i < numColors; i++) {
@@ -122,17 +226,17 @@ vtkSmartPointer<vtkActor> SlicePipeline::CreateLabelSlice2(vtkImageData* labels)
 	const int numColors = 12;
 	double colors[numColors][3] = {
 		{ 166,206,227 },
-		{ 31,120,180 },
-		{ 178,223,138 },
-		{ 51,160,44 },
-		{ 251,154,153 },
-		{ 227,26,28 },
-		{ 253,191,111 },
-		{ 255,127,0 },
-		{ 202,178,214 },
-		{ 106,61,154 },
-		{ 255,255,153 },
-		{ 177,89,40 }
+	{ 31,120,180 },
+	{ 178,223,138 },
+	{ 51,160,44 },
+	{ 251,154,153 },
+	{ 227,26,28 },
+	{ 253,191,111 },
+	{ 255,127,0 },
+	{ 202,178,214 },
+	{ 106,61,154 },
+	{ 255,255,153 },
+	{ 177,89,40 }
 	};
 
 	for (int i = 0; i < numColors; i++) {
@@ -168,68 +272,23 @@ vtkSmartPointer<vtkActor> SlicePipeline::CreateLabelSlice2(vtkImageData* labels)
 
 /*
 vtkSmartPointer<vtkActor> contourSlice(vtkContourFilter* contour) {
-	// Plane
-	vtkSmartPointer<vtkPlane> plane = vtkSmartPointer<vtkPlane>::New();
-	plane->SetOrigin(0, 0, 100);
-	plane->SetNormal(0, 0, 1);
+// Plane
+vtkSmartPointer<vtkPlane> plane = vtkSmartPointer<vtkPlane>::New();
+plane->SetOrigin(0, 0, 100);
+plane->SetNormal(0, 0, 1);
 
-	vtkSmartPointer<vtkCutter> cut = vtkSmartPointer<vtkCutter>::New();
-	cut->SetCutFunction(plane);
-	cut->SetInputConnection(contour->GetOutputPort());
+vtkSmartPointer<vtkCutter> cut = vtkSmartPointer<vtkCutter>::New();
+cut->SetCutFunction(plane);
+cut->SetInputConnection(contour->GetOutputPort());
 
-	// Mapper
-	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-	mapper->SetInputConnection(cut->GetOutputPort());
+// Mapper
+vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+mapper->SetInputConnection(cut->GetOutputPort());
 
-	// Actor
-	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
-	actor->SetMapper(mapper);
+// Actor
+vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+actor->SetMapper(mapper);
 
-	return actor;
+return actor;
 }
 */
-
-SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* rwi) {
-	renderer = vtkSmartPointer<vtkRenderer>::New();
-
-	rwi->GetRenderWindow()->AddRenderer(renderer);
-
-	plane = vtkSmartPointer<vtkPlane>::New();
-
-	// Interaction
-	style = vtkSmartPointer<vtkInteractorStyleSlice>::New();
-	style->SetInteractionModeToImage3D();
-	style->SetCurrentImageNumber(0);
-
-	vtkRenderWindowInteractor* interactor = renderer->GetRenderWindow()->GetInteractor();
-	interactor->SetInteractorStyle(style);
-}
-
-SlicePipeline::~SlicePipeline() {
-}
-
-void SlicePipeline::SetImageData(vtkImageData* data) {	
-	// Render
-	renderer->AddActor(CreateDataSlice(data));
-	renderer->ResetCamera();
-	renderer->GetRenderWindow()->Render();
-}
-
-void SlicePipeline::SetSegmentationData(vtkImageData* labels) {
-	// Interaction
-	style->SetLabels(labels);
-
-	// Render
-	renderer->AddActor(CreateLabelSlice(labels));
-	//	renderer->AddActor(CreateLabelSlice2(labels));
-	renderer->ResetCamera();
-	renderer->GetRenderWindow()->Render();
-}
-
-vtkRenderer* SlicePipeline::GetRenderer() {
-	return renderer;
-}
-
-vtkPlane* SlicePipeline::GetPlane() {
-	return plane;
-}
