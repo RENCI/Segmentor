@@ -30,16 +30,17 @@
 
 #include <vtkCubeSource.h>
 
-SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* rwi) {
+SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* interactor) {
 	labels = nullptr;
 	label = 0;
 	labelSlice = nullptr;
 
-	renderer = vtkSmartPointer<vtkRenderer>::New();
-	rwi->GetRenderWindow()->AddRenderer(renderer);
-	rwi->SetNumberOfFlyFrames(5);
-
 	plane = vtkSmartPointer<vtkPlane>::New();
+
+	// Rendering
+	renderer = vtkSmartPointer<vtkRenderer>::New();
+	interactor->GetRenderWindow()->AddRenderer(renderer);
+	interactor->SetNumberOfFlyFrames(5);
 
 	// Interaction
 	style = vtkSmartPointer<vtkInteractorStyleSlice>::New();
@@ -47,7 +48,6 @@ SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* rwi) {
 	style->SetCurrentImageNumber(0);
 	style->SetSlicePipeline(this);
 
-	vtkRenderWindowInteractor* interactor = renderer->GetRenderWindow()->GetInteractor();
 	interactor->SetInteractorStyle(style);
 
 	CreateProbe();
@@ -77,8 +77,8 @@ void SlicePipeline::SetSegmentationData(vtkImageData* data) {
 	Render();
 }
 
-void SlicePipeline::ShowProbe(bool show) {
-	probe->SetVisibility(show);
+void SlicePipeline::SetProbeVisiblity(bool visiblity) {
+	probe->SetVisibility(visiblity);
 }
 
 void SlicePipeline::SetProbePosition(double x, double y, double z) {

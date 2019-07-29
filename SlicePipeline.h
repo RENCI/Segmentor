@@ -21,7 +21,7 @@ public:
 	void SetImageData(vtkImageData* data);
 	void SetSegmentationData(vtkImageData* data);
 
-	void ShowProbe(bool show = true);
+	void SetProbeVisiblity(bool visibility);
 	void SetProbePosition(double x, double y, double z);
 
 	void PickLabel(int x, int y, int z);

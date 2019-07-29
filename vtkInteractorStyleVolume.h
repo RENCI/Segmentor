@@ -19,6 +19,7 @@ public:
 
 	void OnLeftButtonDown() override;
 	void OnLeftButtonUp() override;
+	void OnChar() override;
 	void OnMouseMove() override;
 
 	void SetVolumePipeline(VolumePipeline* pipeline);

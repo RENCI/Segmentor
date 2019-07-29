@@ -49,6 +49,21 @@ void vtkInteractorStyleVolume::OnLeftButtonUp() {
 }
 
 //----------------------------------------------------------------------------
+void vtkInteractorStyleVolume::OnChar()
+{
+	switch (this->Interactor->GetKeyCode())	{
+	case 's':
+	case 'S':
+		this->volumePipeline->ToggleSmoothSurfaces();
+		break;
+
+	default:
+		this->Superclass::OnChar();
+		break;
+	}
+}
+
+//----------------------------------------------------------------------------
 void vtkInteractorStyleVolume::OnMouseMove() {
 	if (!this->CurrentRenderer) return;
 
@@ -62,8 +77,8 @@ void vtkInteractorStyleVolume::OnMouseMove() {
 		double* p = this->Picker->GetPickPosition();
 
 		// Update probes
-		this->volumePipeline->ShowProbe();
-		this->slicePipeline->ShowProbe();
+		this->volumePipeline->SetProbeVisiblity(true);
+		this->slicePipeline->SetProbeVisiblity(true);
 
 		this->volumePipeline->SetProbePosition(p[0], p[1], p[2]);
 		this->slicePipeline->SetProbePosition(p[0], p[1], p[2]);
@@ -72,8 +87,8 @@ void vtkInteractorStyleVolume::OnMouseMove() {
 		this->slicePipeline->Render();
 	}
 	else {
-		this->volumePipeline->ShowProbe(false);
-		this->slicePipeline->ShowProbe(false);
+		this->volumePipeline->SetProbeVisiblity(false);
+		this->slicePipeline->SetProbeVisiblity(false);
 
 		this->volumePipeline->Render();
 		this->slicePipeline->Render();

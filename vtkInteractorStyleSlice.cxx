@@ -137,8 +137,8 @@ void vtkInteractorStyleSlice::OnMouseMove() {
 		// XXX: Probably cleaner to use observers for events, rather than passing in the pipelines
 
 		// Update probes
-		this->volumePipeline->ShowProbe();
-		this->slicePipeline->ShowProbe();
+		this->volumePipeline->SetProbeVisiblity(true);
+		this->slicePipeline->SetProbeVisiblity(true);
 
 		this->slicePipeline->SetProbePosition(p[0], p[1], p[2]);
 		this->volumePipeline->SetProbePosition(p[0], p[1], p[2]);
@@ -147,8 +147,8 @@ void vtkInteractorStyleSlice::OnMouseMove() {
 		this->volumePipeline->Render();
 	}
 	else {
-		this->volumePipeline->ShowProbe(false);
-		this->slicePipeline->ShowProbe(false);
+		this->volumePipeline->SetProbeVisiblity(false);
+		this->slicePipeline->SetProbeVisiblity(false);
 
 		this->slicePipeline->Render();
 		this->volumePipeline->Render();
