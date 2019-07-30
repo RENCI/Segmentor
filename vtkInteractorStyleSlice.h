@@ -11,7 +11,7 @@ class SlicePipeline;
 class VolumePipeline;
 
 // Interaction flags
-#define VTKIS_PAINT 2048
+#define VTKIS_PAINTSLICE 2048
 
 class vtkInteractorStyleSlice : public vtkInteractorStyleImage {
 public:
@@ -22,6 +22,7 @@ public:
 	void OnMouseMove() override;
 	void OnLeftButtonDown() override;
 	void OnLeftButtonUp() override;
+	void OnEnter() override;
 
 	virtual void Paint();
 	virtual void StartPaint();

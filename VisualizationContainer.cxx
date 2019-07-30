@@ -36,17 +36,17 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	slicePipeline->GetInteractorStyle()->SetVolumePipeline(volumePipeline);
 
 	// Callbacks
-	vtkSmartPointer <vtkCallbackCommand> volumeCallback = vtkSmartPointer<vtkCallbackCommand>::New();
-	volumeCallback->SetCallback(volumeCameraChange);
-	volumeCallback->SetClientData(slicePipeline->GetRenderer());
+	vtkSmartPointer <vtkCallbackCommand> volumeCameraCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+	volumeCameraCallback->SetCallback(volumeCameraChange);
+	volumeCameraCallback->SetClientData(slicePipeline->GetRenderer());
 
-	volumePipeline->GetRenderer()->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, volumeCallback);
+	volumePipeline->GetRenderer()->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, volumeCameraCallback);
 
-	vtkSmartPointer <vtkCallbackCommand> sliceCallback = vtkSmartPointer<vtkCallbackCommand>::New();
-	sliceCallback->SetCallback(sliceCameraChange);
-	sliceCallback->SetClientData(volumePipeline->GetRenderer());
+	vtkSmartPointer <vtkCallbackCommand> sliceCameraCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+	sliceCameraCallback->SetCallback(sliceCameraChange);
+	sliceCameraCallback->SetClientData(volumePipeline->GetRenderer());
 
-	slicePipeline->GetRenderer()->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, sliceCallback);
+	slicePipeline->GetRenderer()->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, sliceCameraCallback);
 }
 
 VisualizationContainer::~VisualizationContainer() {

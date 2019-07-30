@@ -7,6 +7,15 @@
 
 #include "VisualizationContainer.h"
 
+
+#include "vtkCallbackCommand.h"
+#include "vtkSmartPointer.h"
+#include "vtkRenderWindowInteractor.h"
+void testEnter(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+	std::cout << "HERE" << std::endl;
+}
+
+
 // Constructor
 MainWindow::MainWindow() {
 	// Create the GUI from the Qt Designer file
@@ -25,6 +34,8 @@ MainWindow::MainWindow() {
 
 	// Create visualization container
 	visualizationContainer = new VisualizationContainer(qvtkWidgetLeft->GetInteractor(), qvtkWidgetRight->GetInteractor());
+
+	qApp->installEventFilter(this);
 }
 
 MainWindow::~MainWindow() {
@@ -175,6 +186,23 @@ void MainWindow::on_actionSegment_Volume_triggered() {
 void MainWindow::on_actionExit_triggered() {
 	// Exit Qt
 	qApp->exit();
+}
+
+bool MainWindow::eventFilter(QObject* obj, QEvent* event) {
+	if (event->type() == QEvent::Enter) {
+		if (obj == qvtkWidgetLeft) {
+			std::cout << "LEFT" << std::endl;
+
+			// XXX: How to grab focus so keypresses work without clicking first?
+		}
+		else if (obj == qvtkWidgetRight) {
+			std::cout << "RIGHT" << std::endl;
+
+			// XXX: How to grab focus so keypresses work without clicking first?
+		}
+	}
+
+	return QObject::eventFilter(obj, event);
 }
 
 QString MainWindow::GetDefaultDirectory(QString key) {

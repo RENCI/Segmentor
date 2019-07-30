@@ -28,7 +28,7 @@ void vtkInteractorStyleSlice::StartPaint()
 	{
 		return;
 	}
-	this->StartState(VTKIS_PAINT);
+	this->StartState(VTKIS_PAINTSLICE);
 
 /*
 	// Get the last (the topmost) image
@@ -54,7 +54,7 @@ void vtkInteractorStyleSlice::StartPaint()
 //----------------------------------------------------------------------------
 void vtkInteractorStyleSlice::EndPaint()
 {
-	if (this->State != VTKIS_PAINT)
+	if (this->State != VTKIS_PAINTSLICE)
 	{
 		return;
 	}
@@ -100,7 +100,7 @@ void vtkInteractorStyleSlice::OnLeftButtonUp() {
 			// Get the point coordinate for the pick event
 			int* p = this->Picker->GetPointIJK();
 
-			if (this->State == VTKIS_PAINT) {
+			if (this->State == VTKIS_PAINTSLICE) {
 				this->slicePipeline->Paint(p[0], p[1], p[2]);
 			}
 			else {
@@ -120,7 +120,7 @@ void vtkInteractorStyleSlice::OnLeftButtonUp() {
 		}
 	}
 	
-	if (this->State == VTKIS_PAINT) {
+	if (this->State == VTKIS_PAINTSLICE) {
 		this->EndPaint();
 		if (this->Interactor)
 		{
@@ -159,7 +159,7 @@ void vtkInteractorStyleSlice::OnMouseMove() {
 		this->slicePipeline->SetProbeVisiblity(false);
 	}
 
-	if (this->State == VTKIS_PAINT) {
+	if (this->State == VTKIS_PAINTSLICE) {
 		this->FindPokedRenderer(this->Interactor->GetEventPosition()[0], this->Interactor->GetEventPosition()[1]);
 		this->Paint();
 		//this->InvokeEvent(vtkCommand::InteractionEvent, nullptr);
@@ -169,6 +169,11 @@ void vtkInteractorStyleSlice::OnMouseMove() {
 	this->slicePipeline->Render();
 
 	this->Superclass::OnMouseMove();
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::OnEnter() {
+	std::cout << "ENTER" << std::endl;
 }
 
 //----------------------------------------------------------------------------

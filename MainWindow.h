@@ -37,6 +37,8 @@ protected:
 	// The visualization container
 	VisualizationContainer * visualizationContainer;
 
+	bool eventFilter(QObject* obj, QEvent* event);
+
 	// Default directories
 	QString defaultImageDirectoryKey;
 	QString defaultSegmentationDirectoryKey;
