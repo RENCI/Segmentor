@@ -99,8 +99,36 @@ void SlicePipeline::SetProbePosition(double x, double y, double z) {
 }
 
 void SlicePipeline::PickLabel(int x, int y, int z) {
-	// Toggle the label
-	label = static_cast<unsigned short*>(this->labels->GetScalarPointer(x, y, z))[0];
+	SetLabel(static_cast<unsigned short*>(labels->GetScalarPointer(x, y, z))[0]);
+}
+
+void SlicePipeline::Paint(int x, int y, int z) {
+	// Paint the label
+	unsigned short* p = static_cast<unsigned short*>(labels->GetScalarPointer(x, y, z));
+	p[0] = label;
+	labels->Modified();
+}
+
+void SlicePipeline::PickPointLabel(double x, double y, double z) {
+	// Get the label
+	vtkIdType id = labels->FindPoint(x, y, z);
+	SetLabel(static_cast<unsigned short*>(labels->GetScalarPointer())[id]);
+}
+
+void SlicePipeline::PaintPoint(double x, double y, double z) {
+	// Paint the label
+	vtkIdType id = labels->FindPoint(x, y, z);
+	unsigned short* p = static_cast<unsigned short*>(labels->GetScalarPointer());
+	p[id] = label;
+	labels->Modified();
+}
+
+unsigned short SlicePipeline::GetLabel() {
+	return label;
+}
+
+void SlicePipeline::SetLabel(unsigned int newLabel) {
+	label = newLabel;
 
 	if (label > 0) {
 		double color[3];
@@ -110,14 +138,6 @@ void SlicePipeline::PickLabel(int x, int y, int z) {
 	else {
 		probe->GetProperty()->SetColor(1, 1, 1);
 	}
-}
-
-void SlicePipeline::Paint(int x, int y, int z) {
-	// Toggle the label
-	unsigned short* p = static_cast<unsigned short*>(this->labels->GetScalarPointer(x, y, z));
-	p[0] = label;
-	labels->Modified();	
-	Render();
 }
 
 void SlicePipeline::Render() {

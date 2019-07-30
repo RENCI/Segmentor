@@ -92,11 +92,11 @@ void vtkInteractorStyleSlice::OnLeftButtonDown() {
 
 //----------------------------------------------------------------------------
 void vtkInteractorStyleSlice::OnLeftButtonUp() {
-	if (!this->MouseMoved) {
+	if (!this->MouseMoved && this->slicePipeline) {
 		// Pick at the mouse location provided by the interactor
 		int pick = this->Picker->Pick(this->Interactor->GetEventPosition()[0], this->Interactor->GetEventPosition()[1], 0.0, this->CurrentRenderer);
 
-		if (pick && this->slicePipeline) {
+		if (pick) {
 			// Get the point coordinate for the pick event
 			int* p = this->Picker->GetPointIJK();
 
@@ -105,7 +105,18 @@ void vtkInteractorStyleSlice::OnLeftButtonUp() {
 			}
 			else {
 				this->slicePipeline->PickLabel(p[0], p[1], p[2]);
+				this->volumePipeline->SetLabel(this->slicePipeline->GetLabel());
 			}
+
+			this->slicePipeline->Render();
+			this->volumePipeline->Render();
+		}
+		else {
+			this->slicePipeline->SetLabel(0);
+			this->volumePipeline->SetLabel(0);
+
+			this->slicePipeline->Render();
+			this->volumePipeline->Render();
 		}
 	}
 	
@@ -142,16 +153,10 @@ void vtkInteractorStyleSlice::OnMouseMove() {
 
 		this->slicePipeline->SetProbePosition(p[0], p[1], p[2]);
 		this->volumePipeline->SetProbePosition(p[0], p[1], p[2]);
-
-		this->slicePipeline->Render();
-		this->volumePipeline->Render();
 	}
 	else {
 		this->volumePipeline->SetProbeVisiblity(false);
 		this->slicePipeline->SetProbeVisiblity(false);
-
-		this->slicePipeline->Render();
-		this->volumePipeline->Render();
 	}
 
 	if (this->State == VTKIS_PAINT) {
@@ -159,6 +164,9 @@ void vtkInteractorStyleSlice::OnMouseMove() {
 		this->Paint();
 		//this->InvokeEvent(vtkCommand::InteractionEvent, nullptr);
 	}
+
+	this->volumePipeline->Render();
+	this->slicePipeline->Render();
 
 	this->Superclass::OnMouseMove();
 }
@@ -182,7 +190,10 @@ void vtkInteractorStyleSlice::Paint()
 	if (pick && this->slicePipeline) {
 		// Get the point coordinate for the pick event
 		int* p = this->Picker->GetPointIJK();
-		this->slicePipeline->Paint(p[0], p[1], p[2]);
+		this->slicePipeline->Paint(p[0], p[1], p[2]);		
+
+		this->slicePipeline->Render();
+		this->volumePipeline->Render();
 	}
 }
 

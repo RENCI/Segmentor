@@ -27,6 +27,12 @@ public:
 	void PickLabel(int x, int y, int z);
 	void Paint(int x, int y, int z);
 
+	void PickPointLabel(double x, double y, double z);
+	void PaintPoint(double x, double y, double z);
+
+	unsigned short GetLabel();
+	void SetLabel(unsigned int newLabel);
+
 	void Render();
 
 	vtkRenderer* GetRenderer();

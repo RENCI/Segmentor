@@ -111,10 +111,22 @@ void VolumePipeline::SetSmoothSurfaces(bool smooth) {
 	smoothSurfaces = smooth;
 
 	UpdatePipeline();
+	Render();
 }
 
 void VolumePipeline::ToggleSmoothSurfaces() {
 	SetSmoothSurfaces(!smoothSurfaces);
+}
+
+void VolumePipeline::SetLabel(unsigned short label) {
+	if (label > 0) {
+		double color[3];
+		mapper->GetLookupTable()->GetColor(label, color);
+		probe->GetProperty()->SetColor(color);
+	}
+	else {
+		probe->GetProperty()->SetColor(1, 1, 1);
+	}
 }
 
 void VolumePipeline::Render() {

@@ -27,6 +27,8 @@ public:
   void SetSmoothSurfaces(bool smooth);
   void ToggleSmoothSurfaces();
 
+  void SetLabel(unsigned short label);
+
   void Render();
 
   vtkRenderer* GetRenderer();	
