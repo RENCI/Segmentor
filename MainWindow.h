@@ -6,9 +6,7 @@
 #include <QMainWindow>
 #include <QSettings>
 
-class DataPipeline;
-class VolumePipeline;
-class SlicePipeline;
+class VisualizationContainer;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
   Q_OBJECT
@@ -36,10 +34,8 @@ public slots:
 	virtual void on_actionExit_triggered();
 
 protected:
-	// The visualization pipeline objects
-	DataPipeline *dataPipeline;
-	VolumePipeline *volumePipeline;
-	SlicePipeline *slicePipeline;
+	// The visualization container
+	VisualizationContainer * visualizationContainer;
 
 	// Default directories
 	QString defaultImageDirectoryKey;

@@ -1,7 +1,7 @@
 #include "LabelColors.h"
 
 #include "vtkLookupTable.h"
-
+/*
 LabelColors::LabelColors() {
 }
 
@@ -23,3 +23,4 @@ vtkSmartPointer<vtkLookupTable> GetColors(vtkImageData* data) {
 
 	return labelColors;
 }
+*/

@@ -3,67 +3,9 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include <vtkCallbackCommand.h>
-#include <vtkCamera.h>
 #include <vtkGenericOpenGLRenderWindow.h>
-#include <vtkSmartPointer.h>
-#include <vtkRenderer.h>
 
-#include <vtkInteractorStyleSlice.h>
-#include <vtkInteractorStyleVolume.h>
-
-#include "DataPipeline.h"
-#include "VolumePipeline.h"
-#include "SlicePipeline.h"
-
-bool firstCallback = true;
-
-void volumeViewChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
-	if (!firstCallback) return;
-
-	firstCallback = false;
-
-	vtkCamera* volumeCamera = reinterpret_cast<vtkCamera*>(caller);
-
-	vtkRenderer* sliceRenderer = reinterpret_cast<vtkRenderer*>(clientData);
-	vtkCamera* sliceCamera = sliceRenderer->GetActiveCamera();
-
-	sliceCamera->SetFocalPoint(volumeCamera->GetFocalPoint());
-	sliceCamera->SetPosition(volumeCamera->GetPosition());
-	sliceCamera->SetViewUp(volumeCamera->GetViewUp());
-
-	sliceCamera->SetClippingRange(volumeCamera->GetDistance() - 1, volumeCamera->GetDistance() + 1);
-
-	sliceRenderer->GetRenderWindow()->Render();
-
-	firstCallback = true;
-}
-
-void sliceViewChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
-	if (!firstCallback) return;
-
-	firstCallback = false;
-
-	double r = 10;
-
-	vtkCamera* sliceCamera = reinterpret_cast<vtkCamera*>(caller);
-
-	vtkRenderer* volumeRenderer = reinterpret_cast<vtkRenderer*>(clientData);
-	vtkCamera* volumeCamera = volumeRenderer->GetActiveCamera();
-
-	volumeCamera->SetFocalPoint(sliceCamera->GetFocalPoint());
-	volumeCamera->SetPosition(sliceCamera->GetPosition());
-	volumeCamera->SetViewUp(sliceCamera->GetViewUp());
-
-	volumeRenderer->ResetCameraClippingRange();
-
-//	volumeCamera->SetClippingRange(volumeCamera->GetDistance() - r, volumeCamera->GetClippingRange()[1]);
-//	volumeCamera->SetClippingRange(volumeCamera->GetDistance() - 0.5, volumeCamera->GetDistance() + 0.5);
-
-	volumeRenderer->GetRenderWindow()->Render();
-
-	firstCallback = true;
-}
+#include "VisualizationContainer.h"
 
 // Constructor
 MainWindow::MainWindow() {
@@ -81,33 +23,13 @@ MainWindow::MainWindow() {
 	vtkNew<vtkGenericOpenGLRenderWindow> renderWindowRight;
 	qvtkWidgetRight->SetRenderWindow(renderWindowRight);
 
-	// Create VTK pipelines
-	dataPipeline = new DataPipeline();
-	volumePipeline = new VolumePipeline(this->qvtkWidgetLeft->GetInteractor());
-	slicePipeline = new SlicePipeline(this->qvtkWidgetRight->GetInteractor());
-
-	volumePipeline->GetInteractorStyle()->SetSlicePipeline(slicePipeline);
-	slicePipeline->GetInteractorStyle()->SetVolumePipeline(volumePipeline);
-
-	// Callbacks
-	vtkSmartPointer <vtkCallbackCommand> volumeCallback = vtkSmartPointer<vtkCallbackCommand>::New();
-	volumeCallback->SetCallback(volumeViewChange);
-	volumeCallback->SetClientData(slicePipeline->GetRenderer());
-
-	volumePipeline->GetRenderer()->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, volumeCallback);
-
-	vtkSmartPointer <vtkCallbackCommand> sliceCallback = vtkSmartPointer<vtkCallbackCommand>::New();
-	sliceCallback->SetCallback(sliceViewChange);
-	sliceCallback->SetClientData(volumePipeline->GetRenderer());
-
-	slicePipeline->GetRenderer()->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, sliceCallback);
+	// Create visualization container
+	visualizationContainer = new VisualizationContainer(qvtkWidgetLeft->GetInteractor(), qvtkWidgetRight->GetInteractor());
 }
 
 MainWindow::~MainWindow() {
 	// Clean up
-	delete dataPipeline;
-	delete volumePipeline;
-	delete slicePipeline;
+	delete visualizationContainer;
 
 	qApp->exit();
 }
@@ -126,11 +48,8 @@ void MainWindow::on_actionOpen_Image_File_triggered() {
 
 	SetDefaultDirectory(defaultImageDirectoryKey, fileName);
 
-	// Load image
-	if (dataPipeline->OpenImageFile(fileName.toStdString())) {
-		slicePipeline->SetImageData(dataPipeline->GetData());
-	}
-	else {
+	// Load data
+	if (!visualizationContainer->OpenImageFile(fileName.toStdString())) {
 		QMessageBox errorMessage;
 		errorMessage.setText("Could not open file.");
 		errorMessage.exec();
@@ -163,11 +82,8 @@ void MainWindow::on_actionOpen_Image_Stack_triggered() {
 		fileNames.push_back(fileInfoList.at(i).absoluteFilePath().toStdString());
 	}
 
-	// Load images
-	if (dataPipeline->OpenImageStack(fileNames)) {
-		slicePipeline->SetImageData(dataPipeline->GetData());
-	}
-	else {
+	// Load data
+	if (!visualizationContainer->OpenImageStack(fileNames)) {
 		QMessageBox errorMessage;
 		errorMessage.setText("Could not open files.");
 		errorMessage.exec();
@@ -189,11 +105,7 @@ void MainWindow::on_actionOpen_Segmentation_File_triggered() {
 	SetDefaultDirectory(defaultSegmentationDirectoryKey, fileName);
 
 	// Load segmentation data
-	if (dataPipeline->OpenSegmentationFile(fileName.toStdString())) {
-		volumePipeline->SetSegmentationData(dataPipeline->GetLabels());
-		slicePipeline->SetSegmentationData(dataPipeline->GetLabels());
-	}
-	else {
+	if (!visualizationContainer->OpenSegmentationFile(fileName.toStdString())) {
 		QMessageBox errorMessage;
 		errorMessage.setText("Could not open file.");
 		errorMessage.exec();
@@ -227,11 +139,7 @@ void MainWindow::on_actionOpen_Segmentation_Stack_triggered() {
 	}
 
 	// Load segmentation data
-	if (dataPipeline->OpenSegmentationStack(fileNames)) {
-		volumePipeline->SetSegmentationData(dataPipeline->GetLabels());
-		slicePipeline->SetSegmentationData(dataPipeline->GetLabels());
-	}
-	else {
+	if (!visualizationContainer->OpenSegmentationStack(fileNames)) {
 		QMessageBox errorMessage;
 		errorMessage.setText("Could not open files.");
 		errorMessage.exec();
@@ -252,7 +160,8 @@ void MainWindow::on_actionSave_Segmentation_Data_triggered() {
 
 	SetDefaultDirectory(defaultSegmentationDirectoryKey, fileName);
 
-	if (!dataPipeline->SaveSegmentationData(fileName.toStdString())) {
+	// Save segmentation data
+	if (!visualizationContainer->SaveSegmentationData(fileName.toStdString())) {
 		QMessageBox errorMessage;
 		errorMessage.setText("Could not save file.");
 		errorMessage.exec();
@@ -260,9 +169,7 @@ void MainWindow::on_actionSave_Segmentation_Data_triggered() {
 }
 
 void MainWindow::on_actionSegment_Volume_triggered() {
-	dataPipeline->SegmentVolume();
-	volumePipeline->SetSegmentationData(dataPipeline->GetLabels());
-	slicePipeline->SetSegmentationData(dataPipeline->GetLabels());
+	visualizationContainer->SegmentVolume();
 }
 
 void MainWindow::on_actionExit_triggered() {

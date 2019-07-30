@@ -6,6 +6,7 @@
 class vtkLookupTable;
 
 class LabelColors {
+	/*
 public:	
 	static vtkSmartPointer<vtkLookupTable> GetColors(vtkImageData* data);
 
@@ -32,6 +33,8 @@ protected:
 private:
 	LabelColors();
 	~LabelColors();
+	*/
 };
+
 
 #endif

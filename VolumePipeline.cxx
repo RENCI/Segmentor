@@ -23,6 +23,8 @@ double rescale(double value, double min, double max) {
 }
 
 VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* interactor) {
+	smoothSurfaces = true;
+
 	// Rendering
 	renderer = vtkSmartPointer<vtkRenderer>::New();
 	interactor->GetRenderWindow()->AddRenderer(renderer);
@@ -154,7 +156,7 @@ void VolumePipeline::CreatePipeline() {
 
 	// Smoother
 	int smoothingIterations = 10;
-	double passBand = 0.001;
+	double passBand = 0.01;
 	double featureAngle = 120.0;
 
 	smoother = vtkSmartPointer<vtkWindowedSincPolyDataFilter>::New();
