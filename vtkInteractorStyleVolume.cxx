@@ -28,7 +28,7 @@ void vtkInteractorStyleVolume::StartPaint()
 	{
 		return;
 	}
-	this->StartState(VTKIS_PAINTVOLUME);
+	this->StartState(VTKIS_PAINT_VOLUME);
 
 	/*
 	// Get the last (the topmost) image
@@ -54,7 +54,7 @@ void vtkInteractorStyleVolume::StartPaint()
 //----------------------------------------------------------------------------
 void vtkInteractorStyleVolume::EndPaint()
 {
-	if (this->State != VTKIS_PAINTVOLUME)
+	if (this->State != VTKIS_PAINT_VOLUME)
 	{
 		return;
 	}
@@ -100,7 +100,7 @@ void vtkInteractorStyleVolume::OnLeftButtonUp() {
 			// Get the point coordinate for the pick event
 			double* p = this->Picker->GetPickPosition();
 
-			if (this->State == VTKIS_PAINTVOLUME) {
+			if (this->State == VTKIS_PAINT_VOLUME) {
 				this->slicePipeline->PaintPoint(p[0], p[1], p[2]);
 			}
 			else {
@@ -120,7 +120,7 @@ void vtkInteractorStyleVolume::OnLeftButtonUp() {
 		}
 	}
 
-	if (this->State == VTKIS_PAINTVOLUME) {
+	if (this->State == VTKIS_PAINT_VOLUME) {
 		this->EndPaint();
 		if (this->Interactor)
 		{
@@ -171,7 +171,7 @@ void vtkInteractorStyleVolume::OnMouseMove() {
 		this->slicePipeline->SetProbeVisiblity(false);
 	}
 
-	if (this->State == VTKIS_PAINTVOLUME) {
+	if (this->State == VTKIS_PAINT_VOLUME) {
 		this->FindPokedRenderer(this->Interactor->GetEventPosition()[0], this->Interactor->GetEventPosition()[1]);
 		this->Paint();
 		//this->InvokeEvent(vtkCommand::InteractionEvent, nullptr);

@@ -12,7 +12,7 @@ class SlicePipeline;
 class VolumePipeline;
 
 // Interaction flags
-#define VTKIS_PAINTVOLUME 2049
+#define VTKIS_PAINT_VOLUME 2048
 
 class vtkInteractorStyleVolume : public vtkInteractorStyleTrackballCamera {
 public:
