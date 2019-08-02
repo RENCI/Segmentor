@@ -79,7 +79,8 @@ void vtkInteractorStyleSlice::EndErase()
 }
 
 //----------------------------------------------------------------------------
-void vtkInteractorStyleSlice::OnMouseMove() {
+void vtkInteractorStyleSlice::OnMouseMove() 
+{
 	this->MouseMoved = true;
 
 	int x = this->Interactor->GetEventPosition()[0];
@@ -149,6 +150,7 @@ void vtkInteractorStyleSlice::OnLeftButtonDown()
 	else
 	{
 		this->Superclass::OnLeftButtonDown();
+		this->ReleaseFocus();
 	}
 }
 
@@ -171,7 +173,7 @@ void vtkInteractorStyleSlice::OnLeftButtonUp() {
 			this->InvokeEvent(PaintEvent, nullptr);
 			break;
 
-		default:
+		case VTKIS_ROTATE:
 			this->InvokeEvent(SelectLabelEvent, nullptr);
 		}
 	}
@@ -179,10 +181,6 @@ void vtkInteractorStyleSlice::OnLeftButtonUp() {
 	if (this->State == VTKIS_PAINT_SLICE)
 	{
 		this->EndPaint();
-		if (this->Interactor)
-		{
-			this->ReleaseFocus();
-		}
 	}
 
 
@@ -215,6 +213,7 @@ void vtkInteractorStyleSlice::OnRightButtonDown()
 	else
 	{
 		this->Superclass::OnRightButtonDown();
+		this->ReleaseFocus();
 	}
 }
 
@@ -231,26 +230,16 @@ void vtkInteractorStyleSlice::OnRightButtonUp() {
 
 	if (!this->MouseMoved)
 	{
-		switch (this->State)
+		if (this->State == VTKIS_ERASE_SLICE)
 		{
-		case VTKIS_ERASE_SLICE:
-			this->InvokeEvent(EraseEvent, nullptr);
-			break;
-
-		default:
-			this->InvokeEvent(SelectLabelEvent, nullptr);
+			this->InvokeEvent(EraseEvent, nullptr);			
 		}
 	}
 
 	if (this->State == VTKIS_ERASE_SLICE)
 	{
 		this->EndErase();
-		if (this->Interactor)
-		{
-			this->ReleaseFocus();
-		}
 	}
-
 
 	// Call parent to handle all other states and perform additional work
 

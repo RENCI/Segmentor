@@ -16,8 +16,10 @@
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
-#include <vtkThreshold.h>
 #include <vtkWindowedSincPolyDataFilter.h>
+
+#include <vtkThreshold.h>
+#include <vtkDataSetMapper.h>
 
 double rescale(double value, double min, double max) {
 	return min + (max - min) * value;
@@ -103,9 +105,10 @@ void VolumePipeline::SetSegmentationData(vtkImageData* data) {
 	probe->VisibilityOn();
 
 	// Render
+	renderer->AddActor(actor);
+
 	renderer->ResetCamera();
 	renderer->GetRenderWindow()->Render();
-	renderer->AddActor(actor);
 }
 
 void VolumePipeline::SetProbeVisiblity(bool visibility) {
@@ -168,7 +171,6 @@ vtkAlgorithmOutput* VolumePipeline::GetContour() {
 	return contour->GetOutputPort();
 }
 
-
 void VolumePipeline::CreatePipeline() {
 	// Threshold
 	threshold = vtkSmartPointer<vtkImageThreshold>::New();
@@ -220,7 +222,6 @@ void VolumePipeline::UpdatePipeline() {
 		mapper->SetInputConnection(contour->GetOutputPort());
 	}
 }
-
 
 void VolumePipeline::CreateProbe() {
 	vtkSmartPointer<vtkCubeSource> source = vtkSmartPointer<vtkCubeSource>::New();

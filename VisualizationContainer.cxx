@@ -338,8 +338,13 @@ SlicePipeline* VisualizationContainer::GetSlicePipeline() {
 
 void VisualizationContainer::SetLabel(int x, int y, int z, unsigned short label) {
 	unsigned short* p = static_cast<unsigned short*>(labels->GetScalarPointer(x, y, z));
-	p[0] = label;
-	labels->Modified();
+
+	// Restrict painting to no label, and erasing to current label
+	if ((label != 0 && p[0] == 0) ||
+		(label == 0 && p[0] == currentLabel)) {
+		p[0] = label;
+		labels->Modified();
+	}
 }
 
 void VisualizationContainer::SetPointLabel(double x, double y, double z, unsigned short label) {

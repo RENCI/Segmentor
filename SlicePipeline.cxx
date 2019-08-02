@@ -184,8 +184,6 @@ void SlicePipeline::CreateLabelSlice(vtkImageData* labels) {
 		}
 	}
 
-	double opacity = 0.25;
-
 	// Mapper
 	vtkSmartPointer<vtkImageResliceMapper> mapper = vtkSmartPointer<vtkImageResliceMapper>::New();
 	mapper->SetInputDataObject(labels);
@@ -199,7 +197,7 @@ void SlicePipeline::CreateLabelSlice(vtkImageData* labels) {
 	labelColors->SetTableValue(0, 0.0, 0.0, 0.0, 0.0);
 	for (int i = 1; i <= maxLabel; i++) {
 		double* c = colors[(i - 1) % numColors];
-		labelColors->SetTableValue(i, c[0], c[1], c[2], opacity);
+		labelColors->SetTableValue(i, c[0], c[1], c[2]);
 	}
 	labelColors->Build();
 
@@ -208,6 +206,7 @@ void SlicePipeline::CreateLabelSlice(vtkImageData* labels) {
 	property->SetInterpolationTypeToNearest();
 	property->SetLookupTable(labelColors);
 	property->UseLookupTableScalarRangeOn();
+	property->SetOpacity(0.25);
 
 	// Slice
 	labelSlice = vtkSmartPointer<vtkImageSlice>::New();

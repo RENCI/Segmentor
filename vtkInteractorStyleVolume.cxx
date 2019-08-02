@@ -103,7 +103,7 @@ void vtkInteractorStyleVolume::EndSlice()
 //----------------------------------------------------------------------------
 void vtkInteractorStyleVolume::OnMouseMove() 
 {
-	this->MouseMoved = false;
+	this->MouseMoved = true;
 
 	int x = this->Interactor->GetEventPosition()[0];
 	int y = this->Interactor->GetEventPosition()[1];
@@ -112,6 +112,10 @@ void vtkInteractorStyleVolume::OnMouseMove()
 	{
 	case VTKIS_PAINT_VOLUME:
 		this->InvokeEvent(PaintEvent, nullptr);
+		break;
+
+	case VTKIS_ERASE_VOLUME:
+		this->InvokeEvent(EraseEvent, nullptr);
 		break;
 
 	case VTKIS_SLICE_VOLUME:
@@ -138,7 +142,7 @@ void vtkInteractorStyleVolume::OnLeftButtonDown()
 	{
 		return;
 	}
-	
+		
 	// If atl is held down, start painting
 	if (this->Interactor->GetAltKey()) {
 		this->StartPaint();
@@ -149,6 +153,7 @@ void vtkInteractorStyleVolume::OnLeftButtonDown()
 	else
 	{
 		this->Superclass::OnLeftButtonDown();
+		this->ReleaseFocus();
 	}
 }
 
@@ -172,19 +177,14 @@ void vtkInteractorStyleVolume::OnLeftButtonUp()
 			this->InvokeEvent(PaintEvent, nullptr);
 			break;
 
-		default:
+		case VTKIS_ROTATE:
 			this->InvokeEvent(SelectLabelEvent, nullptr);
 		}
 	}
 
-
 	if (this->State == VTKIS_PAINT_VOLUME)
 	{
 		this->EndPaint();
-		if (this->Interactor)
-		{
-			this->ReleaseFocus();
-		}
 	}
 
 	// Call parent to handle all other states and perform additional work
@@ -205,7 +205,7 @@ void vtkInteractorStyleVolume::OnRightButtonDown()
 	{
 		return;
 	}
-
+	
 	// If alt is held down, start erasing
 	if (this->Interactor->GetAltKey()) 
 	{
@@ -223,6 +223,7 @@ void vtkInteractorStyleVolume::OnRightButtonDown()
 	else
 	{
 		this->Superclass::OnRightButtonDown();
+		this->ReleaseFocus();
 	}
 }
 
@@ -239,14 +240,9 @@ void vtkInteractorStyleVolume::OnRightButtonUp() {
 
 	if (!this->MouseMoved)
 	{
-		switch (this->State)
+		if (this->State == VTKIS_ERASE_VOLUME)
 		{
-		case VTKIS_ERASE_VOLUME:
 			this->InvokeEvent(EraseEvent, nullptr);
-			break;
-
-		default:
-			this->InvokeEvent(SelectLabelEvent, nullptr);
 		}
 	}
 
@@ -254,18 +250,10 @@ void vtkInteractorStyleVolume::OnRightButtonUp() {
 	{ 
 	case VTKIS_ERASE_VOLUME:	
 		this->EndErase();
-		if (this->Interactor)
-		{
-			this->ReleaseFocus();
-		}
 		break;
 
 	case VTKIS_SLICE_VOLUME:
 		this->EndSlice();
-		if (this->Interactor)
-		{
-			this->ReleaseFocus();
-		}
 		break;
 	}
 
