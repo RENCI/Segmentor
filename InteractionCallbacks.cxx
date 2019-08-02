@@ -71,6 +71,11 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 	case 'S':
 		vis->GetVolumePipeline()->ToggleSmoothSurfaces();
 		break;
+
+	case 't':
+	case 'T':
+		vis->GetVolumePipeline()->ToggleThresholdLabels();
+		break;
 	}
 }
 

@@ -7,6 +7,7 @@ class vtkActor;
 class vtkAlgorithmOutput;
 class vtkDiscreteFlyingEdges3D;
 class vtkImageData;
+class vtkImageThreshold;
 class vtkInteractorStyleVolume;
 class vtkPolyDataMapper;
 class vtkRenderer;
@@ -28,6 +29,8 @@ public:
   void ToggleSmoothSurfaces();
 
   void SetLabel(unsigned short label);
+  void SetThresholdLabels(bool threshold);
+  void ToggleThresholdLabels();
 
   void Render();
 
@@ -36,6 +39,7 @@ public:
   vtkAlgorithmOutput* GetContour();
 
 protected:
+	bool thresholdLabels;
 	bool smoothSurfaces;
 
 	// Rendering
@@ -43,6 +47,7 @@ protected:
 	vtkSmartPointer<vtkInteractorStyleVolume> style;
 
 	// Pipeline
+	vtkSmartPointer<vtkImageThreshold> threshold;
 	vtkSmartPointer<vtkDiscreteFlyingEdges3D> contour;
 	vtkSmartPointer<vtkWindowedSincPolyDataFilter> smoother;
 	vtkSmartPointer<vtkPolyDataMapper> mapper;

@@ -8,6 +8,7 @@
 #include <vtkDiscreteFlyingEdges3D.h>
 #include <vtkImageData.h>
 #include <vtkImageResample.h>
+#include <vtkImageThreshold.h>
 #include <vtkInteractorStyle.h>
 #include <vtkLookupTable.h>
 #include <vtkPolyDataMapper.h>
@@ -23,6 +24,7 @@ double rescale(double value, double min, double max) {
 }
 
 VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* interactor) {
+	thresholdLabels = false;
 	smoothSurfaces = true;
 
 	// Rendering
@@ -47,6 +49,12 @@ VolumePipeline::~VolumePipeline() {
 }
 
 void VolumePipeline::SetSegmentationData(vtkImageData* data) {
+	// Reset
+	thresholdLabels = false;
+	smoothSurfaces = true;
+
+	threshold->SetInputDataObject(data);
+
 	// Get label info
 	int maxLabel = data->GetScalarRange()[1];
 
@@ -128,6 +136,20 @@ void VolumePipeline::SetLabel(unsigned short label) {
 	else {
 		probe->GetProperty()->SetColor(1, 1, 1);
 	}
+
+	threshold->ThresholdBetween(label, label);
+}
+
+void VolumePipeline::SetThresholdLabels(bool threshold) {
+	thresholdLabels = threshold;
+
+	UpdatePipeline();
+	renderer->ResetCameraClippingRange();
+	Render();
+}
+
+void VolumePipeline::ToggleThresholdLabels() {
+	SetThresholdLabels(!thresholdLabels);
 }
 
 void VolumePipeline::Render() {
@@ -148,6 +170,12 @@ vtkAlgorithmOutput* VolumePipeline::GetContour() {
 
 
 void VolumePipeline::CreatePipeline() {
+	// Threshold
+	threshold = vtkSmartPointer<vtkImageThreshold>::New();
+	threshold->ReplaceInOff();
+	threshold->ReplaceOutOn();
+	threshold->SetOutValue(0);
+
 	// Contour
 	contour = vtkSmartPointer<vtkDiscreteFlyingEdges3D>::New(); 
 	contour->ComputeNormalsOff();
@@ -178,6 +206,13 @@ void VolumePipeline::CreatePipeline() {
 }
 
 void VolumePipeline::UpdatePipeline() {
+	if (thresholdLabels) {
+		contour->SetInputConnection(threshold->GetOutputPort());
+	}
+	else {
+		contour->SetInputDataObject(threshold->GetInputDataObject(0, 0));
+	}
+
 	if (smoothSurfaces) {
 		mapper->SetInputConnection(smoother->GetOutputPort());
 	}
