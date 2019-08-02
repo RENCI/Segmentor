@@ -350,6 +350,11 @@ void VisualizationContainer::SetLabel(int x, int y, int z, unsigned short label)
 void VisualizationContainer::SetPointLabel(double x, double y, double z, unsigned short label) {
 	vtkIdType id = labels->FindPoint(x, y, z);
 	unsigned short* p = static_cast<unsigned short*>(labels->GetScalarPointer());
-	p[id] = label;
-	labels->Modified();
+
+	// Restrict painting to no label, and erasing to current label
+	if ((label != 0 && p[id] == 0) ||
+		(label == 0 && p[id] == currentLabel)) {
+		p[id] = label;
+		labels->Modified();
+	}
 }

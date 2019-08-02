@@ -3,6 +3,8 @@
 
 #include <vtkSmartPointer.h>
 
+#include <vector>
+
 class vtkActor;
 class vtkAlgorithmOutput;
 class vtkDiscreteFlyingEdges3D;
@@ -14,6 +16,8 @@ class vtkRenderer;
 class vtkRenderWindowInteractor;
 class vtkVolume;
 class vtkWindowedSincPolyDataFilter;
+
+class vtkLookupTable;
 
 class VolumePipeline {
 public:
@@ -29,7 +33,7 @@ public:
   void ToggleSmoothSurfaces();
 
   void SetLabel(unsigned short label);
-  void SetThresholdLabels(bool threshold);
+  void SetThresholdLabels(bool doThreshold);
   void ToggleThresholdLabels();
 
   void Render();
@@ -53,8 +57,11 @@ protected:
 	vtkSmartPointer<vtkPolyDataMapper> mapper;
 	vtkSmartPointer<vtkActor> actor;
 
+	std::vector<vtkSmartPointer<vtkActor>> regionActors;
+
 	void CreatePipeline();
 	void UpdatePipeline();
+	void ExtractRegions(vtkImageData* labels, vtkLookupTable* lut);
 
 	// Probe
 	vtkSmartPointer<vtkActor> probe;
