@@ -6,6 +6,7 @@
 #include <vtkCallbackCommand.h>
 #include <vtkCamera.h>
 #include <vtkContourFilter.h>
+#include <vtkCubeSource.h>
 #include <vtkCutter.h>
 #include <vtkImageData.h>
 #include <vtkImageMapToColors.h>
@@ -16,26 +17,16 @@
 #include <vtkObject.h>
 #include <vtkPlane.h>
 #include <vtkPolyDataMapper.h>
+#include <vtkProperty.h>
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkImageProperty.h>
 #include <vtkImageSlice.h>
 
-#include <vtkActor2D.h>
-#include <vtkProperty2D.h>
-#include <vtkProperty.h>
-
-#include <vtkDataSetMapper.h>
-
-#include <vtkCubeSource.h>
-
 SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* interactor) {
 	labels = nullptr;
-	label = 0;
 	labelSlice = nullptr;
-
-	plane = vtkSmartPointer<vtkPlane>::New();
 
 	// Rendering
 	renderer = vtkSmartPointer<vtkRenderer>::New();
@@ -46,7 +37,6 @@ SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* interactor) {
 	style = vtkSmartPointer<vtkInteractorStyleSlice>::New();
 	style->SetInteractionModeToImage3D();
 	style->SetCurrentImageNumber(0);
-	style->SetSlicePipeline(this);
 
 	interactor->SetInteractorStyle(style);
 
@@ -98,38 +88,7 @@ void SlicePipeline::SetProbePosition(double x, double y, double z) {
 	probe->SetPosition(p2);
 }
 
-void SlicePipeline::PickLabel(int x, int y, int z) {
-	SetLabel(static_cast<unsigned short*>(labels->GetScalarPointer(x, y, z))[0]);
-}
-
-void SlicePipeline::Paint(int x, int y, int z) {
-	// Paint the label
-	unsigned short* p = static_cast<unsigned short*>(labels->GetScalarPointer(x, y, z));
-	p[0] = label;
-	labels->Modified();
-}
-
-void SlicePipeline::PickPointLabel(double x, double y, double z) {
-	// Get the label
-	vtkIdType id = labels->FindPoint(x, y, z);
-	SetLabel(static_cast<unsigned short*>(labels->GetScalarPointer())[id]);
-}
-
-void SlicePipeline::PaintPoint(double x, double y, double z) {
-	// Paint the label
-	vtkIdType id = labels->FindPoint(x, y, z);
-	unsigned short* p = static_cast<unsigned short*>(labels->GetScalarPointer());
-	p[id] = label;
-	labels->Modified();
-}
-
-unsigned short SlicePipeline::GetLabel() {
-	return label;
-}
-
-void SlicePipeline::SetLabel(unsigned int newLabel) {
-	label = newLabel;
-
+void SlicePipeline::SetLabel(unsigned short label) {
 	if (label > 0) {
 		double color[3];
 		labelSlice->GetProperty()->GetLookupTable()->GetColor(label, color);
@@ -144,16 +103,12 @@ void SlicePipeline::Render() {
 	renderer->GetRenderWindow()->Render();
 }
 
-vtkRenderer* SlicePipeline::GetRenderer() {
+vtkSmartPointer<vtkRenderer> SlicePipeline::GetRenderer() {
 	return renderer;
 }
 
-vtkInteractorStyleSlice* SlicePipeline::GetInteractorStyle() {
+vtkSmartPointer<vtkInteractorStyleSlice> SlicePipeline::GetInteractorStyle() {
 	return style;
-}
-
-vtkPlane* SlicePipeline::GetPlane() {
-	return plane;
 }
 
 void SlicePipeline::CreateProbe() {
@@ -261,78 +216,3 @@ void SlicePipeline::CreateLabelSlice(vtkImageData* labels) {
 	labelSlice->PickableOff();
 	labelSlice->DragableOff();
 }
-
-vtkSmartPointer<vtkActor> SlicePipeline::CreateLabelSlice2(vtkImageData* labels) {
-	// Number of labels
-	int maxLabel = labels->GetScalarRange()[1];
-
-	// Colors from ColorBrewer
-	const int numColors = 12;
-	double colors[numColors][3] = {
-		{ 166,206,227 },
-		{ 31,120,180 },
-		{ 178,223,138 },
-		{ 51,160,44 },
-		{ 251,154,153 },
-		{ 227,26,28 },
-		{ 253,191,111 },
-		{ 255,127,0 },
-		{ 202,178,214 },
-		{ 106,61,154 },
-		{ 255,255,153 },
-		{ 177,89,40 }
-	};
-
-	for (int i = 0; i < numColors; i++) {
-		for (int j = 0; j < 3; j++) {
-			colors[i][j] /= 255.0;
-		}
-	}
-
-	double opacity = 0.25;
-
-	// Label colors
-	vtkSmartPointer<vtkLookupTable> labelColors = vtkSmartPointer<vtkLookupTable>::New();
-	labelColors->SetNumberOfTableValues(maxLabel + 1);
-	labelColors->SetRange(0, maxLabel);
-	labelColors->SetTableValue(0, 0.0, 0.0, 0.0, 0.0);
-	for (int i = 1; i <= maxLabel; i++) {
-		double* c = colors[(i - 1) % numColors];
-		labelColors->SetTableValue(i, c[0], c[1], c[2], opacity);
-	}
-	labelColors->Build();
-
-	// Mapper
-	vtkSmartPointer<vtkDataSetMapper> mapper = vtkSmartPointer<vtkDataSetMapper>::New();
-	mapper->UseLookupTableScalarRangeOn();
-	mapper->SetInputDataObject(labels);
-
-	// Actor
-	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
-	actor->SetMapper(mapper);
-
-	return actor;
-}
-
-/*
-vtkSmartPointer<vtkActor> contourSlice(vtkContourFilter* contour) {
-// Plane
-vtkSmartPointer<vtkPlane> plane = vtkSmartPointer<vtkPlane>::New();
-plane->SetOrigin(0, 0, 100);
-plane->SetNormal(0, 0, 1);
-
-vtkSmartPointer<vtkCutter> cut = vtkSmartPointer<vtkCutter>::New();
-cut->SetCutFunction(plane);
-cut->SetInputConnection(contour->GetOutputPort());
-
-// Mapper
-vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-mapper->SetInputConnection(cut->GetOutputPort());
-
-// Actor
-vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
-actor->SetMapper(mapper);
-
-return actor;
-}
-*/

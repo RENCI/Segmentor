@@ -1,9 +1,51 @@
 #ifndef InteractionCallbacks_H
 #define InteractionCallbacks_H
 
-class vtkObject;
+#include "vtkSmartPointer.h"
 
-void volumeCameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
-void sliceCameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
+class vtkObject;
+class vtkCellPicker;
+class vtkRenderWindowInteractor;
+
+class VisualizationContainer;
+
+class InteractionCallbacks {
+public:
+	static void VolumeCameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
+	static void SliceCameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
+	
+	static void OnChar(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
+
+	static void VolumeSelectLabel(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
+	static void SliceSelectLabel(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
+
+	static void VolumePaint(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
+	static void SlicePaint(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
+
+	static void VolumeErase(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
+	static void SliceErase(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
+
+	static void VolumeMouseMove(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
+	static void SliceMouseMove(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
+
+private:
+	static bool firstCameraCallback;
+
+	static vtkSmartPointer<vtkCellPicker> picker;
+
+	enum ViewType {
+		VolumeView,
+		SliceView
+	};
+
+	static void MouseMove(vtkRenderWindowInteractor* rwi, VisualizationContainer* vis, ViewType viewType);
+
+	static int Pick(vtkRenderWindowInteractor* rwi);
+	static double* VolumePick();
+	static int* SlicePick();
+
+	InteractionCallbacks();
+	~InteractionCallbacks();
+};
 
 #endif

@@ -31,7 +31,6 @@ VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* interactor) {
 
 	// Interaction
 	style = vtkSmartPointer<vtkInteractorStyleVolume>::New();
-	style->SetVolumePipeline(this);
 
 	interactor->SetInteractorStyle(style);
 	interactor->SetNumberOfFlyFrames(5);

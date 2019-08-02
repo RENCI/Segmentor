@@ -1,17 +1,17 @@
 #ifndef vtkInteractorStyleSlice_H
 #define vtkInteractorStyleSlice_H
 
+#include <vtkCommand.h>
 #include <vtkImageData.h>
 #include <vtkInteractorStyleImage.h>
 #include <vtkSetGet.h>
 #include <vtkSmartPointer.h>
 
 class vtkCellPicker;
-class SlicePipeline;
-class VolumePipeline;
 
 // Interaction flags
 #define VTKIS_PAINT_SLICE 2048
+#define VTKIS_ERASE_SLICE 2049
 
 class vtkInteractorStyleSlice : public vtkInteractorStyleImage {
 public:
@@ -22,14 +22,24 @@ public:
 	void OnMouseMove() override;
 	void OnLeftButtonDown() override;
 	void OnLeftButtonUp() override;
+	void OnRightButtonDown() override;
+	void OnRightButtonUp() override;
 	void OnChar() override;
 
-	virtual void Paint();
 	virtual void StartPaint();
 	virtual void EndPaint();
+	virtual void StartErase();
+	virtual void EndErase();
 
-	void SetVolumePipeline(VolumePipeline* pipeline);
-	void SetSlicePipeline(SlicePipeline* pipeline);
+	enum SliceEventIds {
+		SelectLabelEvent = vtkCommand::UserEvent + 1,
+		StartPaintEvent,
+		PaintEvent,
+		EndPaintEvent,
+		StartEraseEvent,
+		EraseEvent,
+		EndEraseEvent
+	};
 
 protected:
 	vtkInteractorStyleSlice();
@@ -38,9 +48,6 @@ protected:
 	bool MouseMoved;
 
 	vtkSmartPointer<vtkCellPicker> Picker;
-
-	VolumePipeline* volumePipeline;
-	SlicePipeline* slicePipeline;
 
 private:
 	vtkInteractorStyleSlice(const vtkInteractorStyleSlice&) = delete;

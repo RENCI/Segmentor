@@ -191,12 +191,12 @@ void MainWindow::on_actionExit_triggered() {
 bool MainWindow::eventFilter(QObject* obj, QEvent* event) {
 	if (event->type() == QEvent::Enter) {
 		if (obj == qvtkWidgetLeft) {
-			std::cout << "LEFT" << std::endl;
+			//std::cout << "LEFT" << std::endl;
 
 			// XXX: How to grab focus so keypresses work without clicking first?
 		}
 		else if (obj == qvtkWidgetRight) {
-			std::cout << "RIGHT" << std::endl;
+			//std::cout << "RIGHT" << std::endl;
 
 			// XXX: How to grab focus so keypresses work without clicking first?
 		}

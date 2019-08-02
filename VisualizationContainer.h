@@ -27,14 +27,33 @@ public:
 	void SegmentVolume();
 	bool SaveSegmentationData(const std::string& fileName);
 
+	void PickLabel(int x, int y, int z);
+	void Paint(int x, int y, int z);
+	void Erase(int x, int y, int z);
+
+	void PickPointLabel(double x, double y, double z);
+	void PaintPoint(double x, double y, double z);
+	void ErasePoint(double x, double y, double z);
+
+	void SetCurrentLabel(unsigned short newLabel);
+
+	void Render();
+
+	VolumePipeline* GetVolumePipeline();
+	SlicePipeline* GetSlicePipeline();
+
 protected:
 	// The data
 	vtkSmartPointer<vtkImageData> data;
 	vtkSmartPointer<vtkImageData> labels;
+	unsigned short currentLabel;
 
 	// Rendering pipelines
 	VolumePipeline *volumePipeline;
 	SlicePipeline *slicePipeline;
+
+	void SetLabel(int x, int y, int z, unsigned short label);
+	void SetPointLabel(double x, double y, double z, unsigned short label);
 };
 
 #endif

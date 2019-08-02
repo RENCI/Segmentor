@@ -24,32 +24,20 @@ public:
 	void SetProbeVisiblity(bool visibility);
 	void SetProbePosition(double x, double y, double z);
 
-	void PickLabel(int x, int y, int z);
-	void Paint(int x, int y, int z);
-
-	void PickPointLabel(double x, double y, double z);
-	void PaintPoint(double x, double y, double z);
-
-	unsigned short GetLabel();
-	void SetLabel(unsigned int newLabel);
+	void SetLabel(unsigned short label);
 
 	void Render();
 
-	vtkRenderer* GetRenderer();
-	vtkInteractorStyleSlice* GetInteractorStyle();
-	vtkPlane* GetPlane();
+	vtkSmartPointer<vtkRenderer> GetRenderer();
+	vtkSmartPointer<vtkInteractorStyleSlice> GetInteractorStyle();
 
 protected:
 	// Data
 	vtkSmartPointer<vtkImageData> labels;
-	unsigned short label;
 
 	// Rendering
 	vtkSmartPointer<vtkRenderer> renderer;
 	vtkSmartPointer<vtkInteractorStyleSlice> style;
-
-	// Plane for slicing
-	vtkSmartPointer<vtkPlane> plane;
 
 	// Slices
 	vtkSmartPointer<vtkImageSlice> labelSlice;
@@ -62,7 +50,6 @@ protected:
 	// Slices
 	vtkSmartPointer<vtkImageSlice> CreateDataSlice(vtkImageData* data);
 	void CreateLabelSlice(vtkImageData* labels);
-	vtkSmartPointer<vtkActor> CreateLabelSlice2(vtkImageData* labels);
 };
 
 #endif
