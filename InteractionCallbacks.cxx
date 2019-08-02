@@ -170,12 +170,10 @@ void InteractionCallbacks::SliceErase(vtkObject* caller, unsigned long eventId, 
 }
 
 void InteractionCallbacks::VolumeMouseMove(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
-	std::cout << "VMM" << std::endl;
 	MouseMove(static_cast<vtkRenderWindowInteractor*>(caller), static_cast<VisualizationContainer*>(clientData), VolumeView);
 }
 
 void InteractionCallbacks::SliceMouseMove(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
-	std::cout << "SMM" << std::endl;
 	MouseMove(static_cast<vtkRenderWindowInteractor*>(caller), static_cast<VisualizationContainer*>(clientData), SliceView);
 }
 

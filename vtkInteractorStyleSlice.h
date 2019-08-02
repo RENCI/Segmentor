@@ -49,6 +49,8 @@ protected:
 
 	vtkSmartPointer<vtkCellPicker> Picker;
 
+	void SetOrientation(const double leftToRight[3], const double viewUp[3]);
+
 private:
 	vtkInteractorStyleSlice(const vtkInteractorStyleSlice&) = delete;
 	void operator=(const vtkInteractorStyleSlice&) = delete;

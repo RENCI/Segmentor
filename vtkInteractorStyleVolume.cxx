@@ -377,14 +377,29 @@ void vtkInteractorStyleVolume::Slice()
 void vtkInteractorStyleVolume::SetOrientation(
 	const double leftToRight[3], const double viewUp[3])
 {
-	// Borrowed from vtkInteractorStyleImage
+	// Adapted from vtkInteractorStyleImage
 	if (this->CurrentRenderer)
 	{
+		vtkCamera *camera = this->CurrentRenderer->GetActiveCamera();
+
 		// the cross product points out of the screen
 		double vector[3];
 		vtkMath::Cross(leftToRight, viewUp, vector);
+
+		// Flip if current view matches
+		double camProj[3];
+		double camUp[3];
+		camera->GetDirectionOfProjection(camProj);
+		camera->GetViewUp(camUp);
+		if (vector[0] == -camProj[0] && vector[1] == -camProj[1] && vector[2] == -camProj[2] &&
+			viewUp[0] == camUp[0] && viewUp[1] == camUp[1] && viewUp[2] == camUp[2])
+		{
+			vector[0] *= -1;
+			vector[1] *= -1;
+			vector[2] *= -1;
+		}
+
 		double focus[3];
-		vtkCamera *camera = this->CurrentRenderer->GetActiveCamera();
 		camera->GetFocalPoint(focus);
 		double d = camera->GetDistance();
 		camera->SetPosition(focus[0] + d * vector[0],

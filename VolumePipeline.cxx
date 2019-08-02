@@ -103,12 +103,10 @@ void VolumePipeline::SetSegmentationData(vtkImageData* data) {
 	// Update probe
 	UpdateProbe(data);
 	probe->VisibilityOn();
-
-	// Render
 	renderer->AddActor(actor);
 
-	renderer->ResetCamera();
-	renderer->GetRenderWindow()->Render();
+	renderer->ResetCameraClippingRange();
+	Render();
 }
 
 void VolumePipeline::SetProbeVisiblity(bool visibility) {

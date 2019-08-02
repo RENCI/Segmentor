@@ -63,7 +63,6 @@ void SlicePipeline::SetSegmentationData(vtkImageData* data) {
 
 	// Render
 	renderer->AddActor(labelSlice);
-	renderer->ResetCamera();
 	Render();
 }
 
