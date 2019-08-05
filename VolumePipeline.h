@@ -6,18 +6,12 @@
 #include <vector>
 
 class vtkActor;
-class vtkAlgorithmOutput;
-class vtkDiscreteFlyingEdges3D;
 class vtkImageData;
-class vtkImageThreshold;
-class vtkInteractorStyleVolume;
-class vtkPolyDataMapper;
+class vtkLookupTable;
 class vtkRenderer;
 class vtkRenderWindowInteractor;
-class vtkVolume;
-class vtkWindowedSincPolyDataFilter;
 
-class vtkLookupTable;
+class vtkInteractorStyleVolume;
 
 class VolumePipeline {
 public:
@@ -40,28 +34,20 @@ public:
 
   vtkRenderer* GetRenderer();	
   vtkInteractorStyleVolume* GetInteractorStyle();
-  vtkAlgorithmOutput* GetContour();
 
 protected:
 	bool thresholdLabels;
 	bool smoothSurfaces;
+	unsigned short currentLabel;
 
 	// Rendering
 	vtkSmartPointer<vtkRenderer> renderer;
 	vtkSmartPointer<vtkInteractorStyleVolume> style;
+	vtkSmartPointer<vtkLookupTable> labelColors;
 
-	// Pipeline
-	vtkSmartPointer<vtkImageThreshold> threshold;
-	vtkSmartPointer<vtkDiscreteFlyingEdges3D> contour;
-	vtkSmartPointer<vtkWindowedSincPolyDataFilter> smoother;
-	vtkSmartPointer<vtkPolyDataMapper> mapper;
-	vtkSmartPointer<vtkActor> actor;
-
+	// Regions
 	std::vector<vtkSmartPointer<vtkActor>> regionActors;
-
-	void CreatePipeline();
-	void UpdatePipeline();
-	void ExtractRegions(vtkImageData* labels, vtkLookupTable* lut);
+	void ExtractRegions(vtkImageData* labels);
 
 	// Probe
 	vtkSmartPointer<vtkActor> probe;
