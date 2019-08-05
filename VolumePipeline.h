@@ -13,12 +13,14 @@ class vtkRenderWindowInteractor;
 
 class vtkInteractorStyleVolume;
 
+class Region;
+
 class VolumePipeline {
 public:
-  VolumePipeline(vtkRenderWindowInteractor* rwi);
+  VolumePipeline(vtkRenderWindowInteractor* rwi, vtkLookupTable* lut);
   ~VolumePipeline();
 
-  void SetSegmentationData(vtkImageData* data);
+  void SetRegions(vtkImageData* data, std::vector<Region*> regions);
 
   void SetProbeVisiblity(bool visibility);
   void SetProbePosition(double x, double y, double z);
@@ -47,7 +49,6 @@ protected:
 
 	// Regions
 	std::vector<vtkSmartPointer<vtkActor>> regionActors;
-	void ExtractRegions(vtkImageData* labels);
 
 	// Probe
 	vtkSmartPointer<vtkActor> probe;

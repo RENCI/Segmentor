@@ -5,6 +5,7 @@
 #include <vtkImageConnectivityFilter.h>
 #include <vtkImageOpenClose3D.h>
 #include <vtkImageThreshold.h>
+#include <vtkLookupTable.h>
 #include <vtkNIFTIImageReader.h>
 #include <vtkNIFTIImageWriter.h>
 #include <vtkRenderer.h>
@@ -24,14 +25,18 @@
 #include "SegmentorMath.h"
 #include "SlicePipeline.h"
 #include "VolumePipeline.h"
+#include "Region.h"
 
 VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volumeInteractor, vtkRenderWindowInteractor* sliceInteractor) {
 	data = nullptr;
 	labels = nullptr;
 	currentLabel = 0;
 
+	// Lookup table
+	labelColors = vtkSmartPointer<vtkLookupTable>::New();
+
 	// Create rendering pipelines
-	volumePipeline = new VolumePipeline(volumeInteractor);
+	volumePipeline = new VolumePipeline(volumeInteractor, labelColors);
 	slicePipeline = new SlicePipeline(sliceInteractor);
 
 	// Callbacks
@@ -100,6 +105,8 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 }
 
 VisualizationContainer::~VisualizationContainer() {
+	delete volumePipeline;
+	delete slicePipeline;
 }
 
 bool VisualizationContainer::OpenImageFile(const std::string& fileName) {
@@ -182,8 +189,7 @@ bool VisualizationContainer::OpenSegmentationFile(const std::string& fileName) {
 		return false;
 	}
 
-	volumePipeline->SetSegmentationData(labels);
-	slicePipeline->SetSegmentationData(labels);
+	UpdateLabels();
 
 	return true;
 }
@@ -212,8 +218,7 @@ bool VisualizationContainer::OpenSegmentationStack(const std::vector<std::string
 		return false;
 	}
 
-	volumePipeline->SetSegmentationData(labels);
-	slicePipeline->SetSegmentationData(labels);
+	UpdateLabels();
 
 	return true;
 }
@@ -281,11 +286,9 @@ void VisualizationContainer::SegmentVolume() {
 	connectivity->SetInputConnection(openClose->GetOutputPort());
 	connectivity->Update();
 
-	// Set label output
 	labels = connectivity->GetOutput();
 
-	volumePipeline->SetSegmentationData(labels);
-	slicePipeline->SetSegmentationData(labels);
+	UpdateLabels();
 }
 
 void VisualizationContainer::PickLabel(int x, int y, int z) {
@@ -334,6 +337,66 @@ VolumePipeline* VisualizationContainer::GetVolumePipeline() {
 
 SlicePipeline* VisualizationContainer::GetSlicePipeline() {
 	return slicePipeline;
+}
+
+void VisualizationContainer::UpdateLabels() {
+	UpdateColors();
+	ExtractRegions();
+
+	volumePipeline->SetRegions(labels, regions);
+	slicePipeline->SetSegmentationData(labels);
+}
+
+void VisualizationContainer::UpdateColors() {
+	// Get label info
+	int maxLabel = labels->GetScalarRange()[1];;
+
+	// Colors from ColorBrewer
+	const int numColors = 12;
+	double colors[numColors][3] = {
+		{ 166,206,227 },
+	{ 31,120,180 },
+	{ 178,223,138 },
+	{ 51,160,44 },
+	{ 251,154,153 },
+	{ 227,26,28 },
+	{ 253,191,111 },
+	{ 255,127,0 },
+	{ 202,178,214 },
+	{ 106,61,154 },
+	{ 255,255,153 },
+	{ 177,89,40 }
+	};
+
+	for (int i = 0; i < numColors; i++) {
+		for (int j = 0; j < 3; j++) {
+			colors[i][j] /= 255.0;
+		}
+	}
+
+	// Label colors
+	labelColors->SetNumberOfTableValues(maxLabel + 1);
+	labelColors->SetRange(0, maxLabel);
+	labelColors->SetTableValue(0, 0.0, 0.0, 0.0);
+	for (int i = 1; i <= maxLabel; i++) {
+		double* c = colors[(i - 1) % numColors];
+		labelColors->SetTableValue(i, c[0], c[1], c[2]);
+	}
+	labelColors->Build();
+}
+
+void VisualizationContainer::ExtractRegions() {
+	// Get label info
+	int maxLabel = labels->GetScalarRange()[1];
+
+	// Clear current regions
+	for (int i = 0; i < regions.size(); i++) {
+		delete regions[i];
+	}
+
+	for (int label = 1; label <= maxLabel; label++) {
+		regions.push_back(new Region(labels, label));
+	}
 }
 
 void VisualizationContainer::SetLabel(int x, int y, int z, unsigned short label) {

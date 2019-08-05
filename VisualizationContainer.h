@@ -7,11 +7,12 @@
 #include <vtkSmartPointer.h>
 
 class vtkImageData;
+class vtkLookupTable;
 class vtkRenderWindowInteractor;
 
-class DataPipeline;
 class VolumePipeline;
 class SlicePipeline;
+class Region;
 
 class VisualizationContainer {
 public:
@@ -46,11 +47,18 @@ protected:
 	// The data
 	vtkSmartPointer<vtkImageData> data;
 	vtkSmartPointer<vtkImageData> labels;
+
+	std::vector<Region*> regions;
 	unsigned short currentLabel;
+	vtkSmartPointer<vtkLookupTable> labelColors;
 
 	// Rendering pipelines
 	VolumePipeline *volumePipeline;
 	SlicePipeline *slicePipeline;
+
+	void UpdateLabels();
+	void UpdateColors();
+	void ExtractRegions();
 
 	void SetLabel(int x, int y, int z, unsigned short label);
 	void SetPointLabel(double x, double y, double z, unsigned short label);

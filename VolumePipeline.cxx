@@ -3,7 +3,6 @@
 #include "vtkInteractorStyleVolume.h"
 
 #include <vtkActor.h>
-
 #include <vtkCubeSource.h>
 #include <vtkExtractVOI.h>
 #include <vtkDiscreteFlyingEdges3D.h>
@@ -23,11 +22,13 @@
 
 #include <algorithm>
 
+#include "Region.h"
+
 double rescale(double value, double min, double max) {
 	return min + (max - min) * value;
 }
 
-VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* interactor) {
+VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut) {
 	thresholdLabels = false;
 	smoothSurfaces = true;
 	currentLabel = 0;
@@ -42,8 +43,8 @@ VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* interactor) {
 	interactor->SetInteractorStyle(style);
 	interactor->SetNumberOfFlyFrames(5);
 
-	// Lookup table
-	labelColors = vtkSmartPointer<vtkLookupTable>::New();
+	// Colors
+	labelColors = lut;
 
 	// Probe
 	CreateProbe();
@@ -63,53 +64,71 @@ VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* interactor) {
 VolumePipeline::~VolumePipeline() {
 }
 
-void VolumePipeline::SetSegmentationData(vtkImageData* data) {
+void VolumePipeline::SetRegions(vtkImageData* data, std::vector<Region*> regions) {
 	// Reset
 	thresholdLabels = false;
 	smoothSurfaces = true;
 	currentLabel = 0;
+	
+	regionActors.clear();
 
-	// Get label info
-	int maxLabel = data->GetScalarRange()[1];;
+	for (int i = 0; i < regions.size(); i++) {
+		Region* region = regions[i];
 
-	// Colors from ColorBrewer
-	const int numColors = 12;
-	double colors[numColors][3] = {
-		{ 166,206,227 },
-		{ 31,120,180 },
-		{ 178,223,138 },
-		{ 51,160,44 },
-		{ 251,154,153 },
-		{ 227,26,28 },
-		{ 253,191,111 },
-		{ 255,127,0 },
-		{ 202,178,214 },
-		{ 106,61,154 },
-		{ 255,255,153 },
-		{ 177,89,40 }
-	};
+		//		vtkSmartPointer<vtkContourFilter> contour = vtkSmartPointer<vtkContourFilter>::New();
+		//		vtkSmartPointer<vtkFlyingEdges3D> contour = vtkSmartPointer<vtkFlyingEdges3D>::New();
+		vtkSmartPointer<vtkDiscreteFlyingEdges3D> contour = vtkSmartPointer<vtkDiscreteFlyingEdges3D>::New();
+		contour->SetValue(0, region->GetLabel());
+		contour->ComputeNormalsOff();
+		contour->ComputeGradientsOff();
+		contour->SetInputConnection(region->GetOutput());
+		//		contour->SetInputDataObject(data);
 
-	for (int i = 0; i < numColors; i++) {
-		for (int j = 0; j < 3; j++) {
-			colors[i][j] /= 255.0;
-		}
+		// Smoother
+		int smoothingIterations = 8;
+		double passBand = 0.01;
+		double featureAngle = 120.0;
+
+		vtkSmartPointer<vtkWindowedSincPolyDataFilter> smoother = vtkSmartPointer<vtkWindowedSincPolyDataFilter>::New();
+		smoother->SetNumberOfIterations(smoothingIterations);
+		//smoother->BoundarySmoothingOff();
+		//smoother->FeatureEdgeSmoothingOff();
+		//smoother->SetFeatureAngle(featureAngle);
+		smoother->SetPassBand(passBand);
+		//smoother->NonManifoldSmoothingOn();
+		smoother->NormalizeCoordinatesOn();
+		smoother->SetInputConnection(contour->GetOutputPort());
+
+		vtkSmartPointer<vtkPolyDataNormals> normals = vtkSmartPointer<vtkPolyDataNormals>::New();
+		normals->ComputePointNormalsOn();
+		normals->SplittingOff();
+		normals->SetInputConnection(contour->GetOutputPort());
+		//		normals->SetInputConnection(smoother->GetOutputPort());
+
+		vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+				mapper->SetInputConnection(normals->GetOutputPort());
+		//		mapper->SetInputConnection(smoother->GetOutputPort());
+		//mapper->SetInputConnection(contour->GetOutputPort());
+		mapper->ScalarVisibilityOff();
+
+		double color[3];
+		labelColors->GetColor(region->GetLabel(), color);
+
+		vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+		actor->SetMapper(mapper);
+		actor->GetProperty()->SetColor(color);
+		actor->GetProperty()->SetDiffuse(1.0);
+		actor->GetProperty()->SetAmbient(0.1);
+		actor->GetProperty()->SetSpecular(0.0);
+
+		regionActors.push_back(actor);
+
+		renderer->AddActor(actor);
 	}
-
-	// Label colors
-	labelColors->SetNumberOfTableValues(maxLabel + 1);
-	labelColors->SetRange(0, maxLabel);
-	labelColors->SetTableValue(0, 0.0, 0.0, 0.0);
-	for (int i = 1; i <= maxLabel; i++) {
-		double* c = colors[(i - 1) % numColors];
-		labelColors->SetTableValue(i, c[0], c[1], c[2]);
-	}
-	labelColors->Build();
 
 	// Update probe
 	UpdateProbe(data);
 	probe->VisibilityOn();
-
-	ExtractRegions(data);
 
 	renderer->ResetCameraClippingRange();
 	Render();
@@ -138,7 +157,7 @@ void VolumePipeline::SetLabel(unsigned short label) {
 
 	if (currentLabel > 0) {
 		double color[3];
-		labelColors->GetColor(label, color);
+		labelColors->GetColor(currentLabel, color);
 		probe->GetProperty()->SetColor(color);
 	}
 	else {
@@ -172,105 +191,6 @@ vtkRenderer* VolumePipeline::GetRenderer() {
 
 vtkInteractorStyleVolume* VolumePipeline::GetInteractorStyle() {
 	return style;
-}
-
-void VolumePipeline::ExtractRegions(vtkImageData* data) {
-	// Get label info
-	int maxLabel = data->GetScalarRange()[1];
-	int numPoints = data->GetNumberOfPoints();
-	unsigned short* scalars = static_cast<unsigned short*>(data->GetScalarPointer());
-
-	int dataExtent[6];
-	data->GetExtent(dataExtent);
-
-	regionActors.clear();
-
-	for (int label = 1; label <= maxLabel; label++) {
-		// Initialize extent for this region
-		int extent[6];
-		extent[0] = dataExtent[1];
-		extent[1] = dataExtent[0];
-		extent[2] = dataExtent[3];
-		extent[3] = dataExtent[2];
-		extent[4] = dataExtent[5];
-		extent[5] = dataExtent[4];
-
-		for (int i = 0; i < numPoints; i++) {
-			if (scalars[i] == label) {
-				double* point = data->GetPoint(i);
-
-				if (point[0] < extent[0]) extent[0] = point[0];
-				if (point[0] > extent[1]) extent[1] = point[0];
-				if (point[1] < extent[2]) extent[2] = point[1];
-				if (point[1] > extent[3]) extent[3] = point[1];				
-				if (point[2] < extent[4]) extent[4] = point[2];
-				if (point[2] > extent[5]) extent[5] = point[2];
-			}
-		}
-
-		// Add a buffer around VOI
-		int padding = 2;
-		extent[0] = std::max(dataExtent[0], extent[0] - padding);
-		extent[1] = std::min(dataExtent[1], extent[1] + padding);
-		extent[2] = std::max(dataExtent[2], extent[2] - padding);
-		extent[3] = std::min(dataExtent[3], extent[3] + padding);
-		extent[4] = std::max(dataExtent[4], extent[4] - padding);
-		extent[5] = std::min(dataExtent[5], extent[5] + padding);
-		
-		vtkSmartPointer<vtkExtractVOI> voi = vtkSmartPointer<vtkExtractVOI>::New();
-		voi->SetVOI(extent);
-		voi->SetInputDataObject(data);
-
-//		vtkSmartPointer<vtkContourFilter> contour = vtkSmartPointer<vtkContourFilter>::New();
-//		vtkSmartPointer<vtkFlyingEdges3D> contour = vtkSmartPointer<vtkFlyingEdges3D>::New();
-		vtkSmartPointer<vtkDiscreteFlyingEdges3D> contour = vtkSmartPointer<vtkDiscreteFlyingEdges3D>::New();
-		contour->SetValue(0, label);
-		contour->ComputeNormalsOff();
-		contour->ComputeGradientsOff();
-		contour->SetInputConnection(voi->GetOutputPort());
-//		contour->SetInputDataObject(data);
-
-		// Smoother
-		int smoothingIterations = 8;
-		double passBand = 0.01;
-		double featureAngle = 120.0;
-
-		vtkSmartPointer<vtkWindowedSincPolyDataFilter> smoother = vtkSmartPointer<vtkWindowedSincPolyDataFilter>::New();
-		smoother->SetNumberOfIterations(smoothingIterations);
-		//smoother->BoundarySmoothingOff();
-		//smoother->FeatureEdgeSmoothingOff();
-		//smoother->SetFeatureAngle(featureAngle);
-		smoother->SetPassBand(passBand);
-		//smoother->NonManifoldSmoothingOn();
-		smoother->NormalizeCoordinatesOn();
-		smoother->SetInputConnection(contour->GetOutputPort());
-
-		vtkSmartPointer<vtkPolyDataNormals> normals = vtkSmartPointer<vtkPolyDataNormals>::New();
-		normals->ComputePointNormalsOn();
-		normals->SplittingOff();
-		normals->SetInputConnection(contour->GetOutputPort());
-//		normals->SetInputConnection(smoother->GetOutputPort());
-
-		vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-//		mapper->SetInputConnection(normals->GetOutputPort());
-//		mapper->SetInputConnection(smoother->GetOutputPort());
-		mapper->SetInputConnection(contour->GetOutputPort());
-		mapper->ScalarVisibilityOff();
-
-		double color[3];
-		labelColors->GetColor(label, color);
-
-		vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
-		actor->SetMapper(mapper);
-		actor->GetProperty()->SetColor(color);
-		actor->GetProperty()->SetDiffuse(1.0);
-		actor->GetProperty()->SetAmbient(0.1);
-		actor->GetProperty()->SetSpecular(0.0);
-		
-		regionActors.push_back(actor);
-
-		renderer->AddActor(actor);
-	}
 }
 
 void VolumePipeline::CreateProbe() {
