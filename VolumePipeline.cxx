@@ -3,6 +3,7 @@
 #include "vtkInteractorStyleVolume.h"
 
 #include <vtkActor.h>
+#include <vtkCamera.h>
 #include <vtkCubeSource.h>
 #include <vtkImageData.h>
 #include <vtkInteractorStyle.h>
@@ -17,12 +18,23 @@
 #include "Region.h"
 #include "RegionSurface.h"
 
+#include <vtkCallbackCommand.h>
+#include <vtkPlaneSource.h>
+
 double rescale(double value, double min, double max) {
 	return min + (max - min) * value;
 }
 
+void cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+	vtkCamera* camera = static_cast<vtkCamera*>(caller);
+	VolumePipeline* vis = static_cast<VolumePipeline*>(clientData);
+
+	vis->UpdatePlane();
+}
+
 VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut) {
-	filterLabels = false;
+	filterLabel = false;
+	filterPlane = false;
 	smoothSurfaces = false;
 	smoothShading = true;
 	currentLabel = 0;
@@ -37,11 +49,23 @@ VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* interactor, vtkLookupT
 	interactor->SetInteractorStyle(style);
 	interactor->SetNumberOfFlyFrames(5);
 
+
+// Camera callback
+vtkSmartPointer <vtkCallbackCommand> cameraCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+cameraCallback->SetCallback(cameraChange);
+cameraCallback->SetClientData(this);
+renderer->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, cameraCallback);
+
+
+
 	// Colors
 	labelColors = lut;
 
 	// Probe
 	CreateProbe();
+
+	// Plane
+	CreatePlane();
 
 	// Create light
 	double lightPosition[3] = { 0, 0.5, 1 };	
@@ -61,7 +85,7 @@ VolumePipeline::~VolumePipeline() {
 
 void VolumePipeline::SetRegions(vtkImageData* data, std::vector<Region*> regions) {
 	// Reset
-	filterLabels = false;
+	filterLabel = false;
 	currentLabel = 0;
 	
 	RemoveSurfaces();
@@ -79,6 +103,10 @@ void VolumePipeline::SetRegions(vtkImageData* data, std::vector<Region*> regions
 	// Update probe
 	UpdateProbe(data);
 	probe->VisibilityOn();
+
+	// Update plane
+	UpdatePlane(data);
+	plane->VisibilityOn();
 
 	renderer->ResetCameraClippingRange();
 	Render();
@@ -135,14 +163,31 @@ void VolumePipeline::ToggleSmoothShading() {
 	SetSmoothShading(!smoothShading);
 }
 
-void VolumePipeline::SetFilterLabels(bool filter) {
-	filterLabels = filter;
+void VolumePipeline::SetFilterLabel(bool filter) {
+	filterLabel = filter;
 
 	FilterLabels();
 }
 
-void VolumePipeline::ToggleFilterLabels() {
-	SetFilterLabels(!filterLabels);
+void VolumePipeline::ToggleFilterLabel() {
+	SetFilterLabel(!filterLabel);
+}
+
+void VolumePipeline::SetFilterPlane(bool filter) {
+	filterPlane = filter;
+
+	FilterLabels();
+}
+
+void VolumePipeline::ToggleFilterPlane() {
+	SetFilterPlane(!filterPlane);
+}
+
+void VolumePipeline::UpdatePlane() {
+	vtkCamera* cam = renderer->GetActiveCamera();
+
+	planeSource->SetCenter(cam->GetFocalPoint());
+	planeSource->SetNormal(cam->GetDirectionOfProjection());
 }
 
 void VolumePipeline::Render() {
@@ -184,12 +229,64 @@ void VolumePipeline::UpdateProbe(vtkImageData* data) {
 	probe->SetScale(data->GetSpacing());
 }
 
+void VolumePipeline::CreatePlane() {
+	planeSource = vtkSmartPointer<vtkPlaneSource>::New();
+	planeSource->SetXResolution(50);
+	planeSource->SetYResolution(50);
+
+	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputConnection(planeSource->GetOutputPort());
+
+	plane = vtkSmartPointer<vtkActor>::New();
+	plane->SetMapper(mapper);
+	//plane->GetProperty()->SetRepresentationToWireframe();
+	plane->GetProperty()->LightingOff();
+	plane->GetProperty()->SetOpacity(0.2);
+	plane->VisibilityOff();
+	plane->PickableOff();
+
+	renderer->AddActor(plane);
+}
+
+void VolumePipeline::UpdatePlane(vtkImageData* data) {	
+	double bb[6];
+	data->GetBounds(bb);
+
+	double s = bb[1] - bb[0];
+
+	planeSource->SetOrigin(0, 0, 0);
+	planeSource->SetPoint1(s, 0, 0);
+	planeSource->SetPoint2(0, s, 0);
+
+	UpdatePlane();
+}
+
 void VolumePipeline::FilterLabels() {
 	for (int i = 0; i < surfaces.size(); i++) {
 		RegionSurface* surface = surfaces[i];
+			
+		if (filterLabel) {
+			surface->GetActor()->SetVisibility(surface->GetRegion()->GetLabel() == currentLabel);
+		}
+		else {
+			surface->GetActor()->VisibilityOn();
+		}
 
-		if (filterLabels) surface->GetActor()->SetVisibility(surface->GetRegion()->GetLabel() == currentLabel);
-		else surface->GetActor()->VisibilityOn();
+		if (filterPlane) {
+			vtkCamera* cam = renderer->GetActiveCamera();
+			bool ix = surface->IntersectsPlane(cam->GetFocalPoint(), cam->GetDirectionOfProjection());
+
+			//if (ix) surface->GetActor()->GetProperty()->SetRepresentationToSurface();
+			//else surface->GetActor()->GetProperty()->SetRepresentationToPoints();
+
+			//surface->GetActor()->SetVisibility(ix);
+			surface->GetActor()->GetProperty()->SetOpacity(ix ? 1 : 0);
+		}
+		else {
+			//surface->GetActor()->VisibilityOn();
+			//surface->GetActor()->GetProperty()->SetRepresentationToSurface();
+			surface->GetActor()->GetProperty()->SetOpacity(1.0);
+		}
 	}
 
 	renderer->ResetCameraClippingRange();

@@ -8,6 +8,7 @@
 class vtkActor;
 class vtkImageData;
 class vtkLookupTable;
+class vtkPlaneSource;
 class vtkRenderer;
 class vtkRenderWindowInteractor;
 
@@ -34,8 +35,13 @@ public:
   void SetSmoothShading(bool smooth);
   void ToggleSmoothShading();
 
-  void SetFilterLabels(bool filter);
-  void ToggleFilterLabels();
+  void SetFilterLabel(bool filter);
+  void ToggleFilterLabel();
+
+  void SetFilterPlane(bool filter);
+  void ToggleFilterPlane();
+
+  void UpdatePlane();
 
   void Render();
 
@@ -43,7 +49,8 @@ public:
   vtkInteractorStyleVolume* GetInteractorStyle();
 
 protected:
-	bool filterLabels;
+	bool filterLabel;
+	bool filterPlane;
 	bool smoothSurfaces;
 	bool smoothShading;
 	unsigned short currentLabel;
@@ -61,6 +68,12 @@ protected:
 	vtkSmartPointer<vtkActor> probe;
 	void CreateProbe();
 	void UpdateProbe(vtkImageData* data);
+
+	// Plane	
+	vtkSmartPointer<vtkPlaneSource> planeSource;
+	vtkSmartPointer<vtkActor> plane;
+	void CreatePlane();
+	void UpdatePlane(vtkImageData* data);
 
 	void FilterLabels();
 };

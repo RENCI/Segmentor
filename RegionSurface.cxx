@@ -3,6 +3,7 @@
 #include <vtkActor.h>
 #include <vtkDiscreteFlyingEdges3D.h>
 #include <vtkLookupTable.h>
+#include <vtkPlane.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkPolyDataNormals.h>
 #include <vtkProperty.h>
@@ -80,6 +81,12 @@ void RegionSurface::SetSmoothShading(bool smooth) {
 	UpdatePipeline();
 }
 
+bool RegionSurface::IntersectsPlane(double p[3], double n[3]) {
+	if (!IntersectsBoundingBox(p, n)) return false;
+
+	return IntersectsSurface(p, n);
+}
+
 void RegionSurface::UpdatePipeline() {
 	vtkAlgorithm* surface;
 
@@ -97,4 +104,56 @@ void RegionSurface::UpdatePipeline() {
 	else {
 		mapper->SetInputConnection(surface->GetOutputPort());
 	}
+}
+
+bool RegionSurface::IntersectsBoundingBox(double p[3], double n[3]) {
+	double bb[6];
+	actor->GetBounds(bb);
+
+	// Get points on bounding box
+	double points[8][6] = {
+		{ bb[0], bb[2], bb[4] },
+		{ bb[0], bb[2], bb[5] },
+		{ bb[0], bb[3], bb[4] },
+		{ bb[0], bb[3], bb[5] },
+		{ bb[1], bb[2], bb[4] },
+		{ bb[1], bb[2], bb[5] },
+		{ bb[1], bb[3], bb[4] },
+		{ bb[1], bb[3], bb[5] }
+	};
+
+	// Check if first point is on the plane
+	double d = vtkPlane::Evaluate(n, p, points[0]);
+	if (d == 0.0) return true;
+
+	// Check if any points lie on the other side of the plane
+	for (int i = 1; i < 8; i++) {
+		double e = vtkPlane::Evaluate(n, p, points[i]);
+
+		if (e == 0.0 || (e < 0.0 && d > 0.0) || (e > 0.0 && d < 0.0)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool RegionSurface::IntersectsSurface(double p[3], double n[3]) {
+	// Check all points
+	vtkPolyData* data = mapper->GetInput();
+
+	// Check if first point is on the plane
+	double d = vtkPlane::Evaluate(n, p, data->GetPoint(0));
+	if (d == 0.0) return true;
+
+	// Check if any points lie on the other side of the plane
+	for (int i = 0; i < data->GetNumberOfPoints(); i++) {
+		double e = vtkPlane::Evaluate(n, p, data->GetPoint(i));
+
+		if (e == 0.0 || (e < 0.0 && d > 0.0) || (e > 0.0 && d < 0.0)) {
+			return true;
+		}
+	}
+
+	return false;
 }

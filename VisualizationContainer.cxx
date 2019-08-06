@@ -439,6 +439,9 @@ void VisualizationContainer::SetLabel(int x, int y, int z, unsigned short label)
 }
 
 void VisualizationContainer::PointToStructured(double p[3], int s[3]) {
+	vtkIdType point = labels->FindPoint(p);
+	double* p2 = labels->GetPoint(point);
 	double c[3];
-	labels->ComputeStructuredCoordinates(p, s, c);
+	
+	labels->ComputeStructuredCoordinates(p2, s, c);
 }

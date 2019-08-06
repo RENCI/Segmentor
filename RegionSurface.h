@@ -23,6 +23,8 @@ public:
 	void SetSmoothSurfaces(bool smooth);
 	void SetSmoothShading(bool smooth);
 
+	bool IntersectsPlane(double p[3], double n[3]);
+
 protected:
 	Region* region;
 
@@ -36,6 +38,9 @@ protected:
 	vtkSmartPointer<vtkActor> actor;
 
 	void UpdatePipeline();
+
+	bool IntersectsBoundingBox(double p[3], double n[3]);
+	bool IntersectsSurface(double p[3], double n[3]);
 };
 
 #endif

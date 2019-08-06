@@ -76,10 +76,15 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 	case 'N':
 		vis->GetVolumePipeline()->ToggleSmoothShading();
 		break;
+	
+	case 'p':
+	case 'P':
+		vis->GetVolumePipeline()->ToggleFilterPlane();
+		break;
 
 	case 't':
 	case 'T':
-		vis->GetVolumePipeline()->ToggleFilterLabels();
+		vis->GetVolumePipeline()->ToggleFilterLabel();
 		break;
 	}
 }
