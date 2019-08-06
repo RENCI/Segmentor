@@ -5,8 +5,6 @@
 #include <vtkActor.h>
 #include <vtkCubeSource.h>
 #include <vtkImageData.h>
-#include <vtkImageResample.h>
-#include <vtkImageThreshold.h>
 #include <vtkInteractorStyle.h>
 #include <vtkLight.h>
 #include <vtkLookupTable.h>
@@ -16,8 +14,6 @@
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 
-#include <algorithm>
-
 #include "Region.h"
 #include "RegionSurface.h"
 
@@ -26,8 +22,9 @@ double rescale(double value, double min, double max) {
 }
 
 VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut) {
-	thresholdLabels = false;
-	smoothSurfaces = true;
+	filterLabels = false;
+	smoothSurfaces = false;
+	smoothShading = true;
 	currentLabel = 0;
 
 	// Rendering
@@ -64,14 +61,15 @@ VolumePipeline::~VolumePipeline() {
 
 void VolumePipeline::SetRegions(vtkImageData* data, std::vector<Region*> regions) {
 	// Reset
-	thresholdLabels = false;
-	smoothSurfaces = true;
+	filterLabels = false;
 	currentLabel = 0;
 	
 	RemoveSurfaces();
 
 	for (int i = 0; i < regions.size(); i++) {
 		RegionSurface* surface = new RegionSurface(regions[i], labelColors);
+		surface->SetSmoothSurfaces(smoothSurfaces);
+		surface->SetSmoothShading(smoothShading);
 
 		renderer->AddActor(surface->GetActor());
 
@@ -86,24 +84,6 @@ void VolumePipeline::SetRegions(vtkImageData* data, std::vector<Region*> regions
 	Render();
 }
 
-void VolumePipeline::SetProbeVisiblity(bool visibility) {
-	probe->SetVisibility(visibility);
-}
-
-void VolumePipeline::SetProbePosition(double x, double y, double z) {
-	probe->SetPosition(x, y, z);
-}
-
-void VolumePipeline::SetSmoothSurfaces(bool smooth) {
-	smoothSurfaces = smooth;
-
-	Render();
-}
-
-void VolumePipeline::ToggleSmoothSurfaces() {
-	SetSmoothSurfaces(!smoothSurfaces);
-}
-
 void VolumePipeline::SetLabel(unsigned short label) {
 	currentLabel = label;
 
@@ -115,22 +95,54 @@ void VolumePipeline::SetLabel(unsigned short label) {
 	else {
 		probe->GetProperty()->SetColor(1, 1, 1);
 	}
+
+	FilterLabels();
 }
 
-void VolumePipeline::SetThresholdLabels(bool doThreshold) {
-	thresholdLabels = doThreshold;
+void VolumePipeline::SetProbeVisiblity(bool visibility) {
+	probe->SetVisibility(visibility);
+}
 
-	for (int i = 0; i < regionActors.size(); i++) {
-		if (thresholdLabels) regionActors[i]->SetVisibility(i == currentLabel - 1);
-		else regionActors[i]->VisibilityOn();
+void VolumePipeline::SetProbePosition(double x, double y, double z) {
+	probe->SetPosition(x, y, z);
+}
+
+void VolumePipeline::SetSmoothSurfaces(bool smooth) {
+	smoothSurfaces = smooth;
+
+	for (int i = 0; i < surfaces.size(); i++) {
+		surfaces[i]->SetSmoothSurfaces(smoothSurfaces);
 	}
 
-	renderer->ResetCameraClippingRange();
 	Render();
 }
 
-void VolumePipeline::ToggleThresholdLabels() {
-	SetThresholdLabels(!thresholdLabels);
+void VolumePipeline::ToggleSmoothSurfaces() {
+	SetSmoothSurfaces(!smoothSurfaces);
+}
+
+void VolumePipeline::SetSmoothShading(bool smooth) {
+	smoothShading = smooth;
+
+	for (int i = 0; i < surfaces.size(); i++) {
+		surfaces[i]->SetSmoothShading(smoothShading);
+	}
+
+	Render();
+}
+
+void VolumePipeline::ToggleSmoothShading() {
+	SetSmoothShading(!smoothShading);
+}
+
+void VolumePipeline::SetFilterLabels(bool filter) {
+	filterLabels = filter;
+
+	FilterLabels();
+}
+
+void VolumePipeline::ToggleFilterLabels() {
+	SetFilterLabels(!filterLabels);
 }
 
 void VolumePipeline::Render() {
@@ -170,4 +182,16 @@ void VolumePipeline::CreateProbe() {
 void VolumePipeline::UpdateProbe(vtkImageData* data) {
 	probe->SetPosition(data->GetCenter());
 	probe->SetScale(data->GetSpacing());
+}
+
+void VolumePipeline::FilterLabels() {
+	for (int i = 0; i < surfaces.size(); i++) {
+		RegionSurface* surface = surfaces[i];
+
+		if (filterLabels) surface->GetActor()->SetVisibility(surface->GetRegion()->GetLabel() == currentLabel);
+		else surface->GetActor()->VisibilityOn();
+	}
+
+	renderer->ResetCameraClippingRange();
+	Render();
 }

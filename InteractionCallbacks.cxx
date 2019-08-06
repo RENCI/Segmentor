@@ -72,9 +72,14 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 		vis->GetVolumePipeline()->ToggleSmoothSurfaces();
 		break;
 
+	case 'n':
+	case 'N':
+		vis->GetVolumePipeline()->ToggleSmoothShading();
+		break;
+
 	case 't':
 	case 'T':
-		vis->GetVolumePipeline()->ToggleThresholdLabels();
+		vis->GetVolumePipeline()->ToggleFilterLabels();
 		break;
 	}
 }

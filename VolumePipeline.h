@@ -23,15 +23,19 @@ public:
 
   void SetRegions(vtkImageData* data, std::vector<Region*> regions);
 
+  void SetLabel(unsigned short label);
+
   void SetProbeVisiblity(bool visibility);
   void SetProbePosition(double x, double y, double z);
 
   void SetSmoothSurfaces(bool smooth);
   void ToggleSmoothSurfaces();
 
-  void SetLabel(unsigned short label);
-  void SetThresholdLabels(bool doThreshold);
-  void ToggleThresholdLabels();
+  void SetSmoothShading(bool smooth);
+  void ToggleSmoothShading();
+
+  void SetFilterLabels(bool filter);
+  void ToggleFilterLabels();
 
   void Render();
 
@@ -39,8 +43,9 @@ public:
   vtkInteractorStyleVolume* GetInteractorStyle();
 
 protected:
-	bool thresholdLabels;
+	bool filterLabels;
 	bool smoothSurfaces;
+	bool smoothShading;
 	unsigned short currentLabel;
 
 	// Rendering
@@ -49,13 +54,15 @@ protected:
 	vtkSmartPointer<vtkLookupTable> labelColors;
 
 	// Region surfaces
-	std::vector<vtkSmartPointer<RegionSurface>> surfaces;
+	std::vector<RegionSurface*> surfaces;
 	void RemoveSurfaces();
 
 	// Probe
 	vtkSmartPointer<vtkActor> probe;
 	void CreateProbe();
 	void UpdateProbe(vtkImageData* data);
+
+	void FilterLabels();
 };
 
 #endif

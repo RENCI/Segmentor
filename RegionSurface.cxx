@@ -10,22 +10,24 @@
 
 #include "Region.h"
 
-RegionSurface::RegionSurface(Region* region, vtkLookupTable* lut) {
-	//		vtkSmartPointer<vtkContourFilter> contour = vtkSmartPointer<vtkContourFilter>::New();
-	//		vtkSmartPointer<vtkFlyingEdges3D> contour = vtkSmartPointer<vtkFlyingEdges3D>::New();
-	vtkSmartPointer<vtkDiscreteFlyingEdges3D> contour = vtkSmartPointer<vtkDiscreteFlyingEdges3D>::New();
+RegionSurface::RegionSurface(Region* inputRegion, vtkLookupTable* lut) {
+	smoothSurfaces = false;
+	smoothShading = true;
+
+	region = inputRegion;
+
+	contour = vtkSmartPointer<vtkDiscreteFlyingEdges3D>::New();
 	contour->SetValue(0, region->GetLabel());
 	contour->ComputeNormalsOff();
 	contour->ComputeGradientsOff();
 	contour->SetInputConnection(region->GetOutput());
-	//		contour->SetInputDataObject(data);
 
 	// Smoother
 	int smoothingIterations = 8;
 	double passBand = 0.01;
 	double featureAngle = 120.0;
 
-	vtkSmartPointer<vtkWindowedSincPolyDataFilter> smoother = vtkSmartPointer<vtkWindowedSincPolyDataFilter>::New();
+	smoother = vtkSmartPointer<vtkWindowedSincPolyDataFilter>::New();
 	smoother->SetNumberOfIterations(smoothingIterations);
 	//smoother->BoundarySmoothingOff();
 	//smoother->FeatureEdgeSmoothingOff();
@@ -35,16 +37,11 @@ RegionSurface::RegionSurface(Region* region, vtkLookupTable* lut) {
 	smoother->NormalizeCoordinatesOn();
 	smoother->SetInputConnection(contour->GetOutputPort());
 
-	vtkSmartPointer<vtkPolyDataNormals> normals = vtkSmartPointer<vtkPolyDataNormals>::New();
+	normals = vtkSmartPointer<vtkPolyDataNormals>::New();
 	normals->ComputePointNormalsOn();
 	normals->SplittingOff();
-	normals->SetInputConnection(contour->GetOutputPort());
-	//		normals->SetInputConnection(smoother->GetOutputPort());
 
-	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-	mapper->SetInputConnection(normals->GetOutputPort());
-	//		mapper->SetInputConnection(smoother->GetOutputPort());
-	//mapper->SetInputConnection(contour->GetOutputPort());
+	mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	mapper->ScalarVisibilityOff();
 
 	double color[3];
@@ -56,11 +53,48 @@ RegionSurface::RegionSurface(Region* region, vtkLookupTable* lut) {
 	actor->GetProperty()->SetDiffuse(1.0);
 	actor->GetProperty()->SetAmbient(0.1);
 	actor->GetProperty()->SetSpecular(0.0);
+
+	UpdatePipeline();
 }
 	
 RegionSurface::~RegionSurface() {
 }
 
+Region* RegionSurface::GetRegion() {
+	return region;
+}
+
 vtkSmartPointer<vtkActor> RegionSurface::GetActor() {
 	return actor;
+}
+
+void RegionSurface::SetSmoothSurfaces(bool smooth) {
+	smoothSurfaces = smooth;
+
+	UpdatePipeline();
+}
+
+void RegionSurface::SetSmoothShading(bool smooth) {
+	smoothShading = smooth;
+
+	UpdatePipeline();
+}
+
+void RegionSurface::UpdatePipeline() {
+	vtkAlgorithm* surface;
+
+	if (smoothSurfaces) {
+		surface = smoother;
+	}
+	else {
+		surface = contour;
+	}
+
+	if (smoothShading) {
+		normals->SetInputConnection(surface->GetOutputPort());
+		mapper->SetInputConnection(normals->GetOutputPort());
+	}
+	else {
+		mapper->SetInputConnection(surface->GetOutputPort());
+	}
 }
