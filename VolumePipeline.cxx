@@ -4,8 +4,6 @@
 
 #include <vtkActor.h>
 #include <vtkCubeSource.h>
-#include <vtkExtractVOI.h>
-#include <vtkDiscreteFlyingEdges3D.h>
 #include <vtkImageData.h>
 #include <vtkImageResample.h>
 #include <vtkImageThreshold.h>
@@ -13,16 +11,15 @@
 #include <vtkLight.h>
 #include <vtkLookupTable.h>
 #include <vtkPolyDataMapper.h>
-#include <vtkPolyDataNormals.h>
 #include <vtkProperty.h>
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
-#include <vtkWindowedSincPolyDataFilter.h>
 
 #include <algorithm>
 
 #include "Region.h"
+#include "RegionSurface.h"
 
 double rescale(double value, double min, double max) {
 	return min + (max - min) * value;
@@ -62,6 +59,7 @@ VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* interactor, vtkLookupT
 }
 
 VolumePipeline::~VolumePipeline() {
+	RemoveSurfaces();
 }
 
 void VolumePipeline::SetRegions(vtkImageData* data, std::vector<Region*> regions) {
@@ -70,60 +68,14 @@ void VolumePipeline::SetRegions(vtkImageData* data, std::vector<Region*> regions
 	smoothSurfaces = true;
 	currentLabel = 0;
 	
-	regionActors.clear();
+	RemoveSurfaces();
 
 	for (int i = 0; i < regions.size(); i++) {
-		Region* region = regions[i];
+		RegionSurface* surface = new RegionSurface(regions[i], labelColors);
 
-		//		vtkSmartPointer<vtkContourFilter> contour = vtkSmartPointer<vtkContourFilter>::New();
-		//		vtkSmartPointer<vtkFlyingEdges3D> contour = vtkSmartPointer<vtkFlyingEdges3D>::New();
-		vtkSmartPointer<vtkDiscreteFlyingEdges3D> contour = vtkSmartPointer<vtkDiscreteFlyingEdges3D>::New();
-		contour->SetValue(0, region->GetLabel());
-		contour->ComputeNormalsOff();
-		contour->ComputeGradientsOff();
-		contour->SetInputConnection(region->GetOutput());
-		//		contour->SetInputDataObject(data);
+		renderer->AddActor(surface->GetActor());
 
-		// Smoother
-		int smoothingIterations = 8;
-		double passBand = 0.01;
-		double featureAngle = 120.0;
-
-		vtkSmartPointer<vtkWindowedSincPolyDataFilter> smoother = vtkSmartPointer<vtkWindowedSincPolyDataFilter>::New();
-		smoother->SetNumberOfIterations(smoothingIterations);
-		//smoother->BoundarySmoothingOff();
-		//smoother->FeatureEdgeSmoothingOff();
-		//smoother->SetFeatureAngle(featureAngle);
-		smoother->SetPassBand(passBand);
-		//smoother->NonManifoldSmoothingOn();
-		smoother->NormalizeCoordinatesOn();
-		smoother->SetInputConnection(contour->GetOutputPort());
-
-		vtkSmartPointer<vtkPolyDataNormals> normals = vtkSmartPointer<vtkPolyDataNormals>::New();
-		normals->ComputePointNormalsOn();
-		normals->SplittingOff();
-		normals->SetInputConnection(contour->GetOutputPort());
-		//		normals->SetInputConnection(smoother->GetOutputPort());
-
-		vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-				mapper->SetInputConnection(normals->GetOutputPort());
-		//		mapper->SetInputConnection(smoother->GetOutputPort());
-		//mapper->SetInputConnection(contour->GetOutputPort());
-		mapper->ScalarVisibilityOff();
-
-		double color[3];
-		labelColors->GetColor(region->GetLabel(), color);
-
-		vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
-		actor->SetMapper(mapper);
-		actor->GetProperty()->SetColor(color);
-		actor->GetProperty()->SetDiffuse(1.0);
-		actor->GetProperty()->SetAmbient(0.1);
-		actor->GetProperty()->SetSpecular(0.0);
-
-		regionActors.push_back(actor);
-
-		renderer->AddActor(actor);
+		surfaces.push_back(surface);
 	}
 
 	// Update probe
@@ -191,6 +143,12 @@ vtkRenderer* VolumePipeline::GetRenderer() {
 
 vtkInteractorStyleVolume* VolumePipeline::GetInteractorStyle() {
 	return style;
+}
+
+void VolumePipeline::RemoveSurfaces() {
+	for (int i = 0; i < surfaces.size(); i++) {
+		delete surfaces[i];
+	}
 }
 
 void VolumePipeline::CreateProbe() {

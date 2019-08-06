@@ -14,6 +14,7 @@ class vtkRenderWindowInteractor;
 class vtkInteractorStyleVolume;
 
 class Region;
+class RegionSurface;
 
 class VolumePipeline {
 public:
@@ -47,8 +48,9 @@ protected:
 	vtkSmartPointer<vtkInteractorStyleVolume> style;
 	vtkSmartPointer<vtkLookupTable> labelColors;
 
-	// Regions
-	std::vector<vtkSmartPointer<vtkActor>> regionActors;
+	// Region surfaces
+	std::vector<vtkSmartPointer<RegionSurface>> surfaces;
+	void RemoveSurfaces();
 
 	// Probe
 	vtkSmartPointer<vtkActor> probe;

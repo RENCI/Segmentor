@@ -105,6 +105,8 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 }
 
 VisualizationContainer::~VisualizationContainer() {
+	RemoveRegions();
+
 	delete volumePipeline;
 	delete slicePipeline;
 }
@@ -385,14 +387,18 @@ void VisualizationContainer::UpdateColors() {
 	labelColors->Build();
 }
 
+void VisualizationContainer::RemoveRegions() {
+	for (int i = 0; i < regions.size(); i++) {
+		delete regions[i];
+	}
+}
+
 void VisualizationContainer::ExtractRegions() {
 	// Get label info
 	int maxLabel = labels->GetScalarRange()[1];
 
 	// Clear current regions
-	for (int i = 0; i < regions.size(); i++) {
-		delete regions[i];
-	}
+	RemoveRegions();
 
 	for (int label = 1; label <= maxLabel; label++) {
 		regions.push_back(new Region(labels, label));

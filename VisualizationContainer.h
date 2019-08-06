@@ -58,6 +58,8 @@ protected:
 
 	void UpdateLabels();
 	void UpdateColors();
+
+	void RemoveRegions();
 	void ExtractRegions();
 
 	void SetLabel(int x, int y, int z, unsigned short label);
