@@ -5,8 +5,9 @@
 
 #include <algorithm>
 
-Region::Region(vtkImageData* data, unsigned short regionLabel) {
+Region::Region(vtkImageData* inputData, unsigned short regionLabel) {
 	// Input data info
+	data = inputData;
 	unsigned short* scalars = static_cast<unsigned short*>(data->GetScalarPointer());
 	int numPoints = data->GetNumberOfPoints();
 
@@ -40,18 +41,10 @@ Region::Region(vtkImageData* data, unsigned short regionLabel) {
 		}
 	}
 
-	// Add a buffer around VOI
-	int padding = 2;
-	extent[0] = std::max(dataExtent[0], extent[0] - padding);
-	extent[1] = std::min(dataExtent[1], extent[1] + padding);
-	extent[2] = std::max(dataExtent[2], extent[2] - padding);
-	extent[3] = std::min(dataExtent[3], extent[3] + padding);
-	extent[4] = std::max(dataExtent[4], extent[4] - padding);
-	extent[5] = std::min(dataExtent[5], extent[5] + padding);
-
 	voi = vtkSmartPointer<vtkExtractVOI>::New();
-	voi->SetVOI(extent);
 	voi->SetInputDataObject(data);
+
+	UpdateExtent();
 }
 	
 Region::~Region() {
@@ -59,6 +52,59 @@ Region::~Region() {
 
 vtkAlgorithmOutput* Region::GetOutput() {
 	return voi->GetOutputPort();
+}
+
+void Region::UpdateExtent(int x, int y, int z) {
+	bool update = false;
+
+	if (x < extent[0]) {
+		extent[0] = x;
+		update = true;
+	}
+	else if (x > extent[1]) {
+		extent[1] = x;
+		update = true;
+	}
+
+	if (y < extent[2]) {
+		extent[2] = y;
+		update = true;
+	}
+	else if (y > extent[3]) {
+		extent[3] = y;
+		update = true;
+	}
+
+	if (z < extent[4]) {
+		extent[4] = z;
+		update = true;
+	}
+	else if (z > extent[5]) {
+		extent[5] = z;
+		update = true;
+	}
+
+	if (update) {
+		UpdateExtent();
+	}
+}
+
+void Region::UpdateExtent() {
+	int dataExtent[6];
+	data->GetExtent(dataExtent);
+
+	// Add a buffer around VOI
+	const int padding = 2;
+
+	int padExtent[6];
+	padExtent[0] = std::max(dataExtent[0], extent[0] - padding);
+	padExtent[1] = std::min(dataExtent[1], extent[1] + padding);
+	padExtent[2] = std::max(dataExtent[2], extent[2] - padding);
+	padExtent[3] = std::min(dataExtent[3], extent[3] + padding);
+	padExtent[4] = std::max(dataExtent[4], extent[4] - padding);
+	padExtent[5] = std::min(dataExtent[5], extent[5] + padding);
+
+	voi->SetVOI(padExtent);
 }
 
 unsigned short Region::GetLabel() {

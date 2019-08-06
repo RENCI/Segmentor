@@ -49,7 +49,8 @@ protected:
 	vtkSmartPointer<vtkImageData> labels;
 
 	std::vector<Region*> regions;
-	unsigned short currentLabel;
+	Region* currentRegion;
+
 	vtkSmartPointer<vtkLookupTable> labelColors;
 
 	// Rendering pipelines
@@ -63,7 +64,8 @@ protected:
 	void ExtractRegions();
 
 	void SetLabel(int x, int y, int z, unsigned short label);
-	void SetPointLabel(double x, double y, double z, unsigned short label);
+
+	void PointToStructured(double p[3], int s[3]);
 };
 
 #endif

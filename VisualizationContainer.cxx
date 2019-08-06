@@ -30,7 +30,7 @@
 VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volumeInteractor, vtkRenderWindowInteractor* sliceInteractor) {
 	data = nullptr;
 	labels = nullptr;
-	currentLabel = 0;
+	currentRegion = nullptr;
 
 	// Lookup table
 	labelColors = vtkSmartPointer<vtkLookupTable>::New();
@@ -298,7 +298,9 @@ void VisualizationContainer::PickLabel(int x, int y, int z) {
 }
 
 void VisualizationContainer::Paint(int x, int y, int z) {
-	SetLabel(x, y, z, currentLabel);
+	currentRegion->UpdateExtent(x, y, z);
+
+	SetLabel(x, y, z, currentRegion->GetLabel());
 }
 
 void VisualizationContainer::Erase(int x, int y, int z) {	
@@ -306,26 +308,46 @@ void VisualizationContainer::Erase(int x, int y, int z) {
 }
 
 void VisualizationContainer::PickPointLabel(double x, double y, double z) {
-	// Get the label
-	vtkIdType id = labels->FindPoint(x, y, z);
-	SetCurrentLabel(static_cast<unsigned short*>(labels->GetScalarPointer())[id]);
+	double p[3] = { x, y, z };
+	int s[3];
+	PointToStructured(p, s);
+
+	PickLabel(s[0], s[1], s[2]);
 }
 
 void VisualizationContainer::PaintPoint(double x, double y, double z) {
-	SetPointLabel(x, y, z, currentLabel);
+	double p[3] = { x, y, z };
+	int s[3];
+	PointToStructured(p, s);
+
+	Paint(s[0], s[1], s[2]);
 }
 
 void VisualizationContainer::ErasePoint(double x, double y, double z) {
-	SetPointLabel(x, y, z, 0);
+	double p[3] = { x, y, z };
+	int s[3];
+	PointToStructured(p, s);
+
+	Erase(s[0], s[1], s[2]);
 }
 
 void VisualizationContainer::SetCurrentLabel(unsigned short label) {
 	if (label == 0) return;
 
-	currentLabel = label;
+	currentRegion = nullptr;
+	for (int i = 0; i < regions.size(); i++) {
+		if (regions[i]->GetLabel() == label) {
+			currentRegion = regions[i];
+		}
+	}
 
-	volumePipeline->SetLabel(currentLabel);
-	slicePipeline->SetLabel(currentLabel);
+	if (!currentRegion) {
+		currentRegion = new Region(labels, label);
+		regions.push_back(currentRegion);
+	}
+
+	volumePipeline->SetLabel(currentRegion->GetLabel());
+	slicePipeline->SetLabel(currentRegion->GetLabel());
 }
 
 void VisualizationContainer::Render() {
@@ -357,17 +379,17 @@ void VisualizationContainer::UpdateColors() {
 	const int numColors = 12;
 	double colors[numColors][3] = {
 		{ 166,206,227 },
-	{ 31,120,180 },
-	{ 178,223,138 },
-	{ 51,160,44 },
-	{ 251,154,153 },
-	{ 227,26,28 },
-	{ 253,191,111 },
-	{ 255,127,0 },
-	{ 202,178,214 },
-	{ 106,61,154 },
-	{ 255,255,153 },
-	{ 177,89,40 }
+		{ 31,120,180 },
+		{ 178,223,138 },
+		{ 51,160,44 },
+		{ 251,154,153 },
+		{ 227,26,28 },
+		{ 253,191,111 },
+		{ 255,127,0 },
+		{ 202,178,214 },
+		{ 106,61,154 },
+		{ 255,255,153 },
+		{ 177,89,40 }
 	};
 
 	for (int i = 0; i < numColors; i++) {
@@ -409,21 +431,14 @@ void VisualizationContainer::SetLabel(int x, int y, int z, unsigned short label)
 	unsigned short* p = static_cast<unsigned short*>(labels->GetScalarPointer(x, y, z));
 
 	// Restrict painting to no label, and erasing to current label
-	if ((label != 0 && p[0] == 0) ||
-		(label == 0 && p[0] == currentLabel)) {
-		p[0] = label;
+	if ((label != 0 && *p == 0) ||
+		(label == 0 && *p == currentRegion->GetLabel())) {
+		*p = label;
 		labels->Modified();
 	}
 }
 
-void VisualizationContainer::SetPointLabel(double x, double y, double z, unsigned short label) {
-	vtkIdType id = labels->FindPoint(x, y, z);
-	unsigned short* p = static_cast<unsigned short*>(labels->GetScalarPointer());
-
-	// Restrict painting to no label, and erasing to current label
-	if ((label != 0 && p[id] == 0) ||
-		(label == 0 && p[id] == currentLabel)) {
-		p[id] = label;
-		labels->Modified();
-	}
+void VisualizationContainer::PointToStructured(double p[3], int s[3]) {
+	double c[3];
+	labels->ComputeStructuredCoordinates(p, s, c);
 }
