@@ -82,8 +82,13 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 		vis->GetVolumePipeline()->ToggleFilterPlane();
 		break;
 
-	case 't':
-	case 'T':
+	case 'o':
+	case 'O':
+		vis->GetVolumePipeline()->ToggleShowPlane();
+		break;
+
+	case 'l':
+	case 'L':
 		vis->GetVolumePipeline()->ToggleFilterLabel();
 		break;
 	}
@@ -205,12 +210,12 @@ void InteractionCallbacks::MouseMove(vtkRenderWindowInteractor* rwi, Visualizati
 		}
 
 		// Update probes
-		vis->GetVolumePipeline()->SetProbeVisiblity(true);
-		vis->GetSlicePipeline()->SetProbeVisiblity(true);
+		vis->GetVolumePipeline()->SetShowProbe(true);
+		vis->GetSlicePipeline()->SetShowProbe(true);
 	}
 	else {
-		vis->GetVolumePipeline()->SetProbeVisiblity(false);
-		vis->GetSlicePipeline()->SetProbeVisiblity(false);
+		vis->GetVolumePipeline()->SetShowProbe(false);
+		vis->GetSlicePipeline()->SetShowProbe(false);
 	}
 
 	vis->Render();

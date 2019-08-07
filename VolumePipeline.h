@@ -26,7 +26,7 @@ public:
 
   void SetLabel(unsigned short label);
 
-  void SetProbeVisiblity(bool visibility);
+  void SetShowProbe(bool visibility);
   void SetProbePosition(double x, double y, double z);
 
   void SetSmoothSurfaces(bool smooth);
@@ -41,6 +41,8 @@ public:
   void SetFilterPlane(bool filter);
   void ToggleFilterPlane();
 
+  void SetShowPlane(bool show);
+  void ToggleShowPlane();
   void UpdatePlane();
 
   void Render();
@@ -72,6 +74,7 @@ protected:
 	// Plane	
 	vtkSmartPointer<vtkPlaneSource> planeSource;
 	vtkSmartPointer<vtkActor> plane;
+	vtkSmartPointer<vtkActor> planeWire;
 	void CreatePlane();
 	void UpdatePlane(vtkImageData* data);
 

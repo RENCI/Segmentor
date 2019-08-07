@@ -66,8 +66,8 @@ void SlicePipeline::SetSegmentationData(vtkImageData* data) {
 	Render();
 }
 
-void SlicePipeline::SetProbeVisiblity(bool visiblity) {
-	probe->SetVisibility(visiblity);
+void SlicePipeline::SetShowProbe(bool show) {
+	probe->SetVisibility(show);
 }
 
 void SlicePipeline::SetProbePosition(double x, double y, double z) {

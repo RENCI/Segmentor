@@ -26,10 +26,9 @@ double rescale(double value, double min, double max) {
 }
 
 void cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
-	vtkCamera* camera = static_cast<vtkCamera*>(caller);
-	VolumePipeline* vis = static_cast<VolumePipeline*>(clientData);
+	VolumePipeline* pipeline = static_cast<VolumePipeline*>(clientData);
 
-	vis->UpdatePlane();
+	pipeline->UpdatePlane();
 }
 
 VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut) {
@@ -49,14 +48,11 @@ VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* interactor, vtkLookupT
 	interactor->SetInteractorStyle(style);
 	interactor->SetNumberOfFlyFrames(5);
 
-
-// Camera callback
-vtkSmartPointer <vtkCallbackCommand> cameraCallback = vtkSmartPointer<vtkCallbackCommand>::New();
-cameraCallback->SetCallback(cameraChange);
-cameraCallback->SetClientData(this);
-renderer->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, cameraCallback);
-
-
+	// Camera callback
+	vtkSmartPointer <vtkCallbackCommand> cameraCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+	cameraCallback->SetCallback(cameraChange);
+	cameraCallback->SetClientData(this);
+	renderer->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, cameraCallback);
 
 	// Colors
 	labelColors = lut;
@@ -106,7 +102,6 @@ void VolumePipeline::SetRegions(vtkImageData* data, std::vector<Region*> regions
 
 	// Update plane
 	UpdatePlane(data);
-	plane->VisibilityOn();
 
 	renderer->ResetCameraClippingRange();
 	Render();
@@ -127,8 +122,8 @@ void VolumePipeline::SetLabel(unsigned short label) {
 	FilterLabels();
 }
 
-void VolumePipeline::SetProbeVisiblity(bool visibility) {
-	probe->SetVisibility(visibility);
+void VolumePipeline::SetShowProbe(bool show) {
+	probe->SetVisibility(show);
 }
 
 void VolumePipeline::SetProbePosition(double x, double y, double z) {
@@ -190,6 +185,16 @@ void VolumePipeline::UpdatePlane() {
 	planeSource->SetNormal(cam->GetDirectionOfProjection());
 }
 
+void VolumePipeline::SetShowPlane(bool show) {
+	plane->SetVisibility(show);
+	planeWire->SetVisibility(show);
+	Render();
+}
+
+void VolumePipeline::ToggleShowPlane() {
+	SetShowPlane(!plane->GetVisibility());
+}
+
 void VolumePipeline::Render() {
 	renderer->GetRenderWindow()->Render();
 }
@@ -237,15 +242,27 @@ void VolumePipeline::CreatePlane() {
 	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	mapper->SetInputConnection(planeSource->GetOutputPort());
 
+	vtkSmartPointer<vtkPolyDataMapper> mapperWire = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapperWire->SetInputConnection(planeSource->GetOutputPort());
+
 	plane = vtkSmartPointer<vtkActor>::New();
 	plane->SetMapper(mapper);
-	//plane->GetProperty()->SetRepresentationToWireframe();
 	plane->GetProperty()->LightingOff();
 	plane->GetProperty()->SetOpacity(0.2);
 	plane->VisibilityOff();
 	plane->PickableOff();
 
+	planeWire = vtkSmartPointer<vtkActor>::New();
+	planeWire->SetMapper(mapperWire);
+	planeWire->GetProperty()->SetRepresentationToWireframe();
+	planeWire->GetProperty()->LightingOff();
+	planeWire->GetProperty()->SetColor(0, 0, 0);
+	planeWire->GetProperty()->SetOpacity(0.1);
+	planeWire->VisibilityOff();
+	planeWire->PickableOff();
+
 	renderer->AddActor(plane);
+	renderer->AddActor(planeWire);
 }
 
 void VolumePipeline::UpdatePlane(vtkImageData* data) {	
