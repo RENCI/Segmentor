@@ -107,7 +107,7 @@ void VolumePipeline::SetRegions(vtkImageData* data, std::vector<Region*> regions
 	Render();
 }
 
-void VolumePipeline::SetLabel(unsigned short label) {
+void VolumePipeline::SetCurrentLabel(unsigned short label) {
 	currentLabel = label;
 
 	if (currentLabel > 0) {

@@ -24,7 +24,7 @@ public:
 
   void SetRegions(vtkImageData* data, std::vector<Region*> regions);
 
-  void SetLabel(unsigned short label);
+  void SetCurrentLabel(unsigned short label);
 
   void SetShowProbe(bool visibility);
   void SetProbePosition(double x, double y, double z);

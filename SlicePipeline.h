@@ -24,7 +24,7 @@ public:
 	void SetShowProbe(bool show);
 	void SetProbePosition(double x, double y, double z);
 
-	void SetLabel(unsigned short label);
+	void SetCurrentLabel(unsigned short label);
 
 	void Render();
 

@@ -87,7 +87,7 @@ void SlicePipeline::SetProbePosition(double x, double y, double z) {
 	probe->SetPosition(p2);
 }
 
-void SlicePipeline::SetLabel(unsigned short label) {
+void SlicePipeline::SetCurrentLabel(unsigned short label) {
 	if (label > 0) {
 		double color[3];
 		labelSlice->GetProperty()->GetLookupTable()->GetColor(label, color);

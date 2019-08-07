@@ -132,7 +132,7 @@ bool VisualizationContainer::OpenImageFile(const std::string& fileName) {
 	}
 	else {
 		return false;
-	}
+	}	
 
 	slicePipeline->SetImageData(data);
 
@@ -294,20 +294,28 @@ void VisualizationContainer::SegmentVolume() {
 }
 
 void VisualizationContainer::PickLabel(int x, int y, int z) {
+	if (!labels) return;
+
 	SetCurrentLabel(static_cast<unsigned short*>(labels->GetScalarPointer(x, y, z))[0]);
 }
 
 void VisualizationContainer::Paint(int x, int y, int z) {
+	if (!labels) return;
+
 	currentRegion->UpdateExtent(x, y, z);
 
 	SetLabel(x, y, z, currentRegion->GetLabel());
 }
 
 void VisualizationContainer::Erase(int x, int y, int z) {	
+	if (!labels) return;
+
 	SetLabel(x, y, z, 0);
 }
 
 void VisualizationContainer::PickPointLabel(double x, double y, double z) {
+	if (!labels) return;
+
 	double p[3] = { x, y, z };
 	int s[3];
 	PointToStructured(p, s);
@@ -316,6 +324,8 @@ void VisualizationContainer::PickPointLabel(double x, double y, double z) {
 }
 
 void VisualizationContainer::PaintPoint(double x, double y, double z) {
+	if (!labels) return;
+
 	double p[3] = { x, y, z };
 	int s[3];
 	PointToStructured(p, s);
@@ -324,6 +334,8 @@ void VisualizationContainer::PaintPoint(double x, double y, double z) {
 }
 
 void VisualizationContainer::ErasePoint(double x, double y, double z) {
+	if (!labels) return;
+
 	double p[3] = { x, y, z };
 	int s[3];
 	PointToStructured(p, s);
@@ -332,7 +344,7 @@ void VisualizationContainer::ErasePoint(double x, double y, double z) {
 }
 
 void VisualizationContainer::SetCurrentLabel(unsigned short label) {
-	if (label == 0) return;
+	if (!labels || label == 0) return;
 
 	currentRegion = nullptr;
 	for (int i = 0; i < regions.size(); i++) {
@@ -346,8 +358,8 @@ void VisualizationContainer::SetCurrentLabel(unsigned short label) {
 		regions.push_back(currentRegion);
 	}
 
-	volumePipeline->SetLabel(currentRegion->GetLabel());
-	slicePipeline->SetLabel(currentRegion->GetLabel());
+	volumePipeline->SetCurrentLabel(currentRegion->GetLabel());
+	slicePipeline->SetCurrentLabel(currentRegion->GetLabel());
 }
 
 void VisualizationContainer::Render() {
