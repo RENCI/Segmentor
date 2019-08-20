@@ -38,6 +38,8 @@ public:
 
 	void SetCurrentLabel(unsigned short newLabel);
 
+	void GrowRegion(int x, int y, int z);
+
 	void Render();
 
 	VolumePipeline* GetVolumePipeline();
@@ -64,6 +66,9 @@ protected:
 	void ExtractRegions();
 
 	void SetLabel(int x, int y, int z, unsigned short label);
+	unsigned short GetLabel(int x, int y, int z);
+
+	double GetValue(int x, int y, int z);
 
 	void PointToStructured(double p[3], int s[3]);
 };

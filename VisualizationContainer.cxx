@@ -5,9 +5,11 @@
 #include <vtkImageConnectivityFilter.h>
 #include <vtkImageOpenClose3D.h>
 #include <vtkImageThreshold.h>
+#include <vtkIntArray.h>
 #include <vtkLookupTable.h>
 #include <vtkNIFTIImageReader.h>
 #include <vtkNIFTIImageWriter.h>
+#include <vtkPointSource.h>
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
@@ -296,7 +298,7 @@ void VisualizationContainer::SegmentVolume() {
 void VisualizationContainer::PickLabel(int x, int y, int z) {
 	if (!labels) return;
 
-	SetCurrentLabel(static_cast<unsigned short*>(labels->GetScalarPointer(x, y, z))[0]);
+	SetCurrentLabel(GetLabel(x, y, z));
 }
 
 void VisualizationContainer::Paint(int x, int y, int z) {
@@ -360,6 +362,69 @@ void VisualizationContainer::SetCurrentLabel(unsigned short label) {
 
 	volumePipeline->SetCurrentLabel(currentRegion->GetLabel());
 	slicePipeline->SetCurrentLabel(currentRegion->GetLabel());
+}
+
+void VisualizationContainer::GrowRegion(int x, int y, int z) {
+	if (!currentRegion) return;
+
+	double value = GetValue(x, y, z);
+	double label = GetLabel(x, y, z);
+
+	bool grow = label == 0;
+
+	double growValue = 255;
+
+	vtkSmartPointer<vtkPointSource> seed = vtkSmartPointer<vtkPointSource>::New();
+	seed->SetNumberOfPoints(1);
+	seed->SetCenter(x, y, z);
+	seed->SetRadius(0);
+
+	// Variables for growing vs. shrinking
+	double min, max;
+	unsigned short testLabel, newLabel;
+	if (grow) {
+		min = value;
+		max = VTK_DOUBLE_MAX;
+	}
+	else {
+		min = VTK_DOUBLE_MIN;
+		max = value;
+	}
+
+	vtkSmartPointer<vtkImageConnectivityFilter> regionGrow = vtkSmartPointer<vtkImageConnectivityFilter>::New();
+	regionGrow->SetExtractionModeToSeededRegions();
+	regionGrow->SetSeedConnection(seed->GetOutputPort());
+	regionGrow->SetScalarRange(min, max);
+	regionGrow->SetLabelModeToConstantValue();
+	regionGrow->SetLabelConstantValue(growValue);
+	regionGrow->GenerateRegionExtentsOn();
+	regionGrow->SetInputDataObject(data);
+	regionGrow->Update();
+
+	if (regionGrow->GetNumberOfExtractedRegions() != 1) {
+		std::cout << "Invalid number of extracted regions: " << regionGrow->GetNumberOfExtractedRegions() << std::endl;
+		return;
+	}
+
+	int extent[6];
+	regionGrow->GetExtractedRegionExtents()->GetTypedTuple(0, extent);
+
+	for (int i = extent[0]; i <= extent[1]; i++) {
+		for (int j = extent[2]; j <= extent[3]; j++) {
+			for (int k = extent[4]; k <= extent[5]; k++) {
+				double v = regionGrow->GetOutput()->GetScalarComponentAsDouble(i, j, k, 0);
+
+				if (v >= growValue) {
+					if (grow) {
+						Paint(i, j, k);
+					}
+					else {
+						Erase(i, j, k);
+					}
+				}
+			}
+		}
+	}
 }
 
 void VisualizationContainer::Render() {
@@ -448,6 +513,14 @@ void VisualizationContainer::SetLabel(int x, int y, int z, unsigned short label)
 		*p = label;
 		labels->Modified();
 	}
+}
+
+unsigned short VisualizationContainer::GetLabel(int x, int y, int z) {
+	return static_cast<unsigned short*>(labels->GetScalarPointer(x, y, z))[0];
+}
+
+double VisualizationContainer::GetValue(int x, int y, int z) {
+	return data->GetScalarComponentAsDouble(x, y, z, 0);
 }
 
 void VisualizationContainer::PointToStructured(double p[3], int s[3]) {

@@ -66,6 +66,9 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 	vtkRenderWindowInteractor* rwi = static_cast<vtkRenderWindowInteractor*>(caller);
 	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
 
+	int x = rwi->GetEventPosition()[0];
+	int y = rwi->GetEventPosition()[1];
+
 	switch (rwi->GetKeyCode()) {
 	case 's':
 	case 'S':
@@ -91,6 +94,20 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 	case 'L':
 		vis->GetVolumePipeline()->ToggleFilterLabel();
 		break;
+
+	case 'g':
+	case 'G': {
+			// Pick at the mouse location provided by the interactor	
+			int pick = Pick(rwi);
+
+			if (pick) {
+				// Get the pixel indeces for the pick event		
+				int* p = SlicePick();
+				vis->GrowRegion(p[0], p[1], p[2]);
+				vis->Render();
+			}
+			break;
+		}
 	}
 }
 
