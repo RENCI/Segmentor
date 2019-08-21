@@ -46,7 +46,9 @@ SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* interactor) {
 SlicePipeline::~SlicePipeline() {
 }
 
-void SlicePipeline::SetImageData(vtkImageData* data) {	
+void SlicePipeline::SetImageData(vtkImageData* imageData) {
+	data = imageData;
+
 	// Update probe
 	UpdateProbe(data);
 	probe->VisibilityOn();
@@ -57,8 +59,8 @@ void SlicePipeline::SetImageData(vtkImageData* data) {
 	Render();
 }
 
-void SlicePipeline::SetSegmentationData(vtkImageData* data) {
-	labels = data;
+void SlicePipeline::SetSegmentationData(vtkImageData* imageLabels) {
+	labels = imageLabels;
 	CreateLabelSlice(labels);
 
 	// Render
@@ -76,12 +78,16 @@ void SlicePipeline::SetProbePosition(double x, double y, double z) {
 	double p1[3] = { x , y, z };
 	double p2[3];
 	vtkPlane::ProjectPoint(p1, cam->GetFocalPoint(), cam->GetDirectionOfProjection(), p2);
+
+	double* spacing = data->GetSpacing();
+	double s = spacing[0];
 	
-	if (sqrt(vtkMath::Distance2BetweenPoints(p1, p2)) < 1) {
-		probe->GetProperty()->SetOpacity(1);
+	if (sqrt(vtkMath::Distance2BetweenPoints(p1, p2)) < s) {
+		probe->GetProperty()->SetRepresentationToWireframe();
 	}
 	else {
-		probe->GetProperty()->SetOpacity(0.5);
+		probe->GetProperty()->SetRepresentationToPoints();
+		probe->GetProperty()->SetPointSize(2);
 	}	
 
 	probe->SetPosition(p2);
@@ -138,9 +144,14 @@ vtkSmartPointer<vtkImageSlice> SlicePipeline::CreateDataSlice(vtkImageData* data
 
 	// Mapper
 	vtkSmartPointer<vtkImageResliceMapper> mapper = vtkSmartPointer<vtkImageResliceMapper>::New();
-	mapper->SetInputDataObject(data);
 	mapper->SliceFacesCameraOn();
 	mapper->SliceAtFocalPointOn();
+	//mapper->JumpToNearestSliceOn();
+	mapper->AutoAdjustImageQualityOff();
+	mapper->ResampleToScreenPixelsOn();
+	//mapper->SetSlabThickness(10);
+	//mapper->SetSlabTypeToSum();
+	mapper->SetInputDataObject(data);
 
 	// Image property
 	vtkSmartPointer<vtkImageProperty> property = vtkSmartPointer<vtkImageProperty>::New();
@@ -185,9 +196,14 @@ void SlicePipeline::CreateLabelSlice(vtkImageData* labels) {
 
 	// Mapper
 	vtkSmartPointer<vtkImageResliceMapper> mapper = vtkSmartPointer<vtkImageResliceMapper>::New();
-	mapper->SetInputDataObject(labels);
 	mapper->SliceFacesCameraOn();
 	mapper->SliceAtFocalPointOn();
+	//mapper->JumpToNearestSliceOn();
+	mapper->AutoAdjustImageQualityOff();
+	mapper->ResampleToScreenPixelsOn();
+	//mapper->SetSlabThickness(10);
+	//mapper->SetSlabTypeToMin();
+	mapper->SetInputDataObject(labels);
 
 	// Label colors
 	vtkSmartPointer<vtkLookupTable> labelColors = vtkSmartPointer<vtkLookupTable>::New();

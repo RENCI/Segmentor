@@ -33,6 +33,7 @@ public:
 
 protected:
 	// Data
+	vtkSmartPointer<vtkImageData> data;
 	vtkSmartPointer<vtkImageData> labels;
 
 	// Rendering
