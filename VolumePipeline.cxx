@@ -281,13 +281,6 @@ void VolumePipeline::UpdatePlane(vtkImageData* data) {
 void VolumePipeline::FilterLabels() {
 	for (int i = 0; i < surfaces.size(); i++) {
 		RegionSurface* surface = surfaces[i];
-			
-		if (filterLabel) {
-			surface->GetActor()->SetVisibility(surface->GetRegion()->GetLabel() == currentLabel);
-		}
-		else {
-			surface->GetActor()->VisibilityOn();
-		}
 
 		if (filterPlane) {
 			vtkCamera* cam = renderer->GetActiveCamera();
@@ -295,14 +288,21 @@ void VolumePipeline::FilterLabels() {
 
 			//if (ix) surface->GetActor()->GetProperty()->SetRepresentationToSurface();
 			//else surface->GetActor()->GetProperty()->SetRepresentationToPoints();
-
-			//surface->GetActor()->SetVisibility(ix);
-			surface->GetActor()->GetProperty()->SetOpacity(ix ? 1 : 0);
+			
+			//surface->GetActor()->GetProperty()->SetOpacity(ix ? 1 : 0.1);
+			surface->GetActor()->SetVisibility(ix);
 		}
 		else {
-			//surface->GetActor()->VisibilityOn();
 			//surface->GetActor()->GetProperty()->SetRepresentationToSurface();
-			surface->GetActor()->GetProperty()->SetOpacity(1.0);
+			//surface->GetActor()->GetProperty()->SetOpacity(1.0);
+			surface->GetActor()->VisibilityOn();
+		}
+			
+		if (filterLabel) {
+			surface->GetActor()->SetVisibility(surface->GetRegion()->GetLabel() == currentLabel);
+		}
+		else if (!filterPlane) {
+			surface->GetActor()->VisibilityOn();
 		}
 	}
 
