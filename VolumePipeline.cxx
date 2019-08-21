@@ -40,11 +40,10 @@ VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* interactor, vtkLookupT
 
 	// Rendering
 	renderer = vtkSmartPointer<vtkRenderer>::New();
-	interactor->GetRenderWindow()->AddRenderer(renderer);
 
-	// Interaction
 	style = vtkSmartPointer<vtkInteractorStyleVolume>::New();
 
+	interactor->GetRenderWindow()->AddRenderer(renderer);
 	interactor->SetInteractorStyle(style);
 	interactor->SetNumberOfFlyFrames(5);
 
@@ -63,7 +62,7 @@ VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* interactor, vtkLookupT
 	// Plane
 	CreatePlane();
 
-	// Create light
+	// Lighting
 	double lightPosition[3] = { 0, 0.5, 1 };	
 	double lightFocalPoint[3] = { 0, 0, 0 };
 

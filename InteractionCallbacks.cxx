@@ -35,7 +35,7 @@ void InteractionCallbacks::VolumeCameraChange(vtkObject* caller, unsigned long e
 	sliceCamera->SetPosition(volumeCamera->GetPosition());
 	sliceCamera->SetViewUp(volumeCamera->GetViewUp());
 
-	sliceCamera->SetClippingRange(volumeCamera->GetDistance() - 1, volumeCamera->GetDistance() + 1);
+	sliceCamera->SetClippingRange(volumeCamera->GetDistance() - 0.5, volumeCamera->GetDistance() + 0.5);
 
 	sliceRenderer->GetRenderWindow()->Render();
 

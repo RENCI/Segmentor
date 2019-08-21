@@ -9,13 +9,14 @@ class vtkContourFilter;
 class vtkImageData;
 class vtkImageSlice;
 class vtkInteractorStyleSlice;
+class vtkLookupTable;
 class vtkPlane;
 class vtkRenderer;
 class vtkRenderWindowInteractor;
 
 class SlicePipeline {
 public:
-	SlicePipeline(vtkRenderWindowInteractor* rwi);
+	SlicePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut);
 	~SlicePipeline();
 
 	void SetImageData(vtkImageData* data);
@@ -39,6 +40,7 @@ protected:
 	// Rendering
 	vtkSmartPointer<vtkRenderer> renderer;
 	vtkSmartPointer<vtkInteractorStyleSlice> style;
+	vtkSmartPointer<vtkLookupTable> labelColors;
 
 	// Slices
 	vtkSmartPointer<vtkImageSlice> labelSlice;

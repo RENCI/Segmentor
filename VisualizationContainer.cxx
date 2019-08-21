@@ -39,7 +39,7 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 
 	// Create rendering pipelines
 	volumePipeline = new VolumePipeline(volumeInteractor, labelColors);
-	slicePipeline = new SlicePipeline(sliceInteractor);
+	slicePipeline = new SlicePipeline(sliceInteractor, labelColors);
 
 	// Callbacks
 
@@ -381,7 +381,6 @@ void VisualizationContainer::GrowRegion(int x, int y, int z) {
 
 	// Variables for growing vs. shrinking
 	double min, max;
-	unsigned short testLabel, newLabel;
 	if (grow) {
 		min = value;
 		max = VTK_DOUBLE_MAX;

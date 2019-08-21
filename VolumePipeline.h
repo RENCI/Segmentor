@@ -19,7 +19,7 @@ class RegionSurface;
 
 class VolumePipeline {
 public:
-  VolumePipeline(vtkRenderWindowInteractor* rwi, vtkLookupTable* lut);
+  VolumePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut);
   ~VolumePipeline();
 
   void SetRegions(vtkImageData* data, std::vector<Region*> regions);
