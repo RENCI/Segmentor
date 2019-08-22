@@ -10,6 +10,7 @@ class vtkImageData;
 class vtkImageSlice;
 class vtkInteractorStyleSlice;
 class vtkLookupTable;
+class vtkObject;
 class vtkPlane;
 class vtkRenderer;
 class vtkRenderWindowInteractor;
@@ -26,6 +27,8 @@ public:
 	void SetProbePosition(double x, double y, double z);
 
 	void SetCurrentLabel(unsigned short label);
+
+	void UpdatePlane();
 
 	void Render();
 
@@ -44,6 +47,7 @@ protected:
 
 	// Slices
 	vtkSmartPointer<vtkImageSlice> labelSlice;
+	vtkSmartPointer<vtkPlane> plane;
 
 	// Probe
 	vtkSmartPointer<vtkActor> probe;
@@ -53,6 +57,8 @@ protected:
 	// Slices
 	vtkSmartPointer<vtkImageSlice> CreateDataSlice(vtkImageData* data);
 	void CreateLabelSlice(vtkImageData* labels);
+
+	static void cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 };
 
 #endif

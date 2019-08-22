@@ -25,7 +25,7 @@ double rescale(double value, double min, double max) {
 	return min + (max - min) * value;
 }
 
-void cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+void VolumePipeline::cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
 	VolumePipeline* pipeline = static_cast<VolumePipeline*>(clientData);
 
 	pipeline->UpdatePlane();

@@ -9,6 +9,7 @@ class vtkActor;
 class vtkImageData;
 class vtkLookupTable;
 class vtkPlaneSource;
+class vtkObject;
 class vtkRenderer;
 class vtkRenderWindowInteractor;
 
@@ -79,6 +80,8 @@ protected:
 	void UpdatePlane(vtkImageData* data);
 
 	void FilterLabels();
+
+	static void cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 };
 
 #endif

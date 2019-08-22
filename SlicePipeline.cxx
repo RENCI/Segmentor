@@ -22,9 +22,34 @@
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 
+#include <vtkDataSetMapper.h>
+#include <vtkThreshold.h>
+#include <vtkFlyingEdgesPlaneCutter.h>
+#include <vtkDataSetSurfaceFilter.h>
+#include <vtkPointDataToCellData.h>
+#include <vtkImageDataGeometryFilter.h>
+#include <vtkExtractEdges.h>
+#include <vtkGlyph3DMapper.h>
+#include <vtkThresholdPoints.h>
+#include <vtkCleanPolyData.h>
+#include <vtkAppendFilter.h>
+#include <vtkStaticCleanPolyData.h>
+#include <vtkDataSetRegionSurfaceFilter.h>
+#include <vtkImageToStructuredGrid.h>
+#include <vtkAssignAttribute.h>
+#include <vtkPointData.h>
+#include <vtkImageDataToPointSet.h>
+
+void SlicePipeline::cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+	SlicePipeline* pipeline = static_cast<SlicePipeline*>(clientData);
+
+	pipeline->UpdatePlane();
+}
+
 SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut) {
 	labels = nullptr;
 	labelSlice = nullptr;
+	plane = vtkSmartPointer<vtkPlane>::New();
 
 	// Rendering
 	renderer = vtkSmartPointer<vtkRenderer>::New();
@@ -37,6 +62,12 @@ SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTab
 	interactor->GetRenderWindow()->AddRenderer(renderer);
 	interactor->SetInteractorStyle(style);
 	interactor->SetNumberOfFlyFrames(5);
+
+	// Camera callback
+	vtkSmartPointer <vtkCallbackCommand> cameraCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+	cameraCallback->SetCallback(cameraChange);
+	cameraCallback->SetClientData(this);
+	renderer->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, cameraCallback);
 
 	// Colors
 	labelColors = lut;
@@ -104,6 +135,24 @@ void SlicePipeline::SetCurrentLabel(unsigned short label) {
 	else {
 		probe->GetProperty()->SetColor(1, 1, 1);
 	}
+}
+
+void SlicePipeline::UpdatePlane() {
+	vtkCamera* cam = renderer->GetActiveCamera();
+
+	double v[3];
+	cam->GetDirectionOfProjection(v);
+	double s = -0.01;
+
+	vtkMath::Normalize(v);
+	v[0] *= s;
+	v[1] *= s;
+	v[2] *= s;
+
+	double* o = cam->GetFocalPoint();
+
+	plane->SetOrigin(o[0] + v[0], o[1] + v[1], o[2] + v[2]);
+	plane->SetNormal(cam->GetDirectionOfProjection());
 }
 
 void SlicePipeline::Render() {
@@ -186,7 +235,7 @@ void SlicePipeline::CreateLabelSlice(vtkImageData* labels) {
 	property->SetInterpolationTypeToNearest();
 	property->SetLookupTable(labelColors);
 	property->UseLookupTableScalarRangeOn();
-	property->SetOpacity(0.25);
+	property->SetOpacity(0.1);
 	
 	// Slice
 	labelSlice = vtkSmartPointer<vtkImageSlice>::New();
@@ -196,89 +245,33 @@ void SlicePipeline::CreateLabelSlice(vtkImageData* labels) {
 	labelSlice->DragableOff();
 
 	labelSlice->Update();
-	
-	// Below attempts to generate voxels outlines
-/*
-	vtkSmartPointer<vtkThreshold> threshold = vtkSmartPointer<vtkThreshold>::New();
-	threshold->ThresholdByUpper(1);
-	threshold->SetInputDataObject(labels);
 
-	vtkSmartPointer<vtkDataSetMapper> mapper2 = vtkSmartPointer<vtkDataSetMapper>::New();
-	mapper2->SetInputConnection(threshold->GetOutputPort());
+	// Voxel outlines
+	vtkSmartPointer<vtkThresholdPoints> points = vtkSmartPointer<vtkThresholdPoints>::New();
+	points->SetUpperThreshold(1);
+	points->SetInputDataObject(labels);
 
-	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
-	actor->GetProperty()->SetRepresentationToWireframe();
-	actor->SetMapper(mapper2);
-*/
+	vtkSmartPointer<vtkCubeSource> glyphSource = vtkSmartPointer<vtkCubeSource>::New();
 
-/*
-	vtkSmartPointer<vtkPlane> plane = vtkSmartPointer<vtkPlane>::New(); 
-	plane->SetNormal(0, 0, 1);
-	plane->SetOrigin(labels->GetDimensions()[0] / 2, labels->GetDimensions()[1] / 2, labels->GetDimensions()[2] / 2);
+	vtkSmartPointer<vtkGlyph3D> glyph = vtkSmartPointer<vtkGlyph3D>::New();
+	glyph->SetSourceConnection(glyphSource->GetOutputPort());
+	glyph->ScalingOff();
+	glyph->SetInputConnection(points->GetOutputPort());
 
 	vtkSmartPointer<vtkCutter> cut = vtkSmartPointer<vtkCutter>::New();
 	cut->SetCutFunction(plane);
-	cut->GenerateTrianglesOff();
-	cut->SetInputDataObject(labels);
+	cut->SetInputConnection(glyph->GetOutputPort());
 
-	vtkSmartPointer<vtkDataSetMapper> mapper2 = vtkSmartPointer<vtkDataSetMapper>::New();
+	vtkSmartPointer<vtkPolyDataMapper> mapper2 = vtkSmartPointer<vtkPolyDataMapper>::New();
 	mapper2->SetLookupTable(labelColors);
 	mapper2->UseLookupTableScalarRangeOn();
 	mapper2->SetInputConnection(cut->GetOutputPort());
 
 	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
-	actor->GetProperty()->SetRepresentationToPoints();
-	actor->PickableOff();
-	actor->SetMapper(mapper2);
-
-	vtkSmartPointer<vtkActor> actor2 = vtkSmartPointer<vtkActor>::New();
-	actor2->GetProperty()->SetRepresentationToWireframe();
-	double* p = actor2->GetPosition();
-	actor2->SetPosition(p[0] - 0.5, p[1] - 0.5, p[2] - 0.5);
-	actor2->PickableOff();
-	actor2->SetMapper(mapper2);
-
-	renderer->AddActor(actor);
-	renderer->AddActor(actor2);
-*/
-
-/*
-	vtkSmartPointer<vtkImageCast> cast = vtkSmartPointer<vtkImageCast>::New();
-	cast->SetOutputScalarTypeToFloat();
-	cast->SetInputDataObject(labels);
-
-	vtkSmartPointer<vtkImageDataGeometryFilter> grid = vtkSmartPointer<vtkImageDataGeometryFilter>::New();
-	grid->OutputTrianglesOn();
-	grid->SetInputConnection(cast->GetOutputPort());
-
-	vtkSmartPointer<vtkDataSetMapper> mapper2 = vtkSmartPointer<vtkDataSetMapper>::New();
-	mapper2->SetInputConnection(grid->GetOutputPort());
-
-	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
-	//actor->GetProperty()->SetRepresentationToWireframe();
-	actor->SetMapper(mapper2);
-
-*/
-/*
-	//vtkSmartPointer<vtkCubeSource> glyph = vtkSmartPointer<vtkCubeSource>::New();
-	//vtkSmartPointer<vtkPlaneSource> glyph = vtkSmartPointer<vtkPlaneSource>::New();
-	vtkSmartPointer<vtkSphereSource> glyph = vtkSmartPointer<vtkSphereSource>::New();
-	glyph->SetRadius(0.1);
-
-	vtkSmartPointer<vtkGlyph3DMapper> mapper2 = vtkSmartPointer<vtkGlyph3DMapper>::New();
-	mapper2->SetSourceConnection(glyph->GetOutputPort());
-	mapper2->ScalingOff(); 
-	mapper2->SetLookupTable(labelColors);
-	mapper2->UseLookupTableScalarRangeOn();
-	mapper2->SetInputDataObject(labels);
-
-	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
-	//actor->GetProperty()->SetRepresentationToPoints();
 	actor->GetProperty()->LightingOff();
 	actor->GetProperty()->SetOpacity(0.25);
 	actor->PickableOff();
 	actor->SetMapper(mapper2);
 
 	renderer->AddActor(actor);
-*/
 }
