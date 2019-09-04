@@ -39,6 +39,9 @@
 #include <vtkAssignAttribute.h>
 #include <vtkPointData.h>
 #include <vtkImageDataToPointSet.h>
+#include <vtkCellCenters.h>
+#include <vtkExtractGeometry.h>
+#include <vtkAppendFilter.h>
 
 void SlicePipeline::cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
 	SlicePipeline* pipeline = static_cast<SlicePipeline*>(clientData);

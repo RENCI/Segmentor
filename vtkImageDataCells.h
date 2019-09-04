@@ -1,0 +1,26 @@
+#ifndef vtkImageDataCells_h
+#define vtkImageDataCells_h
+
+#include <vtkSetGet.h>
+#include "vtkUnstructuredGridAlgorithm.h"
+
+class vtkImageDataCells : public vtkUnstructuredGridAlgorithm
+{
+public:
+	static vtkImageDataCells* New();
+	vtkTypeMacro(vtkImageDataCells, vtkUnstructuredGridAlgorithm);
+
+protected:
+	vtkImageDataCells();
+	~vtkImageDataCells() override ;
+
+	// Usual data generation methods
+	int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
+	int FillInputPortInformation(int port, vtkInformation *info) override;
+
+private:
+	vtkImageDataCells(const vtkImageDataCells&) = delete;
+	void operator=(const vtkImageDataCells&) = delete;
+};
+
+#endif
