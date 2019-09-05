@@ -56,12 +56,19 @@ void SlicePipeline::cameraChange(vtkObject* caller, unsigned long eventId, void*
 }
 
 SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut) {
+	data = nullptr;
 	labels = nullptr;
-	labelSlice = nullptr;
-	plane = vtkSmartPointer<vtkPlane>::New();
-	labelOutlines = vtkSmartPointer<vtkActor>::New();
 
-	labelVisualizationType = Overlay;
+	plane = vtkSmartPointer<vtkPlane>::New();
+
+	labelSlice = vtkSmartPointer<vtkImageSlice>::New();
+	labelSlice->VisibilityOn();
+
+	labelOutlines = vtkSmartPointer<vtkActor>::New();
+	labelOutlines->VisibilityOff();
+
+	regionOutlines = vtkSmartPointer<vtkActor>::New();
+	regionOutlines->VisibilityOn();
 
 	// Rendering
 	renderer = vtkSmartPointer<vtkRenderer>::New();
@@ -98,8 +105,9 @@ void SlicePipeline::SetImageData(vtkImageData* imageData) {
 	UpdateProbe(data);
 	probe->VisibilityOn();
 
+	CreateDataSlice(data);
+
 	// Render
-	renderer->AddActor(CreateDataSlice(data));
 	renderer->ResetCamera();
 	Render();
 }
@@ -108,11 +116,7 @@ void SlicePipeline::SetSegmentationData(vtkImageData* imageLabels) {
 	labels = imageLabels;
 	CreateLabelSlice(labels);
 
-	SetLabelVisualizationType(labelVisualizationType);
-
 	// Render
-	renderer->AddActor(labelSlice);
-	renderer->AddActor(labelOutlines);
 	Render();
 }
 
@@ -152,36 +156,19 @@ void SlicePipeline::SetCurrentLabel(unsigned short label) {
 	}
 }
 
-void SlicePipeline::ChangeLabelVisualization() {
-	LabelVisualizationType type = (LabelVisualizationType)(labelVisualizationType + 1);
-	if (type > 2) {
-		type = (LabelVisualizationType)0;
-	}
-
-	SetLabelVisualizationType(type);
+void SlicePipeline::ToggleLabelSlice() {
+	labelSlice->SetVisibility(!labelSlice->GetVisibility());
+	Render();
 }
 
-void SlicePipeline::SetLabelVisualizationType(LabelVisualizationType type) {
-	labelVisualizationType = type;
+void SlicePipeline::ToggleLabelOutlines() {
+	labelOutlines->SetVisibility(!labelOutlines->GetVisibility());
+	Render();
+}
 
-return;
-
-	switch (type) {
-	case Overlay:
-		labelSlice->SetVisibility(true);
-		labelOutlines->SetVisibility(false);
-		break;
-
-	case Outline:
-		labelSlice->SetVisibility(false);
-		labelOutlines->SetVisibility(true);
-		break;
-
-	case None:
-		labelSlice->SetVisibility(false);
-		labelOutlines->SetVisibility(false);
-		break;
-	}
+void SlicePipeline::ToggleRegionOutlines() {
+	regionOutlines->SetVisibility(!regionOutlines->GetVisibility());
+	Render();
 }
 
 void SlicePipeline::UpdatePlane() {
@@ -235,7 +222,7 @@ void SlicePipeline::UpdateProbe(vtkImageData* data) {
 	probe->SetScale(data->GetSpacing());
 }
 
-vtkSmartPointer<vtkImageSlice> SlicePipeline::CreateDataSlice(vtkImageData* data) {
+void SlicePipeline::CreateDataSlice(vtkImageData* data) {
 	// Get image info
 	double minValue = data->GetScalarRange()[0];
 	double maxValue = data->GetScalarRange()[1];
@@ -262,7 +249,7 @@ vtkSmartPointer<vtkImageSlice> SlicePipeline::CreateDataSlice(vtkImageData* data
 	slice->SetMapper(mapper);
 	slice->SetProperty(property);
 
-	return slice;
+	renderer->AddActor(slice);
 }
 
 void SlicePipeline::CreateLabelSlice(vtkImageData* labels) {
@@ -285,16 +272,14 @@ void SlicePipeline::CreateLabelSlice(vtkImageData* labels) {
 	property->SetOpacity(0.1);
 	
 	// Slice
-	labelSlice = vtkSmartPointer<vtkImageSlice>::New();
 	labelSlice->SetMapper(mapper);
 	labelSlice->SetProperty(property);
 	labelSlice->PickableOff();
 	labelSlice->DragableOff();
 
-	labelSlice->Update();
+	renderer->AddActor(labelSlice);
 
-	// Voxel outlines
-
+	// Label outlines
 	vtkSmartPointer<vtkImageDataCells> cells = vtkSmartPointer<vtkImageDataCells>::New();
 	cells->SetInputDataObject(labels);
 
@@ -302,71 +287,42 @@ void SlicePipeline::CreateLabelSlice(vtkImageData* labels) {
 	threshold->ThresholdByUpper(1);
 	threshold->SetInputConnection(cells->GetOutputPort());
 
-	vtkSmartPointer<vtkGeometryFilter> surface = vtkSmartPointer<vtkGeometryFilter>::New();
-	surface->SetInputConnection(threshold->GetOutputPort());
+	vtkSmartPointer<vtkCutter> labelOutlinesCut = vtkSmartPointer<vtkCutter>::New();
+	labelOutlinesCut->SetCutFunction(plane);
+	labelOutlinesCut->GenerateTrianglesOff();
+	labelOutlinesCut->SetInputConnection(threshold->GetOutputPort());
 
-	vtkSmartPointer<vtkCutter> cut = vtkSmartPointer<vtkCutter>::New();
-	cut->SetCutFunction(plane);
-	cut->SetInputConnection(surface->GetOutputPort());
+	vtkSmartPointer<vtkPolyDataMapper> labelOutlinesMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	labelOutlinesMapper->SetLookupTable(labelColors);
+	labelOutlinesMapper->UseLookupTableScalarRangeOn();
+	labelOutlinesMapper->SetInputConnection(labelOutlinesCut->GetOutputPort());
 
-	vtkSmartPointer<vtkPolyDataMapper> outlineMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-	outlineMapper->SetLookupTable(labelColors);
-	outlineMapper->UseLookupTableScalarRangeOn();
-	outlineMapper->SetInputConnection(cut->GetOutputPort());
-
-	labelOutlines = vtkSmartPointer<vtkActor>::New();
 	labelOutlines->GetProperty()->LightingOff();
 	labelOutlines->GetProperty()->SetRepresentationToWireframe();
 	labelOutlines->GetProperty()->SetOpacity(0.25);
 	labelOutlines->PickableOff();
-	labelOutlines->SetMapper(outlineMapper);
+	labelOutlines->SetMapper(labelOutlinesMapper);
 
 	renderer->AddActor(labelOutlines);
 
-/*
-	vtkSmartPointer<vtkImageDataCells> cells = vtkSmartPointer<vtkImageDataCells>::New();
-	cells->SetInputDataObject(labels);
+	// Region outlines
+	vtkSmartPointer<vtkGeometryFilter> surface = vtkSmartPointer<vtkGeometryFilter>::New();
+	surface->SetInputConnection(threshold->GetOutputPort());
 
-	vtkSmartPointer<vtkThreshold> threshold = vtkSmartPointer<vtkThreshold>::New();
-	threshold->ThresholdByUpper(1);
-	threshold->SetInputConnection(cells->GetOutputPort());
+	vtkSmartPointer<vtkCutter> regionOutlinesCut = vtkSmartPointer<vtkCutter>::New();
+	regionOutlinesCut->SetCutFunction(plane);
+	regionOutlinesCut->SetInputConnection(surface->GetOutputPort());
 
-	vtkSmartPointer<vtkDataSetMapper> mapper2 = vtkSmartPointer<vtkDataSetMapper>::New();
-	mapper2->SetInputConnection(threshold->GetOutputPort());
+	vtkSmartPointer<vtkPolyDataMapper> regionOutlinesMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	regionOutlinesMapper->SetLookupTable(labelColors);
+	regionOutlinesMapper->UseLookupTableScalarRangeOn();
+	regionOutlinesMapper->SetInputConnection(regionOutlinesCut->GetOutputPort());
 
-	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
-	//actor->GetProperty()->SetRepresentationToWireframe();
-	actor->SetMapper(mapper2);
+	regionOutlines->GetProperty()->LightingOff();
+	regionOutlines->GetProperty()->SetRepresentationToWireframe();
+	regionOutlines->GetProperty()->SetOpacity(0.25);
+	regionOutlines->PickableOff();
+	regionOutlines->SetMapper(regionOutlinesMapper);
 
-	renderer->AddActor(actor);
-	renderer->ResetCamera();
-*/
-
-/*
-	vtkSmartPointer<vtkThresholdPoints> points = vtkSmartPointer<vtkThresholdPoints>::New();
-	points->SetUpperThreshold(1);
-	points->SetInputDataObject(labels);
-
-	vtkSmartPointer<vtkCubeSource> glyphSource = vtkSmartPointer<vtkCubeSource>::New();
-
-	vtkSmartPointer<vtkGlyph3D> glyph = vtkSmartPointer<vtkGlyph3D>::New();
-	glyph->SetSourceConnection(glyphSource->GetOutputPort());
-	glyph->ScalingOff();
-	glyph->SetInputConnection(points->GetOutputPort());
-
-	vtkSmartPointer<vtkCutter> cut = vtkSmartPointer<vtkCutter>::New();
-	cut->SetCutFunction(plane);
-	cut->SetInputConnection(glyph->GetOutputPort());
-
-	vtkSmartPointer<vtkPolyDataMapper> outlineMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-	outlineMapper->SetLookupTable(labelColors);
-	outlineMapper->UseLookupTableScalarRangeOn();
-	outlineMapper->SetInputConnection(cut->GetOutputPort());
-
-	labelOutlines = vtkSmartPointer<vtkActor>::New();
-	labelOutlines->GetProperty()->LightingOff();
-	labelOutlines->GetProperty()->SetOpacity(0.25);
-	labelOutlines->PickableOff();
-	labelOutlines->SetMapper(outlineMapper);
-*/
+	renderer->AddActor(regionOutlines);
 }

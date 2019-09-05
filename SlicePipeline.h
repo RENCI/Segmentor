@@ -28,7 +28,9 @@ public:
 
 	void SetCurrentLabel(unsigned short label);
 	
-	void ChangeLabelVisualization();
+	void ToggleLabelSlice();
+	void ToggleLabelOutlines();
+	void ToggleRegionOutlines();
 
 	void UpdatePlane();
 
@@ -47,18 +49,13 @@ protected:
 	vtkSmartPointer<vtkInteractorStyleSlice> style;
 	vtkSmartPointer<vtkLookupTable> labelColors;
 
-	vtkSmartPointer<vtkImageSlice> labelSlice;
+	// Cut plane
 	vtkSmartPointer<vtkPlane> plane;
+
+	// Overlays
+	vtkSmartPointer<vtkImageSlice> labelSlice;
 	vtkSmartPointer<vtkActor> labelOutlines;
-
-	// Label visualization
-	enum LabelVisualizationType {
-		Overlay,
-		Outline,
-		None
-	} labelVisualizationType;
-
-	void SetLabelVisualizationType(LabelVisualizationType type);
+	vtkSmartPointer<vtkActor> regionOutlines;
 
 	// Probe
 	vtkSmartPointer<vtkActor> probe;
@@ -66,7 +63,7 @@ protected:
 	void UpdateProbe(vtkImageData* data);
 
 	// Slices
-	vtkSmartPointer<vtkImageSlice> CreateDataSlice(vtkImageData* data);
+	void CreateDataSlice(vtkImageData* data);
 	void CreateLabelSlice(vtkImageData* labels);
 
 	static void cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);

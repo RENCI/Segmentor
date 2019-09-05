@@ -109,9 +109,16 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 			break;
 		}
 
-	case 'v':
-	case 'V':
-		vis->GetSlicePipeline()->ChangeLabelVisualization();
+	case '1':
+		vis->GetSlicePipeline()->ToggleLabelSlice();
+		break;
+
+	case '2':
+		vis->GetSlicePipeline()->ToggleLabelOutlines();
+		break;
+
+	case '3':
+		vis->GetSlicePipeline()->ToggleRegionOutlines();
 		break;
 	}
 }
