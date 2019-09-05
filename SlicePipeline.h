@@ -27,6 +27,8 @@ public:
 	void SetProbePosition(double x, double y, double z);
 
 	void SetCurrentLabel(unsigned short label);
+	
+	void ChangeLabelVisualization();
 
 	void UpdatePlane();
 
@@ -45,9 +47,18 @@ protected:
 	vtkSmartPointer<vtkInteractorStyleSlice> style;
 	vtkSmartPointer<vtkLookupTable> labelColors;
 
-	// Slices
 	vtkSmartPointer<vtkImageSlice> labelSlice;
 	vtkSmartPointer<vtkPlane> plane;
+	vtkSmartPointer<vtkActor> labelOutlines;
+
+	// Label visualization
+	enum LabelVisualizationType {
+		Overlay,
+		Outline,
+		None
+	} labelVisualizationType;
+
+	void SetLabelVisualizationType(LabelVisualizationType type);
 
 	// Probe
 	vtkSmartPointer<vtkActor> probe;

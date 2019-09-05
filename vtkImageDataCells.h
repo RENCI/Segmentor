@@ -18,6 +18,8 @@ protected:
 	int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
 	int FillInputPortInformation(int port, vtkInformation *info) override;
 
+	void PointOffset(double in[3], double x, double y, double z, double out[3]);
+
 private:
 	vtkImageDataCells(const vtkImageDataCells&) = delete;
 	void operator=(const vtkImageDataCells&) = delete;
