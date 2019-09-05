@@ -319,8 +319,8 @@ void SlicePipeline::CreateLabelSlice(vtkImageData* labels) {
 	regionOutlinesMapper->SetInputConnection(regionOutlinesCut->GetOutputPort());
 
 	regionOutlines->GetProperty()->LightingOff();
-	regionOutlines->GetProperty()->SetRepresentationToWireframe();
-	regionOutlines->GetProperty()->SetOpacity(0.25);
+	regionOutlines->GetProperty()->SetLineWidth(2);
+	regionOutlines->GetProperty()->SetOpacity(0.5);
 	regionOutlines->PickableOff();
 	regionOutlines->SetMapper(regionOutlinesMapper);
 
