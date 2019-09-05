@@ -1,6 +1,7 @@
 #include "SlicePipeline.h"
 
 #include "vtkInteractorStyleSlice.h"
+#include "vtkImageDataCells.h"
 
 #include <vtkActor.h>
 #include <vtkCallbackCommand.h>
@@ -8,6 +9,7 @@
 #include <vtkContourFilter.h>
 #include <vtkCubeSource.h>
 #include <vtkCutter.h>
+#include <vtkGeometryFilter.h>
 #include <vtkImageData.h>
 #include <vtkImageMapToColors.h>
 #include <vtkImageProperty.h>
@@ -21,33 +23,7 @@
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
-
-#include <vtkDataSetMapper.h>
 #include <vtkThreshold.h>
-#include <vtkFlyingEdgesPlaneCutter.h>
-#include <vtkDataSetSurfaceFilter.h>
-#include <vtkPointDataToCellData.h>
-#include <vtkImageDataGeometryFilter.h>
-#include <vtkExtractEdges.h>
-#include <vtkGlyph3DMapper.h>
-#include <vtkThresholdPoints.h>
-#include <vtkCleanPolyData.h>
-#include <vtkAppendFilter.h>
-#include <vtkStaticCleanPolyData.h>
-#include <vtkDataSetRegionSurfaceFilter.h>
-#include <vtkImageToStructuredGrid.h>
-#include <vtkAssignAttribute.h>
-#include <vtkPointData.h>
-#include <vtkImageDataToPointSet.h>
-#include <vtkCellCenters.h>
-#include <vtkExtractGeometry.h>
-#include <vtkAppendFilter.h>
-#include <vtkRectilinearGridToTetrahedra.h>
-
-#include <vtkGeometryFilter.h>
-
-#include "vtkImageDataCells.h"
-#include "vtkUnstructuredGrid.h"
 
 void SlicePipeline::cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
 	SlicePipeline* pipeline = static_cast<SlicePipeline*>(clientData);
@@ -72,13 +48,33 @@ SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTab
 
 	// Rendering
 	renderer = vtkSmartPointer<vtkRenderer>::New();
+	renderer->SetLayer(0);
 	//renderer->GetActiveCamera()->ParallelProjectionOn();
+
+	labelSliceRenderer = vtkSmartPointer<vtkRenderer>::New();
+	labelSliceRenderer->SetLayer(1);
+	labelSliceRenderer->InteractiveOff();
+	labelSliceRenderer->SetActiveCamera(renderer->GetActiveCamera());
+
+	labelOutlinesRenderer = vtkSmartPointer<vtkRenderer>::New();
+	labelOutlinesRenderer->SetLayer(2);
+	labelOutlinesRenderer->InteractiveOff();
+	labelOutlinesRenderer->SetActiveCamera(renderer->GetActiveCamera());
+
+	regionOutlinesRenderer = vtkSmartPointer<vtkRenderer>::New();
+	regionOutlinesRenderer->SetLayer(2);
+	regionOutlinesRenderer->InteractiveOff();
+	regionOutlinesRenderer->SetActiveCamera(renderer->GetActiveCamera());
 
 	style = vtkSmartPointer<vtkInteractorStyleSlice>::New();
 	style->SetInteractionModeToImage3D();
 	style->SetCurrentImageNumber(0);
 
+	interactor->GetRenderWindow()->SetNumberOfLayers(4);
 	interactor->GetRenderWindow()->AddRenderer(renderer);
+	interactor->GetRenderWindow()->AddRenderer(labelSliceRenderer);
+	interactor->GetRenderWindow()->AddRenderer(labelOutlinesRenderer);
+	interactor->GetRenderWindow()->AddRenderer(regionOutlinesRenderer);
 	interactor->SetInteractorStyle(style);
 	interactor->SetNumberOfFlyFrames(5);
 
@@ -176,7 +172,7 @@ void SlicePipeline::UpdatePlane() {
 
 	double v[3];
 	cam->GetDirectionOfProjection(v);
-	double s = -0.01;
+	double s = 0.0;
 
 	vtkMath::Normalize(v);
 	v[0] *= s;
@@ -186,6 +182,8 @@ void SlicePipeline::UpdatePlane() {
 	double* o = cam->GetFocalPoint();
 
 	plane->SetOrigin(o[0] + v[0], o[1] + v[1], o[2] + v[2]);
+
+	plane->SetOrigin(cam->GetFocalPoint());
 	plane->SetNormal(cam->GetDirectionOfProjection());
 }
 
@@ -274,10 +272,8 @@ void SlicePipeline::CreateLabelSlice(vtkImageData* labels) {
 	// Slice
 	labelSlice->SetMapper(mapper);
 	labelSlice->SetProperty(property);
-	labelSlice->PickableOff();
-	labelSlice->DragableOff();
 
-	renderer->AddActor(labelSlice);
+	labelSliceRenderer->AddActor(labelSlice);
 
 	// Label outlines
 	vtkSmartPointer<vtkImageDataCells> cells = vtkSmartPointer<vtkImageDataCells>::New();
@@ -300,10 +296,9 @@ void SlicePipeline::CreateLabelSlice(vtkImageData* labels) {
 	labelOutlines->GetProperty()->LightingOff();
 	labelOutlines->GetProperty()->SetRepresentationToWireframe();
 	labelOutlines->GetProperty()->SetOpacity(0.25);
-	labelOutlines->PickableOff();
 	labelOutlines->SetMapper(labelOutlinesMapper);
-
-	renderer->AddActor(labelOutlines);
+	
+	labelOutlinesRenderer->AddActor(labelOutlines);
 
 	// Region outlines
 	vtkSmartPointer<vtkGeometryFilter> surface = vtkSmartPointer<vtkGeometryFilter>::New();
@@ -321,8 +316,7 @@ void SlicePipeline::CreateLabelSlice(vtkImageData* labels) {
 	regionOutlines->GetProperty()->LightingOff();
 	regionOutlines->GetProperty()->SetLineWidth(2);
 	regionOutlines->GetProperty()->SetOpacity(0.5);
-	regionOutlines->PickableOff();
 	regionOutlines->SetMapper(regionOutlinesMapper);
 
-	renderer->AddActor(regionOutlines);
+	regionOutlinesRenderer->AddActor(regionOutlines);
 }

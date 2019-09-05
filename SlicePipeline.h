@@ -32,6 +32,7 @@ public:
 	void ToggleLabelOutlines();
 	void ToggleRegionOutlines();
 
+	void UpdateOverlay();
 	void UpdatePlane();
 
 	void Render();
@@ -46,6 +47,10 @@ protected:
 
 	// Rendering
 	vtkSmartPointer<vtkRenderer> renderer;
+	vtkSmartPointer<vtkRenderer> labelSliceRenderer;
+	vtkSmartPointer<vtkRenderer> labelOutlinesRenderer;
+	vtkSmartPointer<vtkRenderer> regionOutlinesRenderer;
+
 	vtkSmartPointer<vtkInteractorStyleSlice> style;
 	vtkSmartPointer<vtkLookupTable> labelColors;
 
