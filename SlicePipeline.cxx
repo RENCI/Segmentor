@@ -44,6 +44,8 @@
 #include <vtkAppendFilter.h>
 #include <vtkRectilinearGridToTetrahedra.h>
 
+#include <vtkGeometryFilter.h>
+
 #include "vtkImageDataCells.h"
 #include "vtkUnstructuredGrid.h"
 
@@ -161,6 +163,8 @@ void SlicePipeline::ChangeLabelVisualization() {
 
 void SlicePipeline::SetLabelVisualizationType(LabelVisualizationType type) {
 	labelVisualizationType = type;
+
+return;
 
 	switch (type) {
 	case Overlay:
@@ -290,31 +294,55 @@ void SlicePipeline::CreateLabelSlice(vtkImageData* labels) {
 	labelSlice->Update();
 
 	// Voxel outlines
+
+	vtkSmartPointer<vtkImageDataCells> cells = vtkSmartPointer<vtkImageDataCells>::New();
+	cells->SetInputDataObject(labels);
+
+	vtkSmartPointer<vtkThreshold> threshold = vtkSmartPointer<vtkThreshold>::New();
+	threshold->ThresholdByUpper(1);
+	threshold->SetInputConnection(cells->GetOutputPort());
+
+	vtkSmartPointer<vtkGeometryFilter> surface = vtkSmartPointer<vtkGeometryFilter>::New();
+	surface->SetInputConnection(threshold->GetOutputPort());
+
+	vtkSmartPointer<vtkCutter> cut = vtkSmartPointer<vtkCutter>::New();
+	cut->SetCutFunction(plane);
+	cut->SetInputConnection(surface->GetOutputPort());
+
+	vtkSmartPointer<vtkPolyDataMapper> outlineMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	outlineMapper->SetLookupTable(labelColors);
+	outlineMapper->UseLookupTableScalarRangeOn();
+	outlineMapper->SetInputConnection(cut->GetOutputPort());
+
+	labelOutlines = vtkSmartPointer<vtkActor>::New();
+	labelOutlines->GetProperty()->LightingOff();
+	labelOutlines->GetProperty()->SetRepresentationToWireframe();
+	labelOutlines->GetProperty()->SetOpacity(0.25);
+	labelOutlines->PickableOff();
+	labelOutlines->SetMapper(outlineMapper);
+
+	renderer->AddActor(labelOutlines);
+
 /*
 	vtkSmartPointer<vtkImageDataCells> cells = vtkSmartPointer<vtkImageDataCells>::New();
 	cells->SetInputDataObject(labels);
-	cells->Update();
 
-	labels->Print(std::cout);
-	cells->GetOutput()->Print(std::cout);
-
-	//vtkSmartPointer<vtkThreshold> threshold = vtkSmartPointer<vtkThreshold>::New();
-	//threshold->ThresholdByUpper(1);
-	//threshold->SetInputConnection(cells->GetOutputPort());
-
-	//threshold->Update();
-	//threshold->GetOutput()->Print(std::cout);
+	vtkSmartPointer<vtkThreshold> threshold = vtkSmartPointer<vtkThreshold>::New();
+	threshold->ThresholdByUpper(1);
+	threshold->SetInputConnection(cells->GetOutputPort());
 
 	vtkSmartPointer<vtkDataSetMapper> mapper2 = vtkSmartPointer<vtkDataSetMapper>::New();
-	mapper2->SetInputConnection(cells->GetOutputPort());
+	mapper2->SetInputConnection(threshold->GetOutputPort());
 
 	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
-	actor->GetProperty()->SetRepresentationToWireframe();
+	//actor->GetProperty()->SetRepresentationToWireframe();
 	actor->SetMapper(mapper2);
 
 	renderer->AddActor(actor);
+	renderer->ResetCamera();
 */
 
+/*
 	vtkSmartPointer<vtkThresholdPoints> points = vtkSmartPointer<vtkThresholdPoints>::New();
 	points->SetUpperThreshold(1);
 	points->SetInputDataObject(labels);
@@ -340,4 +368,5 @@ void SlicePipeline::CreateLabelSlice(vtkImageData* labels) {
 	labelOutlines->GetProperty()->SetOpacity(0.25);
 	labelOutlines->PickableOff();
 	labelOutlines->SetMapper(outlineMapper);
+*/
 }
