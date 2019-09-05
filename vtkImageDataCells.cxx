@@ -56,7 +56,7 @@ int vtkImageDataCells::RequestData(
 	double* spacing = input->GetSpacing();
 
 	// Number of points
-	int numPoints = input->GetNumberOfPoints();
+	int numPoints = (inputDims[0] + 1) * (inputDims[1] + 1) * (inputDims[2] + 1);
 
 	// Allocate memory for points
 	vtkNew<vtkPoints> points;
@@ -67,37 +67,66 @@ int vtkImageDataCells::RequestData(
 	int nj = inputDims[1];
 
 	// Point offset
-	double x = spacing[0] / 2;
-	double y = spacing[1] / 2;
-	double z = spacing[2] / 2;
+	double halfCellX = spacing[0] / 2;
+	double halfCellY = spacing[1] / 2;
+	double halfCellZ = spacing[2] / 2;
 
 	// Create points
-	for (int i = 0; i < inputDims[0]; i++) {
-		for (int j = 0; j < inputDims[1]; j++) {
-			for (int k = 0; k < inputDims[2]; k++) {
-				vtkIdType id = GetPointId(i, j, k, ni, nj);
+	int n = 0;
+	for (int k = 0; k <= inputDims[2]; k++) {
+		for (int j = 0; j <= inputDims[1]; j++) {
+			for (int i = 0; i <= inputDims[0]; i++) {
+				// Defaults
+				int i2 = i;
+				int j2 = j;
+				int k2 = k;
 
+				double xOffset = -halfCellX;
+				double yOffset = -halfCellY;
+				double zOffset = -halfCellZ;
+
+				// Edge cases
+				if (i == inputDims[0]) {
+					i2 = inputDims[0] - 1;
+					xOffset = halfCellX;
+				}
+
+				if (j == inputDims[1]) {
+					j2 = inputDims[1] - 1;
+					yOffset = halfCellY;
+				}
+
+				if (k == inputDims[2]) {
+					k2 = inputDims[2] - 1;
+					zOffset = halfCellZ;
+				}
+				
+				// Get point
 				double p0[3];
-				input->GetPoint(id, p0);
+				input->GetPoint(GetPointId(i2, j2, k2, ni, nj), p0);
 
-				double p[3];
-				PointOffset(p0, -x, -y, -z, p);
-
-				points->SetPoint(id, p);
+				// Create offset point
+				double p[3];				
+				PointOffset(p0, xOffset, yOffset, zOffset, p);
+				points->SetPoint(n++, p);
 			}
 		}
 	}
 
 	// Number of cells
-	const int numCells = (inputDims[0] - 1) * (inputDims[1] - 1) * (inputDims[2] - 1);
+	int numCells = input->GetNumberOfPoints();
 
 	// Allocate memory for cells
 	output->Allocate(numCells);
 
+	// Axes lengths for indexing
+	ni = inputDims[0] + 1;
+	nj = inputDims[1] + 1;
+
 	// Create cells
-	for (int i = 0; i < inputDims[0] - 1; i++) {
-		for (int j = 0; j < inputDims[1] - 1; j++) {
-			for (int k = 0; k < inputDims[2] - 1; k++) {
+	for (int k = 0; k < inputDims[2]; k++) {
+		for (int j = 0; j < inputDims[1]; j++) {
+			for (int i = 0; i < inputDims[0]; i++) {
 				vtkIdType cellPoints[8] = {
 					GetPointId(i,     j,     k, ni, nj), 
 					GetPointId(i + 1, j,     k, ni, nj), 
@@ -116,25 +145,9 @@ int vtkImageDataCells::RequestData(
 	}
 
 	// Copy point data to cell data 
-	// XXX: Should be able to use shallow copy when drawing cells for each point
-	vtkPointData* pointData = input->GetPointData();
-	vtkCellData* cellData = output->GetCellData();
+	output->GetCellData()->DeepCopy(input->GetPointData());
 
-	cellData->CopyAllocate(pointData);
-	
-	int cid = 0;
-	for (int i = 0; i < inputDims[0] - 1; i++) {
-		for (int j = 0; j < inputDims[1] - 1; j++) {
-			for (int k = 0; k < inputDims[2] - 1; k++) {
-				vtkIdType pid = GetPointId(i, j, k, ni, nj);
-
-				cellData->CopyData(pointData, pid, cid++);
-			}
-		}
-	}
-
-	// Set output
-	//output->GetCellData()->DeepCopy(input->GetPointData());
+	// Set output points
 	output->SetPoints(points.Get());
 
 	return 1;
