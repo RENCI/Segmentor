@@ -87,8 +87,11 @@ void SliceLocation::UpdateView(vtkCamera* camera, vtkPlane* cutPlane) {
 	double x = distance * tan(vtkMath::RadiansFromDegrees(camera->GetViewAngle()));
 	double y = x;
 
+	//planeSource->SetCenter(camera->GetFocalPoint());
+	planeSource->SetNormal(camera->GetDirectionOfProjection());
+
 	visibleActor->SetPosition(camera->GetFocalPoint());
-	visibleActor->SetOrientation(camera->GetOrientation());
+	//visibleActor->SetOrientation(camera->GetOrientation());
 	visibleActor->SetScale(x, y, 1);
 
 	/*
