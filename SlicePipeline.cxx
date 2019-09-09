@@ -1,5 +1,7 @@
 #include "SlicePipeline.h"
 
+#include "SliceLocation.h"
+
 #include "vtkInteractorStyleSlice.h"
 #include "vtkImageDataCells.h"
 
@@ -49,7 +51,6 @@ SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTab
 	// Rendering
 	renderer = vtkSmartPointer<vtkRenderer>::New();
 	renderer->SetLayer(0);
-	//renderer->GetActiveCamera()->ParallelProjectionOn();
 
 	labelSliceRenderer = vtkSmartPointer<vtkRenderer>::New();
 	labelSliceRenderer->SetLayer(1);
@@ -66,6 +67,11 @@ SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTab
 	regionOutlinesRenderer->InteractiveOff();
 	regionOutlinesRenderer->SetActiveCamera(renderer->GetActiveCamera());
 
+	vtkSmartPointer<vtkRenderer> sliceLocationRenderer = vtkSmartPointer<vtkRenderer>::New();
+	sliceLocationRenderer->SetLayer(3);
+	sliceLocationRenderer->InteractiveOff();
+	sliceLocationRenderer->SetViewport(0.8, 0.0, 1.0, 0.2);
+
 	style = vtkSmartPointer<vtkInteractorStyleSlice>::New();
 	style->SetInteractionModeToImage3D();
 	style->SetCurrentImageNumber(0);
@@ -75,6 +81,7 @@ SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTab
 	interactor->GetRenderWindow()->AddRenderer(labelSliceRenderer);
 	interactor->GetRenderWindow()->AddRenderer(labelOutlinesRenderer);
 	interactor->GetRenderWindow()->AddRenderer(regionOutlinesRenderer);
+	interactor->GetRenderWindow()->AddRenderer(sliceLocationRenderer);
 	interactor->SetInteractorStyle(style);
 	interactor->SetNumberOfFlyFrames(5);
 
@@ -89,9 +96,13 @@ SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTab
 
 	// Probe
 	CreateProbe();
+
+	// Slice location
+	sliceLocation = new SliceLocation(sliceLocationRenderer);
 }
 
 SlicePipeline::~SlicePipeline() {
+	delete sliceLocation;
 }
 
 void SlicePipeline::SetImageData(vtkImageData* imageData) {
@@ -101,6 +112,10 @@ void SlicePipeline::SetImageData(vtkImageData* imageData) {
 	UpdateProbe(data);
 	probe->VisibilityOn();
 
+	// Update axes
+	sliceLocation->UpdateData(imageData);
+
+	// Create image slice
 	CreateDataSlice(data);
 
 	// Render
@@ -170,21 +185,10 @@ void SlicePipeline::ToggleRegionOutlines() {
 void SlicePipeline::UpdatePlane() {
 	vtkCamera* cam = renderer->GetActiveCamera();
 
-	double v[3];
-	cam->GetDirectionOfProjection(v);
-	double s = 0.0;
-
-	vtkMath::Normalize(v);
-	v[0] *= s;
-	v[1] *= s;
-	v[2] *= s;
-
-	double* o = cam->GetFocalPoint();
-
-	plane->SetOrigin(o[0] + v[0], o[1] + v[1], o[2] + v[2]);
-
 	plane->SetOrigin(cam->GetFocalPoint());
 	plane->SetNormal(cam->GetDirectionOfProjection());
+
+	sliceLocation->UpdateView(cam, plane);
 }
 
 void SlicePipeline::Render() {
@@ -213,7 +217,7 @@ void SlicePipeline::CreateProbe() {
 	probe->PickableOff();
 
 	renderer->AddActor(probe);
-}
+} 
 
 void SlicePipeline::UpdateProbe(vtkImageData* data) {
 	probe->SetPosition(data->GetCenter());

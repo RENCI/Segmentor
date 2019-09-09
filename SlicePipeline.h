@@ -3,6 +3,8 @@
 
 #include <vtkSmartPointer.h>
 
+class SliceLocation;
+
 class vtkActor;
 class vtkAlgorithmOutput;
 class vtkContourFilter;
@@ -32,7 +34,6 @@ public:
 	void ToggleLabelOutlines();
 	void ToggleRegionOutlines();
 
-	void UpdateOverlay();
 	void UpdatePlane();
 
 	void Render();
@@ -66,6 +67,9 @@ protected:
 	vtkSmartPointer<vtkActor> probe;
 	void CreateProbe();
 	void UpdateProbe(vtkImageData* data);
+
+	// Slice location
+	SliceLocation* sliceLocation;
 
 	// Slices
 	void CreateDataSlice(vtkImageData* data);
