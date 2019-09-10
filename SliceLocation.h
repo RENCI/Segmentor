@@ -24,6 +24,11 @@ public:
 	void UpdateView(vtkCamera* camera, vtkPlane* cutPlane);
 
 protected:
+	double outlineColor[3];
+	double sliceColor[3];
+
+	double length;
+
 	vtkSmartPointer<vtkRenderer> renderer;
 
 	// Outline

@@ -19,6 +19,16 @@
 #include <vtkRenderer.h>
 
 SliceLocation::SliceLocation(vtkRenderer* ren) {
+	sliceColor[0] = 0;
+	sliceColor[1] = 0;
+	sliceColor[2] = 0.75;
+
+	outlineColor[0] = 0.5;
+	outlineColor[1] = 0.5;
+	outlineColor[2] = 0.5;
+
+	length = 0;
+
 	renderer = ren;
 	renderer->GetActiveCamera()->Azimuth(-45.0);
 	renderer->GetActiveCamera()->Elevation(20.0);
@@ -35,6 +45,7 @@ SliceLocation::~SliceLocation() {
 
 void SliceLocation::UpdateData(vtkImageData* data) {
 	double* bounds = data->GetBounds();
+	length = data->GetLength();
 
 	outline->SetInputDataObject(data);
 	corners->SetInputDataObject(data);
@@ -73,7 +84,7 @@ void SliceLocation::UpdateView(vtkCamera* camera, vtkPlane* cutPlane) {
 	insetPlane->SetNormal(camera->GetViewPlaneNormal());
 
 	// View direction
-	double s = 50;
+	double s = length * 0.1;
 	lineSource->SetPoint1(o);
 	lineSource->SetPoint2(o[0] - v[0] * s, o[1] - v[1] * s, o[2] - v[2] * s);
 }
@@ -85,6 +96,7 @@ void SliceLocation::CreateOutline() {
 	mapper->SetInputConnection(outline->GetOutputPort());
 
 	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+	actor->GetProperty()->SetColor(outlineColor);
 	actor->GetProperty()->SetOpacity(0.25);
 	actor->GetProperty()->SetRepresentationToWireframe();
 	actor->GetProperty()->LightingOff();
@@ -101,6 +113,7 @@ void SliceLocation::CreateCorners() {
 	mapper->SetInputConnection(corners->GetOutputPort());
 
 	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+	actor->GetProperty()->SetColor(outlineColor);
 	actor->GetProperty()->SetRepresentationToWireframe();
 	actor->GetProperty()->LightingOff();
 	actor->SetMapper(mapper);
@@ -120,7 +133,7 @@ void SliceLocation::CreatePlane() {
 	mapper->SetInputConnection(planeCutter->GetOutputPort());
 
 	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
-	actor->GetProperty()->SetColor(0.0, 0.0, 1.0);
+	actor->GetProperty()->SetColor(sliceColor);
 	actor->GetProperty()->LightingOff();
 	actor->SetMapper(mapper);
 	actor->VisibilityOff();
@@ -145,7 +158,7 @@ void SliceLocation::CreatePlaneInset() {
 
 	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
 	actor->GetProperty()->SetOpacity(0.5);
-	actor->GetProperty()->SetColor(0.0, 0.0, 1.0);
+	actor->GetProperty()->SetColor(sliceColor);
 	actor->GetProperty()->LightingOff();
 	actor->SetMapper(mapper);
 	actor->VisibilityOff();
@@ -160,7 +173,7 @@ void SliceLocation::CreateViewDirection() {
 	mapper->SetInputConnection(lineSource->GetOutputPort());
 
 	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
-	actor->GetProperty()->SetColor(0.0, 0.0, 1.0);
+	actor->GetProperty()->SetColor(sliceColor);
 	actor->GetProperty()->LightingOff();
 	actor->SetMapper(mapper);
 	actor->VisibilityOff();
