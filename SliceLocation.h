@@ -3,17 +3,16 @@
 
 #include <vtkSmartPointer.h>
 
-class vtkActor;
 class vtkBox;
 class vtkCamera;
-class vtkCubeAxesActor;
 class vtkCubeSource;
 class vtkCutter;
-class vtkFrustumSource;
 class vtkImageData;
+class vtkLineSource;
+class vtkOutlineCornerFilter;
+class vtkOutlineFilter;
 class vtkPlane;
 class vtkPlaneSource;
-class vtkPolyDataMapper;
 class vtkRenderer;
 
 class SliceLocation {
@@ -27,23 +26,28 @@ public:
 protected:
 	vtkSmartPointer<vtkRenderer> renderer;
 
-	vtkSmartPointer<vtkCubeAxesActor> axes;
+	// Outline
+	vtkSmartPointer<vtkOutlineFilter> outline;
 
-	vtkSmartPointer<vtkCutter> cutter;
+	// Corners
+	vtkSmartPointer<vtkOutlineCornerFilter> corners;
 
-	vtkSmartPointer<vtkPolyDataMapper> visibleMapper;
-	vtkSmartPointer<vtkActor> visibleActor;
+	// Plane
+	vtkSmartPointer<vtkCubeSource> planeCube;
+	vtkSmartPointer<vtkCutter> planeCutter;
 
-	vtkSmartPointer<vtkCubeSource> cubeSource;
-	vtkSmartPointer<vtkPlaneSource> planeSource;
-	vtkSmartPointer<vtkActor> plane;
+	// Plane inset
+	vtkSmartPointer<vtkPlaneSource> insetPlane;
+	vtkSmartPointer<vtkBox> box;
 
-	vtkSmartPointer<vtkActor> position;
+	// View direction
+	vtkSmartPointer<vtkLineSource> lineSource;
 
-	void CreateAxes();
+	void CreateOutline();
+	void CreateCorners();
 	void CreatePlane();
-	void CreatePosition();
-	void CreateCameraActor();
+	void CreatePlaneInset();
+	void CreateViewDirection();
 };
 
 #endif

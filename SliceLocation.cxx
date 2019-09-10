@@ -4,28 +4,30 @@
 #include <vtkBox.h>
 #include <vtkCamera.h>
 #include <vtkClipPolyData.h>
-#include <vtkCubeAxesActor.h>
 #include <vtkCubeSource.h>
 #include <vtkCutter.h>
-#include <vtkFrustumSource.h>
 #include <vtkImageData.h>
+#include <vtkLineSource.h>
 #include <vtkMath.h>
 #include <vtkPlane.h>
-#include <vtkPlanes.h>
 #include <vtkPlaneSource.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
+#include <vtkPropCollection.h>
+#include <vtkOutlineCornerFilter.h>
+#include <vtkOutlineFilter.h>
 #include <vtkRenderer.h>
-#include <vtkSphereSource.h>
 
 SliceLocation::SliceLocation(vtkRenderer* ren) {
 	renderer = ren;
-	renderer->GetActiveCamera()->Azimuth(-30.0);
+	renderer->GetActiveCamera()->Azimuth(-45.0);
+	renderer->GetActiveCamera()->Elevation(20.0);
 
-	CreateAxes();
+	CreateOutline();
+	CreateCorners();
 	CreatePlane();
-	CreatePosition();
-	CreateCameraActor();
+	CreatePlaneInset();
+	CreateViewDirection();
 }
 
 SliceLocation::~SliceLocation() {
@@ -33,145 +35,135 @@ SliceLocation::~SliceLocation() {
 
 void SliceLocation::UpdateData(vtkImageData* data) {
 	double* bounds = data->GetBounds();
-	double width = bounds[1] - bounds[0];
-	double length = data->GetLength();
 
-	axes->SetBounds(bounds);
-	axes->VisibilityOn();
+	outline->SetInputDataObject(data);
+	corners->SetInputDataObject(data);
 
-	cubeSource->SetBounds(bounds);
-	plane->VisibilityOn();
+	planeCube->SetBounds(bounds);
+	box->SetBounds(bounds);
 
-	//planeSource->SetOrigin(bounds[0] - length, bounds[2] - length, 0.0);
-	//planeSource->SetPoint1(bounds[1] + length, bounds[2] - length, 0.0);
-	//planeSource->SetPoint2(bounds[0] - length, bounds[3] + length, 0.0);
-	//planeSource->SetOrigin(bounds[0], bounds[2], 0.0);
-	//planeSource->SetPoint1(bounds[1], bounds[2], 0.0);
-	//planeSource->SetPoint2(bounds[0], bounds[3], 0.0);
-	visibleActor->VisibilityOn();
+	vtkPropCollection* props = renderer->GetViewProps();
+	props->InitTraversal();
+	for (int i = 0; i < props->GetNumberOfItems(); i++) {
+		props->GetNextProp()->VisibilityOn();
 
-	position->SetScale(length / 20);
-	position->VisibilityOn();
+		if (i == 0) renderer->ResetCamera();
+	}
 
-	renderer->ResetCamera();
 	renderer->ResetCameraClippingRange();
 }
 
 void SliceLocation::UpdateView(vtkCamera* camera, vtkPlane* cutPlane) {
 	double* o = camera->GetFocalPoint();
-	double* up = camera->GetViewUp();
 	double* v = camera->GetDirectionOfProjection();
 
-	double right[3];
-	vtkMath::Cross(up, v, right);
-
-	double p1[3] = { 
-		o[0] + up[0], o[1] + up[1], o[2] + up[2]
-	};
-
-	double p2[3] = {
-		o[0] + right[0], o[1] + right[1], o[2] + right[2]
-	};
-
-
-	cutter->SetCutFunction(cutPlane);
+	// Plane
+	planeCutter->SetCutFunction(cutPlane);
 	
-	//planeSource->SetCenter(camera->GetFocalPoint());
-	//planeSource->SetNormal(camera->GetDirectionOfProjection());
-
-	//plane->SetPosition(camera->GetFocalPoint());
-	//plane->SetOrientation(camera->GetOrientation());
-
-	
+	// Plane inset
 	double distance = camera->GetDistance();
 	double x = distance * tan(vtkMath::RadiansFromDegrees(camera->GetViewAngle()));
 	double y = x;
 
-	//planeSource->SetCenter(camera->GetFocalPoint());
-	planeSource->SetNormal(camera->GetDirectionOfProjection());
+	insetPlane->SetOrigin(-x / 2, -y / 2, 0.0);
+	insetPlane->SetPoint1(x / 2, -y / 2, 0.0);
+	insetPlane->SetPoint2(-x / 2, y / 2, 0.0);
 
-	visibleActor->SetPosition(camera->GetFocalPoint());
-	//visibleActor->SetOrientation(camera->GetOrientation());
-	visibleActor->SetScale(x, y, 1);
+	insetPlane->SetCenter(camera->GetFocalPoint());
+	insetPlane->SetNormal(camera->GetViewPlaneNormal());
 
-	/*
-	double coeffs[24];
-	camera->GetFrustumPlanes(1.0, coeffs);
-	vtkSmartPointer<vtkPlanes> planes = vtkSmartPointer<vtkPlanes>::New();
-	planes->SetFrustumPlanes(coeffs);
-	visibleMapper->SetClippingPlanes(planes);
-	*/
-	/*
-	vtkSmartPointer<vtkPlane> testPlane = vtkSmartPointer<vtkPlane>::New();
-	testPlane->SetOrigin(o);
-	testPlane->SetNormal(0, 1, 0);
-	visibleMapper->RemoveAllClippingPlanes();
-	visibleMapper->AddClippingPlane(testPlane);
-	*/
-
-	position->SetPosition(camera->GetPosition());
-
-	renderer->ResetCamera();
+	// View direction
+	double s = 50;
+	lineSource->SetPoint1(o);
+	lineSource->SetPoint2(o[0] - v[0] * s, o[1] - v[1] * s, o[2] - v[2] * s);
 }
 
-void SliceLocation::CreateAxes() {
-	axes = vtkSmartPointer<vtkCubeAxesActor>::New();
-	axes->XAxisLabelVisibilityOff();
-	axes->YAxisLabelVisibilityOff();
-	axes->ZAxisLabelVisibilityOff();
-	axes->SetFlyModeToStaticEdges();
-	axes->SetCamera(renderer->GetActiveCamera()); 
-	axes->VisibilityOff();
-	
-	renderer->AddActor(axes);
+void SliceLocation::CreateOutline() {
+	outline = vtkSmartPointer<vtkOutlineFilter>::New();
+
+	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputConnection(outline->GetOutputPort());
+
+	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+	actor->GetProperty()->SetOpacity(0.25);
+	actor->GetProperty()->SetRepresentationToWireframe();
+	actor->GetProperty()->LightingOff();
+	actor->SetMapper(mapper);
+	actor->VisibilityOff();
+
+	renderer->AddActor(actor);
+}
+
+void SliceLocation::CreateCorners() {
+	corners = vtkSmartPointer<vtkOutlineCornerFilter>::New();
+
+	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputConnection(corners->GetOutputPort());
+
+	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+	actor->GetProperty()->SetRepresentationToWireframe();
+	actor->GetProperty()->LightingOff();
+	actor->SetMapper(mapper);
+	actor->VisibilityOff();
+
+	renderer->AddActor(actor);
 }
 
 void SliceLocation::CreatePlane() {
-	cubeSource = vtkSmartPointer<vtkCubeSource>::New();
+	planeCube = vtkSmartPointer<vtkCubeSource>::New();
 
-	cutter = vtkSmartPointer<vtkCutter>::New();
-	cutter->SetInputConnection(cubeSource->GetOutputPort());
-
-	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-	mapper->SetInputConnection(cutter->GetOutputPort());
-
-	plane = vtkSmartPointer<vtkActor>::New();
-	plane->GetProperty()->SetOpacity(0.5);
-	plane->GetProperty()->SetRepresentationToWireframe();
-	plane->GetProperty()->LightingOff();
-	plane->SetMapper(mapper);
-	plane->VisibilityOff();
-
-	renderer->AddActor(plane);
-}
-
-void SliceLocation::CreatePosition() {
-	vtkSmartPointer<vtkSphereSource> sphere = vtkSmartPointer<vtkSphereSource>::New();
+	planeCutter = vtkSmartPointer<vtkCutter>::New();
+	planeCutter->SetCutFunction(vtkSmartPointer<vtkPlane>::New());
+	planeCutter->SetInputConnection(planeCube->GetOutputPort());
 
 	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-	mapper->SetInputConnection(sphere->GetOutputPort());
+	mapper->SetInputConnection(planeCutter->GetOutputPort());
 
-	position = vtkSmartPointer<vtkActor>::New();
-	position->SetMapper(mapper);
-	position->VisibilityOff();
+	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+	actor->GetProperty()->SetColor(0.0, 0.0, 1.0);
+	actor->GetProperty()->LightingOff();
+	actor->SetMapper(mapper);
+	actor->VisibilityOff();
 
-	renderer->AddActor(position);
+	renderer->AddActor(actor);
 }
 
-void SliceLocation::CreateCameraActor() {
-	planeSource = vtkSmartPointer<vtkPlaneSource>::New();
-	planeSource->SetXResolution(10);
-	planeSource->SetYResolution(10);
-	planeSource->SetOrigin(-0.5, -0.5, 0.0);
-	planeSource->SetPoint1(0.5, -0.5, 0.0);
-	planeSource->SetPoint2(-0.5, 0.5, 0.0);
+void SliceLocation::CreatePlaneInset() {
+	insetPlane = vtkSmartPointer<vtkPlaneSource>::New();
+	insetPlane->SetXResolution(100);
+	insetPlane->SetYResolution(100);
 
-	visibleMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-	visibleMapper->SetInputConnection(planeSource->GetOutputPort());
+	box = vtkSmartPointer<vtkBox>::New();
 
-	visibleActor = vtkSmartPointer<vtkActor>::New();
-	visibleActor->SetMapper(visibleMapper);
-	visibleActor->VisibilityOff();
+	vtkSmartPointer<vtkClipPolyData> clip = vtkSmartPointer<vtkClipPolyData>::New();
+	clip->SetClipFunction(box);
+	clip->InsideOutOn();
+	clip->SetInputConnection(insetPlane->GetOutputPort());
 
-	renderer->AddActor(visibleActor);
+	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputConnection(clip->GetOutputPort());
+
+	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+	actor->GetProperty()->SetOpacity(0.5);
+	actor->GetProperty()->SetColor(0.0, 0.0, 1.0);
+	actor->GetProperty()->LightingOff();
+	actor->SetMapper(mapper);
+	actor->VisibilityOff();
+
+	renderer->AddActor(actor);
+}
+
+void SliceLocation::CreateViewDirection() {
+	lineSource = vtkSmartPointer<vtkLineSource>::New();
+
+	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputConnection(lineSource->GetOutputPort());
+
+	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+	actor->GetProperty()->SetColor(0.0, 0.0, 1.0);
+	actor->GetProperty()->LightingOff();
+	actor->SetMapper(mapper);
+	actor->VisibilityOff();
+
+	renderer->AddActor(actor);
 }

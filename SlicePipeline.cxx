@@ -27,6 +27,8 @@
 #include <vtkRenderWindowInteractor.h>
 #include <vtkThreshold.h>
 
+#include <vtkCubeAxesActor.h>
+
 void SlicePipeline::cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
 	SlicePipeline* pipeline = static_cast<SlicePipeline*>(clientData);
 

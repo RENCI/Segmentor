@@ -10,12 +10,13 @@ class vtkAlgorithmOutput;
 class vtkContourFilter;
 class vtkImageData;
 class vtkImageSlice;
-class vtkInteractorStyleSlice;
 class vtkLookupTable;
 class vtkObject;
 class vtkPlane;
 class vtkRenderer;
 class vtkRenderWindowInteractor;
+
+class vtkInteractorStyleSlice;
 
 class SlicePipeline {
 public:
