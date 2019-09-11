@@ -6,10 +6,12 @@
 #include <vector>
 
 class vtkActor;
+class vtkBox;
 class vtkImageData;
 class vtkLookupTable;
 class vtkPlaneSource;
 class vtkObject;
+class vtkOutlineCornerFilter;
 class vtkRenderer;
 class vtkRenderWindowInteractor;
 
@@ -78,6 +80,12 @@ protected:
 	vtkSmartPointer<vtkActor> planeWire;
 	void CreatePlane();
 	void UpdatePlane(vtkImageData* data);
+
+	// Volume corners
+	vtkSmartPointer<vtkOutlineCornerFilter> cornerFilter;
+	vtkSmartPointer<vtkActor> corners;
+	void CreateCorners();
+	void UpdateCorners(vtkImageData* data);
 
 	void FilterLabels();
 

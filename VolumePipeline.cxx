@@ -9,6 +9,8 @@
 #include <vtkInteractorStyle.h>
 #include <vtkLight.h>
 #include <vtkLookupTable.h>
+#include <vtkOutlineCornerFilter.h>
+#include <vtkPlane.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
 #include <vtkRenderer.h>
@@ -62,6 +64,9 @@ VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* interactor, vtkLookupT
 	// Plane
 	CreatePlane();
 
+	// Corners
+	CreateCorners();
+
 	// Lighting
 	double lightPosition[3] = { 0, 0.5, 1 };	
 	double lightFocalPoint[3] = { 0, 0, 0 };
@@ -101,6 +106,10 @@ void VolumePipeline::SetRegions(vtkImageData* data, std::vector<Region*> regions
 
 	// Update plane
 	UpdatePlane(data);
+
+	// Update corners
+	UpdateCorners(data);
+	corners->VisibilityOn();
 
 	renderer->ResetCameraClippingRange();
 	Render();
@@ -235,8 +244,8 @@ void VolumePipeline::UpdateProbe(vtkImageData* data) {
 
 void VolumePipeline::CreatePlane() {
 	planeSource = vtkSmartPointer<vtkPlaneSource>::New();
-	planeSource->SetXResolution(50);
-	planeSource->SetYResolution(50);
+	planeSource->SetXResolution(100);
+	planeSource->SetYResolution(100);
 
 	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	mapper->SetInputConnection(planeSource->GetOutputPort());
@@ -250,6 +259,7 @@ void VolumePipeline::CreatePlane() {
 	plane->GetProperty()->SetOpacity(0.2);
 	plane->VisibilityOff();
 	plane->PickableOff();
+	plane->UseBoundsOff();
 
 	planeWire = vtkSmartPointer<vtkActor>::New();
 	planeWire->SetMapper(mapperWire);
@@ -259,22 +269,61 @@ void VolumePipeline::CreatePlane() {
 	planeWire->GetProperty()->SetOpacity(0.1);
 	planeWire->VisibilityOff();
 	planeWire->PickableOff();
+	planeWire->UseBoundsOff();
 
 	renderer->AddActor(plane);
 	renderer->AddActor(planeWire);
 }
 
 void VolumePipeline::UpdatePlane(vtkImageData* data) {	
-	double bb[6];
-	data->GetBounds(bb);
+	double* bounds = data->GetBounds();
+	double length = data->GetLength();
 
-	double s = bb[1] - bb[0];
+	double s = length * 2;
 
 	planeSource->SetOrigin(0, 0, 0);
 	planeSource->SetPoint1(s, 0, 0);
 	planeSource->SetPoint2(0, s, 0);
 
+	// Clip plane
+	double p1[3] = { bounds[0], bounds[2], bounds[4] };
+	double p2[3] = { bounds[1], bounds[3], bounds[5] };
+	double n[6][3] = {
+		{ 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 }, { -1, 0, 0 }, { 0, -1, 0 }, { 0, 0, -1 }
+	};
+
+	plane->GetMapper()->RemoveAllClippingPlanes();
+	planeWire->GetMapper()->RemoveAllClippingPlanes();
+	for (int i = 0; i < 6; i++) {
+		vtkSmartPointer<vtkPlane> clip = vtkSmartPointer<vtkPlane>::New();
+		clip->SetOrigin(i < 3 ? p1 : p2);
+		clip->SetNormal(n[i]);
+
+		plane->GetMapper()->AddClippingPlane(clip);
+		planeWire->GetMapper()->AddClippingPlane(clip);
+	}
+
 	UpdatePlane();
+}
+
+void VolumePipeline::CreateCorners() {
+	cornerFilter = vtkSmartPointer<vtkOutlineCornerFilter>::New();
+
+	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputConnection(cornerFilter->GetOutputPort());
+
+	corners = vtkSmartPointer<vtkActor>::New();
+	corners->GetProperty()->SetColor(0.5, 0.5, 0.5);
+	corners->GetProperty()->LightingOff();
+	corners->SetMapper(mapper);
+	corners->PickableOff();
+	corners->VisibilityOff();
+
+	renderer->AddActor(corners);
+}
+
+void VolumePipeline::UpdateCorners(vtkImageData* data) {
+	cornerFilter->SetInputDataObject(data);
 }
 
 void VolumePipeline::FilterLabels() {

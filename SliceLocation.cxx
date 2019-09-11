@@ -9,13 +9,13 @@
 #include <vtkImageData.h>
 #include <vtkLineSource.h>
 #include <vtkMath.h>
+#include <vtkOutlineCornerFilter.h>
+#include <vtkOutlineFilter.h>
 #include <vtkPlane.h>
 #include <vtkPlaneSource.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
 #include <vtkPropCollection.h>
-#include <vtkOutlineCornerFilter.h>
-#include <vtkOutlineFilter.h>
 #include <vtkRenderer.h>
 
 SliceLocation::SliceLocation(vtkRenderer* ren) {
@@ -98,7 +98,6 @@ void SliceLocation::CreateOutline() {
 	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
 	actor->GetProperty()->SetColor(outlineColor);
 	actor->GetProperty()->SetOpacity(0.25);
-	actor->GetProperty()->SetRepresentationToWireframe();
 	actor->GetProperty()->LightingOff();
 	actor->SetMapper(mapper);
 	actor->VisibilityOff();
@@ -114,7 +113,6 @@ void SliceLocation::CreateCorners() {
 
 	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
 	actor->GetProperty()->SetColor(outlineColor);
-	actor->GetProperty()->SetRepresentationToWireframe();
 	actor->GetProperty()->LightingOff();
 	actor->SetMapper(mapper);
 	actor->VisibilityOff();
