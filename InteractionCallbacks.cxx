@@ -66,9 +66,6 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 	vtkRenderWindowInteractor* rwi = static_cast<vtkRenderWindowInteractor*>(caller);
 	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
 
-	int x = rwi->GetEventPosition()[0];
-	int y = rwi->GetEventPosition()[1];
-
 	switch (rwi->GetKeyCode()) {
 	case 's':
 	case 'S':
@@ -103,6 +100,12 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 			if (pick) {
 				// Get the pixel indeces for the pick event		
 				int* p = SlicePick();
+
+				// XXX: HACK TO GUARD AGAINST INVALID VOLUME PICK
+				//		NEED TO FIX VOLUME PICKING AND DIFFERENTIATE BETWEEN THEM FOR KEYSTROKE CALLBACK
+
+				if (p[0] == 0 && p[1] == 0 && p[3] == 0) break;
+				
 				vis->GrowRegion(p[0], p[1], p[2]);
 				vis->Render();
 			}
