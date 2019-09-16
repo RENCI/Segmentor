@@ -44,7 +44,7 @@ To save the current segmentation select `File->Save Segmentation Data...`. The f
 
 * Move clipping plane: `Ctrl-right-click and drag`
 
-* Zoom to point: 'f'
+* Zoom to point: `f`
 
 ### Editing:
 
@@ -59,15 +59,15 @@ To save the current segmentation select `File->Save Segmentation Data...`. The f
 
 * Window/level: `Shift-left-click and drag` (2D slice view only)
 
-* Toggle voxel overlay: '1'
-* Toggle voxel outline: '2'
-* Toggle region outline: '3'
+* Toggle voxel overlay: `1`
+* Toggle voxel outline: `2`
+* Toggle region outline: `3`
 
 #### 3D
 
-* Toggle slice plane visualization: 'o'
-* Toggle slice plane filtering: 'p'
-* Toggle region filtering: 'l'
+* Toggle slice plane visualization: `o`
+* Toggle slice plane filtering: `p`
+* Toggle region filtering: `l`
 
-* Toggle surface smoothing: 's'
-* Toggle surface normals: 'n'
+* Toggle surface smoothing: `s`
+* Toggle surface normals: `n`
