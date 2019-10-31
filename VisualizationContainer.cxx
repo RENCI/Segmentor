@@ -302,7 +302,7 @@ void VisualizationContainer::PickLabel(int x, int y, int z) {
 }
 
 void VisualizationContainer::Paint(int x, int y, int z) {
-	if (!labels) return;
+	if (!labels || !currentRegion) return;
 
 	currentRegion->UpdateExtent(x, y, z);
 
