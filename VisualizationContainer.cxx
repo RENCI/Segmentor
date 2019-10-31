@@ -23,6 +23,7 @@
 #include <vtkInteractorStyleSlice.h>
 #include <vtkInteractorStyleVolume.h>
 
+#include "InteractionEnums.h"
 #include "InteractionCallbacks.h"
 #include "SegmentorMath.h"
 #include "SlicePipeline.h"
@@ -33,6 +34,8 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	data = nullptr;
 	labels = nullptr;
 	currentRegion = nullptr;
+
+	interactionMode = NavigationMode;
 
 	// Lookup table
 	labelColors = vtkSmartPointer<vtkLookupTable>::New();
@@ -293,6 +296,13 @@ void VisualizationContainer::SegmentVolume() {
 	labels = connectivity->GetOutput();
 
 	UpdateLabels();
+}
+
+void VisualizationContainer::ToggleInteractionMode() {
+	interactionMode = interactionMode == NavigationMode ? EditMode : NavigationMode;
+
+	slicePipeline->GetInteractorStyle()->SetMode(interactionMode);
+	volumePipeline->GetInteractorStyle()->SetMode(interactionMode);
 }
 
 void VisualizationContainer::PickLabel(int x, int y, int z) {

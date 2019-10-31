@@ -67,6 +67,10 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
 
 	switch (rwi->GetKeyCode()) {
+	case 32:
+		vis->ToggleInteractionMode();
+		break;
+
 	case 's':
 	case 'S':
 		vis->GetVolumePipeline()->ToggleSmoothSurfaces();

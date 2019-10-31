@@ -28,6 +28,8 @@ public:
 	void SegmentVolume();
 	bool SaveSegmentationData(const std::string& fileName);
 
+	void ToggleInteractionMode();
+
 	void PickLabel(int x, int y, int z);
 	void Paint(int x, int y, int z);
 	void Erase(int x, int y, int z);
@@ -58,6 +60,9 @@ protected:
 	// Rendering pipelines
 	VolumePipeline *volumePipeline;
 	SlicePipeline *slicePipeline;
+
+	// Current interaction mode
+	enum InteractionMode interactionMode;
 
 	void UpdateLabels();
 	void UpdateColors();

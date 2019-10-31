@@ -19,6 +19,8 @@ public:
 	vtkTypeMacro(vtkInteractorStyleSlice, vtkInteractorStyleImage);
 	void PrintSelf(ostream& os, vtkIndent indent) override;
 
+	void SetMode(enum InteractionMode mode);
+
 	void OnMouseMove() override;
 	void OnLeftButtonDown() override;
 	void OnLeftButtonUp() override;
@@ -46,6 +48,8 @@ protected:
 	~vtkInteractorStyleSlice() override;
 
 	bool MouseMoved;
+
+	enum InteractionMode Mode;
 
 	vtkSmartPointer<vtkCellPicker> Picker;
 

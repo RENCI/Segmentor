@@ -9,18 +9,29 @@
 #include "vtkRenderWindowInteractor.h"
 #include "vtkRenderer.h"
 
+#include "InteractionEnums.h"
+
 vtkStandardNewMacro(vtkInteractorStyleSlice);
 
 //----------------------------------------------------------------------------
 vtkInteractorStyleSlice::vtkInteractorStyleSlice() 
 {
 	this->MouseMoved = false;
+	this->Mode = NavigationMode;
 	this->Picker = vtkSmartPointer<vtkCellPicker>::New();
 }
 
 //----------------------------------------------------------------------------
 vtkInteractorStyleSlice::~vtkInteractorStyleSlice() 
 {
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::SetMode(enum InteractionMode mode)
+{
+	this->Mode = mode;
+
+	std::cout << this->Mode << std::endl;
 }
 
 //----------------------------------------------------------------------------

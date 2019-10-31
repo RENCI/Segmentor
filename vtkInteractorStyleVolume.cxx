@@ -8,18 +8,27 @@
 #include "vtkRenderWindowInteractor.h"
 #include "vtkRenderer.h"
 
+#include "InteractionEnums.h"
+
 vtkStandardNewMacro(vtkInteractorStyleVolume);
 
 //----------------------------------------------------------------------------
 vtkInteractorStyleVolume::vtkInteractorStyleVolume() 
 {
 	this->MouseMoved = false;
+	this->Mode = NavigationMode;
 	this->Picker = vtkSmartPointer<vtkCellPicker>::New();
 }
 
 //----------------------------------------------------------------------------
 vtkInteractorStyleVolume::~vtkInteractorStyleVolume() 
 {
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleVolume::SetMode(enum InteractionMode mode)
+{
+	this->Mode = mode;
 }
 
 //----------------------------------------------------------------------------
