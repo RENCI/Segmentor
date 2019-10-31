@@ -128,6 +128,14 @@ void vtkInteractorStyleSlice::OnLeftButtonDown()
 		return;
 	}
 
+	if (this->Mode == EditMode) {
+
+	}
+	else {
+		// Navigation mode
+		this->StartRotate();
+	}
+/*
 	// Default to rotation
 	if (!this->Interactor->GetShiftKey() && 
 		!this->Interactor->GetControlKey() && 
@@ -164,6 +172,7 @@ void vtkInteractorStyleSlice::OnLeftButtonDown()
 		this->Superclass::OnLeftButtonDown();
 		this->ReleaseFocus();
 	}
+*/
 }
 
 //----------------------------------------------------------------------------
@@ -202,6 +211,44 @@ void vtkInteractorStyleSlice::OnLeftButtonUp() {
 }
 
 //----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::OnMiddleButtonDown()
+{
+	this->MouseMoved = false;
+
+	int x = this->Interactor->GetEventPosition()[0];
+	int y = this->Interactor->GetEventPosition()[1];
+
+	this->FindPokedRenderer(x, y);
+	if (this->CurrentRenderer == nullptr)
+	{
+		return;
+	}
+
+	if (this->Mode == EditMode) {
+
+	}
+	else {
+		// Navigation mode
+		this->Superclass::OnMiddleButtonDown();
+	}
+
+	/*
+	// If alt is held down, start erasing
+	if (this->Interactor->GetAltKey()) {
+	this->StartErase();
+	}
+
+	// The rest of the button + key combinations remain the same
+
+	else
+	{
+	this->Superclass::OnRightButtonDown();
+	this->ReleaseFocus();
+	}
+	*/
+}
+
+//----------------------------------------------------------------------------
 void vtkInteractorStyleSlice::OnRightButtonDown()
 {
 	this->MouseMoved = false;
@@ -215,6 +262,15 @@ void vtkInteractorStyleSlice::OnRightButtonDown()
 		return;
 	}
 
+	if (this->Mode == EditMode) {
+
+	}
+	else {
+		// Navigation mode
+		this->Superclass::OnRightButtonDown();
+	}
+
+/*
 	// If alt is held down, start erasing
 	if (this->Interactor->GetAltKey()) {
 		this->StartErase();
@@ -227,6 +283,7 @@ void vtkInteractorStyleSlice::OnRightButtonDown()
 		this->Superclass::OnRightButtonDown();
 		this->ReleaseFocus();
 	}
+*/
 }
 
 //----------------------------------------------------------------------------
