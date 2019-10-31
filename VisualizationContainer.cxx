@@ -35,14 +35,16 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	labels = nullptr;
 	currentRegion = nullptr;
 
-	interactionMode = NavigationMode;
-
 	// Lookup table
 	labelColors = vtkSmartPointer<vtkLookupTable>::New();
 
 	// Create rendering pipelines
 	volumePipeline = new VolumePipeline(volumeInteractor, labelColors);
 	slicePipeline = new SlicePipeline(sliceInteractor, labelColors);
+
+	// Set to edit mode, then toggle to propagate change
+	interactionMode = EditMode;
+	ToggleInteractionMode();
 
 	// Callbacks
 
@@ -301,8 +303,10 @@ void VisualizationContainer::SegmentVolume() {
 void VisualizationContainer::ToggleInteractionMode() {
 	interactionMode = interactionMode == NavigationMode ? EditMode : NavigationMode;
 
-	slicePipeline->GetInteractorStyle()->SetMode(interactionMode);
-	volumePipeline->GetInteractorStyle()->SetMode(interactionMode);
+	slicePipeline->SetInteractionMode(interactionMode);
+	volumePipeline->SetInteractionMode(interactionMode);
+
+	Render();
 }
 
 void VisualizationContainer::PickLabel(int x, int y, int z) {

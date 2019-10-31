@@ -25,9 +25,11 @@
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
+#include <vtkTextActor.h>
+#include <vtkTextProperty.h>
 #include <vtkThreshold.h>
 
-#include <vtkCubeAxesActor.h>
+#include "InteractionEnums.h"
 
 void SlicePipeline::cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
 	SlicePipeline* pipeline = static_cast<SlicePipeline*>(clientData);
@@ -101,6 +103,9 @@ SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTab
 
 	// Slice location
 	sliceLocation = new SliceLocation(sliceLocationRenderer);
+
+	// Interaction mode label
+	CreateInteractionModeLabel();
 }
 
 SlicePipeline::~SlicePipeline() {
@@ -116,6 +121,9 @@ void SlicePipeline::SetImageData(vtkImageData* imageData) {
 
 	// Update axes
 	sliceLocation->UpdateData(imageData);
+
+	// Turn on interaction mode
+	interactionModeLabel->VisibilityOn();
 
 	// Create image slice
 	CreateDataSlice(data);
@@ -156,6 +164,13 @@ void SlicePipeline::SetProbePosition(double x, double y, double z) {
 	}	
 
 	probe->SetPosition(p2);
+}
+
+void SlicePipeline::SetInteractionMode(enum InteractionMode mode) {
+	std::string s = mode == NavigationMode ? "Navigation mode" : "Edit mode";
+	interactionModeLabel->SetInput(s.c_str());
+
+	style->SetMode(mode);
 }
 
 void SlicePipeline::SetCurrentLabel(unsigned short label) {
@@ -224,6 +239,17 @@ void SlicePipeline::CreateProbe() {
 void SlicePipeline::UpdateProbe(vtkImageData* data) {
 	probe->SetPosition(data->GetCenter());
 	probe->SetScale(data->GetSpacing());
+}
+
+void SlicePipeline::CreateInteractionModeLabel() {
+	interactionModeLabel = vtkSmartPointer<vtkTextActor>::New();
+	interactionModeLabel->SetPosition(10, 10);
+	interactionModeLabel->GetTextProperty()->SetFontSize(24);
+	interactionModeLabel->GetTextProperty()->SetColor(0.5, 0.5, 0.5);
+	interactionModeLabel->VisibilityOff();
+	interactionModeLabel->PickableOff();
+
+	renderer->AddActor2D(interactionModeLabel);
 }
 
 void SlicePipeline::CreateDataSlice(vtkImageData* data) {

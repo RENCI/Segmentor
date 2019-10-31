@@ -14,6 +14,7 @@ class vtkObject;
 class vtkOutlineCornerFilter;
 class vtkRenderer;
 class vtkRenderWindowInteractor;
+class vtkTextActor;
 
 class vtkInteractorStyleVolume;
 
@@ -27,10 +28,12 @@ public:
 
   void SetRegions(vtkImageData* data, std::vector<Region*> regions);
 
-  void SetCurrentLabel(unsigned short label);
-
   void SetShowProbe(bool visibility);
   void SetProbePosition(double x, double y, double z);
+
+  void SetInteractionMode(enum InteractionMode mode);
+
+  void SetCurrentLabel(unsigned short label);
 
   void SetSmoothSurfaces(bool smooth);
   void ToggleSmoothSurfaces();
@@ -86,6 +89,10 @@ protected:
 	vtkSmartPointer<vtkActor> corners;
 	void CreateCorners();
 	void UpdateCorners(vtkImageData* data);
+
+	// Interaction mode label
+	vtkSmartPointer<vtkTextActor> interactionModeLabel;
+	void CreateInteractionModeLabel();
 
 	void FilterLabels();
 

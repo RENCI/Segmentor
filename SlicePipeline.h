@@ -15,6 +15,7 @@ class vtkObject;
 class vtkPlane;
 class vtkRenderer;
 class vtkRenderWindowInteractor;
+class vtkTextActor;
 
 class vtkInteractorStyleSlice;
 
@@ -28,6 +29,8 @@ public:
 
 	void SetShowProbe(bool show);
 	void SetProbePosition(double x, double y, double z);
+
+	void SetInteractionMode(enum InteractionMode mode);
 
 	void SetCurrentLabel(unsigned short label);
 	
@@ -71,6 +74,10 @@ protected:
 
 	// Slice location
 	SliceLocation* sliceLocation;
+
+	// Interaction mode label
+	vtkSmartPointer<vtkTextActor> interactionModeLabel;
+	void CreateInteractionModeLabel();
 
 	// Slices
 	void CreateDataSlice(vtkImageData* data);

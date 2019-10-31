@@ -16,7 +16,10 @@
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
+#include <vtkTextActor.h>
+#include <vtkTextProperty.h>
 
+#include "InteractionEnums.h"
 #include "Region.h"
 #include "RegionSurface.h"
 
@@ -67,6 +70,9 @@ VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* interactor, vtkLookupT
 	// Corners
 	CreateCorners();
 
+	// Interaction mode label
+	CreateInteractionModeLabel();
+
 	// Lighting
 	double lightPosition[3] = { 0, 0.5, 1 };	
 	double lightFocalPoint[3] = { 0, 0, 0 };
@@ -111,6 +117,9 @@ void VolumePipeline::SetRegions(vtkImageData* data, std::vector<Region*> regions
 	UpdateCorners(data);
 	corners->VisibilityOn();
 
+	// Turn on interaction mode
+	interactionModeLabel->VisibilityOn();
+
 	renderer->ResetCameraClippingRange();
 	Render();
 }
@@ -136,6 +145,13 @@ void VolumePipeline::SetShowProbe(bool show) {
 
 void VolumePipeline::SetProbePosition(double x, double y, double z) {
 	probe->SetPosition(x, y, z);
+}
+
+void VolumePipeline::SetInteractionMode(enum InteractionMode mode) {
+	std::string s = mode == NavigationMode ? "Navigation mode" : "Edit mode";
+	interactionModeLabel->SetInput(s.c_str());
+
+	style->SetMode(mode);
 }
 
 void VolumePipeline::SetSmoothSurfaces(bool smooth) {
@@ -240,6 +256,17 @@ void VolumePipeline::CreateProbe() {
 void VolumePipeline::UpdateProbe(vtkImageData* data) {
 	probe->SetPosition(data->GetCenter());
 	probe->SetScale(data->GetSpacing());
+}
+
+void VolumePipeline::CreateInteractionModeLabel() {
+	interactionModeLabel = vtkSmartPointer<vtkTextActor>::New();
+	interactionModeLabel->SetPosition(10, 10);
+	interactionModeLabel->GetTextProperty()->SetFontSize(24);
+	interactionModeLabel->GetTextProperty()->SetColor(0.5, 0.5, 0.5);
+	interactionModeLabel->VisibilityOff();
+	interactionModeLabel->PickableOff();
+
+	renderer->AddActor2D(interactionModeLabel);
 }
 
 void VolumePipeline::CreatePlane() {
