@@ -152,7 +152,8 @@ void vtkInteractorStyleSlice::OnLeftButtonDown()
 		return;
 	}
 
-	if (this->Mode == EditMode) {
+	if (this->Mode == EditMode) 
+	{
 		// If alt is held down, select the region label
 		if (this->Interactor->GetAltKey()) {
 			this->StartSelect();
@@ -173,7 +174,8 @@ void vtkInteractorStyleSlice::OnLeftButtonDown()
 			this->StartPaint();
 		}
 	}
-	else {
+	else 
+	{
 		// Default to rotation
 		if (!this->Interactor->GetControlKey())
 		{
@@ -224,33 +226,6 @@ void vtkInteractorStyleSlice::OnLeftButtonUp() {
 }
 
 //----------------------------------------------------------------------------
-void vtkInteractorStyleSlice::OnMiddleButtonDown()
-{
-	this->MouseMoved = false;
-
-	int x = this->Interactor->GetEventPosition()[0];
-	int y = this->Interactor->GetEventPosition()[1];
-
-	this->FindPokedRenderer(x, y);
-	if (this->CurrentRenderer == nullptr)
-	{
-		return;
-	}
-
-	if (this->Mode == EditMode) {
-		// If in slicing mode, slice the image
-		if (this->InteractionMode == VTKIS_IMAGE_SLICING)
-		{
-			this->StartSlice();
-		}
-	}
-	else {
-		// Navigation mode
-		this->Superclass::OnMiddleButtonDown();
-	}
-}
-
-//----------------------------------------------------------------------------
 void vtkInteractorStyleSlice::OnRightButtonDown()
 {
 	this->MouseMoved = false;
@@ -264,13 +239,34 @@ void vtkInteractorStyleSlice::OnRightButtonDown()
 		return;
 	}
 
-	if (this->Mode == EditMode) {
-		// XXX: Account for shift for slicing?
-		this->StartErase();
+	if (this->Mode == EditMode) 
+	{
+		// Erase if ctrl is not held down
+		if (!this->Interactor->GetControlKey())
+		{
+			this->StartErase();
+		}
+
+		// Otherwise use default behavior
+		else
+		{
+			this->Superclass::OnRightButtonDown();
+		}
 	}
-	else {
-		// Navigation mode
-		this->Superclass::OnRightButtonDown();
+	else
+	{
+		// If in slicing mode, slice the image
+		if (this->InteractionMode == VTKIS_IMAGE_SLICING &&
+			this->Interactor->GetControlKey())
+		{
+			this->StartSlice();
+		}
+
+		// Otherwise use defaults
+		else
+		{
+			this->Superclass::OnRightButtonDown();
+		}
 	}
 
 /*

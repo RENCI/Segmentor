@@ -32,6 +32,30 @@ void vtkInteractorStyleVolume::SetMode(enum InteractionMode mode)
 }
 
 //----------------------------------------------------------------------------
+void vtkInteractorStyleVolume::StartSelect()
+{
+	if (this->State != VTKIS_NONE)
+	{
+		return;
+	}
+	this->StartState(VTKIS_SELECT_VOLUME);
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleVolume::EndSelect()
+{
+	if (this->State != VTKIS_SELECT_VOLUME)
+	{
+		return;
+	}
+	if (this->HandleObservers)
+	{
+		this->InvokeEvent(SelectLabelEvent, nullptr);
+	}
+	this->StopState();
+}
+
+//----------------------------------------------------------------------------
 void vtkInteractorStyleVolume::StartPaint()
 {
 	if (this->State != VTKIS_NONE)
@@ -151,18 +175,24 @@ void vtkInteractorStyleVolume::OnLeftButtonDown()
 	{
 		return;
 	}
-		
-	// If atl is held down, start painting
-	if (this->Interactor->GetAltKey()) {
-		this->StartPaint();
+
+	if (this->Mode == EditMode)
+	{
+		// If alt is held down, select the region label
+		if (this->Interactor->GetAltKey()) {
+			this->StartSelect();
+		}
+
+		// Otherwise paint
+		else
+		{
+			this->StartPaint();
+		}
 	}
-
-	// The rest of the button + key combinations remain the same
-
 	else
 	{
+		// Use defaults
 		this->Superclass::OnLeftButtonDown();
-		this->ReleaseFocus();
 	}
 }
 
@@ -180,20 +210,21 @@ void vtkInteractorStyleVolume::OnLeftButtonUp()
 
 	if (!this->MouseMoved)
 	{
-		switch (this->State)
+		if (this->State == VTKIS_PAINT_VOLUME)
 		{
-		case VTKIS_PAINT_VOLUME:
 			this->InvokeEvent(PaintEvent, nullptr);
-			break;
-
-		case VTKIS_ROTATE:
-			this->InvokeEvent(SelectLabelEvent, nullptr);
 		}
 	}
 
-	if (this->State == VTKIS_PAINT_VOLUME)
+	switch (this->State)
 	{
+	case VTKIS_SELECT_VOLUME:
+		this->EndSelect();
+		break;
+
+	case VTKIS_PAINT_VOLUME:
 		this->EndPaint();
+		break;
 	}
 
 	// Call parent to handle all other states and perform additional work
@@ -214,25 +245,24 @@ void vtkInteractorStyleVolume::OnRightButtonDown()
 	{
 		return;
 	}
-	
-	// If alt is held down, start erasing
-	if (this->Interactor->GetAltKey()) 
+
+	if (this->Mode == EditMode)
 	{
-		this->StartErase();
+		// If ctl is held down, move the slice plane via the camera focal point
+		if (this->Interactor->GetControlKey())
+		{
+			this->StartSlice();
+		}
+
+		// Otherwise erase
+		else
+		{
+			this->StartErase();
+		}
 	}
-
-	// If ctl is held down, move the slice plane via the camera focal point
-	else if (this->Interactor->GetControlKey())
-	{
-		this->StartSlice();
-	}
-
-	// The rest of the button + key combinations remain the same
-
-	else
-	{
+	else {
+		// Use defaults
 		this->Superclass::OnRightButtonDown();
-		this->ReleaseFocus();
 	}
 }
 

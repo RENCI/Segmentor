@@ -25,7 +25,6 @@ public:
 	void OnMouseMove() override;
 	void OnLeftButtonDown() override;
 	void OnLeftButtonUp() override;
-	void OnMiddleButtonDown() override;
 	void OnRightButtonDown() override;
 	void OnRightButtonUp() override;
 	void OnChar() override;
