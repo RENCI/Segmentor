@@ -33,6 +33,30 @@ void vtkInteractorStyleSlice::SetMode(enum InteractionMode mode)
 }
 
 //----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::StartSelect()
+{
+	if (this->State != VTKIS_NONE)
+	{
+		return;
+	}
+	this->StartState(VTKIS_SELECT_SLICE);
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::EndSelect()
+{
+	if (this->State != VTKIS_SELECT_SLICE)
+	{
+		return;
+	}
+	if (this->HandleObservers)
+	{
+		this->InvokeEvent(SelectLabelEvent, nullptr);
+	}
+	this->StopState();
+}
+
+//----------------------------------------------------------------------------
 void vtkInteractorStyleSlice::StartPaint()
 {
 	if (this->State != VTKIS_NONE)
@@ -129,9 +153,18 @@ void vtkInteractorStyleSlice::OnLeftButtonDown()
 	}
 
 	if (this->Mode == EditMode) {
-
+		// If alt is held down, select the region label
+		if (this->Interactor->GetAltKey()) {
+			this->StartSelect();
+		}
+		else 
+		{
+			this->StartPaint();
+		}
 	}
 	else {
+		// XXX: Need to handle ctrl for spin
+
 		// Navigation mode
 		this->StartRotate();
 	}
@@ -188,22 +221,22 @@ void vtkInteractorStyleSlice::OnLeftButtonUp() {
 	
 	if (!this->MouseMoved)
 	{
-		switch (this->State) 
+		if (this->State == VTKIS_PAINT_SLICE) 
 		{
-		case VTKIS_PAINT_SLICE:
 			this->InvokeEvent(PaintEvent, nullptr);
-			break;
-
-		case VTKIS_ROTATE:
-			this->InvokeEvent(SelectLabelEvent, nullptr);
 		}
 	}
 
-	if (this->State == VTKIS_PAINT_SLICE)
+	switch (this->State)
 	{
-		this->EndPaint();
-	}
+	case VTKIS_SELECT_SLICE:
+		this->EndSelect();
+		break;
 
+	case VTKIS_PAINT_SLICE:
+		this->EndPaint();
+		break;
+	}
 
 	// Call parent to handle all other states and perform additional work
 	

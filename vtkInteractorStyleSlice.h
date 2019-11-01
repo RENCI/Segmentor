@@ -12,6 +12,7 @@ class vtkCellPicker;
 // Interaction flags
 #define VTKIS_PAINT_SLICE 2048
 #define VTKIS_ERASE_SLICE 2049
+#define VTKIS_SELECT_SLICE 2050
 
 class vtkInteractorStyleSlice : public vtkInteractorStyleImage {
 public:
@@ -29,6 +30,8 @@ public:
 	void OnRightButtonUp() override;
 	void OnChar() override;
 
+	virtual void StartSelect();
+	virtual void EndSelect();
 	virtual void StartPaint();
 	virtual void EndPaint();
 	virtual void StartErase();

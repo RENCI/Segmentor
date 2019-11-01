@@ -151,8 +151,6 @@ void vtkInteractorStyleVolume::OnLeftButtonDown()
 	{
 		return;
 	}
-
-
 		
 	// If atl is held down, start painting
 	if (this->Interactor->GetAltKey()) {
