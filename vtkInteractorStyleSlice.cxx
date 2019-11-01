@@ -296,7 +296,8 @@ void vtkInteractorStyleSlice::OnRightButtonDown()
 	}
 
 	if (this->Mode == EditMode) {
-
+		// XXX: Account for shift for slicing?
+		this->StartErase();
 	}
 	else {
 		// Navigation mode
