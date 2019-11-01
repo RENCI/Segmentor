@@ -157,55 +157,35 @@ void vtkInteractorStyleSlice::OnLeftButtonDown()
 		if (this->Interactor->GetAltKey()) {
 			this->StartSelect();
 		}
+
+		// If shift is held down, do window/level
+		else if (this->InteractionMode == VTKIS_IMAGE3D &&
+				 this->Interactor->GetShiftKey())
+		{
+			this->WindowLevelStartPosition[0] = x;
+			this->WindowLevelStartPosition[1] = y;
+			this->StartWindowLevel();
+		}
+
+		// Otherwise paint
 		else 
 		{
 			this->StartPaint();
 		}
 	}
 	else {
-		// XXX: Need to handle ctrl for spin
+		// Default to rotation
+		if (!this->Interactor->GetControlKey())
+		{
+			this->StartRotate();
+		}
 
-		// Navigation mode
-		this->StartRotate();
+		// The rest of the button + key combinations remain the same
+		else
+		{
+			this->Superclass::OnLeftButtonDown();
+		}
 	}
-/*
-	// Default to rotation
-	if (!this->Interactor->GetShiftKey() && 
-		!this->Interactor->GetControlKey() && 
-		!this->Interactor->GetAltKey())
-	{
-		this->StartRotate();
-	}
-
-	// If shift is held down, do window/level
-	else if (this->InteractionMode == VTKIS_IMAGE3D &&
-		this->Interactor->GetShiftKey())
-	{
-		this->WindowLevelStartPosition[0] = x;
-		this->WindowLevelStartPosition[1] = y;
-		this->StartWindowLevel();
-	}
-
-	// If ctrl is held down in slicing mode, slice the image
-	else if (this->InteractionMode == VTKIS_IMAGE_SLICING &&
-		this->Interactor->GetControlKey())
-	{
-		this->StartSlice();
-	}
-
-	// If alt is held down, start painting
-	else if (this->Interactor->GetAltKey()) {
-		this->StartPaint();
-	}
-
-	// The rest of the button + key combinations remain the same
-
-	else
-	{
-		this->Superclass::OnLeftButtonDown();
-		this->ReleaseFocus();
-	}
-*/
 }
 
 //----------------------------------------------------------------------------
@@ -258,27 +238,16 @@ void vtkInteractorStyleSlice::OnMiddleButtonDown()
 	}
 
 	if (this->Mode == EditMode) {
-
+		// If in slicing mode, slice the image
+		if (this->InteractionMode == VTKIS_IMAGE_SLICING)
+		{
+			this->StartSlice();
+		}
 	}
 	else {
 		// Navigation mode
 		this->Superclass::OnMiddleButtonDown();
 	}
-
-	/*
-	// If alt is held down, start erasing
-	if (this->Interactor->GetAltKey()) {
-	this->StartErase();
-	}
-
-	// The rest of the button + key combinations remain the same
-
-	else
-	{
-	this->Superclass::OnRightButtonDown();
-	this->ReleaseFocus();
-	}
-	*/
 }
 
 //----------------------------------------------------------------------------
