@@ -373,7 +373,7 @@ void VolumePipeline::FilterLabels() {
 			surface->GetActor()->VisibilityOn();
 		}
 			
-		if (filterLabel) {
+		if (filterLabel && currentLabel) {
 			surface->GetActor()->SetVisibility(surface->GetRegion()->GetLabel() == currentLabel);
 		}
 		else if (!filterPlane) {
