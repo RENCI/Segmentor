@@ -2,15 +2,16 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QTableWidgetItem>
 
 #include <vtkGenericOpenGLRenderWindow.h>
 
 #include "VisualizationContainer.h"
 
-
 #include "vtkCallbackCommand.h"
 #include "vtkSmartPointer.h"
 #include "vtkRenderWindowInteractor.h"
+
 void testEnter(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
 	std::cout << "HERE" << std::endl;
 }
@@ -34,6 +35,35 @@ MainWindow::MainWindow() {
 
 	// Create visualization container
 	visualizationContainer = new VisualizationContainer(qvtkWidgetLeft->GetInteractor(), qvtkWidgetRight->GetInteractor());
+
+	// Test label table
+	int n = 10;
+	labelTable->setColumnCount(3);
+	labelTable->setRowCount(n);
+
+	QStringList headers;
+	headers << "Id" << "Color" << "Complete";
+
+	labelTable->setHorizontalHeaderLabels(headers);
+	labelTable->verticalHeader()->setVisible(false);
+
+	labelTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+	//labelTable->horizontalHeader()->setStretchLastSection(true);
+
+	for (int i = 0; i < n; i++) {
+		QTableWidgetItem* idItem = new QTableWidgetItem(QString::number(i + 1));
+
+		QColor color((double)i / n * 255, 0, 0);
+		QTableWidgetItem* colorItem = new QTableWidgetItem("");
+		colorItem->setBackgroundColor(color);
+
+		QTableWidgetItem* checkItem = new QTableWidgetItem();
+		checkItem->setCheckState(Qt::Unchecked);
+		
+		labelTable->setItem(i, 0, idItem);
+		labelTable->setItem(i, 1, colorItem);
+		labelTable->setItem(i, 2, checkItem);
+	}
 
 	qApp->installEventFilter(this);
 }
