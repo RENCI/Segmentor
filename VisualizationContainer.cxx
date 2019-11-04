@@ -324,7 +324,7 @@ void VisualizationContainer::Paint(int x, int y, int z) {
 }
 
 void VisualizationContainer::Erase(int x, int y, int z) {	
-	if (!labels) return;
+	if (!labels || !currentRegion) return;
 
 	SetLabel(x, y, z, 0);
 }
