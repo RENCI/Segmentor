@@ -12,8 +12,8 @@ class vtkCellPicker;
 // Interaction flags
 #define VTKIS_PAINT_VOLUME 2048
 #define VTKIS_ERASE_VOLUME 2049
-#define VTKIS_SLICE_VOLUME 2050
-#define VTKIS_SELECT_VOLUME 2051
+#define VTKIS_SELECT_VOLUME 2050
+#define VTKIS_SLICE_VOLUME 2051
 
 class vtkInteractorStyleVolume : public vtkInteractorStyleTrackballCamera {
 public:
@@ -26,6 +26,7 @@ public:
 	void OnMouseMove() override;
 	void OnLeftButtonDown() override;
 	void OnLeftButtonUp() override;
+	void OnMiddleButtonDown() override;
 	void OnRightButtonDown() override;
 	void OnRightButtonUp() override;
 	void OnChar() override;

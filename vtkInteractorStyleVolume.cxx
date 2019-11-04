@@ -191,8 +191,17 @@ void vtkInteractorStyleVolume::OnLeftButtonDown()
 	}
 	else
 	{
-		// Use defaults
-		this->Superclass::OnLeftButtonDown();
+		// If ctrl is held down, spin
+		if (this->Interactor->GetControlKey())
+		{
+			this->StartSpin();
+		}
+
+		// Otherwise rotate around focal point
+		else
+		{
+			this->StartRotate();
+		}
 	}
 }
 
@@ -233,6 +242,27 @@ void vtkInteractorStyleVolume::OnLeftButtonUp()
 }
 
 //----------------------------------------------------------------------------
+void vtkInteractorStyleVolume::OnMiddleButtonDown()
+{
+	this->MouseMoved = false;
+
+	int x = this->Interactor->GetEventPosition()[0];
+	int y = this->Interactor->GetEventPosition()[1];
+
+	this->FindPokedRenderer(x, y);
+	if (this->CurrentRenderer == nullptr)
+	{
+		return;
+	}
+
+	if (this->Mode == NavigationMode)
+	{
+		// Pan
+		this->StartPan();
+	}
+}
+
+//----------------------------------------------------------------------------
 void vtkInteractorStyleVolume::OnRightButtonDown()
 {
 	this->MouseMoved = false;
@@ -248,7 +278,7 @@ void vtkInteractorStyleVolume::OnRightButtonDown()
 
 	if (this->Mode == EditMode)
 	{
-		// If ctl is held down, move the slice plane via the camera focal point
+		// Slice if ctrl is held down
 		if (this->Interactor->GetControlKey())
 		{
 			this->StartSlice();
@@ -260,9 +290,10 @@ void vtkInteractorStyleVolume::OnRightButtonDown()
 			this->StartErase();
 		}
 	}
-	else {
-		// Use defaults
-		this->Superclass::OnRightButtonDown();
+	else
+	{
+		// Zoom
+		this->StartDolly();
 	}
 }
 

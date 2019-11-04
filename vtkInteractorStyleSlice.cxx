@@ -160,8 +160,7 @@ void vtkInteractorStyleSlice::OnLeftButtonDown()
 		}
 
 		// If shift is held down, do window/level
-		else if (this->InteractionMode == VTKIS_IMAGE3D &&
-				 this->Interactor->GetShiftKey())
+		else if (this->Interactor->GetShiftKey())
 		{
 			this->WindowLevelStartPosition[0] = x;
 			this->WindowLevelStartPosition[1] = y;
@@ -176,16 +175,16 @@ void vtkInteractorStyleSlice::OnLeftButtonDown()
 	}
 	else 
 	{
-		// Default to rotation
-		if (!this->Interactor->GetControlKey())
+		// If ctrl is held down, spin
+		if (this->Interactor->GetControlKey()) 
 		{
-			this->StartRotate();
+			this->StartSpin();
 		}
 
-		// The rest of the button + key combinations remain the same
+		// Otherwise rotate around focal point
 		else
 		{
-			this->Superclass::OnLeftButtonDown();
+			this->StartRotate();
 		}
 	}
 }
@@ -226,6 +225,27 @@ void vtkInteractorStyleSlice::OnLeftButtonUp() {
 }
 
 //----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::OnMiddleButtonDown()
+{
+	this->MouseMoved = false;
+
+	int x = this->Interactor->GetEventPosition()[0];
+	int y = this->Interactor->GetEventPosition()[1];
+
+	this->FindPokedRenderer(x, y);
+	if (this->CurrentRenderer == nullptr)
+	{
+		return;
+	}
+
+	if (this->Mode == NavigationMode)
+	{
+		// Pan
+		this->StartPan();
+	}
+}
+
+//----------------------------------------------------------------------------
 void vtkInteractorStyleSlice::OnRightButtonDown()
 {
 	this->MouseMoved = false;
@@ -241,48 +261,23 @@ void vtkInteractorStyleSlice::OnRightButtonDown()
 
 	if (this->Mode == EditMode) 
 	{
-		// Erase if ctrl is not held down
-		if (!this->Interactor->GetControlKey())
-		{
-			this->StartErase();
-		}
-
-		// Otherwise use default behavior
-		else
-		{
-			this->Superclass::OnRightButtonDown();
-		}
-	}
-	else
-	{
-		// If in slicing mode, slice the image
-		if (this->InteractionMode == VTKIS_IMAGE_SLICING &&
-			this->Interactor->GetControlKey())
+		// Slice if ctrl is held down
+		if (this->Interactor->GetControlKey())
 		{
 			this->StartSlice();
 		}
 
-		// Otherwise use defaults
+		// Otherwise erase
 		else
 		{
-			this->Superclass::OnRightButtonDown();
+			this->StartErase();
 		}
 	}
-
-/*
-	// If alt is held down, start erasing
-	if (this->Interactor->GetAltKey()) {
-		this->StartErase();
-	}
-
-	// The rest of the button + key combinations remain the same
-
 	else
 	{
-		this->Superclass::OnRightButtonDown();
-		this->ReleaseFocus();
+		// Zoom
+		this->StartDolly();
 	}
-*/
 }
 
 //----------------------------------------------------------------------------
