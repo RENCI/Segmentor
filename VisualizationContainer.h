@@ -6,6 +6,8 @@
 
 #include <vtkSmartPointer.h>
 
+class MainWindow;
+
 class vtkImageData;
 class vtkLookupTable;
 class vtkRenderWindowInteractor;
@@ -16,7 +18,10 @@ class Region;
 
 class VisualizationContainer {
 public:
-	VisualizationContainer(vtkRenderWindowInteractor* volumeInteractor, vtkRenderWindowInteractor* sliceInteractor);
+	VisualizationContainer(
+		vtkRenderWindowInteractor* volumeInteractor, 
+		vtkRenderWindowInteractor* sliceInteractor,
+		MainWindow* mainWindow);
 	~VisualizationContainer();
 
 	bool OpenImageFile(const std::string& fileName);
@@ -48,6 +53,9 @@ public:
 	SlicePipeline* GetSlicePipeline();
 
 protected:
+	// Qt main window
+	MainWindow* qtWindow;
+
 	// The data
 	vtkSmartPointer<vtkImageData> data;
 	vtkSmartPointer<vtkImageData> labels;

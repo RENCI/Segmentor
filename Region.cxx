@@ -5,7 +5,7 @@
 
 #include <algorithm>
 
-Region::Region(vtkImageData* inputData, unsigned short regionLabel) {
+Region::Region(vtkImageData* inputData, unsigned short regionLabel, double regionColor[3]) {
 	// Input data info
 	data = inputData;
 	unsigned short* scalars = static_cast<unsigned short*>(data->GetScalarPointer());
@@ -16,6 +16,11 @@ Region::Region(vtkImageData* inputData, unsigned short regionLabel) {
 
 	// Label for this region
 	label = regionLabel;
+
+	// Color for this region
+	color[0] = regionColor[0];
+	color[1] = regionColor[1];
+	color[2] = regionColor[2];
 
 	// Initialize extent for this region
 	extent[0] = dataExtent[1];
@@ -111,8 +116,8 @@ unsigned short Region::GetLabel() {
 	return label;
 }
 
-void Region::SetLabel(unsigned short regionLabel) {
-	label = regionLabel;
+const double* Region::GetColor() {
+	return color;
 }
 
 int Region::GetNumVoxels() {

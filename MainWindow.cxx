@@ -7,15 +7,11 @@
 #include <vtkGenericOpenGLRenderWindow.h>
 
 #include "VisualizationContainer.h"
+#include "Region.h"
 
 #include "vtkCallbackCommand.h"
 #include "vtkSmartPointer.h"
 #include "vtkRenderWindowInteractor.h"
-
-void testEnter(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
-	std::cout << "HERE" << std::endl;
-}
-
 
 // Constructor
 MainWindow::MainWindow() {
@@ -34,36 +30,20 @@ MainWindow::MainWindow() {
 	qvtkWidgetRight->SetRenderWindow(renderWindowRight);
 
 	// Create visualization container
-	visualizationContainer = new VisualizationContainer(qvtkWidgetLeft->GetInteractor(), qvtkWidgetRight->GetInteractor());
+	visualizationContainer = new VisualizationContainer(qvtkWidgetLeft->GetInteractor(), qvtkWidgetRight->GetInteractor(), this);
 
-	// Test label table
-	int n = 10;
-	labelTable->setColumnCount(3);
-	labelTable->setRowCount(n);
-
+	// Region table
 	QStringList headers;
-	headers << "Id" << "Color" << "Complete";
+	headers << "Id" << "Color" << "Size" << "Done" << "Remove";
+	regionTable->setColumnCount(headers.length());
+	regionTable->setHorizontalHeaderLabels(headers);
+	regionTable->verticalHeader()->setVisible(false);
 
-	labelTable->setHorizontalHeaderLabels(headers);
-	labelTable->verticalHeader()->setVisible(false);
-
-	labelTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-	//labelTable->horizontalHeader()->setStretchLastSection(true);
-
-	for (int i = 0; i < n; i++) {
-		QTableWidgetItem* idItem = new QTableWidgetItem(QString::number(i + 1));
-
-		QColor color((double)i / n * 255, 0, 0);
-		QTableWidgetItem* colorItem = new QTableWidgetItem("");
-		colorItem->setBackgroundColor(color);
-
-		QTableWidgetItem* checkItem = new QTableWidgetItem();
-		checkItem->setCheckState(Qt::Unchecked);
-		
-		labelTable->setItem(i, 0, idItem);
-		labelTable->setItem(i, 1, colorItem);
-		labelTable->setItem(i, 2, checkItem);
-	}
+	regionTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+	regionTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+	regionTable->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+	regionTable->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+	regionTable->horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeToContents);\
 
 	qApp->installEventFilter(this);
 }
@@ -73,6 +53,35 @@ MainWindow::~MainWindow() {
 	delete visualizationContainer;
 
 	qApp->exit();
+}
+
+void MainWindow::UpdateRegions(const std::vector<Region*>& regions) {
+	int numRegions = (int)regions.size();
+
+	regionTable->setRowCount(numRegions);
+
+	for (int i = 0; i < numRegions; i++) {
+		Region* region = regions[i];
+
+		QTableWidgetItem* idItem = new QTableWidgetItem(QString::number(region->GetLabel()));
+		idItem->setTextAlignment(Qt::AlignCenter);
+
+		const double* col = region->GetColor();
+		QColor color(col[0] * 255, col[1] * 255, col[2] * 255);
+		QTableWidgetItem* colorItem = new QTableWidgetItem("");
+		colorItem->setBackgroundColor(color);
+
+		QTableWidgetItem* sizeItem = new QTableWidgetItem(QString::number(region->GetNumVoxels()));
+		sizeItem->setTextAlignment(Qt::AlignCenter);
+
+		QTableWidgetItem* checkItem = new QTableWidgetItem();
+		checkItem->setCheckState(Qt::Unchecked);
+
+		regionTable->setItem(i, 0, idItem);
+		regionTable->setItem(i, 1, colorItem);
+		regionTable->setItem(i, 2, sizeItem);
+		regionTable->setItem(i, 3, checkItem);
+	}
 }
 
 void MainWindow::on_actionOpen_Image_File_triggered() {

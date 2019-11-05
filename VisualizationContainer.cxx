@@ -1,5 +1,7 @@
 #include "VisualizationContainer.h"
 
+#include "MainWindow.h"
+
 #include <vtkCallbackCommand.h>
 #include <vtkCamera.h>
 #include <vtkImageConnectivityFilter.h>
@@ -30,10 +32,13 @@
 #include "VolumePipeline.h"
 #include "Region.h"
 
-VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volumeInteractor, vtkRenderWindowInteractor* sliceInteractor) {
+VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volumeInteractor, vtkRenderWindowInteractor* sliceInteractor, MainWindow* mainWindow) {
 	data = nullptr;
 	labels = nullptr;
 	currentRegion = nullptr;
+
+	// Qt main window
+	qtWindow = mainWindow;
 
 	// Lookup table
 	labelColors = vtkSmartPointer<vtkLookupTable>::New();
@@ -370,7 +375,8 @@ void VisualizationContainer::SetCurrentLabel(unsigned short label) {
 	}
 
 	if (!currentRegion) {
-		currentRegion = new Region(labels, label);
+		std::cout << "WHY AM I HERE?" << std::endl;
+		currentRegion = new Region(labels, label, labelColors->GetTableValue(label));
 		regions.push_back(currentRegion);
 	}
 
@@ -459,6 +465,8 @@ void VisualizationContainer::UpdateLabels() {
 
 	volumePipeline->SetRegions(labels, regions);
 	slicePipeline->SetSegmentationData(labels);
+
+	qtWindow->UpdateRegions(regions);
 }
 
 void VisualizationContainer::UpdateColors() {
@@ -513,7 +521,7 @@ void VisualizationContainer::ExtractRegions() {
 	RemoveRegions();
 
 	for (int label = 1; label <= maxLabel; label++) {
-		regions.push_back(new Region(labels, label));
+		regions.push_back(new Region(labels, label, labelColors->GetTableValue(label)));
 	}
 }
 

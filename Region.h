@@ -9,7 +9,7 @@ class vtkImageData;
 
 class Region {
 public:
-	Region(vtkImageData* data, unsigned short regionLabel);
+	Region(vtkImageData* data, unsigned short regionLabel, double regionColor[3]);
 	~Region();
 
 	vtkAlgorithmOutput* GetOutput();
@@ -17,12 +17,12 @@ public:
 	void UpdateExtent(int x, int y, int z);
 
 	unsigned short GetLabel();
-	void SetLabel(unsigned short regionLabel);
-
+	const double* GetColor();
 	int GetNumVoxels();
 
 protected:
 	unsigned short label;
+	double color[3];
 	int extent[6];
 	int numVoxels;
 

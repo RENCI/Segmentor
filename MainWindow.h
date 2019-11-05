@@ -7,12 +7,15 @@
 #include <QSettings>
 
 class VisualizationContainer;
+class Region;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
   Q_OBJECT
 public:
 	MainWindow();
 	virtual ~MainWindow();
+
+	void UpdateRegions(const std::vector<Region*>& regions);
 
 public slots:
 	// Use Qt's auto-connect magic to tie GUI widgets to slots,
