@@ -41,6 +41,8 @@ MainWindow::MainWindow() {
 	regionTable->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
 	regionTableContainer->layout()->addWidget(regionTable);
 
+	connect(regionTable, SIGNAL(removeRegion(int)), this, SLOT(on_removeRegion(int)));
+
 	qApp->installEventFilter(this);
 }
 
@@ -196,6 +198,10 @@ void MainWindow::on_actionSegment_Volume_triggered() {
 void MainWindow::on_actionExit_triggered() {
 	// Exit Qt
 	qApp->exit();
+}
+
+void MainWindow::on_removeRegion(int label) {
+	visualizationContainer->RemoveRegion((unsigned short)label);
 }
 
 bool MainWindow::eventFilter(QObject* obj, QEvent* event) {

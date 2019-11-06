@@ -27,6 +27,7 @@ public:
   ~VolumePipeline();
 
   void SetRegions(vtkImageData* data, std::vector<Region*> regions);
+  void RemoveSurface(int index);
 
   void SetShowProbe(bool visibility);
   void SetProbePosition(double x, double y, double z);

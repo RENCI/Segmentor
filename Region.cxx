@@ -123,3 +123,7 @@ const double* Region::GetColor() {
 int Region::GetNumVoxels() {
 	return numVoxels;
 }
+
+const int* Region::GetExtent() {
+	return extent;
+}

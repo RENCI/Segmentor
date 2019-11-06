@@ -446,6 +446,32 @@ void VisualizationContainer::GrowRegion(int x, int y, int z) {
 	}
 }
 
+void VisualizationContainer::RemoveRegion(unsigned short label) {
+	int index = GetRegionIndex(label);
+
+	if (index == -1) return;
+
+	Region* region = regions[index];
+
+	const int* extent = region->GetExtent();
+
+	for (int i = extent[0]; i <= extent[1]; i++) {
+		for (int j = extent[2]; j <= extent[3]; j++) {
+			for (int k = extent[4]; k <= extent[5]; k++) {
+				unsigned short* p = static_cast<unsigned short*>(labels->GetScalarPointer(i, j, k));
+				if (*p == label) *p = 0;
+			}
+		}
+	}
+
+	regions.erase(regions.begin() + index);
+	volumePipeline->RemoveSurface(index);
+	qtWindow->UpdateRegionTable(regions);
+
+	labels->Modified();
+	Render();
+}
+
 void VisualizationContainer::Render() {
 	volumePipeline->Render();
 	slicePipeline->Render();
@@ -507,8 +533,16 @@ void VisualizationContainer::UpdateColors() {
 	labelColors->Build();
 }
 
+int VisualizationContainer::GetRegionIndex(unsigned short label) {
+	for (int i = 0; i < (int)regions.size(); i++) {
+		if (regions[i]->GetLabel() == label) return i;
+	}
+
+	return -1;
+}
+
 void VisualizationContainer::RemoveRegions() {
-	for (int i = 0; i < regions.size(); i++) {
+	for (int i = 0; i < (int)regions.size(); i++) {
 		delete regions[i];
 	}
 }
@@ -537,7 +571,7 @@ void VisualizationContainer::SetLabel(int x, int y, int z, unsigned short label)
 }
 
 unsigned short VisualizationContainer::GetLabel(int x, int y, int z) {
-	return static_cast<unsigned short*>(labels->GetScalarPointer(x, y, z))[0];
+	return *(static_cast<unsigned short*>(labels->GetScalarPointer(x, y, z)));
 }
 
 double VisualizationContainer::GetValue(int x, int y, int z) {

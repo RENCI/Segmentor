@@ -46,6 +46,7 @@ public:
 	void SetCurrentLabel(unsigned short newLabel);
 
 	void GrowRegion(int x, int y, int z);
+	void RemoveRegion(unsigned short label);
 
 	void Render();
 
@@ -75,6 +76,7 @@ protected:
 	void UpdateLabels();
 	void UpdateColors();
 
+	int GetRegionIndex(unsigned short label);
 	void RemoveRegions();
 	void ExtractRegions();
 

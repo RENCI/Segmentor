@@ -37,6 +37,9 @@ public slots:
 
 	virtual void on_actionExit_triggered();
 
+	// Region table events
+	virtual void on_removeRegion(int label);
+
 protected:
 	// The visualization container
 	VisualizationContainer* visualizationContainer;

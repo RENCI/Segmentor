@@ -19,6 +19,7 @@ public:
 	unsigned short GetLabel();
 	const double* GetColor();
 	int GetNumVoxels();
+	const int* GetExtent();
 
 protected:
 	unsigned short label;

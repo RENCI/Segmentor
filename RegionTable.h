@@ -3,6 +3,8 @@
 
 #include <QTableWidget>
 
+class QSignalMapper;
+
 class Region;
 
 class RegionTable : public QTableWidget {
@@ -12,8 +14,11 @@ public:
 
 	void Update(const std::vector<Region*>& regions);
 
-protected:
+signals:
+	void removeRegion(int label);
 
+protected:
+	QSignalMapper * removeMapper;
 };
 
 #endif

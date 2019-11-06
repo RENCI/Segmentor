@@ -6,6 +6,7 @@
 #include <QIcon>
 #include <QStyle>
 #include <QPushButton>
+#include <QSignalMapper>
 
 #include "Region.h"
 
@@ -16,15 +17,12 @@ RegionTable::RegionTable(QWidget* parent)
 	headers << "Id" << "Color" << "Size" << "Done" << "Remove";
 	setColumnCount(headers.length());
 	setHorizontalHeaderLabels(headers);
+	resizeColumnsToContents();
 	verticalHeader()->setVisible(false);
 
-	horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-	horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-	horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
-	horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
-	horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
-
 	setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+
+	removeMapper = new QSignalMapper(this);
 }
 
 void RegionTable::Update(const std::vector<Region*>& regions) {
@@ -61,6 +59,8 @@ void RegionTable::Update(const std::vector<Region*>& regions) {
 		// Remove button
 		QPushButton* removeButton = new QPushButton(this);
 		removeButton->setIcon(removeIcon);
+		connect(removeButton, SIGNAL(clicked()), removeMapper, SLOT(map()));
+		removeMapper->setMapping(removeButton, (int)region->GetLabel());
 		
 		setItem(i, 0, idItem);
 		setItem(i, 1, colorItem);
@@ -68,4 +68,8 @@ void RegionTable::Update(const std::vector<Region*>& regions) {
 		setItem(i, 3, checkItem);
 		setCellWidget(i, 4, removeButton);
 	}
+
+	connect(removeMapper, SIGNAL(mapped(int)), this, SIGNAL(removeRegion(int)));
+
+	resizeColumnsToContents();
 }
