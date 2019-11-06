@@ -8,6 +8,7 @@
 
 class VisualizationContainer;
 class Region;
+class RegionTable;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
   Q_OBJECT
@@ -38,10 +39,10 @@ public slots:
 
 protected:
 	// The visualization container
-	VisualizationContainer * visualizationContainer;
+	VisualizationContainer* visualizationContainer;
 
 	// Region table
-	void CreateRegionTable();
+	RegionTable* regionTable;
 
 	bool eventFilter(QObject* obj, QEvent* event);
 

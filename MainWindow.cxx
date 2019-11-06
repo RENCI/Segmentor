@@ -3,11 +3,15 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QTableWidgetItem>
+#include <QIcon>
+#include <QStyle>
+#include <QPushButton>
 
 #include <vtkGenericOpenGLRenderWindow.h>
 
 #include "VisualizationContainer.h"
 #include "Region.h"
+#include "RegionTable.h"
 
 #include "vtkCallbackCommand.h"
 #include "vtkSmartPointer.h"
@@ -33,7 +37,9 @@ MainWindow::MainWindow() {
 	visualizationContainer = new VisualizationContainer(qvtkWidgetLeft->GetInteractor(), qvtkWidgetRight->GetInteractor(), this);
 
 	// Create region table
-	CreateRegionTable();	
+	regionTable = new RegionTable();
+	regionTable->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+	regionTableContainer->layout()->addWidget(regionTable);
 
 	qApp->installEventFilter(this);
 }
@@ -45,56 +51,8 @@ MainWindow::~MainWindow() {
 	qApp->exit();
 }
 
-void MainWindow::CreateRegionTable() {
-	// Region table
-	QStringList headers;
-	headers << "Id" << "Color" << "Size" << "Done" << "Remove";
-	regionTable->setColumnCount(headers.length());
-	regionTable->setHorizontalHeaderLabels(headers);
-	regionTable->verticalHeader()->setVisible(false);
-
-	regionTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-	regionTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-	regionTable->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
-	regionTable->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
-	regionTable->horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
-
-	regionTable->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
-}
-
-void MainWindow::UpdateRegionTableWidth() {
-
-}
-
 void MainWindow::UpdateRegionTable(const std::vector<Region*>& regions) {
-	int numRegions = (int)regions.size();
-
-	regionTable->setRowCount(numRegions);
-
-	for (int i = 0; i < numRegions; i++) {
-		Region* region = regions[i];
-
-		QTableWidgetItem* idItem = new QTableWidgetItem(QString::number(region->GetLabel()));
-		idItem->setTextAlignment(Qt::AlignCenter);
-
-		const double* col = region->GetColor();
-		QColor color(col[0] * 255, col[1] * 255, col[2] * 255);
-		QTableWidgetItem* colorItem = new QTableWidgetItem("");
-		colorItem->setBackgroundColor(color);
-
-		QTableWidgetItem* sizeItem = new QTableWidgetItem(QString::number(region->GetNumVoxels()));
-		sizeItem->setTextAlignment(Qt::AlignCenter);
-
-		QTableWidgetItem* checkItem = new QTableWidgetItem();
-		checkItem->setCheckState(Qt::Unchecked);
-
-		regionTable->setItem(i, 0, idItem);
-		regionTable->setItem(i, 1, colorItem);
-		regionTable->setItem(i, 2, sizeItem);
-		regionTable->setItem(i, 3, checkItem);
-	}
-
-	UpdateRegionTableWidth();
+	regionTable->Update(regions);
 }
 
 void MainWindow::on_actionOpen_Image_File_triggered() {
