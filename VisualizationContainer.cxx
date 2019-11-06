@@ -466,7 +466,7 @@ void VisualizationContainer::UpdateLabels() {
 	volumePipeline->SetRegions(labels, regions);
 	slicePipeline->SetSegmentationData(labels);
 
-	qtWindow->UpdateRegions(regions);
+	qtWindow->UpdateRegionTable(regions);
 }
 
 void VisualizationContainer::UpdateColors() {

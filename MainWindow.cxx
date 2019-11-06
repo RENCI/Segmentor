@@ -32,18 +32,8 @@ MainWindow::MainWindow() {
 	// Create visualization container
 	visualizationContainer = new VisualizationContainer(qvtkWidgetLeft->GetInteractor(), qvtkWidgetRight->GetInteractor(), this);
 
-	// Region table
-	QStringList headers;
-	headers << "Id" << "Color" << "Size" << "Done" << "Remove";
-	regionTable->setColumnCount(headers.length());
-	regionTable->setHorizontalHeaderLabels(headers);
-	regionTable->verticalHeader()->setVisible(false);
-
-	regionTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-	regionTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-	regionTable->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
-	regionTable->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
-	regionTable->horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeToContents);\
+	// Create region table
+	CreateRegionTable();	
 
 	qApp->installEventFilter(this);
 }
@@ -55,7 +45,28 @@ MainWindow::~MainWindow() {
 	qApp->exit();
 }
 
-void MainWindow::UpdateRegions(const std::vector<Region*>& regions) {
+void MainWindow::CreateRegionTable() {
+	// Region table
+	QStringList headers;
+	headers << "Id" << "Color" << "Size" << "Done" << "Remove";
+	regionTable->setColumnCount(headers.length());
+	regionTable->setHorizontalHeaderLabels(headers);
+	regionTable->verticalHeader()->setVisible(false);
+
+	regionTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+	regionTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+	regionTable->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+	regionTable->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+	regionTable->horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
+
+	regionTable->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+}
+
+void MainWindow::UpdateRegionTableWidth() {
+
+}
+
+void MainWindow::UpdateRegionTable(const std::vector<Region*>& regions) {
 	int numRegions = (int)regions.size();
 
 	regionTable->setRowCount(numRegions);
@@ -82,6 +93,8 @@ void MainWindow::UpdateRegions(const std::vector<Region*>& regions) {
 		regionTable->setItem(i, 2, sizeItem);
 		regionTable->setItem(i, 3, checkItem);
 	}
+
+	UpdateRegionTableWidth();
 }
 
 void MainWindow::on_actionOpen_Image_File_triggered() {

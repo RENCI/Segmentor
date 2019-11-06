@@ -15,7 +15,7 @@ public:
 	MainWindow();
 	virtual ~MainWindow();
 
-	void UpdateRegions(const std::vector<Region*>& regions);
+	void UpdateRegionTable(const std::vector<Region*>& regions);
 
 public slots:
 	// Use Qt's auto-connect magic to tie GUI widgets to slots,
@@ -39,6 +39,9 @@ public slots:
 protected:
 	// The visualization container
 	VisualizationContainer * visualizationContainer;
+
+	// Region table
+	void CreateRegionTable();
 
 	bool eventFilter(QObject* obj, QEvent* event);
 
