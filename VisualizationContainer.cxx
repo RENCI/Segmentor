@@ -447,121 +447,53 @@ void VisualizationContainer::RelabelCurrentRegion() {
 				volumePipeline->AddSurface(regions.back());
 			}			
 		}
+
+		qtWindow->UpdateRegionTable(regions);
+
+		labels->Modified();
+		Render();
 	}
-
-	qtWindow->UpdateRegionTable(regions);
-
-	Render();
-
-	// Need split and merge operations
-	// Split: threshold by current label and run connected components, create new regions if necessary
-	// Merge: threshold by current label and create seed points for each component (hopefully only one)
-	//			-- need to check if merged regions still exist (i.e. they were not contiguous) and delete/update as necessary
-	// Easier merge: set all pixels in selected region to current region label. Remove selected region.
-
-
-/*
-	vtkSmartPointer<vtkImageThreshold> threshold = vtkSmartPointer<vtkImageThreshold>::New();
-	threshold->ThresholdByUpper(1);
-	threshold->ReplaceInOn();
-	threshold->SetInValue(255);
-	threshold->SetOutputScalarTypeToUnsignedChar();
-	threshold->SetInputDataObject(labels);
-
-	vtkSmartPointer<vtkImageConnectivityFilter> connectivity = vtkSmartPointer<vtkImageConnectivityFilter>::New();
-	connectivity->SetScalarRange(255, 255);
-	connectivity->SetLabelScalarTypeToUnsignedShort();
-	connectivity->SetLabelModeToSizeRank();
-	connectivity->GenerateRegionExtentsOn();
-	connectivity->SetInputConnection(threshold->GetOutputPort());
-	connectivity->Update();
-
-	vtkSmartPointer<vtkImageData> newLabelImage = connectivity->GetOutput();
-
-	// Get max label in old regions
-	unsigned short maxOldLabel = 0;
-	for (int i = 0; i < (int)regions.size(); i++) {
-		unsigned short label = regions[i]->GetLabel();
-		if (label > maxOldLabel) maxOldLabel = label;
-	}
-
-	// Availability for current regions
-	// -1: Not currently used
-	// 0: Used but not available
-	// 1: Used and available
-	std::vector<int> oldRegionAvailability(maxOldLabel, -1);
-
-	for (int i = 0; i < (int)regions.size(); i++) {
-		oldRegionAvailability[regions[i]->GetLabel()] = 1;
-	}
-
-	vtkIdTypeArray* newLabels = connectivity->GetExtractedRegionLabels();
-	vtkIntArray* newExtents = connectivity->GetExtractedRegionExtents();
-
-	// Match new regions to current regions, or create new ones if necessary
-	for (int i = 0; i < connectivity->GetNumberOfExtractedRegions(); i++) {
-		// Get information for this new region
-		unsigned short newLabel = (unsigned short)newLabels->GetTuple1(i);
-		double* extent = newExtents->GetTuple(i);
-
-		// Get the current labels in the new region
-		std::vector<unsigned int> regionLabels;
-		std::vector<int> regionLabelCounts;
-		
-		for (int i = extent[0]; i <= extent[1]; i++) {
-			for (int j = extent[2]; j <= extent[3]; j++) {
-				for (int k = extent[4]; k <= extent[5]; k++) {
-					unsigned short* p = static_cast<unsigned short*>(labels->GetScalarPointer(i, j, k));
-					unsigned short oldLabel = *(static_cast<unsigned short*>(newLabelImage->GetScalarPointer(i, j, k)));
-
-					if (*p == label) *p = 0;
-				}
-			}
-		}
-		
-	}
-	*/
-
-	/*
-
-	unsigned short label = currentRegion->GetLabel();
-
-	vtkSmartPointer<vtkImageThreshold> threshold = vtkSmartPointer<vtkImageThreshold>::New();
-	threshold->ThresholdBetween(label, label);
-	threshold->ReplaceInOn();
-	threshold->SetInValue(255);
-	threshold->SetOutputScalarTypeToUnsignedChar();
-	threshold->SetInputDataObject(labels);
-
-	vtkSmartPointer<vtkImageConnectivityFilter> connectivity = vtkSmartPointer<vtkImageConnectivityFilter>::New();
-	connectivity->SetScalarRange(255, 255);
-	connectivity->SetLabelScalarTypeToUnsignedShort();
-	connectivity->SetLabelModeToSizeRank();
-	connectivity->GenerateRegionExtentsOn();
-	connectivity->SetInputConnection(threshold->GetOutputPort());
-	connectivity->Update();
-
-	std::cout << connectivity->GetNumberOfExtractedRegions() << std::endl;
-
-	int numRegions = connectivity->GetNumberOfExtractedRegions();
-
-	if (numRegions == 0) {
-		std::cout << "HANDLE CASE WHERE REGION HAS BEEN REMOVED" << std::endl;
-	}
-	else {
-		for (int i = 0; i < numRegions; i++) {
-			unsigned short currentLabel = i == 0 ? label : GetNewLabel();
-		}
-	}
-
-
-	// 1. Get regions with this label (original may have split)
-	// 2. See if there are any connections to these regions via seeds (regions may have been joined)
-	*/
 }
 
 void VisualizationContainer::MergeWithCurrentRegion(int x, int y, int z) {
+	if (!currentRegion) return;
 
+	unsigned short currentLabel = currentRegion->GetLabel();
+
+	// Get the region at the point
+	unsigned short label = GetLabel(x, y, z);
+
+	int index = GetRegionIndex(label);
+
+	Region* region = regions[index];
+
+	const int* extent = region->GetExtent();
+
+	// Update label data
+	for (int i = extent[0]; i <= extent[1]; i++) {
+		for (int j = extent[2]; j <= extent[3]; j++) {
+			for (int k = extent[4]; k <= extent[5]; k++) {
+				unsigned short* labelData = static_cast<unsigned short*>(labels->GetScalarPointer(i, j, k));
+
+				if (*labelData == label) *labelData = currentLabel;
+			}
+		}
+	}
+
+	// Update current region extent
+	const int* currentExtent = currentRegion->GetExtent();
+
+	int newExtent[6];
+	for (int i = 0; i < 6; i++) {
+		newExtent[i] = i % 2 == 0 ? 
+			std::min(extent[i], currentExtent[i]) : 
+			std::max(extent[i], currentExtent[i]);
+	}
+
+	currentRegion->SetExtent(newExtent);
+
+	// Remove region
+	RemoveRegion(label);
 }
 
 unsigned short VisualizationContainer::GetNewLabel() {
