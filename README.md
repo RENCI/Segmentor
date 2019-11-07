@@ -51,7 +51,7 @@ Switch between **Navigation** and **Edit** modes with the space bar.
 * Erase: `Right-click or right-click and drag`
 * Region grow: `g` (2D slice view only)
 
-### Either mode:
+### Both modes:
 
 #### General 
 
