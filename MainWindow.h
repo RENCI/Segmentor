@@ -38,6 +38,7 @@ public slots:
 	virtual void on_actionExit_triggered();
 
 	// Region table events
+	virtual void on_regionDone(int label, bool done);
 	virtual void on_removeRegion(int label);
 
 protected:

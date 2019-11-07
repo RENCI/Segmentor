@@ -6,6 +6,8 @@
 #include <algorithm>
 
 Region::Region(vtkImageData* inputData, unsigned short regionLabel, double regionColor[3]) {
+	done = false;
+
 	// Input data info
 	data = inputData;
 	unsigned short* scalars = static_cast<unsigned short*>(data->GetScalarPointer());
@@ -120,6 +122,10 @@ void Region::UpdateExtent() {
 	voi->SetVOI(padExtent);
 }
 
+void Region::SetDone(bool isDone) {
+	done = isDone;
+}
+
 unsigned short Region::GetLabel() {
 	return label;
 }
@@ -145,4 +151,8 @@ int Region::GetNumVoxels() {
 
 const int* Region::GetExtent() {
 	return extent;
+}
+
+bool Region::GetDone() {
+	return done;
 }

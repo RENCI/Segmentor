@@ -128,8 +128,31 @@ void VolumePipeline::AddSurface(Region* region) {
 	surfaces.push_back(surface);
 }
 
-void VolumePipeline::RemoveSurface(int index) {
-	surfaces.erase(surfaces.begin() + index);
+void VolumePipeline::RemoveSurface(unsigned short label) {
+	for (int i = 0; i < (int)surfaces.size(); i++) {
+		if (surfaces[i]->GetRegion()->GetLabel() == label) {
+			surfaces.erase(surfaces.begin() + i);
+			return;
+		}
+	}
+}
+
+void VolumePipeline::SetSurfaceDone(unsigned short label, bool done) {
+	for (int i = 0; i < (int)surfaces.size(); i++) {
+		Region* region = surfaces[i]->GetRegion();
+
+		if (region->GetLabel() == label) {
+			if (region->GetDone()) {
+				surfaces[i]->GetActor()->GetProperty()->SetColor(0.5, 0.5, 0.5);
+			}
+			else {
+				const double* color = region->GetColor();
+				surfaces[i]->GetActor()->GetProperty()->SetColor(color[0], color[1], color[2]);
+			}
+
+			return;
+		}
+	}
 }
 
 void VolumePipeline::SetCurrentLabel(unsigned short label) {

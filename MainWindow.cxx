@@ -41,7 +41,8 @@ MainWindow::MainWindow() {
 	regionTable->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
 	regionTableContainer->layout()->addWidget(regionTable);
 
-	connect(regionTable, SIGNAL(removeRegion(int)), this, SLOT(on_removeRegion(int)));
+	QObject::connect(regionTable, &RegionTable::regionDone, this, &MainWindow::on_regionDone);
+	QObject::connect(regionTable, &RegionTable::removeRegion, this, &MainWindow::on_removeRegion);
 
 	qApp->installEventFilter(this);
 }
@@ -200,6 +201,9 @@ void MainWindow::on_actionExit_triggered() {
 	qApp->exit();
 }
 
+void MainWindow::on_regionDone(int label, bool done) {
+	visualizationContainer->SetRegionDone((unsigned short)label, done);
+}
 void MainWindow::on_removeRegion(int label) {
 	visualizationContainer->RemoveRegion((unsigned short)label);
 }

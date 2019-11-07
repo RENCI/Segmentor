@@ -15,10 +15,8 @@ public:
 	void Update(const std::vector<Region*>& regions);
 
 signals:
+	void regionDone(int label, bool done);
 	void removeRegion(int label);
-
-protected:
-	QSignalMapper * removeMapper;
 };
 
 #endif

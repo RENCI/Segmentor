@@ -583,6 +583,28 @@ void VisualizationContainer::GrowRegion(int x, int y, int z) {
 	Render();
 }
 
+void VisualizationContainer::SetRegionDone(unsigned short label, bool done) {
+	Region* region = GetRegion(label);
+
+	if (!region) return;
+
+	region->SetDone(done);
+
+	if (done) {
+		// Set to grey
+		labelColors->SetTableValue(label, 0.5, 0.5, 0.5);
+		labelColors->Build();
+	}
+	else {
+		// Set to color map
+		UpdateColors(label);
+	}
+
+	volumePipeline->SetSurfaceDone(label, done);
+
+	Render();
+}
+
 void VisualizationContainer::RemoveRegion(unsigned short label) {
 	int index = GetRegionIndex(label);
 
@@ -602,7 +624,7 @@ void VisualizationContainer::RemoveRegion(unsigned short label) {
 	}
 
 	regions.erase(regions.begin() + index);
-	volumePipeline->RemoveSurface(index);
+	volumePipeline->RemoveSurface(label);
 	qtWindow->UpdateRegionTable(regions);
 
 	labels->Modified();
@@ -652,12 +674,20 @@ void VisualizationContainer::UpdateColors(unsigned short label) {
 		{ 177,89,40 }
 	};
 
+	for (int i = 0; i < numColors; i++) {
+		for (int j = 0; j < 3; j++) {
+			colors[i][j] /= 255.0;
+		}
+	}
+
 	if (label >= labelColors->GetNumberOfTableValues()) {
 		labelColors->SetNumberOfTableValues(label + 1);
 		labelColors->SetRange(0, label);
-		double* c = colors[(label - 1) % numColors];
-		labelColors->SetTableValue(label, c[0], c[1], c[2]);
 	}
+
+	double* c = colors[(label - 1) % numColors];
+	labelColors->SetTableValue(label, c[0], c[1], c[2]);
+	labelColors->Build();
 }
 
 void VisualizationContainer::UpdateColors() {
@@ -704,6 +734,12 @@ int VisualizationContainer::GetRegionIndex(unsigned short label) {
 	}
 
 	return -1;
+}
+
+Region* VisualizationContainer::GetRegion(unsigned short label) {
+	int index = GetRegionIndex(label);
+
+	return index == -1 ? nullptr : regions[index];
 }
 
 void VisualizationContainer::RemoveRegions() {

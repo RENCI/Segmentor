@@ -29,7 +29,8 @@ public:
   void SetRegions(vtkImageData* data, std::vector<Region*> regions);
 
   void AddSurface(Region* region);
-  void RemoveSurface(int index);
+  void RemoveSurface(unsigned short label);
+  void SetSurfaceDone(unsigned short label, bool done);
 
   void SetShowProbe(bool visibility);
   void SetProbePosition(double x, double y, double z);

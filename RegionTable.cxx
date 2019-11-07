@@ -7,6 +7,7 @@
 #include <QStyle>
 #include <QPushButton>
 #include <QSignalMapper>
+#include <QCheckBox>
 
 #include "Region.h"
 
@@ -21,8 +22,6 @@ RegionTable::RegionTable(QWidget* parent)
 	verticalHeader()->setVisible(false);
 
 	setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
-
-	removeMapper = new QSignalMapper(this);
 }
 
 void RegionTable::Update(const std::vector<Region*>& regions) {
@@ -36,9 +35,10 @@ void RegionTable::Update(const std::vector<Region*>& regions) {
 
 	for (int i = 0; i < numRegions; i++) {
 		Region* region = regions[i];
+		int label = (int)region->GetLabel();
 
 		// Id
-		QTableWidgetItem* idItem = new QTableWidgetItem(QString::number(region->GetLabel()));
+		QTableWidgetItem* idItem = new QTableWidgetItem(QString::number(label));
 		idItem->setTextAlignment(Qt::AlignCenter);
 
 		// Color
@@ -52,24 +52,26 @@ void RegionTable::Update(const std::vector<Region*>& regions) {
 		sizeItem->setTextAlignment(Qt::AlignCenter);
 
 		// Checkbox
-		//QCheckbox* checkBox = new QCheckBox();
-		QTableWidgetItem* checkItem = new QTableWidgetItem();
-		checkItem->setCheckState(Qt::Unchecked);
+		QCheckBox* checkBox = new QCheckBox(this);
+		checkBox->setChecked(region->GetDone());
+		checkBox->setStyleSheet("margin-left:10%;margin-right:5%;");
+		QObject::connect(checkBox, &QCheckBox::stateChanged, [this, label](int state) {
+			regionDone(label, state);
+		});
 
 		// Remove button
 		QPushButton* removeButton = new QPushButton(this);
 		removeButton->setIcon(removeIcon);
-		connect(removeButton, SIGNAL(clicked()), removeMapper, SLOT(map()));
-		removeMapper->setMapping(removeButton, (int)region->GetLabel());
+		QObject::connect(removeButton, &QPushButton::clicked, [this, label]() {
+			removeRegion(label);
+		});
 		
 		setItem(i, 0, idItem);
 		setItem(i, 1, colorItem);
 		setItem(i, 2, sizeItem);
-		setItem(i, 3, checkItem);
+		setCellWidget(i, 3, checkBox);
 		setCellWidget(i, 4, removeButton);
 	}
-
-	connect(removeMapper, SIGNAL(mapped(int)), this, SIGNAL(removeRegion(int)));
 
 	resizeColumnsToContents();
 }
