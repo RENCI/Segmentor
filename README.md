@@ -35,27 +35,33 @@ To save the current segmentation select `File->Save Segmentation Data...`. The f
 
 ## Controls:
 
-### Navigation:
+Switch between **Navigation** and **Edit** modes with the space bar.
+
+### Navigation mode:
 
 * Rotate: `Left-click and drag`
 * Translate: `Middle-click and drag`
 * Zoom: `Right-click and drag`
 * Spin: `Ctrl-left-click and drag`
 
-* Move clipping plane: `Ctrl-right-click and drag`
+### Edit mode:
 
-* Zoom to point: `f`
-
-### Editing:
-
-* Select current label: `Left-click segmentation region`
-* Paint: `Alt-left click or Alt-left click and drag`
-* Erase: `Alt-right click or Alt-right click and drag`
+* Select current label: `Middle-click or Ctrl-left-click segmentation region`
+* Paint: `Left-click or left-click and drag`
+* Erase: `Right-click or right-click and drag`
 * Region grow: `g` (2D slice view only)
 
-### Visualization:
+### Either mode:
 
-#### 2D
+#### General 
+
+* Move clipping plane: `Ctrl-right-click and drag`
+* Zoom to point: `f`
+* Relabel current region: `u`
+* Merge with current region: `m`
+* Region grow: `g` (2D slice view only)
+
+#### 2D Visualization:
 
 * Window/level: `Shift-left-click and drag` (2D slice view only)
 
@@ -63,7 +69,7 @@ To save the current segmentation select `File->Save Segmentation Data...`. The f
 * Toggle voxel outline: `2`
 * Toggle region outline: `3`
 
-#### 3D
+#### 3D Visualization
 
 * Toggle slice plane visualization: `o`
 * Toggle slice plane filtering: `p`
