@@ -98,23 +98,46 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 
 	case 'g':
 	case 'G': {
-			// Pick at the mouse location provided by the interactor	
-			int pick = Pick(rwi);
+		// Pick at the mouse location provided by the interactor	
+		int pick = Pick(rwi);
 
-			if (pick) {
-				// Get the pixel indeces for the pick event		
-				int* p = SlicePick();
+		if (pick) {
+			// Get the pixel indeces for the pick event		
+			int* p = SlicePick();
 
-				// XXX: HACK TO GUARD AGAINST INVALID VOLUME PICK
-				//		NEED TO FIX VOLUME PICKING AND DIFFERENTIATE BETWEEN THEM FOR KEYSTROKE CALLBACK
+			// XXX: HACK TO GUARD AGAINST INVALID VOLUME PICK
+			//		NEED TO FIX VOLUME PICKING AND DIFFERENTIATE BETWEEN THEM FOR KEYSTROKE CALLBACK
 
-				if (p[0] == 0 && p[1] == 0 && p[3] == 0) break;
+			if (p[0] == 0 && p[1] == 0 && p[3] == 0) break;
 				
-				vis->GrowRegion(p[0], p[1], p[2]);
-				vis->Render();
-			}
-			break;
+			vis->GrowRegion(p[0], p[1], p[2]);
 		}
+		break;
+	}
+
+	case 'u':
+	case 'U':
+		vis->RelabelCurrentRegion();
+		break;
+
+	case 'm':
+	case 'M': {
+		// Pick at the mouse location provided by the interactor	
+		int pick = Pick(rwi);
+
+		if (pick) {
+			// Get the pixel indeces for the pick event		
+			int* p = SlicePick();
+
+			// XXX: HACK TO GUARD AGAINST INVALID VOLUME PICK
+			//		NEED TO FIX VOLUME PICKING AND DIFFERENTIATE BETWEEN THEM FOR KEYSTROKE CALLBACK
+
+			if (p[0] == 0 && p[1] == 0 && p[3] == 0) break;
+
+			vis->MergeWithCurrentRegion(p[0], p[1], p[2]);
+		}
+		break;
+	}
 
 	case '1':
 		vis->GetSlicePipeline()->ToggleLabelSlice();

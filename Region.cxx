@@ -30,7 +30,9 @@ Region::Region(vtkImageData* inputData, unsigned short regionLabel, double regio
 	extent[4] = dataExtent[5];
 	extent[5] = dataExtent[4];
 
-	numVoxels = 0;
+	// XXX: USE GENERATE REGION EXTENTS FROM vktImageConnectivityFilter AND PASS THIS IN
+	//		ALSO REGION SIZE FROM FILTER
+
 	for (int i = 0; i < numPoints; i++) {
 		if (scalars[i] == label) {
 			double* point = data->GetPoint(i);
@@ -41,8 +43,6 @@ Region::Region(vtkImageData* inputData, unsigned short regionLabel, double regio
 			if (point[1] > extent[3]) extent[3] = point[1];
 			if (point[2] < extent[4]) extent[4] = point[2];
 			if (point[2] > extent[5]) extent[5] = point[2];
-
-			numVoxels++;
 		}
 	}
 
@@ -57,6 +57,14 @@ Region::~Region() {
 
 vtkAlgorithmOutput* Region::GetOutput() {
 	return voi->GetOutputPort();
+}
+
+void Region::SetExtent(int newExtent[6]) {
+	for (int i = 0; i < 6; i++) {
+		extent[i] = newExtent[i];
+	}
+
+	UpdateExtent();
 }
 
 void Region::UpdateExtent(int x, int y, int z) {
@@ -121,6 +129,17 @@ const double* Region::GetColor() {
 }
 
 int Region::GetNumVoxels() {
+	voi->Update();
+
+	vtkImageData* voiData = voi->GetOutput();
+	unsigned short* scalars = static_cast<unsigned short*>(voiData->GetScalarPointer());
+	int numPoints = voiData->GetNumberOfPoints();
+
+	int numVoxels = 0;
+	for (int i = 0; i < numPoints; i++) {
+		if (scalars[i] == label) numVoxels++;
+	}
+
 	return numVoxels;
 }
 

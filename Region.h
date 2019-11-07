@@ -14,6 +14,7 @@ public:
 
 	vtkAlgorithmOutput* GetOutput();
 
+	void SetExtent(int newExtent[6]);
 	void UpdateExtent(int x, int y, int z);
 
 	unsigned short GetLabel();
@@ -25,7 +26,6 @@ protected:
 	unsigned short label;
 	double color[3];
 	int extent[6];
-	int numVoxels;
 
 	vtkSmartPointer<vtkImageData> data;
 	vtkSmartPointer<vtkExtractVOI> voi;

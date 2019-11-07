@@ -97,13 +97,7 @@ void VolumePipeline::SetRegions(vtkImageData* data, std::vector<Region*> regions
 	RemoveSurfaces();
 
 	for (int i = 0; i < regions.size(); i++) {
-		RegionSurface* surface = new RegionSurface(regions[i], labelColors);
-		surface->SetSmoothSurfaces(smoothSurfaces);
-		surface->SetSmoothShading(smoothShading);
-
-		renderer->AddActor(surface->GetActor());
-
-		surfaces.push_back(surface);
+		AddSurface(regions[i]);
 	}
 
 	// Update probe
@@ -122,6 +116,16 @@ void VolumePipeline::SetRegions(vtkImageData* data, std::vector<Region*> regions
 
 	renderer->ResetCameraClippingRange();
 	Render();
+}
+
+void VolumePipeline::AddSurface(Region* region) {
+	RegionSurface* surface = new RegionSurface(region, labelColors);
+	surface->SetSmoothSurfaces(smoothSurfaces);
+	surface->SetSmoothShading(smoothShading);
+
+	renderer->AddActor(surface->GetActor());
+
+	surfaces.push_back(surface);
 }
 
 void VolumePipeline::RemoveSurface(int index) {
