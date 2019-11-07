@@ -27,6 +27,7 @@ public:
 	void OnLeftButtonDown() override;
 	void OnLeftButtonUp() override;
 	void OnMiddleButtonDown() override;
+	void OnMiddleButtonUp() override;
 	void OnRightButtonDown() override;
 	void OnRightButtonUp() override;
 	void OnChar() override;

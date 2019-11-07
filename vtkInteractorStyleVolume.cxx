@@ -178,8 +178,8 @@ void vtkInteractorStyleVolume::OnLeftButtonDown()
 
 	if (this->Mode == EditMode)
 	{
-		// If alt is held down, select the region label
-		if (this->Interactor->GetAltKey()) {
+		// If ctrl is held down, select the region label
+		if (this->Interactor->GetControlKey()) {
 			this->StartSelect();
 		}
 
@@ -255,11 +255,37 @@ void vtkInteractorStyleVolume::OnMiddleButtonDown()
 		return;
 	}
 
-	if (this->Mode == NavigationMode)
+	if (this->Mode == EditMode)
+	{
+		// Select
+		this->StartSelect();
+	}
+	else
 	{
 		// Pan
 		this->StartPan();
 	}
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleVolume::OnMiddleButtonUp() {
+	int x = this->Interactor->GetEventPosition()[0];
+	int y = this->Interactor->GetEventPosition()[1];
+
+	this->FindPokedRenderer(x, y);
+	if (this->CurrentRenderer == nullptr)
+	{
+		return;
+	}
+
+	if (this->State == VTKIS_SELECT_VOLUME)
+	{
+		this->EndSelect();
+	}
+
+	// Call parent to handle all other states and perform additional work
+
+	this->Superclass::OnMiddleButtonUp();
 }
 
 //----------------------------------------------------------------------------
@@ -276,24 +302,23 @@ void vtkInteractorStyleVolume::OnRightButtonDown()
 		return;
 	}
 
-	if (this->Mode == EditMode)
+	// Slice if ctrl is held down
+	if (this->Interactor->GetControlKey())
 	{
-		// Slice if ctrl is held down
-		if (this->Interactor->GetControlKey())
-		{
-			this->StartSlice();
-		}
-
-		// Otherwise erase
-		else
-		{
-			this->StartErase();
-		}
+		this->StartSlice();
 	}
 	else
 	{
-		// Zoom
-		this->StartDolly();
+		if (this->Mode == EditMode)
+		{
+			// Erase
+			this->StartErase();
+		}
+		else
+		{
+			// Zoom
+			this->StartDolly();
+		}
 	}
 }
 

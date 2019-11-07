@@ -152,39 +152,41 @@ void vtkInteractorStyleSlice::OnLeftButtonDown()
 		return;
 	}
 
-	if (this->Mode == EditMode) 
+	// If shift is held down, do window/level in either mode
+	if (this->Interactor->GetShiftKey())
 	{
-		// If alt is held down, select the region label
-		if (this->Interactor->GetAltKey()) {
-			this->StartSelect();
-		}
-
-		// If shift is held down, do window/level
-		else if (this->Interactor->GetShiftKey())
-		{
-			this->WindowLevelStartPosition[0] = x;
-			this->WindowLevelStartPosition[1] = y;
-			this->StartWindowLevel();
-		}
-
-		// Otherwise paint
-		else 
-		{
-			this->StartPaint();
-		}
+		this->WindowLevelStartPosition[0] = x;
+		this->WindowLevelStartPosition[1] = y;
+		this->StartWindowLevel();
 	}
-	else 
+	else
 	{
-		// If ctrl is held down, spin
-		if (this->Interactor->GetControlKey()) 
+		if (this->Mode == EditMode)
 		{
-			this->StartSpin();
-		}
+			// If ctrl is held down, select the region label
+			if (this->Interactor->GetControlKey()) {
+				this->StartSelect();
+			}
 
-		// Otherwise rotate around focal point
+			// Otherwise paint
+			else
+			{
+				this->StartPaint();
+			}
+		}
 		else
 		{
-			this->StartRotate();
+			// If ctrl is held down, spin
+			if (this->Interactor->GetControlKey())
+			{
+				this->StartSpin();
+			}
+
+			// Otherwise rotate around focal point
+			else
+			{
+				this->StartRotate();
+			}
 		}
 	}
 }
@@ -238,11 +240,37 @@ void vtkInteractorStyleSlice::OnMiddleButtonDown()
 		return;
 	}
 
-	if (this->Mode == NavigationMode)
+	if (this->Mode == EditMode)
+	{
+		// Select
+		this->StartSelect();
+	}
+	else 
 	{
 		// Pan
 		this->StartPan();
 	}
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::OnMiddleButtonUp() {
+	int x = this->Interactor->GetEventPosition()[0];
+	int y = this->Interactor->GetEventPosition()[1];
+
+	this->FindPokedRenderer(x, y);
+	if (this->CurrentRenderer == nullptr)
+	{
+		return;
+	}
+
+	if (this->State == VTKIS_SELECT_SLICE)
+	{
+		this->EndSelect();
+	}
+
+	// Call parent to handle all other states and perform additional work
+
+	this->Superclass::OnMiddleButtonUp();
 }
 
 //----------------------------------------------------------------------------
@@ -259,24 +287,23 @@ void vtkInteractorStyleSlice::OnRightButtonDown()
 		return;
 	}
 
-	if (this->Mode == EditMode) 
+	// Slice if ctrl is held down
+	if (this->Interactor->GetControlKey())
 	{
-		// Slice if ctrl is held down
-		if (this->Interactor->GetControlKey())
-		{
-			this->StartSlice();
-		}
-
-		// Otherwise erase
-		else
-		{
-			this->StartErase();
-		}
+		this->StartSlice();
 	}
 	else
 	{
-		// Zoom
-		this->StartDolly();
+		if (this->Mode == EditMode)
+		{
+			// Erase
+			this->StartErase();		
+		}
+		else
+		{
+			// Zoom
+			this->StartDolly();
+		}
 	}
 }
 
