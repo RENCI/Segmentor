@@ -10,7 +10,7 @@
 #include <vtkGenericOpenGLRenderWindow.h>
 
 #include "VisualizationContainer.h"
-#include "Region.h"
+#include "RegionCollection.h"
 #include "RegionTable.h"
 
 #include "vtkCallbackCommand.h"
@@ -54,7 +54,7 @@ MainWindow::~MainWindow() {
 	qApp->exit();
 }
 
-void MainWindow::UpdateRegionTable(const std::vector<Region*>& regions) {
+void MainWindow::UpdateRegionTable(RegionCollection* regions) {
 	regionTable->Update(regions);
 }
 

@@ -10,6 +10,7 @@
 #include <QCheckBox>
 
 #include "Region.h"
+#include "RegionCollection.h"
 
 RegionTable::RegionTable(QWidget* parent)
 	: QTableWidget(parent) 
@@ -24,8 +25,8 @@ RegionTable::RegionTable(QWidget* parent)
 	setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 }
 
-void RegionTable::Update(const std::vector<Region*>& regions) {
-	int numRegions = (int)regions.size();
+void RegionTable::Update(RegionCollection* regions) {
+	int numRegions = regions->Size();
 
 	setRowCount(numRegions);
 
@@ -33,8 +34,8 @@ void RegionTable::Update(const std::vector<Region*>& regions) {
 	QStyle* style = QApplication::style();
 	QIcon removeIcon = style->standardIcon(QStyle::SP_DialogCancelButton);
 
-	for (int i = 0; i < numRegions; i++) {
-		Region* region = regions[i];
+	regions->InitTraversal();
+	while (Region* region = regions->GetNext()) {
 		int label = (int)region->GetLabel();
 
 		// Id

@@ -1,7 +1,7 @@
 #ifndef Region_H
 #define Region_H
 
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
 
 class vtkAlgorithmOutput;
 class vtkExtractVOI;

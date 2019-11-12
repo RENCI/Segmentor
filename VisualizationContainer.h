@@ -15,6 +15,7 @@ class vtkRenderWindowInteractor;
 class VolumePipeline;
 class SlicePipeline;
 class Region;
+class RegionCollection;
 
 class VisualizationContainer {
 public:
@@ -43,7 +44,8 @@ public:
 	void PaintPoint(double x, double y, double z);
 	void ErasePoint(double x, double y, double z);
 
-	void SetCurrentLabel(unsigned short newLabel);
+	void SetCurrentRegion(Region* region);
+//	void SetCurrentLabel(unsigned short newLabel);
 
 	void RelabelCurrentRegion();
 	void MergeWithCurrentRegion(int x, int y, int z);
@@ -65,7 +67,8 @@ protected:
 	vtkSmartPointer<vtkImageData> data;
 	vtkSmartPointer<vtkImageData> labels;
 
-	std::vector<Region*> regions;
+	// Regions
+	RegionCollection* regions;
 	Region* currentRegion;
 
 	vtkSmartPointer<vtkLookupTable> labelColors;

@@ -5,14 +5,14 @@
 
 class QSignalMapper;
 
-class Region;
+class RegionCollection;
 
 class RegionTable : public QTableWidget {
   Q_OBJECT
 public:
 	RegionTable(QWidget* parent = 0);
 
-	void Update(const std::vector<Region*>& regions);
+	void Update(RegionCollection* regions);
 
 signals:
 	void regionDone(int label, bool done);

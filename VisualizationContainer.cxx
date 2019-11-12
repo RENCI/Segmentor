@@ -32,10 +32,12 @@
 #include "SlicePipeline.h"
 #include "VolumePipeline.h"
 #include "Region.h"
+#include "RegionCollection.h"
 
 VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volumeInteractor, vtkRenderWindowInteractor* sliceInteractor, MainWindow* mainWindow) {
 	data = nullptr;
 	labels = nullptr;
+	regions = new RegionCollection();
 	currentRegion = nullptr;
 
 	// Qt main window
@@ -118,10 +120,9 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 }
 
 VisualizationContainer::~VisualizationContainer() {
-	RemoveRegions();
-
 	delete volumePipeline;
 	delete slicePipeline;
+	delete regions;
 }
 
 bool VisualizationContainer::OpenImageFile(const std::string& fileName) {
@@ -316,7 +317,7 @@ void VisualizationContainer::ToggleInteractionMode() {
 void VisualizationContainer::PickLabel(int x, int y, int z) {
 	if (!labels) return;
 
-	SetCurrentLabel(GetLabel(x, y, z));
+	SetCurrentRegion(regions->Get(GetLabel(x, y, z)));
 }
 
 void VisualizationContainer::Paint(int x, int y, int z) {
@@ -365,6 +366,14 @@ void VisualizationContainer::ErasePoint(double x, double y, double z) {
 	Erase(s[0], s[1], s[2]);
 }
 
+void VisualizationContainer::SetCurrentRegion(Region* region) {
+	currentRegion = region;
+
+	volumePipeline->SetCurrentLabel(region->GetLabel());
+	slicePipeline->SetCurrentLabel(region->GetLabel());
+}
+
+/*
 void VisualizationContainer::SetCurrentLabel(unsigned short label) {
 	if (!labels) return;
 
@@ -382,6 +391,7 @@ void VisualizationContainer::SetCurrentLabel(unsigned short label) {
 	volumePipeline->SetCurrentLabel(label);
 	slicePipeline->SetCurrentLabel(label);
 }
+*/
 
 void VisualizationContainer::RelabelCurrentRegion() {
 	if (!currentRegion) return;
@@ -396,21 +406,21 @@ void VisualizationContainer::RelabelCurrentRegion() {
 	connectivity->SetInputDataObject(labels);
 	connectivity->Update();
 
-	int numRegions = connectivity->GetNumberOfExtractedRegions();
-	vtkIdTypeArray* conLabels = connectivity->GetExtractedRegionLabels();
-	vtkIntArray* regionExtents = connectivity->GetExtractedRegionExtents();
-	vtkImageData* conOutput = connectivity->GetOutput();
+	int numComponents = connectivity->GetNumberOfExtractedRegions();
+	vtkIdTypeArray* componentLabels = connectivity->GetExtractedRegionLabels();
+	vtkIntArray* componentExtents = connectivity->GetExtractedRegionExtents();
+	vtkImageData* connectivityOutput = connectivity->GetOutput();
 
-	if (numRegions == 0) {
+	if (numComponents == 0) {
 		RemoveRegion(label);
 	}
 	else {
-		for (int i = 0; i < numRegions; i++) {
-			// Get the extent for this region
-			double* regionExtent = regionExtents->GetTuple(i);
+		for (int i = 0; i < numComponents; i++) {
+			// Get the extent for this component
+			double* componentExtent = componentExtents->GetTuple(i);
 			int extent[6];
 			for (int j = 0; j < 6; j++) {
-				extent[j] = (int)regionExtent[j];
+				extent[j] = (int)componentExtent[j];
 			}
 
 			if (i == 0) {
@@ -419,7 +429,7 @@ void VisualizationContainer::RelabelCurrentRegion() {
 			}
 			else {
 				// Label from the connectivity filter
-				unsigned short conLabel = (unsigned short)conLabels->GetTuple1(i);
+				unsigned short componentLabel = (unsigned short)componentLabels->GetTuple1(i);
 
 				// Get label for new region
 				unsigned short newLabel = GetNewLabel();
@@ -429,9 +439,9 @@ void VisualizationContainer::RelabelCurrentRegion() {
 					for (int j = extent[2]; j <= extent[3]; j++) {
 						for (int k = extent[4]; k <= extent[5]; k++) {
 							unsigned short* labelData = static_cast<unsigned short*>(labels->GetScalarPointer(i, j, k));
-							unsigned short* conData = static_cast<unsigned short*>(conOutput->GetScalarPointer(i, j, k));
+							unsigned short* connectivityData = static_cast<unsigned short*>(connectivityOutput->GetScalarPointer(i, j, k));
 
-							if (*conData == conLabel) *labelData = newLabel;
+							if (*connectivityData == componentLabel) *labelData = newLabel;
 						}
 					}
 				}
@@ -439,10 +449,11 @@ void VisualizationContainer::RelabelCurrentRegion() {
 				UpdateColors(newLabel);
 
 				// Create new region
-				regions.push_back(new Region(labels, newLabel, labelColors->GetTableValue(newLabel)));
+				Region* newRegion = new Region(labels, newLabel, labelColors->GetTableValue(newLabel));
+				regions->Add(newRegion);
 
 				// Add surface
-				volumePipeline->AddSurface(regions.back());
+				volumePipeline->AddSurface(newRegion);
 			}			
 		}
 
