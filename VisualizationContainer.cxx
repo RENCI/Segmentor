@@ -366,7 +366,7 @@ void VisualizationContainer::ErasePoint(double x, double y, double z) {
 }
 
 void VisualizationContainer::SetCurrentLabel(unsigned short label) {
-	if (!labels || label == 0) return;
+	if (!labels) return;
 
 	currentRegion = nullptr;
 	for (int i = 0; i < regions.size(); i++) {
@@ -376,13 +376,11 @@ void VisualizationContainer::SetCurrentLabel(unsigned short label) {
 	}
 
 	if (!currentRegion) {
-		std::cout << "WHY AM I HERE?" << std::endl;
-		currentRegion = new Region(labels, label, labelColors->GetTableValue(label));
-		regions.push_back(currentRegion);
+		currentRegion = nullptr;
 	}
-
-	volumePipeline->SetCurrentLabel(currentRegion->GetLabel());
-	slicePipeline->SetCurrentLabel(currentRegion->GetLabel());
+	
+	volumePipeline->SetCurrentLabel(label);
+	slicePipeline->SetCurrentLabel(label);
 }
 
 void VisualizationContainer::RelabelCurrentRegion() {
@@ -626,6 +624,9 @@ void VisualizationContainer::RemoveRegion(unsigned short label) {
 	regions.erase(regions.begin() + index);
 	volumePipeline->RemoveSurface(label);
 	qtWindow->UpdateRegionTable(regions);
+
+	if (region == currentRegion) SetCurrentLabel(0);
+	delete region;
 
 	labels->Modified();
 	Render();
