@@ -55,6 +55,7 @@ Region::Region(vtkImageData* inputData, unsigned short regionLabel, double regio
 }
 	
 Region::~Region() {
+	ClearLabels();
 }
 
 vtkAlgorithmOutput* Region::GetOutput() {
@@ -155,4 +156,17 @@ const int* Region::GetExtent() {
 
 bool Region::GetDone() {
 	return done;
+}
+
+void Region::ClearLabels() {
+	for (int i = extent[0]; i <= extent[1]; i++) {
+		for (int j = extent[2]; j <= extent[3]; j++) {
+			for (int k = extent[4]; k <= extent[5]; k++) {
+				unsigned short* p = static_cast<unsigned short*>(data->GetScalarPointer(i, j, k));
+				if (*p == label) *p = 0;
+			}
+		}
+	}
+
+	data->Modified();
 }

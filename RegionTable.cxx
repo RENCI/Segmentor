@@ -34,8 +34,9 @@ void RegionTable::Update(RegionCollection* regions) {
 	QStyle* style = QApplication::style();
 	QIcon removeIcon = style->standardIcon(QStyle::SP_DialogCancelButton);
 
-	regions->InitTraversal();
-	while (Region* region = regions->GetNext()) {
+	int i = 0;
+	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++, i++) {
+		Region* region = regions->Get(it);
 		int label = (int)region->GetLabel();
 
 		// Id

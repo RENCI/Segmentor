@@ -471,10 +471,7 @@ void VisualizationContainer::MergeWithCurrentRegion(int x, int y, int z) {
 
 	// Get the region at the point
 	unsigned short label = GetLabel(x, y, z);
-
-	int index = GetRegionIndex(label);
-
-	Region* region = regions[index];
+	Region* region = regions->Get(label);
 
 	const int* extent = region->GetExtent();
 
@@ -503,29 +500,6 @@ void VisualizationContainer::MergeWithCurrentRegion(int x, int y, int z) {
 
 	// Remove region
 	RemoveRegion(label);
-}
-
-unsigned short VisualizationContainer::GetNewLabel() {
-	// Get labels
-	std::vector<unsigned short> labels;
-	for (int i = 0; i < (int)regions.size(); i++) {
-		labels.push_back(regions[i]->GetLabel());
-	}
-
-	// Sort them
-	std::sort(labels.begin(), labels.end());
-
-	// Check that the first label is 1
-	if (labels[0] != 1) return 1;
-
-	// Find the first gap
-	for (int i = 1; i < (int)labels.size(); i++) {
-		unsigned short testValue = labels[i - 1] + 1;
-		if (labels[i] != testValue) return testValue;
-	}
-
-	// No gap, return next label
-	return labels.back() + 1;
 }
 
 void VisualizationContainer::GrowRegion(int x, int y, int z) {
@@ -615,31 +589,13 @@ void VisualizationContainer::SetRegionDone(unsigned short label, bool done) {
 }
 
 void VisualizationContainer::RemoveRegion(unsigned short label) {
-	int index = GetRegionIndex(label);
+	if (label == currentRegion->GetLabel()) SetCurrentRegion(nullptr);
 
-	if (index == -1) return;
-
-	Region* region = regions[index];
-
-	const int* extent = region->GetExtent();
-
-	for (int i = extent[0]; i <= extent[1]; i++) {
-		for (int j = extent[2]; j <= extent[3]; j++) {
-			for (int k = extent[4]; k <= extent[5]; k++) {
-				unsigned short* p = static_cast<unsigned short*>(labels->GetScalarPointer(i, j, k));
-				if (*p == label) *p = 0;
-			}
-		}
-	}
-
-	regions.erase(regions.begin() + index);
+	regions->Remove(label);
+	
 	volumePipeline->RemoveSurface(label);
 	qtWindow->UpdateRegionTable(regions);
 
-	if (region == currentRegion) SetCurrentLabel(0);
-	delete region;
-
-	labels->Modified();
 	Render();
 }
 

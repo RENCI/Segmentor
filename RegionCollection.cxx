@@ -33,9 +33,8 @@ void RegionCollection::Remove(unsigned short label) {
 }
 
 void RegionCollection::RemoveAll() {
-	InitTraversal();
-	for (Region* region = GetNext(); region != nullptr; region = GetNext()) {
-		delete region;
+	for (Iterator it = Begin(); it != End(); it++) {
+		delete Get(it);
 	}
 
 	regions.clear();
@@ -45,16 +44,23 @@ int RegionCollection::Size() {
 	return (int)regions.size();
 }
 
-void RegionCollection::InitTraversal() {
-	it = regions.begin();
+RegionCollection::Iterator RegionCollection::Begin() {
+	return regions.begin();
 }
 
-Region* RegionCollection::GetNext() {
-	if (it == regions.end()) return nullptr;
-	
-	Region* region = it->second;
-	it++;
-
-	return region;
+RegionCollection::Iterator RegionCollection::End() {
+	return regions.end();
 }
 
+Region* RegionCollection::Get(RegionCollection::Iterator iterator) {
+	return iterator->second;
+}
+
+unsigned short RegionCollection::GetNewLabel() {
+	unsigned short label = 1;
+	for (Iterator it = Begin(); it != End(); it++, label++) {
+		if (it->first != label) return label;
+	}
+
+	return label;
+}

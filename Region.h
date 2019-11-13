@@ -34,6 +34,7 @@ protected:
 	vtkSmartPointer<vtkExtractVOI> voi;
 
 	void UpdateExtent();
+	void ClearLabels();
 };
 
 #endif
