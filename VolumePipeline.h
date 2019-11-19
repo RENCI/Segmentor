@@ -20,13 +20,14 @@ class vtkInteractorStyleVolume;
 
 class Region;
 class RegionSurface;
+class RegionCollection;
 
 class VolumePipeline {
 public:
   VolumePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut);
   ~VolumePipeline();
 
-  void SetRegions(vtkImageData* data, std::vector<Region*> regions);
+  void SetRegions(vtkImageData* data, RegionCollection* regions);
 
   void AddSurface(Region* region);
   void RemoveSurface(unsigned short label);

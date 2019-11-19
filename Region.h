@@ -33,6 +33,8 @@ protected:
 	vtkSmartPointer<vtkImageData> data;
 	vtkSmartPointer<vtkExtractVOI> voi;
 
+
+
 	void UpdateExtent();
 	void ClearLabels();
 };

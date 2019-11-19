@@ -22,6 +22,7 @@
 #include "InteractionEnums.h"
 #include "Region.h"
 #include "RegionSurface.h"
+#include "RegionCollection.h"
 
 #include <vtkCallbackCommand.h>
 #include <vtkPlaneSource.h>
@@ -89,15 +90,15 @@ VolumePipeline::~VolumePipeline() {
 	RemoveSurfaces();
 }
 
-void VolumePipeline::SetRegions(vtkImageData* data, std::vector<Region*> regions) {
+void VolumePipeline::SetRegions(vtkImageData* data, RegionCollection* regions) {
 	// Reset
 	filterLabel = false;
 	currentLabel = 0;
 	
 	RemoveSurfaces();
 
-	for (int i = 0; i < regions.size(); i++) {
-		AddSurface(regions[i]);
+	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+		AddSurface(regions->Get(it));
 	}
 
 	// Update probe
@@ -156,6 +157,8 @@ void VolumePipeline::SetSurfaceDone(unsigned short label, bool done) {
 }
 
 void VolumePipeline::SetCurrentLabel(unsigned short label) {
+	std::cout << label << std::endl;
+
 	currentLabel = label;
 
 	if (currentLabel > 0) {
@@ -166,6 +169,8 @@ void VolumePipeline::SetCurrentLabel(unsigned short label) {
 	else {
 		probe->GetProperty()->SetColor(1, 1, 1);
 	}
+
+	std::cout << "HERE" << std::endl;
 
 	FilterLabels();
 }

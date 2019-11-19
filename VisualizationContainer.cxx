@@ -369,29 +369,15 @@ void VisualizationContainer::ErasePoint(double x, double y, double z) {
 void VisualizationContainer::SetCurrentRegion(Region* region) {
 	currentRegion = region;
 
-	volumePipeline->SetCurrentLabel(region->GetLabel());
-	slicePipeline->SetCurrentLabel(region->GetLabel());
-}
-
-/*
-void VisualizationContainer::SetCurrentLabel(unsigned short label) {
-	if (!labels) return;
-
-	currentRegion = nullptr;
-	for (int i = 0; i < regions.size(); i++) {
-		if (regions[i]->GetLabel() == label) {
-			currentRegion = regions[i];
-		}
+	if (currentRegion) {
+		volumePipeline->SetCurrentLabel(currentRegion->GetLabel());
+		slicePipeline->SetCurrentLabel(currentRegion->GetLabel());
 	}
-
-	if (!currentRegion) {
-		currentRegion = nullptr;
+	else {
+		volumePipeline->SetCurrentLabel(0);
+		slicePipeline->SetCurrentLabel(0);
 	}
-	
-	volumePipeline->SetCurrentLabel(label);
-	slicePipeline->SetCurrentLabel(label);
 }
-*/
 
 void VisualizationContainer::RelabelCurrentRegion() {
 	if (!currentRegion) return;
@@ -432,7 +418,7 @@ void VisualizationContainer::RelabelCurrentRegion() {
 				unsigned short componentLabel = (unsigned short)componentLabels->GetTuple1(i);
 
 				// Get label for new region
-				unsigned short newLabel = GetNewLabel();
+				unsigned short newLabel = regions->GetNewLabel();
 
 				// Update label data
 				for (int i = extent[0]; i <= extent[1]; i++) {
@@ -567,7 +553,7 @@ void VisualizationContainer::GrowRegion(int x, int y, int z) {
 }
 
 void VisualizationContainer::SetRegionDone(unsigned short label, bool done) {
-	Region* region = GetRegion(label);
+	Region* region = regions->Get(label);
 
 	if (!region) return;
 
@@ -696,35 +682,15 @@ void VisualizationContainer::UpdateColors() {
 	labelColors->Build();
 }
 
-int VisualizationContainer::GetRegionIndex(unsigned short label) {
-	for (int i = 0; i < (int)regions.size(); i++) {
-		if (regions[i]->GetLabel() == label) return i;
-	}
-
-	return -1;
-}
-
-Region* VisualizationContainer::GetRegion(unsigned short label) {
-	int index = GetRegionIndex(label);
-
-	return index == -1 ? nullptr : regions[index];
-}
-
-void VisualizationContainer::RemoveRegions() {
-	for (int i = 0; i < (int)regions.size(); i++) {
-		delete regions[i];
-	}
-}
-
 void VisualizationContainer::ExtractRegions() {
 	// Get label info
 	int maxLabel = labels->GetScalarRange()[1];
 
 	// Clear current regions
-	RemoveRegions();
+	regions->RemoveAll();
 
 	for (int label = 1; label <= maxLabel; label++) {
-		regions.push_back(new Region(labels, label, labelColors->GetTableValue(label)));
+		regions->Add(new Region(labels, label, labelColors->GetTableValue(label)));
 	}
 }
 

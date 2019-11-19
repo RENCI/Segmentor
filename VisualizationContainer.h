@@ -45,7 +45,6 @@ public:
 	void ErasePoint(double x, double y, double z);
 
 	void SetCurrentRegion(Region* region);
-//	void SetCurrentLabel(unsigned short newLabel);
 
 	void RelabelCurrentRegion();
 	void MergeWithCurrentRegion(int x, int y, int z);
@@ -84,11 +83,6 @@ protected:
 	void UpdateColors();
 	void UpdateColors(unsigned short label);
 
-	unsigned short GetNewLabel();
-
-	int GetRegionIndex(unsigned short label);
-	Region* GetRegion(unsigned short label);
-	void RemoveRegions();
 	void ExtractRegions();
 
 	void SetLabel(int x, int y, int z, unsigned short label);
