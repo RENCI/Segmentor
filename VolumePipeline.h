@@ -8,7 +8,6 @@
 class vtkActor;
 class vtkBox;
 class vtkImageData;
-class vtkLookupTable;
 class vtkPlaneSource;
 class vtkObject;
 class vtkOutlineCornerFilter;
@@ -24,21 +23,17 @@ class RegionCollection;
 
 class VolumePipeline {
 public:
-  VolumePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut);
+  VolumePipeline(vtkRenderWindowInteractor* interactor);
   ~VolumePipeline();
 
-  void SetRegions(vtkImageData* data, RegionCollection* regions);
-
-  void AddSurface(Region* region);
-  void RemoveSurface(unsigned short label);
-  void SetSurfaceDone(unsigned short label, bool done);
+  void SetRegions(vtkImageData* data, RegionCollection* newRegions);
 
   void SetShowProbe(bool visibility);
   void SetProbePosition(double x, double y, double z);
 
   void SetInteractionMode(enum InteractionMode mode);
 
-  void SetCurrentLabel(unsigned short label);
+  void SetCurrentRegion(Region* region);
 
   void SetSmoothSurfaces(bool smooth);
   void ToggleSmoothSurfaces();
@@ -46,8 +41,8 @@ public:
   void SetSmoothShading(bool smooth);
   void ToggleSmoothShading();
 
-  void SetFilterLabel(bool filter);
-  void ToggleFilterLabel();
+  void SetFilterRegion(bool filter);
+  void ToggleFilterRegion();
 
   void SetFilterPlane(bool filter);
   void ToggleFilterPlane();
@@ -62,20 +57,19 @@ public:
   vtkInteractorStyleVolume* GetInteractorStyle();
 
 protected:
-	bool filterLabel;
+	bool filterRegion;
 	bool filterPlane;
 	bool smoothSurfaces;
 	bool smoothShading;
-	unsigned short currentLabel;
+	
+	Region* currentRegion;
 
 	// Rendering
 	vtkSmartPointer<vtkRenderer> renderer;
 	vtkSmartPointer<vtkInteractorStyleVolume> style;
-	vtkSmartPointer<vtkLookupTable> labelColors;
 
-	// Region surfaces
-	std::vector<RegionSurface*> surfaces;
-	void RemoveSurfaces();
+	// Regions
+	RegionCollection* regions;
 
 	// Probe
 	vtkSmartPointer<vtkActor> probe;
@@ -99,7 +93,7 @@ protected:
 	vtkSmartPointer<vtkTextActor> interactionModeLabel;
 	void CreateInteractionModeLabel();
 
-	void FilterLabels();
+	void FilterRegions();
 
 	static void cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 };

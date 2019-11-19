@@ -7,12 +7,13 @@
 #include <vtkPolyDataMapper.h>
 #include <vtkPolyDataNormals.h>
 #include <vtkProperty.h>
+#include <vtkRenderer.h>
 #include <vtkWindowedSincPolyDataFilter.h>
 
 #include "Region.h"
 
-RegionSurface::RegionSurface(Region* inputRegion, vtkLookupTable* lut) {
-	smoothSurfaces = false;
+RegionSurface::RegionSurface(Region* inputRegion, double color[3]) {
+	smoothSurface = false;
 	smoothShading = true;
 
 	region = inputRegion;
@@ -45,9 +46,6 @@ RegionSurface::RegionSurface(Region* inputRegion, vtkLookupTable* lut) {
 	mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	mapper->ScalarVisibilityOff();
 
-	double color[3];
-	lut->GetColor(region->GetLabel(), color);
-
 	actor = vtkSmartPointer<vtkActor>::New();
 	actor->SetMapper(mapper);
 	actor->GetProperty()->SetColor(color);
@@ -59,18 +57,17 @@ RegionSurface::RegionSurface(Region* inputRegion, vtkLookupTable* lut) {
 }
 	
 RegionSurface::~RegionSurface() {
-}
-
-Region* RegionSurface::GetRegion() {
-	return region;
+	while (actor->GetNumberOfConsumers() > 0) {
+		vtkRenderer::SafeDownCast(actor->GetConsumer(0))->RemoveActor(actor);
+	}
 }
 
 vtkSmartPointer<vtkActor> RegionSurface::GetActor() {
 	return actor;
 }
 
-void RegionSurface::SetSmoothSurfaces(bool smooth) {
-	smoothSurfaces = smooth;
+void RegionSurface::SetSmoothSurface(bool smooth) {
+	smoothSurface = smooth;
 
 	UpdatePipeline();
 }
@@ -90,7 +87,7 @@ bool RegionSurface::IntersectsPlane(double p[3], double n[3]) {
 void RegionSurface::UpdatePipeline() {
 	vtkAlgorithm* surface;
 
-	if (smoothSurfaces) {
+	if (smoothSurface) {
 		surface = smoother;
 	}
 	else {

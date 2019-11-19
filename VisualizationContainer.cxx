@@ -47,7 +47,7 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	labelColors = vtkSmartPointer<vtkLookupTable>::New();
 
 	// Create rendering pipelines
-	volumePipeline = new VolumePipeline(volumeInteractor, labelColors);
+	volumePipeline = new VolumePipeline(volumeInteractor);
 	slicePipeline = new SlicePipeline(sliceInteractor, labelColors);
 
 	// Set to edit mode, then toggle to propagate change
@@ -316,7 +316,7 @@ void VisualizationContainer::ToggleInteractionMode() {
 
 void VisualizationContainer::PickLabel(int x, int y, int z) {
 	if (!labels) return;
-
+	
 	SetCurrentRegion(regions->Get(GetLabel(x, y, z)));
 }
 
@@ -368,13 +368,12 @@ void VisualizationContainer::ErasePoint(double x, double y, double z) {
 
 void VisualizationContainer::SetCurrentRegion(Region* region) {
 	currentRegion = region;
+	volumePipeline->SetCurrentRegion(currentRegion);
 
 	if (currentRegion) {
-		volumePipeline->SetCurrentLabel(currentRegion->GetLabel());
 		slicePipeline->SetCurrentLabel(currentRegion->GetLabel());
 	}
 	else {
-		volumePipeline->SetCurrentLabel(0);
 		slicePipeline->SetCurrentLabel(0);
 	}
 }
@@ -435,11 +434,8 @@ void VisualizationContainer::RelabelCurrentRegion() {
 				UpdateColors(newLabel);
 
 				// Create new region
-				Region* newRegion = new Region(labels, newLabel, labelColors->GetTableValue(newLabel));
+				Region* newRegion = new Region(newLabel, labelColors->GetTableValue(newLabel), labels);
 				regions->Add(newRegion);
-
-				// Add surface
-				volumePipeline->AddSurface(newRegion);
 			}			
 		}
 
@@ -569,17 +565,15 @@ void VisualizationContainer::SetRegionDone(unsigned short label, bool done) {
 		UpdateColors(label);
 	}
 
-	volumePipeline->SetSurfaceDone(label, done);
-
 	Render();
 }
 
 void VisualizationContainer::RemoveRegion(unsigned short label) {
-	if (label == currentRegion->GetLabel()) SetCurrentRegion(nullptr);
+	Region* region = regions->Get(label);
+
+	if (region == currentRegion) SetCurrentRegion(nullptr);
 
 	regions->Remove(label);
-	
-	volumePipeline->RemoveSurface(label);
 	qtWindow->UpdateRegionTable(regions);
 
 	Render();
@@ -603,7 +597,7 @@ void VisualizationContainer::UpdateLabels() {
 	ExtractRegions();
 
 	volumePipeline->SetRegions(labels, regions);
-	slicePipeline->SetSegmentationData(labels);
+	slicePipeline->SetSegmentationData(labels, regions);
 
 	qtWindow->UpdateRegionTable(regions);
 }
@@ -690,7 +684,7 @@ void VisualizationContainer::ExtractRegions() {
 	regions->RemoveAll();
 
 	for (int label = 1; label <= maxLabel; label++) {
-		regions->Add(new Region(labels, label, labelColors->GetTableValue(label)));
+		regions->Add(new Region(label, labelColors->GetTableValue(label), labels));
 	}
 }
 

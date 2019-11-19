@@ -5,7 +5,6 @@
 
 class vtkActor;
 class vtkDiscreteFlyingEdges3D;
-class vtkLookupTable;
 class vtkPolyDataMapper;
 class vtkPolyDataNormals;
 class vtkWindowedSincPolyDataFilter;
@@ -14,13 +13,12 @@ class Region;
 
 class RegionSurface {
 public:
-	RegionSurface(Region* inputRegion, vtkLookupTable* lut);
+	RegionSurface(Region* inputRegion, double color[3]);
 	~RegionSurface();
 
-	Region* GetRegion();
 	vtkSmartPointer<vtkActor> GetActor();
 
-	void SetSmoothSurfaces(bool smooth);
+	void SetSmoothSurface(bool smooth);
 	void SetSmoothShading(bool smooth);
 
 	bool IntersectsPlane(double p[3], double n[3]);
@@ -28,7 +26,7 @@ public:
 protected:
 	Region* region;
 
-	bool smoothSurfaces;
+	bool smoothSurface;
 	bool smoothShading;
 
 	vtkSmartPointer<vtkDiscreteFlyingEdges3D> contour;

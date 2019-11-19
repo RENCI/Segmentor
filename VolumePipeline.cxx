@@ -8,7 +8,6 @@
 #include <vtkImageData.h>
 #include <vtkInteractorStyle.h>
 #include <vtkLight.h>
-#include <vtkLookupTable.h>
 #include <vtkOutlineCornerFilter.h>
 #include <vtkPlane.h>
 #include <vtkPolyDataMapper.h>
@@ -37,12 +36,13 @@ void VolumePipeline::cameraChange(vtkObject* caller, unsigned long eventId, void
 	pipeline->UpdatePlane();
 }
 
-VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut) {
-	filterLabel = false;
+VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* interactor) {
+	filterRegion = false;
 	filterPlane = false;
 	smoothSurfaces = false;
 	smoothShading = true;
-	currentLabel = 0;
+	
+	currentRegion = nullptr;
 
 	// Rendering
 	renderer = vtkSmartPointer<vtkRenderer>::New();
@@ -58,9 +58,6 @@ VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* interactor, vtkLookupT
 	cameraCallback->SetCallback(cameraChange);
 	cameraCallback->SetClientData(this);
 	renderer->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, cameraCallback);
-
-	// Colors
-	labelColors = lut;
 
 	// Probe
 	CreateProbe();
@@ -87,18 +84,17 @@ VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* interactor, vtkLookupT
 }
 
 VolumePipeline::~VolumePipeline() {
-	RemoveSurfaces();
 }
 
-void VolumePipeline::SetRegions(vtkImageData* data, RegionCollection* regions) {
+void VolumePipeline::SetRegions(vtkImageData* data, RegionCollection* newRegions) {
+	regions = newRegions;
+
 	// Reset
-	filterLabel = false;
-	currentLabel = 0;
-	
-	RemoveSurfaces();
+	filterRegion = false;
+	currentRegion = nullptr;
 
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
-		AddSurface(regions->Get(it));
+		renderer->AddActor(regions->Get(it)->GetSurface()->GetActor());
 	}
 
 	// Update probe
@@ -119,60 +115,18 @@ void VolumePipeline::SetRegions(vtkImageData* data, RegionCollection* regions) {
 	Render();
 }
 
-void VolumePipeline::AddSurface(Region* region) {
-	RegionSurface* surface = new RegionSurface(region, labelColors);
-	surface->SetSmoothSurfaces(smoothSurfaces);
-	surface->SetSmoothShading(smoothShading);
+void VolumePipeline::SetCurrentRegion(Region* region) {
+	currentRegion = region;
 
-	renderer->AddActor(surface->GetActor());
-
-	surfaces.push_back(surface);
-}
-
-void VolumePipeline::RemoveSurface(unsigned short label) {
-	for (int i = 0; i < (int)surfaces.size(); i++) {
-		if (surfaces[i]->GetRegion()->GetLabel() == label) {
-			surfaces.erase(surfaces.begin() + i);
-			return;
-		}
-	}
-}
-
-void VolumePipeline::SetSurfaceDone(unsigned short label, bool done) {
-	for (int i = 0; i < (int)surfaces.size(); i++) {
-		Region* region = surfaces[i]->GetRegion();
-
-		if (region->GetLabel() == label) {
-			if (region->GetDone()) {
-				surfaces[i]->GetActor()->GetProperty()->SetColor(0.5, 0.5, 0.5);
-			}
-			else {
-				const double* color = region->GetColor();
-				surfaces[i]->GetActor()->GetProperty()->SetColor(color[0], color[1], color[2]);
-			}
-
-			return;
-		}
-	}
-}
-
-void VolumePipeline::SetCurrentLabel(unsigned short label) {
-	std::cout << label << std::endl;
-
-	currentLabel = label;
-
-	if (currentLabel > 0) {
-		double color[3];
-		labelColors->GetColor(currentLabel, color);
-		probe->GetProperty()->SetColor(color);
+	if (currentRegion) {
+		const double* color = region->GetColor();
+		probe->GetProperty()->SetColor(color[0], color[1], color[2]);
 	}
 	else {
 		probe->GetProperty()->SetColor(1, 1, 1);
 	}
 
-	std::cout << "HERE" << std::endl;
-
-	FilterLabels();
+	FilterRegions();
 }
 
 void VolumePipeline::SetShowProbe(bool show) {
@@ -193,8 +147,8 @@ void VolumePipeline::SetInteractionMode(enum InteractionMode mode) {
 void VolumePipeline::SetSmoothSurfaces(bool smooth) {
 	smoothSurfaces = smooth;
 
-	for (int i = 0; i < surfaces.size(); i++) {
-		surfaces[i]->SetSmoothSurfaces(smoothSurfaces);
+	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+		regions->Get(it)->GetSurface()->SetSmoothSurface(smoothSurfaces);
 	}
 
 	Render();
@@ -207,8 +161,8 @@ void VolumePipeline::ToggleSmoothSurfaces() {
 void VolumePipeline::SetSmoothShading(bool smooth) {
 	smoothShading = smooth;
 
-	for (int i = 0; i < surfaces.size(); i++) {
-		surfaces[i]->SetSmoothShading(smoothShading);
+	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+		regions->Get(it)->GetSurface()->SetSmoothShading(smoothShading);
 	}
 
 	Render();
@@ -218,20 +172,20 @@ void VolumePipeline::ToggleSmoothShading() {
 	SetSmoothShading(!smoothShading);
 }
 
-void VolumePipeline::SetFilterLabel(bool filter) {
-	filterLabel = filter;
+void VolumePipeline::SetFilterRegion(bool filter) {
+	filterRegion = filter;
 
-	FilterLabels();
+	FilterRegions();
 }
 
-void VolumePipeline::ToggleFilterLabel() {
-	SetFilterLabel(!filterLabel);
+void VolumePipeline::ToggleFilterRegion() {
+	SetFilterRegion(!filterRegion);
 }
 
 void VolumePipeline::SetFilterPlane(bool filter) {
 	filterPlane = filter;
 
-	FilterLabels();
+	FilterRegions();
 }
 
 void VolumePipeline::ToggleFilterPlane() {
@@ -265,12 +219,6 @@ vtkRenderer* VolumePipeline::GetRenderer() {
 
 vtkInteractorStyleVolume* VolumePipeline::GetInteractorStyle() {
 	return style;
-}
-
-void VolumePipeline::RemoveSurfaces() {
-	for (int i = 0; i < surfaces.size(); i++) {
-		delete surfaces[i];
-	}
 }
 
 void VolumePipeline::CreateProbe() {
@@ -389,9 +337,10 @@ void VolumePipeline::UpdateCorners(vtkImageData* data) {
 	cornerFilter->SetInputDataObject(data);
 }
 
-void VolumePipeline::FilterLabels() {
-	for (int i = 0; i < surfaces.size(); i++) {
-		RegionSurface* surface = surfaces[i];
+void VolumePipeline::FilterRegions() {
+	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+		Region* region = regions->Get(it);
+		RegionSurface* surface = region->GetSurface();
 
 		if (filterPlane) {
 			vtkCamera* cam = renderer->GetActiveCamera();
@@ -409,8 +358,8 @@ void VolumePipeline::FilterLabels() {
 			surface->GetActor()->VisibilityOn();
 		}
 			
-		if (filterLabel && currentLabel) {
-			surface->GetActor()->SetVisibility(surface->GetRegion()->GetLabel() == currentLabel);
+		if (filterRegion && currentRegion) {
+			surface->GetActor()->SetVisibility(region == currentRegion);
 		}
 		else if (!filterPlane) {
 			surface->GetActor()->VisibilityOn();

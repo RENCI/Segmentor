@@ -2,7 +2,7 @@
 #define vtkImageDataCells_h
 
 #include <vtkSetGet.h>
-#include "vtkUnstructuredGridAlgorithm.h"
+#include <vtkUnstructuredGridAlgorithm.h>
 
 class vtkImageDataCells : public vtkUnstructuredGridAlgorithm
 {

@@ -93,7 +93,8 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 
 	case 'l':
 	case 'L':
-		vis->GetVolumePipeline()->ToggleFilterLabel();
+		vis->GetSlicePipeline()->ToggleFilterRegion();
+		vis->GetVolumePipeline()->ToggleFilterRegion();
 		break;
 
 	case 'g':

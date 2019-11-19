@@ -1,11 +1,20 @@
 #include "Region.h"
 
-#include "vtkExtractVOI.h"
-#include "vtkImageData.h"
+#include <vtkActor.h>
+#include <vtkExtractVOI.h>
+#include <vtkImageData.h>
+#include <vtkPlane.h>
+#include <vtkProperty.h>
+#include <vtkThreshold.h>
 
 #include <algorithm>
 
-Region::Region(vtkImageData* inputData, unsigned short regionLabel, double regionColor[3]) {
+#include "vtkImageDataCells.h"
+
+#include "RegionOutline.h"
+#include "RegionSurface.h"
+
+Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* inputData) {
 	done = false;
 
 	// Input data info
@@ -51,15 +60,40 @@ Region::Region(vtkImageData* inputData, unsigned short regionLabel, double regio
 	voi = vtkSmartPointer<vtkExtractVOI>::New();
 	voi->SetInputDataObject(data);
 
+	vtkSmartPointer<vtkImageDataCells> cells = vtkSmartPointer<vtkImageDataCells>::New();
+	cells->SetInputConnection(voi->GetOutputPort());
+
+	threshold = vtkSmartPointer<vtkThreshold>::New();
+	threshold->ThresholdBetween(label, label);
+	threshold->SetInputConnection(cells->GetOutputPort());
+	
+	outline = new RegionOutline(this, color);
+	surface = new RegionSurface(this, color);
+
 	UpdateExtent();
 }
 	
 Region::~Region() {
 	ClearLabels();
+
+	delete outline;
+	delete surface;
 }
 
 vtkAlgorithmOutput* Region::GetOutput() {
 	return voi->GetOutputPort();
+}
+
+vtkAlgorithmOutput* Region::GetCells() {
+	return threshold->GetOutputPort();
+}
+
+RegionOutline* Region::GetOutline() {
+	return outline;
+}
+
+RegionSurface* Region::GetSurface() {
+	return surface;
 }
 
 void Region::SetExtent(int newExtent[6]) {
@@ -125,6 +159,15 @@ void Region::UpdateExtent() {
 
 void Region::SetDone(bool isDone) {
 	done = isDone;
+
+	if (done) {
+		outline->GetActor()->GetProperty()->SetColor(0.5, 0.5, 0.5);
+		surface->GetActor()->GetProperty()->SetColor(0.5, 0.5, 0.5);
+	}
+	else {
+		outline->GetActor()->GetProperty()->SetColor(color);
+		surface->GetActor()->GetProperty()->SetColor(color);
+	}
 }
 
 unsigned short Region::GetLabel() {

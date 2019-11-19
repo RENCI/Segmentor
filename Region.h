@@ -6,13 +6,24 @@
 class vtkAlgorithmOutput;
 class vtkExtractVOI;
 class vtkImageData;
+class vtkPlane;
+class vtkThreshold;
+
+class vtkImageDataCells;
+
+class RegionOutline;
+class RegionSurface;
 
 class Region {
 public:
-	Region(vtkImageData* data, unsigned short regionLabel, double regionColor[3]);
+	Region(unsigned short regionLabel, double regionColor[3], vtkImageData* data);
 	~Region();
 
 	vtkAlgorithmOutput* GetOutput();
+	vtkAlgorithmOutput* GetCells();
+
+	RegionOutline* GetOutline();
+	RegionSurface* GetSurface();
 
 	void SetExtent(int newExtent[6]);
 	void UpdateExtent(int x, int y, int z);
@@ -32,8 +43,10 @@ protected:
 
 	vtkSmartPointer<vtkImageData> data;
 	vtkSmartPointer<vtkExtractVOI> voi;
+	vtkSmartPointer<vtkThreshold> threshold;
 
-
+	RegionSurface* surface;
+	RegionOutline* outline;
 
 	void UpdateExtent();
 	void ClearLabels();

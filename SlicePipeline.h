@@ -19,24 +19,37 @@ class vtkTextActor;
 
 class vtkInteractorStyleSlice;
 
+class Region;
+class RegionOutline;
+class RegionCollection;
+
 class SlicePipeline {
 public:
 	SlicePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut);
 	~SlicePipeline();
 
 	void SetImageData(vtkImageData* data);
-	void SetSegmentationData(vtkImageData* data);
+	void SetSegmentationData(vtkImageData* data, RegionCollection* newRegions);
+
+	void RemoveRegion(Region* region);
 
 	void SetShowProbe(bool show);
 	void SetProbePosition(double x, double y, double z);
 
 	void SetInteractionMode(enum InteractionMode mode);
 
+	void SetCurrentRegion(Region* region);
+
 	void SetCurrentLabel(unsigned short label);
 	
 	void ToggleLabelSlice();
 	void ToggleLabelOutlines();
+
+	void ShowRegionOutlines(bool show);
 	void ToggleRegionOutlines();
+
+	void SetFilterRegion(bool filter);
+	void ToggleFilterRegion();
 
 	void UpdatePlane();
 
@@ -46,6 +59,11 @@ public:
 	vtkSmartPointer<vtkInteractorStyleSlice> GetInteractorStyle();
 
 protected:
+	bool showRegionOutlines;
+	bool filterRegion;
+
+	Region* currentRegion;
+
 	// Data
 	vtkSmartPointer<vtkImageData> data;
 	vtkSmartPointer<vtkImageData> labels;
@@ -59,13 +77,15 @@ protected:
 	vtkSmartPointer<vtkInteractorStyleSlice> style;
 	vtkSmartPointer<vtkLookupTable> labelColors;
 
+	// Regions
+	RegionCollection* regions;
+
 	// Cut plane
 	vtkSmartPointer<vtkPlane> plane;
 
 	// Overlays
 	vtkSmartPointer<vtkImageSlice> labelSlice;
 	vtkSmartPointer<vtkActor> labelOutlines;
-	vtkSmartPointer<vtkActor> regionOutlines;
 
 	// Probe
 	vtkSmartPointer<vtkActor> probe;
@@ -82,6 +102,8 @@ protected:
 	// Slices
 	void CreateDataSlice(vtkImageData* data);
 	void CreateLabelSlice(vtkImageData* labels);
+
+	void FilterRegions();
 
 	static void cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 };
