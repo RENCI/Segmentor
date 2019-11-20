@@ -1,5 +1,5 @@
-#ifndef VolumePipeline_H
-#define VolumePipeline_H
+#ifndef VolumeView_H
+#define VolumeView_H
 
 #include <vtkSmartPointer.h>
 
@@ -21,12 +21,13 @@ class Region;
 class RegionSurface;
 class RegionCollection;
 
-class VolumePipeline {
+class VolumeView {
 public:
-  VolumePipeline(vtkRenderWindowInteractor* interactor);
-  ~VolumePipeline();
+  VolumeView(vtkRenderWindowInteractor* interactor);
+  ~VolumeView();
 
   void SetRegions(vtkImageData* data, RegionCollection* newRegions);
+  void AddRegion(Region* region);
 
   void SetShowProbe(bool visibility);
   void SetProbePosition(double x, double y, double z);

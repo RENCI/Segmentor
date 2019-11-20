@@ -8,8 +8,8 @@
 #include "vtkRenderer.h"
 
 #include "VisualizationContainer.h"
-#include "VolumePipeline.h"
-#include "SlicePipeline.h"
+#include "VolumeView.h"
+#include "SliceView.h"
 
 bool InteractionCallbacks::firstCameraCallback = true;
 
@@ -73,28 +73,28 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 
 	case 's':
 	case 'S':
-		vis->GetVolumePipeline()->ToggleSmoothSurfaces();
+		vis->GetVolumeView()->ToggleSmoothSurfaces();
 		break;
 
 	case 'n':
 	case 'N':
-		vis->GetVolumePipeline()->ToggleSmoothShading();
+		vis->GetVolumeView()->ToggleSmoothShading();
 		break;
 	
 	case 'p':
 	case 'P':
-		vis->GetVolumePipeline()->ToggleFilterPlane();
+		vis->GetVolumeView()->ToggleFilterPlane();
 		break;
 
 	case 'o':
 	case 'O':
-		vis->GetVolumePipeline()->ToggleShowPlane();
+		vis->GetVolumeView()->ToggleShowPlane();
 		break;
 
 	case 'l':
 	case 'L':
-		vis->GetSlicePipeline()->ToggleFilterRegion();
-		vis->GetVolumePipeline()->ToggleFilterRegion();
+		vis->GetSliceView()->ToggleFilterRegion();
+		vis->GetVolumeView()->ToggleFilterRegion();
 		break;
 
 	case 'g':
@@ -141,15 +141,15 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 	}
 
 	case '1':
-		vis->GetSlicePipeline()->ToggleLabelSlice();
+		vis->GetSliceView()->ToggleLabelSlice();
 		break;
 
 	case '2':
-		vis->GetSlicePipeline()->ToggleVoxelOutlines();
+		vis->GetSliceView()->ToggleVoxelOutlines();
 		break;
 
 	case '3':
-		vis->GetSlicePipeline()->ToggleRegionOutlines();
+		vis->GetSliceView()->ToggleRegionOutlines();
 		break;
 	}
 }
@@ -260,22 +260,22 @@ void InteractionCallbacks::MouseMove(vtkRenderWindowInteractor* rwi, Visualizati
 		// Get the point coordinate for the pick event
 		if (viewType == SliceView) {
 			int* p = SlicePick();
-			vis->GetVolumePipeline()->SetProbePosition(p[0], p[1], p[2]);
-			vis->GetSlicePipeline()->SetProbePosition(p[0], p[1], p[2]);
+			vis->GetVolumeView()->SetProbePosition(p[0], p[1], p[2]);
+			vis->GetSliceView()->SetProbePosition(p[0], p[1], p[2]);
 		}
 		else {
 			double* p = VolumePick(); 
-			vis->GetVolumePipeline()->SetProbePosition(p[0], p[1], p[2]);
-			vis->GetSlicePipeline()->SetProbePosition(p[0], p[1], p[2]);		
+			vis->GetVolumeView()->SetProbePosition(p[0], p[1], p[2]);
+			vis->GetSliceView()->SetProbePosition(p[0], p[1], p[2]);		
 		}
 
 		// Update probes
-		vis->GetVolumePipeline()->SetShowProbe(true);
-		vis->GetSlicePipeline()->SetShowProbe(true);
+		vis->GetVolumeView()->SetShowProbe(true);
+		vis->GetSliceView()->SetShowProbe(true);
 	}
 	else {
-		vis->GetVolumePipeline()->SetShowProbe(false);
-		vis->GetSlicePipeline()->SetShowProbe(false);
+		vis->GetVolumeView()->SetShowProbe(false);
+		vis->GetSliceView()->SetShowProbe(false);
 	}
 
 	vis->Render();

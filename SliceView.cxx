@@ -1,6 +1,4 @@
-#include "SlicePipeline.h"
-
-#include "SliceLocation.h"
+#include "SliceView.h"
 
 #include "vtkInteractorStyleSlice.h"
 #include "vtkImageDataCells.h"
@@ -8,9 +6,7 @@
 #include <vtkActor.h>
 #include <vtkCallbackCommand.h>
 #include <vtkCamera.h>
-#include <vtkContourFilter.h>
 #include <vtkCubeSource.h>
-#include <vtkCutter.h>
 #include <vtkImageData.h>
 #include <vtkImageMapToColors.h>
 #include <vtkImageProperty.h>
@@ -26,23 +22,23 @@
 #include <vtkRenderWindowInteractor.h>
 #include <vtkTextActor.h>
 #include <vtkTextProperty.h>
-#include <vtkThreshold.h>
 
 #include "InteractionEnums.h"
 #include "Region.h"
 #include "RegionOutline.h"
 #include "RegionVoxelOutlines.h"
 #include "RegionCollection.h"
+#include "SliceLocation.h"
 
-void SlicePipeline::cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
-	SlicePipeline* pipeline = static_cast<SlicePipeline*>(clientData);
+void SliceView::cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+	SliceView* pipeline = static_cast<SliceView*>(clientData);
 
 	pipeline->UpdatePlane();
 }
 
-SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut) {
-	showVoxelOutlines = true;
+SliceView::SliceView(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut) {
 	showRegionOutlines = true;
+	showVoxelOutlines = false;
 	filterRegion = false;
 
 	data = nullptr;
@@ -111,11 +107,11 @@ SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTab
 	CreateInteractionModeLabel();
 }
 
-SlicePipeline::~SlicePipeline() {
+SliceView::~SliceView() {
 	delete sliceLocation;
 }
 
-void SlicePipeline::SetImageData(vtkImageData* imageData) {
+void SliceView::SetImageData(vtkImageData* imageData) {
 	data = imageData;
 
 	// Update probe
@@ -136,29 +132,39 @@ void SlicePipeline::SetImageData(vtkImageData* imageData) {
 	Render();
 }
 
-void SlicePipeline::SetSegmentationData(vtkImageData* imageLabels, RegionCollection* newRegions) {
+void SliceView::SetSegmentationData(vtkImageData* imageLabels, RegionCollection* newRegions) {
 	labels = imageLabels;
 	CreateLabelSlice(labels);
 
 	regions = newRegions;
 
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
-		Region* region = regions->Get(it);
-
-		RegionOutline* outline = region->GetOutline();
-		outline->SetPlane(plane);
-		regionOutlinesRenderer->AddActor(outline->GetActor());
-
-		RegionVoxelOutlines* voxelOutlines = region->GetVoxelOutlines();
-		voxelOutlines->SetPlane(plane);
-		voxelOutlinesRenderer->AddActor(voxelOutlines->GetActor());
+		AddRegionActors(regions->Get(it));
 	}
+
+	FilterRegions();
 
 	// Render
 	Render();
 }
 
-void SlicePipeline::SetCurrentRegion(Region* region) {
+void SliceView::AddRegion(Region* region) {
+	AddRegionActors(region);
+
+	FilterRegions();
+}
+
+void SliceView::AddRegionActors(Region* region) {
+	RegionOutline* outline = region->GetOutline();
+	outline->SetPlane(plane);
+	regionOutlinesRenderer->AddActor(outline->GetActor());
+
+	RegionVoxelOutlines* voxelOutlines = region->GetVoxelOutlines();
+	voxelOutlines->SetPlane(plane);
+	voxelOutlinesRenderer->AddActor(voxelOutlines->GetActor());
+}
+
+void SliceView::SetCurrentRegion(Region* region) {
 	currentRegion = region;
 
 	if (currentRegion) {
@@ -172,11 +178,11 @@ void SlicePipeline::SetCurrentRegion(Region* region) {
 	FilterRegions();
 }
 
-void SlicePipeline::SetShowProbe(bool show) {
+void SliceView::SetShowProbe(bool show) {
 	probe->SetVisibility(show);
 }
 
-void SlicePipeline::SetProbePosition(double x, double y, double z) {
+void SliceView::SetProbePosition(double x, double y, double z) {
 	vtkCamera* cam = renderer->GetActiveCamera();
 
 	double p1[3] = { x , y, z };
@@ -197,14 +203,14 @@ void SlicePipeline::SetProbePosition(double x, double y, double z) {
 	probe->SetPosition(p2);
 }
 
-void SlicePipeline::SetInteractionMode(enum InteractionMode mode) {
+void SliceView::SetInteractionMode(enum InteractionMode mode) {
 	std::string s = mode == NavigationMode ? "Navigation mode" : "Edit mode";
 	interactionModeLabel->SetInput(s.c_str());
 
 	style->SetMode(mode);
 }
 
-void SlicePipeline::SetCurrentLabel(unsigned short label) {
+void SliceView::SetCurrentLabel(unsigned short label) {
 	if (label > 0) {
 		double color[3];
 		labelSlice->GetProperty()->GetLookupTable()->GetColor(label, color);
@@ -215,12 +221,12 @@ void SlicePipeline::SetCurrentLabel(unsigned short label) {
 	}
 }
 
-void SlicePipeline::ToggleLabelSlice() {
+void SliceView::ToggleLabelSlice() {
 	labelSlice->SetVisibility(!labelSlice->GetVisibility());
 	Render();
 }
 
-void SlicePipeline::ShowVoxelOutlines(bool show) {
+void SliceView::ShowVoxelOutlines(bool show) {
 	showVoxelOutlines = show;
 
 	FilterRegions();
@@ -228,11 +234,11 @@ void SlicePipeline::ShowVoxelOutlines(bool show) {
 	Render();
 }
 
-void SlicePipeline::ToggleVoxelOutlines() {
+void SliceView::ToggleVoxelOutlines() {
 	ShowVoxelOutlines(!showVoxelOutlines);
 }
 
-void SlicePipeline::ShowRegionOutlines(bool show) {
+void SliceView::ShowRegionOutlines(bool show) {
 	showRegionOutlines = show;
 
 	FilterRegions();
@@ -240,21 +246,21 @@ void SlicePipeline::ShowRegionOutlines(bool show) {
 	Render();
 }
 
-void SlicePipeline::ToggleRegionOutlines() {
+void SliceView::ToggleRegionOutlines() {
 	ShowRegionOutlines(!showRegionOutlines);
 }
 
-void SlicePipeline::SetFilterRegion(bool filter) {
+void SliceView::SetFilterRegion(bool filter) {
 	filterRegion = filter;
 
 	FilterRegions();
 }
 
-void SlicePipeline::ToggleFilterRegion() {
+void SliceView::ToggleFilterRegion() {
 	SetFilterRegion(!filterRegion);
 }
 
-void SlicePipeline::UpdatePlane() {
+void SliceView::UpdatePlane() {
 	vtkCamera* cam = renderer->GetActiveCamera();
 
 	plane->SetOrigin(cam->GetFocalPoint());
@@ -263,19 +269,19 @@ void SlicePipeline::UpdatePlane() {
 	sliceLocation->UpdateView(cam, plane);
 }
 
-void SlicePipeline::Render() {
+void SliceView::Render() {
 	renderer->GetRenderWindow()->Render();
 }
 
-vtkSmartPointer<vtkRenderer> SlicePipeline::GetRenderer() {
+vtkSmartPointer<vtkRenderer> SliceView::GetRenderer() {
 	return renderer;
 }
 
-vtkSmartPointer<vtkInteractorStyleSlice> SlicePipeline::GetInteractorStyle() {
+vtkSmartPointer<vtkInteractorStyleSlice> SliceView::GetInteractorStyle() {
 	return style;
 }
 
-void SlicePipeline::CreateProbe() {
+void SliceView::CreateProbe() {
 	vtkSmartPointer<vtkCubeSource> source = vtkSmartPointer<vtkCubeSource>::New();
 
 	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
@@ -291,12 +297,12 @@ void SlicePipeline::CreateProbe() {
 	renderer->AddActor(probe);
 } 
 
-void SlicePipeline::UpdateProbe(vtkImageData* data) {
+void SliceView::UpdateProbe(vtkImageData* data) {
 	probe->SetPosition(data->GetCenter());
 	probe->SetScale(data->GetSpacing());
 }
 
-void SlicePipeline::CreateInteractionModeLabel() {
+void SliceView::CreateInteractionModeLabel() {
 	interactionModeLabel = vtkSmartPointer<vtkTextActor>::New();
 	interactionModeLabel->SetPosition(10, 10);
 	interactionModeLabel->GetTextProperty()->SetFontSize(24);
@@ -307,7 +313,7 @@ void SlicePipeline::CreateInteractionModeLabel() {
 	renderer->AddActor2D(interactionModeLabel);
 }
 
-void SlicePipeline::CreateDataSlice(vtkImageData* data) {
+void SliceView::CreateDataSlice(vtkImageData* data) {
 	// Get image info
 	double minValue = data->GetScalarRange()[0];
 	double maxValue = data->GetScalarRange()[1];
@@ -337,7 +343,7 @@ void SlicePipeline::CreateDataSlice(vtkImageData* data) {
 	renderer->AddActor(slice);
 }
 
-void SlicePipeline::CreateLabelSlice(vtkImageData* labels) {
+void SliceView::CreateLabelSlice(vtkImageData* labels) {
 	// Mapper
 	vtkSmartPointer<vtkImageResliceMapper> mapper = vtkSmartPointer<vtkImageResliceMapper>::New();
 	mapper->SliceFacesCameraOn();
@@ -363,7 +369,7 @@ void SlicePipeline::CreateLabelSlice(vtkImageData* labels) {
 	labelSliceRenderer->AddActor(labelSlice);
 }
 
-void SlicePipeline::FilterRegions() {
+void SliceView::FilterRegions() {
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
 		Region* region = regions->Get(it);
 		RegionOutline* outline = region->GetOutline();

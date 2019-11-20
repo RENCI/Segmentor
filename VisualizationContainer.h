@@ -12,8 +12,8 @@ class vtkImageData;
 class vtkLookupTable;
 class vtkRenderWindowInteractor;
 
-class VolumePipeline;
-class SlicePipeline;
+class VolumeView;
+class SliceView;
 class Region;
 class RegionCollection;
 
@@ -55,8 +55,8 @@ public:
 
 	void Render();
 
-	VolumePipeline* GetVolumePipeline();
-	SlicePipeline* GetSlicePipeline();
+	VolumeView* GetVolumeView();
+	SliceView* GetSliceView();
 
 protected:
 	// Qt main window
@@ -73,8 +73,8 @@ protected:
 	vtkSmartPointer<vtkLookupTable> labelColors;
 
 	// Rendering pipelines
-	VolumePipeline *volumePipeline;
-	SlicePipeline *slicePipeline;
+	VolumeView *volumeView;
+	SliceView *sliceView;
 
 	// Current interaction mode
 	enum InteractionMode interactionMode;

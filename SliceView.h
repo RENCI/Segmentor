@@ -1,13 +1,9 @@
-#ifndef SlicePipeline_H
-#define SlicePipeline_H
+#ifndef SliceView_H
+#define SliceView_H
 
 #include <vtkSmartPointer.h>
 
-class SliceLocation;
-
 class vtkActor;
-class vtkAlgorithmOutput;
-class vtkContourFilter;
 class vtkImageData;
 class vtkImageSlice;
 class vtkLookupTable;
@@ -22,14 +18,16 @@ class vtkInteractorStyleSlice;
 class Region;
 class RegionOutline;
 class RegionCollection;
+class SliceLocation;
 
-class SlicePipeline {
+class SliceView {
 public:
-	SlicePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut);
-	~SlicePipeline();
+	SliceView(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut);
+	~SliceView();
 
 	void SetImageData(vtkImageData* data);
 	void SetSegmentationData(vtkImageData* data, RegionCollection* newRegions);
+	void AddRegion(Region* region);
 
 	void SetShowProbe(bool show);
 	void SetProbePosition(double x, double y, double z);
@@ -103,6 +101,7 @@ protected:
 	void CreateDataSlice(vtkImageData* data);
 	void CreateLabelSlice(vtkImageData* labels);
 
+	void AddRegionActors(Region* region);
 	void FilterRegions();
 
 	static void cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);

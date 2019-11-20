@@ -29,8 +29,8 @@
 #include "InteractionEnums.h"
 #include "InteractionCallbacks.h"
 #include "SegmentorMath.h"
-#include "SlicePipeline.h"
-#include "VolumePipeline.h"
+#include "SliceView.h"
+#include "VolumeView.h"
 #include "Region.h"
 #include "RegionCollection.h"
 
@@ -47,8 +47,8 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	labelColors = vtkSmartPointer<vtkLookupTable>::New();
 
 	// Create rendering pipelines
-	volumePipeline = new VolumePipeline(volumeInteractor);
-	slicePipeline = new SlicePipeline(sliceInteractor, labelColors);
+	volumeView = new VolumeView(volumeInteractor);
+	sliceView = new SliceView(sliceInteractor, labelColors);
 
 	// Set to edit mode, then toggle to propagate change
 	interactionMode = EditMode;
@@ -59,13 +59,13 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	// Camera
 	vtkSmartPointer <vtkCallbackCommand> volumeCameraCallback = vtkSmartPointer<vtkCallbackCommand>::New();
 	volumeCameraCallback->SetCallback(InteractionCallbacks::VolumeCameraChange);
-	volumeCameraCallback->SetClientData(slicePipeline->GetRenderer());
-	volumePipeline->GetRenderer()->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, volumeCameraCallback);
+	volumeCameraCallback->SetClientData(sliceView->GetRenderer());
+	volumeView->GetRenderer()->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, volumeCameraCallback);
 
 	vtkSmartPointer <vtkCallbackCommand> sliceCameraCallback = vtkSmartPointer<vtkCallbackCommand>::New();
 	sliceCameraCallback->SetCallback(InteractionCallbacks::SliceCameraChange);
-	sliceCameraCallback->SetClientData(volumePipeline->GetRenderer());
-	slicePipeline->GetRenderer()->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, sliceCameraCallback);
+	sliceCameraCallback->SetClientData(volumeView->GetRenderer());
+	sliceView->GetRenderer()->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, sliceCameraCallback);
 
 	// Char
 	vtkSmartPointer<vtkCallbackCommand> onCharCallback = vtkSmartPointer<vtkCallbackCommand>::New(); 
@@ -78,34 +78,34 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	vtkSmartPointer<vtkCallbackCommand> volumeSelectLabelCallback = vtkSmartPointer<vtkCallbackCommand>::New();
 	volumeSelectLabelCallback->SetCallback(InteractionCallbacks::VolumeSelectLabel);
 	volumeSelectLabelCallback->SetClientData(this);
-	volumePipeline->GetInteractorStyle()->AddObserver(vtkInteractorStyleVolume::SelectLabelEvent, volumeSelectLabelCallback);
+	volumeView->GetInteractorStyle()->AddObserver(vtkInteractorStyleVolume::SelectLabelEvent, volumeSelectLabelCallback);
 
 	vtkSmartPointer<vtkCallbackCommand> sliceSelectLabelCallback = vtkSmartPointer<vtkCallbackCommand>::New();
 	sliceSelectLabelCallback->SetCallback(InteractionCallbacks::SliceSelectLabel);
 	sliceSelectLabelCallback->SetClientData(this);
-	slicePipeline->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::SelectLabelEvent, sliceSelectLabelCallback);
+	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::SelectLabelEvent, sliceSelectLabelCallback);
 
 	// Paint
 	vtkSmartPointer<vtkCallbackCommand> volumePaintCallback = vtkSmartPointer<vtkCallbackCommand>::New();
 	volumePaintCallback->SetCallback(InteractionCallbacks::VolumePaint);
 	volumePaintCallback->SetClientData(this);
-	volumePipeline->GetInteractorStyle()->AddObserver(vtkInteractorStyleVolume::PaintEvent, volumePaintCallback);
+	volumeView->GetInteractorStyle()->AddObserver(vtkInteractorStyleVolume::PaintEvent, volumePaintCallback);
 
 	vtkSmartPointer<vtkCallbackCommand> slicePaintCallback = vtkSmartPointer<vtkCallbackCommand>::New();
 	slicePaintCallback->SetCallback(InteractionCallbacks::SlicePaint);
 	slicePaintCallback->SetClientData(this);
-	slicePipeline->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::PaintEvent, slicePaintCallback);
+	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::PaintEvent, slicePaintCallback);
 
 	// Erase
 	vtkSmartPointer<vtkCallbackCommand> volumeEraseCallback = vtkSmartPointer<vtkCallbackCommand>::New();
 	volumeEraseCallback->SetCallback(InteractionCallbacks::VolumeErase);
 	volumeEraseCallback->SetClientData(this);
-	volumePipeline->GetInteractorStyle()->AddObserver(vtkInteractorStyleVolume::EraseEvent, volumeEraseCallback);
+	volumeView->GetInteractorStyle()->AddObserver(vtkInteractorStyleVolume::EraseEvent, volumeEraseCallback);
 
 	vtkSmartPointer<vtkCallbackCommand> sliceEraseCallback = vtkSmartPointer<vtkCallbackCommand>::New();
 	sliceEraseCallback->SetCallback(InteractionCallbacks::SliceErase);
 	sliceEraseCallback->SetClientData(this);
-	slicePipeline->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::EraseEvent, sliceEraseCallback);
+	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::EraseEvent, sliceEraseCallback);
 
 	// Mouse move
 	vtkSmartPointer<vtkCallbackCommand> volumeMouseMoveCallback = vtkSmartPointer<vtkCallbackCommand>::New();
@@ -120,8 +120,8 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 }
 
 VisualizationContainer::~VisualizationContainer() {
-	delete volumePipeline;
-	delete slicePipeline;
+	delete volumeView;
+	delete sliceView;
 	delete regions;
 }
 
@@ -148,7 +148,7 @@ bool VisualizationContainer::OpenImageFile(const std::string& fileName) {
 		return false;
 	}	
 
-	slicePipeline->SetImageData(data);
+	sliceView->SetImageData(data);
 
 	return true;
 }
@@ -177,7 +177,7 @@ bool VisualizationContainer::OpenImageStack(const std::vector<std::string>& file
 		return false;
 	}
 
-	slicePipeline->SetImageData(data);
+	sliceView->SetImageData(data);
 
 	return true;
 }
@@ -308,8 +308,8 @@ void VisualizationContainer::SegmentVolume() {
 void VisualizationContainer::ToggleInteractionMode() {
 	interactionMode = interactionMode == NavigationMode ? EditMode : NavigationMode;
 
-	slicePipeline->SetInteractionMode(interactionMode);
-	volumePipeline->SetInteractionMode(interactionMode);
+	sliceView->SetInteractionMode(interactionMode);
+	volumeView->SetInteractionMode(interactionMode);
 
 	Render();
 }
@@ -368,14 +368,14 @@ void VisualizationContainer::ErasePoint(double x, double y, double z) {
 
 void VisualizationContainer::SetCurrentRegion(Region* region) {
 	currentRegion = region;
-	volumePipeline->SetCurrentRegion(currentRegion);
-	slicePipeline->SetCurrentRegion(currentRegion);
+	volumeView->SetCurrentRegion(currentRegion);
+	sliceView->SetCurrentRegion(currentRegion);
 
 	if (currentRegion) {
-		slicePipeline->SetCurrentLabel(currentRegion->GetLabel());
+		sliceView->SetCurrentLabel(currentRegion->GetLabel());
 	}
 	else {
-		slicePipeline->SetCurrentLabel(0);
+		sliceView->SetCurrentLabel(0);
 	}
 }
 
@@ -437,6 +437,8 @@ void VisualizationContainer::RelabelCurrentRegion() {
 				// Create new region
 				Region* newRegion = new Region(newLabel, labelColors->GetTableValue(newLabel), labels);
 				regions->Add(newRegion);
+				volumeView->AddRegion(newRegion);
+				sliceView->AddRegion(newRegion);
 			}			
 		}
 
@@ -581,24 +583,24 @@ void VisualizationContainer::RemoveRegion(unsigned short label) {
 }
 
 void VisualizationContainer::Render() {
-	volumePipeline->Render();
-	slicePipeline->Render();
+	volumeView->Render();
+	sliceView->Render();
 }
 
-VolumePipeline* VisualizationContainer::GetVolumePipeline() {
-	return volumePipeline;
+VolumeView* VisualizationContainer::GetVolumeView() {
+	return volumeView;
 }
 
-SlicePipeline* VisualizationContainer::GetSlicePipeline() {
-	return slicePipeline;
+SliceView* VisualizationContainer::GetSliceView() {
+	return sliceView;
 }
 
 void VisualizationContainer::UpdateLabels() {
 	UpdateColors();
 	ExtractRegions();
 
-	volumePipeline->SetRegions(labels, regions);
-	slicePipeline->SetSegmentationData(labels, regions);
+	volumeView->SetRegions(labels, regions);
+	sliceView->SetSegmentationData(labels, regions);
 
 	qtWindow->UpdateRegionTable(regions);
 }

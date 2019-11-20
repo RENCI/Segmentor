@@ -1,8 +1,7 @@
-#include "VolumePipeline.h"
-
-#include "vtkInteractorStyleVolume.h"
+#include "VolumeView.h"
 
 #include <vtkActor.h>
+#include <vtkCallbackCommand.h>
 #include <vtkCamera.h>
 #include <vtkCubeSource.h>
 #include <vtkImageData.h>
@@ -10,6 +9,7 @@
 #include <vtkLight.h>
 #include <vtkOutlineCornerFilter.h>
 #include <vtkPlane.h>
+#include <vtkPlaneSource.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
 #include <vtkRenderer.h>
@@ -18,25 +18,24 @@
 #include <vtkTextActor.h>
 #include <vtkTextProperty.h>
 
+#include "vtkInteractorStyleVolume.h"
+
 #include "InteractionEnums.h"
 #include "Region.h"
 #include "RegionSurface.h"
 #include "RegionCollection.h"
 
-#include <vtkCallbackCommand.h>
-#include <vtkPlaneSource.h>
-
 double rescale(double value, double min, double max) {
 	return min + (max - min) * value;
 }
 
-void VolumePipeline::cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
-	VolumePipeline* pipeline = static_cast<VolumePipeline*>(clientData);
+void VolumeView::cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+	VolumeView* pipeline = static_cast<VolumeView*>(clientData);
 
 	pipeline->UpdatePlane();
 }
 
-VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* interactor) {
+VolumeView::VolumeView(vtkRenderWindowInteractor* interactor) {
 	filterRegion = false;
 	filterPlane = false;
 	smoothSurfaces = false;
@@ -83,10 +82,10 @@ VolumePipeline::VolumePipeline(vtkRenderWindowInteractor* interactor) {
 	renderer->AddLight(light);
 }
 
-VolumePipeline::~VolumePipeline() {
+VolumeView::~VolumeView() {
 }
 
-void VolumePipeline::SetRegions(vtkImageData* data, RegionCollection* newRegions) {
+void VolumeView::SetRegions(vtkImageData* data, RegionCollection* newRegions) {
 	regions = newRegions;
 
 	// Reset
@@ -94,7 +93,7 @@ void VolumePipeline::SetRegions(vtkImageData* data, RegionCollection* newRegions
 	currentRegion = nullptr;
 
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
-		renderer->AddActor(regions->Get(it)->GetSurface()->GetActor());
+		AddRegion(regions->Get(it));
 	}
 
 	// Update probe
@@ -115,7 +114,11 @@ void VolumePipeline::SetRegions(vtkImageData* data, RegionCollection* newRegions
 	Render();
 }
 
-void VolumePipeline::SetCurrentRegion(Region* region) {
+void VolumeView::AddRegion(Region* region) {
+	renderer->AddActor(region->GetSurface()->GetActor());
+}
+
+void VolumeView::SetCurrentRegion(Region* region) {
 	currentRegion = region;
 
 	if (currentRegion) {
@@ -129,22 +132,22 @@ void VolumePipeline::SetCurrentRegion(Region* region) {
 	FilterRegions();
 }
 
-void VolumePipeline::SetShowProbe(bool show) {
+void VolumeView::SetShowProbe(bool show) {
 	probe->SetVisibility(show);
 }
 
-void VolumePipeline::SetProbePosition(double x, double y, double z) {
+void VolumeView::SetProbePosition(double x, double y, double z) {
 	probe->SetPosition(x, y, z);
 }
 
-void VolumePipeline::SetInteractionMode(enum InteractionMode mode) {
+void VolumeView::SetInteractionMode(enum InteractionMode mode) {
 	std::string s = mode == NavigationMode ? "Navigation mode" : "Edit mode";
 	interactionModeLabel->SetInput(s.c_str());
 
 	style->SetMode(mode);
 }
 
-void VolumePipeline::SetSmoothSurfaces(bool smooth) {
+void VolumeView::SetSmoothSurfaces(bool smooth) {
 	smoothSurfaces = smooth;
 
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
@@ -154,11 +157,11 @@ void VolumePipeline::SetSmoothSurfaces(bool smooth) {
 	Render();
 }
 
-void VolumePipeline::ToggleSmoothSurfaces() {
+void VolumeView::ToggleSmoothSurfaces() {
 	SetSmoothSurfaces(!smoothSurfaces);
 }
 
-void VolumePipeline::SetSmoothShading(bool smooth) {
+void VolumeView::SetSmoothShading(bool smooth) {
 	smoothShading = smooth;
 
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
@@ -168,60 +171,60 @@ void VolumePipeline::SetSmoothShading(bool smooth) {
 	Render();
 }
 
-void VolumePipeline::ToggleSmoothShading() {
+void VolumeView::ToggleSmoothShading() {
 	SetSmoothShading(!smoothShading);
 }
 
-void VolumePipeline::SetFilterRegion(bool filter) {
+void VolumeView::SetFilterRegion(bool filter) {
 	filterRegion = filter;
 
 	FilterRegions();
 }
 
-void VolumePipeline::ToggleFilterRegion() {
+void VolumeView::ToggleFilterRegion() {
 	SetFilterRegion(!filterRegion);
 }
 
-void VolumePipeline::SetFilterPlane(bool filter) {
+void VolumeView::SetFilterPlane(bool filter) {
 	filterPlane = filter;
 
 	FilterRegions();
 }
 
-void VolumePipeline::ToggleFilterPlane() {
+void VolumeView::ToggleFilterPlane() {
 	SetFilterPlane(!filterPlane);
 }
 
-void VolumePipeline::UpdatePlane() {
+void VolumeView::UpdatePlane() {
 	vtkCamera* cam = renderer->GetActiveCamera();
 
 	planeSource->SetCenter(cam->GetFocalPoint());
 	planeSource->SetNormal(cam->GetDirectionOfProjection());
 }
 
-void VolumePipeline::SetShowPlane(bool show) {
+void VolumeView::SetShowPlane(bool show) {
 	plane->SetVisibility(show);
 	planeWire->SetVisibility(show);
 	Render();
 }
 
-void VolumePipeline::ToggleShowPlane() {
+void VolumeView::ToggleShowPlane() {
 	SetShowPlane(!plane->GetVisibility());
 }
 
-void VolumePipeline::Render() {
+void VolumeView::Render() {
 	renderer->GetRenderWindow()->Render();
 }
 
-vtkRenderer* VolumePipeline::GetRenderer() {
+vtkRenderer* VolumeView::GetRenderer() {
 	return renderer;
 }
 
-vtkInteractorStyleVolume* VolumePipeline::GetInteractorStyle() {
+vtkInteractorStyleVolume* VolumeView::GetInteractorStyle() {
 	return style;
 }
 
-void VolumePipeline::CreateProbe() {
+void VolumeView::CreateProbe() {
 	vtkSmartPointer<vtkCubeSource> source = vtkSmartPointer<vtkCubeSource>::New();
 
 	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
@@ -237,12 +240,12 @@ void VolumePipeline::CreateProbe() {
 	renderer->AddActor(probe);
 }
 
-void VolumePipeline::UpdateProbe(vtkImageData* data) {
+void VolumeView::UpdateProbe(vtkImageData* data) {
 	probe->SetPosition(data->GetCenter());
 	probe->SetScale(data->GetSpacing());
 }
 
-void VolumePipeline::CreateInteractionModeLabel() {
+void VolumeView::CreateInteractionModeLabel() {
 	interactionModeLabel = vtkSmartPointer<vtkTextActor>::New();
 	interactionModeLabel->SetPosition(10, 10);
 	interactionModeLabel->GetTextProperty()->SetFontSize(24);
@@ -253,7 +256,7 @@ void VolumePipeline::CreateInteractionModeLabel() {
 	renderer->AddActor2D(interactionModeLabel);
 }
 
-void VolumePipeline::CreatePlane() {
+void VolumeView::CreatePlane() {
 	planeSource = vtkSmartPointer<vtkPlaneSource>::New();
 	planeSource->SetXResolution(100);
 	planeSource->SetYResolution(100);
@@ -286,7 +289,7 @@ void VolumePipeline::CreatePlane() {
 	renderer->AddActor(planeWire);
 }
 
-void VolumePipeline::UpdatePlane(vtkImageData* data) {	
+void VolumeView::UpdatePlane(vtkImageData* data) {	
 	double* bounds = data->GetBounds();
 	double length = data->GetLength();
 
@@ -317,7 +320,7 @@ void VolumePipeline::UpdatePlane(vtkImageData* data) {
 	UpdatePlane();
 }
 
-void VolumePipeline::CreateCorners() {
+void VolumeView::CreateCorners() {
 	cornerFilter = vtkSmartPointer<vtkOutlineCornerFilter>::New();
 
 	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
@@ -333,11 +336,11 @@ void VolumePipeline::CreateCorners() {
 	renderer->AddActor(corners);
 }
 
-void VolumePipeline::UpdateCorners(vtkImageData* data) {
+void VolumeView::UpdateCorners(vtkImageData* data) {
 	cornerFilter->SetInputDataObject(data);
 }
 
-void VolumePipeline::FilterRegions() {
+void VolumeView::FilterRegions() {
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
 		Region* region = regions->Get(it);
 		RegionSurface* surface = region->GetSurface();
