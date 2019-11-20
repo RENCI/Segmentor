@@ -384,7 +384,7 @@ void SlicePipeline::FilterRegions() {
 		Region* region = regions->Get(it);
 		RegionOutline* outline = region->GetOutline();
 
-		if (filterRegion && currentRegion) {
+		if (filterRegion && currentRegion) {			
 			outline->GetActor()->SetVisibility(region == currentRegion);
 		}
 		else {

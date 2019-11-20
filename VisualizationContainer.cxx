@@ -369,6 +369,7 @@ void VisualizationContainer::ErasePoint(double x, double y, double z) {
 void VisualizationContainer::SetCurrentRegion(Region* region) {
 	currentRegion = region;
 	volumePipeline->SetCurrentRegion(currentRegion);
+	slicePipeline->SetCurrentRegion(currentRegion);
 
 	if (currentRegion) {
 		slicePipeline->SetCurrentLabel(currentRegion->GetLabel());
