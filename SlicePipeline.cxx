@@ -31,6 +31,7 @@
 #include "InteractionEnums.h"
 #include "Region.h"
 #include "RegionOutline.h"
+#include "RegionVoxelOutlines.h"
 #include "RegionCollection.h"
 
 void SlicePipeline::cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
@@ -40,6 +41,7 @@ void SlicePipeline::cameraChange(vtkObject* caller, unsigned long eventId, void*
 }
 
 SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut) {
+	showVoxelOutlines = true;
 	showRegionOutlines = true;
 	filterRegion = false;
 
@@ -53,9 +55,6 @@ SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTab
 	labelSlice = vtkSmartPointer<vtkImageSlice>::New();
 	labelSlice->VisibilityOn();
 
-	labelOutlines = vtkSmartPointer<vtkActor>::New();
-	labelOutlines->VisibilityOff();
-
 	// Rendering
 	renderer = vtkSmartPointer<vtkRenderer>::New();
 	renderer->SetLayer(0);
@@ -65,10 +64,10 @@ SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTab
 	labelSliceRenderer->InteractiveOff();
 	labelSliceRenderer->SetActiveCamera(renderer->GetActiveCamera());
 
-	labelOutlinesRenderer = vtkSmartPointer<vtkRenderer>::New();
-	labelOutlinesRenderer->SetLayer(2);
-	labelOutlinesRenderer->InteractiveOff();
-	labelOutlinesRenderer->SetActiveCamera(renderer->GetActiveCamera());
+	voxelOutlinesRenderer = vtkSmartPointer<vtkRenderer>::New();
+	voxelOutlinesRenderer->SetLayer(2);
+	voxelOutlinesRenderer->InteractiveOff();
+	voxelOutlinesRenderer->SetActiveCamera(renderer->GetActiveCamera());
 
 	regionOutlinesRenderer = vtkSmartPointer<vtkRenderer>::New();
 	regionOutlinesRenderer->SetLayer(2);
@@ -87,7 +86,7 @@ SlicePipeline::SlicePipeline(vtkRenderWindowInteractor* interactor, vtkLookupTab
 	interactor->GetRenderWindow()->SetNumberOfLayers(4);
 	interactor->GetRenderWindow()->AddRenderer(renderer);
 	interactor->GetRenderWindow()->AddRenderer(labelSliceRenderer);
-	interactor->GetRenderWindow()->AddRenderer(labelOutlinesRenderer);
+	interactor->GetRenderWindow()->AddRenderer(voxelOutlinesRenderer);
 	interactor->GetRenderWindow()->AddRenderer(regionOutlinesRenderer);
 	interactor->GetRenderWindow()->AddRenderer(sliceLocationRenderer);
 	interactor->SetInteractorStyle(style);
@@ -144,9 +143,15 @@ void SlicePipeline::SetSegmentationData(vtkImageData* imageLabels, RegionCollect
 	regions = newRegions;
 
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
-		RegionOutline* outline = regions->Get(it)->GetOutline();
+		Region* region = regions->Get(it);
+
+		RegionOutline* outline = region->GetOutline();
 		outline->SetPlane(plane);
 		regionOutlinesRenderer->AddActor(outline->GetActor());
+
+		RegionVoxelOutlines* voxelOutlines = region->GetVoxelOutlines();
+		voxelOutlines->SetPlane(plane);
+		voxelOutlinesRenderer->AddActor(voxelOutlines->GetActor());
 	}
 
 	// Render
@@ -215,17 +220,22 @@ void SlicePipeline::ToggleLabelSlice() {
 	Render();
 }
 
-void SlicePipeline::ToggleLabelOutlines() {
-	labelOutlines->SetVisibility(!labelOutlines->GetVisibility());
+void SlicePipeline::ShowVoxelOutlines(bool show) {
+	showVoxelOutlines = show;
+
+	FilterRegions();
+
 	Render();
+}
+
+void SlicePipeline::ToggleVoxelOutlines() {
+	ShowVoxelOutlines(!showVoxelOutlines);
 }
 
 void SlicePipeline::ShowRegionOutlines(bool show) {
 	showRegionOutlines = show;
 
-	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
-		regions->Get(it)->GetOutline()->GetActor()->SetVisibility(showRegionOutlines);
-	}
+	FilterRegions();
 
 	Render();
 }
@@ -351,44 +361,23 @@ void SlicePipeline::CreateLabelSlice(vtkImageData* labels) {
 	labelSlice->SetProperty(property);
 
 	labelSliceRenderer->AddActor(labelSlice);
-/*
-	// Label outlines
-	vtkSmartPointer<vtkImageDataCells> cells = vtkSmartPointer<vtkImageDataCells>::New();
-	cells->SetInputDataObject(labels);
-
-	vtkSmartPointer<vtkThreshold> threshold = vtkSmartPointer<vtkThreshold>::New();
-	threshold->ThresholdByUpper(1);
-	threshold->SetInputConnection(cells->GetOutputPort());
-
-	vtkSmartPointer<vtkCutter> labelOutlinesCut = vtkSmartPointer<vtkCutter>::New();
-	labelOutlinesCut->SetCutFunction(plane);
-	labelOutlinesCut->GenerateTrianglesOff();
-	labelOutlinesCut->SetInputConnection(threshold->GetOutputPort());
-
-	vtkSmartPointer<vtkPolyDataMapper> labelOutlinesMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-	labelOutlinesMapper->SetLookupTable(labelColors);
-	labelOutlinesMapper->UseLookupTableScalarRangeOn();
-	labelOutlinesMapper->SetInputConnection(labelOutlinesCut->GetOutputPort());
-
-	labelOutlines->GetProperty()->LightingOff();
-	labelOutlines->GetProperty()->SetRepresentationToWireframe();
-	labelOutlines->GetProperty()->SetOpacity(0.25);
-	labelOutlines->SetMapper(labelOutlinesMapper);
-	
-	labelOutlinesRenderer->AddActor(labelOutlines);
-*/
 }
 
 void SlicePipeline::FilterRegions() {
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
 		Region* region = regions->Get(it);
 		RegionOutline* outline = region->GetOutline();
+		RegionVoxelOutlines* voxelOutlines = region->GetVoxelOutlines();
 
 		if (filterRegion && currentRegion) {			
-			outline->GetActor()->SetVisibility(region == currentRegion);
+			bool visible = region == currentRegion;
+
+			outline->GetActor()->SetVisibility(visible && showRegionOutlines);
+			voxelOutlines->GetActor()->SetVisibility(visible && showVoxelOutlines);
 		}
 		else {
-			outline->GetActor()->VisibilityOn();
+			outline->GetActor()->SetVisibility(showRegionOutlines);
+			voxelOutlines->GetActor()->SetVisibility(showVoxelOutlines);
 		}
 	}
 

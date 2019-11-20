@@ -145,7 +145,7 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 		break;
 
 	case '2':
-		vis->GetSlicePipeline()->ToggleLabelOutlines();
+		vis->GetSlicePipeline()->ToggleVoxelOutlines();
 		break;
 
 	case '3':

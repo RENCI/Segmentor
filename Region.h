@@ -11,8 +11,9 @@ class vtkThreshold;
 
 class vtkImageDataCells;
 
-class RegionOutline;
 class RegionSurface;
+class RegionOutline;
+class RegionVoxelOutlines;
 
 class Region {
 public:
@@ -22,8 +23,9 @@ public:
 	vtkAlgorithmOutput* GetOutput();
 	vtkAlgorithmOutput* GetCells();
 
-	RegionOutline* GetOutline();
 	RegionSurface* GetSurface();
+	RegionOutline* GetOutline();
+	RegionVoxelOutlines* GetVoxelOutlines();
 
 	void SetExtent(int newExtent[6]);
 	void UpdateExtent(int x, int y, int z);
@@ -47,6 +49,7 @@ protected:
 
 	RegionSurface* surface;
 	RegionOutline* outline;
+	RegionVoxelOutlines* voxelOutlines;
 
 	void UpdateExtent();
 	void ClearLabels();

@@ -11,8 +11,9 @@
 
 #include "vtkImageDataCells.h"
 
-#include "RegionOutline.h"
 #include "RegionSurface.h"
+#include "RegionOutline.h"
+#include "RegionVoxelOutlines.h"
 
 Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* inputData) {
 	done = false;
@@ -66,9 +67,10 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 	threshold = vtkSmartPointer<vtkThreshold>::New();
 	threshold->ThresholdBetween(label, label);
 	threshold->SetInputConnection(cells->GetOutputPort());
-	
-	outline = new RegionOutline(this, color);
+
 	surface = new RegionSurface(this, color);
+	outline = new RegionOutline(this, color);
+	voxelOutlines = new RegionVoxelOutlines(this, color);
 
 	UpdateExtent();
 }
@@ -88,12 +90,16 @@ vtkAlgorithmOutput* Region::GetCells() {
 	return threshold->GetOutputPort();
 }
 
+RegionSurface* Region::GetSurface() {
+	return surface;
+}
+
 RegionOutline* Region::GetOutline() {
 	return outline;
 }
 
-RegionSurface* Region::GetSurface() {
-	return surface;
+RegionVoxelOutlines* Region::GetVoxelOutlines() {
+	return voxelOutlines;
 }
 
 void Region::SetExtent(int newExtent[6]) {

@@ -31,8 +31,6 @@ public:
 	void SetImageData(vtkImageData* data);
 	void SetSegmentationData(vtkImageData* data, RegionCollection* newRegions);
 
-	void RemoveRegion(Region* region);
-
 	void SetShowProbe(bool show);
 	void SetProbePosition(double x, double y, double z);
 
@@ -43,7 +41,9 @@ public:
 	void SetCurrentLabel(unsigned short label);
 	
 	void ToggleLabelSlice();
-	void ToggleLabelOutlines();
+	
+	void ShowVoxelOutlines(bool show);
+	void ToggleVoxelOutlines();
 
 	void ShowRegionOutlines(bool show);
 	void ToggleRegionOutlines();
@@ -59,6 +59,7 @@ public:
 	vtkSmartPointer<vtkInteractorStyleSlice> GetInteractorStyle();
 
 protected:
+	bool showVoxelOutlines;
 	bool showRegionOutlines;
 	bool filterRegion;
 
@@ -71,7 +72,7 @@ protected:
 	// Rendering
 	vtkSmartPointer<vtkRenderer> renderer;
 	vtkSmartPointer<vtkRenderer> labelSliceRenderer;
-	vtkSmartPointer<vtkRenderer> labelOutlinesRenderer;
+	vtkSmartPointer<vtkRenderer> voxelOutlinesRenderer;
 	vtkSmartPointer<vtkRenderer> regionOutlinesRenderer;
 
 	vtkSmartPointer<vtkInteractorStyleSlice> style;
@@ -83,9 +84,8 @@ protected:
 	// Cut plane
 	vtkSmartPointer<vtkPlane> plane;
 
-	// Overlays
+	// Overlay
 	vtkSmartPointer<vtkImageSlice> labelSlice;
-	vtkSmartPointer<vtkActor> labelOutlines;
 
 	// Probe
 	vtkSmartPointer<vtkActor> probe;

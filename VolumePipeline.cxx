@@ -346,15 +346,9 @@ void VolumePipeline::FilterRegions() {
 			vtkCamera* cam = renderer->GetActiveCamera();
 			bool ix = surface->IntersectsPlane(cam->GetFocalPoint(), cam->GetDirectionOfProjection());
 
-			//if (ix) surface->GetActor()->GetProperty()->SetRepresentationToSurface();
-			//else surface->GetActor()->GetProperty()->SetRepresentationToPoints();
-			
-			//surface->GetActor()->GetProperty()->SetOpacity(ix ? 1 : 0.1);
 			surface->GetActor()->SetVisibility(ix);
 		}
 		else {
-			//surface->GetActor()->GetProperty()->SetRepresentationToSurface();
-			//surface->GetActor()->GetProperty()->SetOpacity(1.0);
 			surface->GetActor()->VisibilityOn();
 		}
 			
