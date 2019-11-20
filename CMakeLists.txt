@@ -37,3 +37,6 @@ else()
   add_executable(Segmentor MACOSX_BUNDLE ${CXX_FILES} ${UISrcs} ${MOCSrcs})
   target_link_libraries(Segmentor ${VTK_LIBRARIES})
 endif()
+
+set(DEBUG_PATH "${VTK_DIR}/bin/Debug;PATH=%PATH%")
+set_target_properties(Segmentor PROPERTIES VS_DEBUGGER_ENVIRONMENT "${DEBUG_PATH}")
