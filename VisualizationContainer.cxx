@@ -369,14 +369,9 @@ void VisualizationContainer::ErasePoint(double x, double y, double z) {
 void VisualizationContainer::SetCurrentRegion(Region* region) {
 	currentRegion = region;
 	volumeView->SetCurrentRegion(currentRegion);
-	sliceView->SetCurrentRegion(currentRegion);
+	sliceView->SetCurrentRegion(currentRegion); 
 
-	if (currentRegion) {
-		sliceView->SetCurrentLabel(currentRegion->GetLabel());
-	}
-	else {
-		sliceView->SetCurrentLabel(0);
-	}
+	qtWindow->HighlightRegionTable(region ? region->GetLabel() : 0);
 }
 
 void VisualizationContainer::RelabelCurrentRegion() {

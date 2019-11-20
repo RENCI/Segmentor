@@ -58,6 +58,10 @@ void MainWindow::UpdateRegionTable(RegionCollection* regions) {
 	regionTable->Update(regions);
 }
 
+void MainWindow::HighlightRegionTable(unsigned short label) {
+	regionTable->Highlight(label);
+}
+
 void MainWindow::on_actionOpen_Image_File_triggered() {
 	// Open a file dialog to read the file
 	QString fileName = QFileDialog::getOpenFileName(this,

@@ -42,16 +42,19 @@ void RegionTable::Update(RegionCollection* regions) {
 		// Id
 		QTableWidgetItem* idItem = new QTableWidgetItem(QString::number(label));
 		idItem->setTextAlignment(Qt::AlignCenter);
+		idItem->setFlags(Qt::ItemIsSelectable);
 
 		// Color
 		const double* col = region->GetColor();
 		QColor color(col[0] * 255, col[1] * 255, col[2] * 255);
 		QTableWidgetItem* colorItem = new QTableWidgetItem("");
 		colorItem->setBackgroundColor(color);
+		colorItem->setFlags(Qt::ItemIsSelectable);
 
 		// Size
 		QTableWidgetItem* sizeItem = new QTableWidgetItem(QString::number(region->GetNumVoxels()));
 		sizeItem->setTextAlignment(Qt::AlignCenter);
+		sizeItem->setFlags(Qt::ItemIsSelectable);
 
 		// Checkbox
 		QCheckBox* checkBox = new QCheckBox(this);
@@ -76,4 +79,25 @@ void RegionTable::Update(RegionCollection* regions) {
 	}
 
 	resizeColumnsToContents();
+
+	Highlight(0);
+}
+
+void RegionTable::Highlight(unsigned short label) {
+	QString labelString = QString::number(label);
+
+	for (int i = 0; i < rowCount(); i++) {
+		QTableWidgetItem* ti = item(i, 0);
+
+		if (ti->text() == labelString) {
+			ti->setBackgroundColor(QColor("#1d91c0"));
+			ti->setTextColor(QColor("white"));
+
+			scrollToItem(ti);
+		}
+		else {
+			ti->setBackgroundColor(QColor("white"));
+			ti->setTextColor(QColor("black"));
+		}
+	}
 }

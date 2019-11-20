@@ -35,8 +35,6 @@ public:
 	void SetInteractionMode(enum InteractionMode mode);
 
 	void SetCurrentRegion(Region* region);
-
-	void SetCurrentLabel(unsigned short label);
 	
 	void ToggleLabelSlice();
 	

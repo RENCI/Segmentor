@@ -17,6 +17,7 @@ public:
 	virtual ~MainWindow();
 
 	void UpdateRegionTable(RegionCollection* regions);
+	void HighlightRegionTable(unsigned short label);
 
 public slots:
 	// Use Qt's auto-connect magic to tie GUI widgets to slots,

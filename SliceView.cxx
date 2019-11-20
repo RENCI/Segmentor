@@ -210,17 +210,6 @@ void SliceView::SetInteractionMode(enum InteractionMode mode) {
 	style->SetMode(mode);
 }
 
-void SliceView::SetCurrentLabel(unsigned short label) {
-	if (label > 0) {
-		double color[3];
-		labelSlice->GetProperty()->GetLookupTable()->GetColor(label, color);
-		probe->GetProperty()->SetColor(color);
-	}
-	else {
-		probe->GetProperty()->SetColor(1, 1, 1);
-	}
-}
-
 void SliceView::ToggleLabelSlice() {
 	labelSlice->SetVisibility(!labelSlice->GetVisibility());
 	Render();
