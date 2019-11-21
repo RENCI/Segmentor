@@ -16,6 +16,7 @@
 #include "RegionVoxelOutlines.h"
 
 Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* inputData) {
+	modified = false;
 	done = false;
 
 	// Input data info
@@ -163,6 +164,10 @@ void Region::UpdateExtent() {
 	voi->SetVOI(padExtent);
 }
 
+void Region::SetModified(bool isModified) {
+	modified = isModified;
+}
+
 void Region::SetDone(bool isDone) {
 	done = isDone;
 
@@ -206,6 +211,11 @@ const int* Region::GetExtent() {
 bool Region::GetDone() {
 	return done;
 }
+
+bool Region::GetModified() {
+	return modified;
+}
+
 
 void Region::ClearLabels() {
 	for (int i = extent[0]; i <= extent[1]; i++) {

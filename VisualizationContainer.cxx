@@ -345,6 +345,9 @@ void VisualizationContainer::Paint(int x, int y, int z) {
 	currentRegion->UpdateExtent(x, y, z);
 
 	SetLabel(x, y, z, currentRegion->GetLabel());
+
+	currentRegion->SetModified(true);
+	qtWindow->UpdateRegionTable(regions);
 }
 
 void VisualizationContainer::Erase(int x, int y, int z) {	
@@ -353,6 +356,9 @@ void VisualizationContainer::Erase(int x, int y, int z) {
 	// TODO: SHRINK EXTENT
 
 	SetLabel(x, y, z, 0);
+
+	currentRegion->SetModified(true);
+	qtWindow->UpdateRegionTable(regions);
 }
 
 void VisualizationContainer::PickPointLabel(double x, double y, double z) {
@@ -415,6 +421,8 @@ void VisualizationContainer::RelabelCurrentRegion() {
 		RemoveRegion(label);
 	}
 	else {
+		currentRegion->SetModified(true);
+
 		for (int i = 0; i < numComponents; i++) {
 			// Get the extent for this component
 			double* componentExtent = componentExtents->GetTuple(i);
@@ -453,6 +461,8 @@ void VisualizationContainer::RelabelCurrentRegion() {
 				regions->Add(newRegion);
 				volumeView->AddRegion(newRegion);
 				sliceView->AddRegion(newRegion);
+				
+				newRegion->SetModified(true);
 			}			
 		}
 
@@ -496,6 +506,7 @@ void VisualizationContainer::MergeWithCurrentRegion(int x, int y, int z) {
 	}
 
 	currentRegion->SetExtent(newExtent);
+	currentRegion->SetModified(true);
 
 	// Remove region
 	RemoveRegion(label);
@@ -712,7 +723,7 @@ void VisualizationContainer::LoadRegionMetadata(std::string fileName) {
 		Region* region = regions->Get(metadata[i].label);
 
 		if (region) {
-			//region->SetModified(metadata[i].modified;
+			region->SetModified(metadata[i].modified);
 			region->SetDone(metadata[i].done);
 		}
 	}
@@ -727,7 +738,7 @@ void VisualizationContainer::SaveRegionMetadata(std::string fileName) {
 		Region* region = regions->Get(it);
 
 		regionMetadata.label = region->GetLabel();
-		regionMetadata.modified = false;
+		regionMetadata.modified = region->GetModified();
 		regionMetadata.done = region->GetDone();
 
 		metadata.push_back(regionMetadata);

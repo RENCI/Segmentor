@@ -60,11 +60,11 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::UpdateRegionTable(RegionCollection* regions) {
-	regionTable->Update(regions);
+	regionTable->update(regions);
 }
 
 void MainWindow::HighlightRegionTable(unsigned short label) {
-	regionTable->Highlight(label);
+	regionTable->highlight(label);
 }
 
 void MainWindow::on_actionOpen_Image_File_triggered() {

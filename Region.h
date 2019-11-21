@@ -29,18 +29,24 @@ public:
 
 	void SetExtent(int newExtent[6]);
 	void UpdateExtent(int x, int y, int z);
-	void SetDone(bool done);
+
+	void SetModified(bool isModified);
+	void SetDone(bool isDone);
 
 	unsigned short GetLabel();
 	const double* GetColor();
 	int GetNumVoxels();
 	const int* GetExtent();
+
+	bool GetModified();
 	bool GetDone();
 
 protected:
 	unsigned short label;
 	double color[3];
 	int extent[6];
+
+	bool modified;
 	bool done;
 
 	vtkSmartPointer<vtkImageData> data;

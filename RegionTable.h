@@ -12,8 +12,11 @@ class RegionTable : public QTableWidget {
 public:
 	RegionTable(QWidget* parent = 0);
 
-	void Update(RegionCollection* regions);
-	void Highlight(unsigned short label);
+	void update(RegionCollection* regions);
+	void highlight(unsigned short label);
+
+public slots:
+	void on_sort();
 
 signals:
 	void regionDone(int label, bool done);
