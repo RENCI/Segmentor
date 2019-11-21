@@ -111,7 +111,6 @@ void VolumeView::SetRegions(vtkImageData* data, RegionCollection* newRegions) {
 	interactionModeLabel->VisibilityOn();
 
 	renderer->ResetCameraClippingRange();
-	Render();
 }
 
 void VolumeView::AddRegion(Region* region) {

@@ -6,6 +6,8 @@
 #include <QMainWindow>
 #include <QSettings>
 
+#include <string>
+
 class VisualizationContainer;
 class RegionCollection;
 class RegionTable;

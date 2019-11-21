@@ -129,7 +129,6 @@ void SliceView::SetImageData(vtkImageData* imageData) {
 
 	// Render
 	renderer->ResetCamera();
-	Render();
 }
 
 void SliceView::SetSegmentationData(vtkImageData* imageLabels, RegionCollection* newRegions) {
@@ -143,9 +142,6 @@ void SliceView::SetSegmentationData(vtkImageData* imageLabels, RegionCollection*
 	}
 
 	FilterRegions();
-
-	// Render
-	Render();
 }
 
 void SliceView::AddRegion(Region* region) {

@@ -7,11 +7,16 @@
 #include <QStyle>
 #include <QPushButton>
 
+#include <QIODevice>
+#include <QJsonDocument>
+#include <QJsonObject>
+
 #include <vtkGenericOpenGLRenderWindow.h>
 
 #include "VisualizationContainer.h"
 #include "RegionCollection.h"
 #include "RegionTable.h"
+#include "RegionMetadataIO.h"
 
 #include "vtkCallbackCommand.h"
 #include "vtkSmartPointer.h"

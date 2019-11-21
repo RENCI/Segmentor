@@ -85,6 +85,10 @@ protected:
 
 	void ExtractRegions();
 
+	// Region metadata
+	void LoadRegionMetadata(std::string fileName);
+	void SaveRegionMetadata(std::string fileName);
+
 	void SetLabel(int x, int y, int z, unsigned short label);
 	unsigned short GetLabel(int x, int y, int z);
 

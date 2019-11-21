@@ -33,6 +33,7 @@
 #include "VolumeView.h"
 #include "Region.h"
 #include "RegionCollection.h"
+#include "RegionMetadataIO.h"
 
 VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volumeInteractor, vtkRenderWindowInteractor* sliceInteractor, MainWindow* mainWindow) {
 	data = nullptr;
@@ -206,11 +207,18 @@ bool VisualizationContainer::OpenSegmentationFile(const std::string& fileName) {
 	}
 
 	UpdateLabels();
+	LoadRegionMetadata(fileName + ".json");
+
+	qtWindow->UpdateRegionTable(regions);
+
+	Render();
 
 	return true;
 }
 
 bool VisualizationContainer::OpenSegmentationStack(const std::vector<std::string>& fileNames) {
+	if (fileNames.size() == 0) return false;
+
 	// Get the file extension
 	std::string extension = fileNames[0].substr(fileNames[0].find_last_of(".") + 1);
 
@@ -235,6 +243,11 @@ bool VisualizationContainer::OpenSegmentationStack(const std::vector<std::string
 	}
 
 	UpdateLabels();
+	LoadRegionMetadata(fileNames[0] + ".json");
+
+	qtWindow->UpdateRegionTable(regions);
+
+	Render();
 
 	return true;
 }
@@ -267,6 +280,8 @@ bool VisualizationContainer::SaveSegmentationData(const std::string& fileName) {
 	else {
 		return false;
 	}
+
+	SaveRegionMetadata(fileName + ".json");
 	
 	return true;
 }
@@ -303,6 +318,10 @@ void VisualizationContainer::SegmentVolume() {
 	labels = connectivity->GetOutput();
 
 	UpdateLabels();
+
+	qtWindow->UpdateRegionTable(regions);
+
+	Render();
 }
 
 void VisualizationContainer::ToggleInteractionMode() {
@@ -596,8 +615,6 @@ void VisualizationContainer::UpdateLabels() {
 
 	volumeView->SetRegions(labels, regions);
 	sliceView->SetSegmentationData(labels, regions);
-
-	qtWindow->UpdateRegionTable(regions);
 }
 
 void VisualizationContainer::UpdateColors(unsigned short label) {
@@ -684,6 +701,37 @@ void VisualizationContainer::ExtractRegions() {
 	for (int label = 1; label <= maxLabel; label++) {
 		regions->Add(new Region(label, labelColors->GetTableValue(label), labels));
 	}
+}
+
+void VisualizationContainer::LoadRegionMetadata(std::string fileName) {
+	std::vector<RegionMetadataIO::Region> metadata = RegionMetadataIO::Read(fileName);
+
+	for (int i = 0; i < (int)metadata.size(); i++) {
+		Region* region = regions->Get(metadata[i].label);
+
+		if (region) {
+			//region->SetModified(metadata[i].modified;
+			region->SetDone(metadata[i].done);
+		}
+	}
+}
+
+void VisualizationContainer::SaveRegionMetadata(std::string fileName) {
+	std::vector<RegionMetadataIO::Region> metadata;
+
+	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+		RegionMetadataIO::Region regionMetadata;
+
+		Region* region = regions->Get(it);
+
+		regionMetadata.label = region->GetLabel();
+		regionMetadata.modified = false;
+		regionMetadata.done = region->GetDone();
+
+		metadata.push_back(regionMetadata);
+	}
+
+	RegionMetadataIO::Write(fileName, metadata);
 }
 
 void VisualizationContainer::SetLabel(int x, int y, int z, unsigned short label) {
