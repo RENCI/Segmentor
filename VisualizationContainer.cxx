@@ -582,6 +582,8 @@ void VisualizationContainer::SetRegionDone(unsigned short label, bool done) {
 		UpdateColors(label);
 	}
 
+	qtWindow->UpdateRegionTable(regions);
+
 	Render();
 }
 

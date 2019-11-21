@@ -34,6 +34,9 @@ void RegionTable::Update(RegionCollection* regions) {
 	QStyle* style = QApplication::style();
 	QIcon removeIcon = style->standardIcon(QStyle::SP_DialogCancelButton);
 
+	// Grey color
+	double grey[3] = { 0.5, 0.5, 0.5 };
+
 	int i = 0;
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++, i++) {
 		Region* region = regions->Get(it);
@@ -45,7 +48,7 @@ void RegionTable::Update(RegionCollection* regions) {
 		idItem->setFlags(Qt::ItemIsSelectable);
 
 		// Color
-		const double* col = region->GetColor();
+		const double* col = region->GetDone() ? grey : region->GetColor();
 		QColor color(col[0] * 255, col[1] * 255, col[2] * 255);
 		QTableWidgetItem* colorItem = new QTableWidgetItem("");
 		colorItem->setBackgroundColor(color);
@@ -55,6 +58,7 @@ void RegionTable::Update(RegionCollection* regions) {
 		QTableWidgetItem* sizeItem = new QTableWidgetItem(QString::number(region->GetNumVoxels()));
 		sizeItem->setTextAlignment(Qt::AlignCenter);
 		sizeItem->setFlags(Qt::ItemIsSelectable);
+		sizeItem->setTextColor(QColor("black"));
 
 		// Checkbox
 		QCheckBox* checkBox = new QCheckBox(this);
