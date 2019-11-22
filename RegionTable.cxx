@@ -78,10 +78,11 @@ void RegionTable::update(RegionCollection* regions) {
 		modifiedItem->setData(0, region->GetModified());
 		modifiedItem->setTextColor(QColor("white"));
 
-		QLabel* modifiedLabel = new QLabel();
-		if (region->GetModified()) modifiedLabel->setPixmap(modifiedIcon.pixmap(16, 16));
-		modifiedLabel->setAlignment(Qt::AlignCenter);
-		modifiedLabel->setEnabled(false);
+		// Using a button for the icon container sizes the icon correctly...
+		QPushButton* modifiedButton = new QPushButton();
+		if (region->GetModified()) modifiedButton->setIcon(modifiedIcon);
+		modifiedButton->setEnabled(false);
+		modifiedButton->setStyleSheet("background-color: transparent; border: none;");
 
 		// Done
 		QTableWidgetItem* doneItem = new QTableWidgetItem();
@@ -89,7 +90,7 @@ void RegionTable::update(RegionCollection* regions) {
 		doneItem->setData(0, region->GetDone());
 		doneItem->setTextColor(QColor("white"));
 
-		QCheckBox* doneCheckBox = new QCheckBox(this);
+		QCheckBox* doneCheckBox = new QCheckBox();
 		doneCheckBox->setChecked(region->GetDone());
 		doneCheckBox->setStyleSheet("margin-left:10%;margin-right:5%;");
 		QObject::connect(doneCheckBox, &QCheckBox::stateChanged, [this, label](int state) {
@@ -100,7 +101,7 @@ void RegionTable::update(RegionCollection* regions) {
 		QTableWidgetItem* removeItem = new QTableWidgetItem();
 		removeItem->setFlags(Qt::ItemIsSelectable);
 
-		QPushButton* removeButton = new QPushButton(this);
+		QPushButton* removeButton = new QPushButton();
 		removeButton->setIcon(removeIcon);
 		QObject::connect(removeButton, &QPushButton::clicked, [this, label]() {
 			removeRegion(label);
@@ -111,7 +112,7 @@ void RegionTable::update(RegionCollection* regions) {
 		setItem(i, 2, sizeItem);
 
 		setItem(i, 3, modifiedItem);
-		setCellWidget(i, 3, modifiedLabel);
+		setCellWidget(i, 3, modifiedButton);
 
 		setItem(i, 4, doneItem);
 		setCellWidget(i, 4, doneCheckBox);
