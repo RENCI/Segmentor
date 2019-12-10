@@ -80,6 +80,7 @@ protected:
 	enum InteractionMode interactionMode;
 
 	void SetImageData(vtkImageData* imageData);
+	bool SetLabelData(vtkImageData* labelData);
 
 	void UpdateLabels();
 	void UpdateColors();

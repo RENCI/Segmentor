@@ -189,27 +189,29 @@ bool VisualizationContainer::OpenSegmentationFile(const std::string& fileName) {
 		reader->SetFileName(fileName.c_str());
 		reader->Update();
 
-		labels = reader->GetOutput();
+		if (SetLabelData(reader->GetOutput())) {
+			LoadRegionMetadata(fileName + ".json");
+
+			qtWindow->UpdateRegionTable(regions);
+
+			return true;
+		}
 	}
 	else if (extension == "nii") {
 		vtkSmartPointer<vtkNIFTIImageReader> reader = vtkSmartPointer<vtkNIFTIImageReader>::New();
 		reader->SetFileName(fileName.c_str());
 		reader->Update();
 
-		labels = reader->GetOutput();
+		if (SetLabelData(reader->GetOutput())) {
+			LoadRegionMetadata(fileName + ".json");
+
+			qtWindow->UpdateRegionTable(regions);
+
+			return true;
+		}
 	}
-	else {
-		return false;
-	}
 
-	UpdateLabels();
-	LoadRegionMetadata(fileName + ".json");
-
-	qtWindow->UpdateRegionTable(regions);
-
-	Render();
-
-	return true;
+	return false;
 }
 
 bool VisualizationContainer::OpenSegmentationStack(const std::vector<std::string>& fileNames) {
@@ -232,20 +234,16 @@ bool VisualizationContainer::OpenSegmentationStack(const std::vector<std::string
 		reader->SetFileNames(names);
 		reader->Update();
 
-		labels = reader->GetOutput();
+		if (SetLabelData(reader->GetOutput())) {
+			LoadRegionMetadata(fileNames[0] + ".json");
+
+			qtWindow->UpdateRegionTable(regions);
+
+			return true;
+		}
 	}
-	else {
-		return false;
-	}
 
-	UpdateLabels();
-	LoadRegionMetadata(fileNames[0] + ".json");
-
-	qtWindow->UpdateRegionTable(regions);
-
-	Render();
-
-	return true;
+	return false;
 }
 
 bool VisualizationContainer::SaveSegmentationData(const std::string& fileName) {
@@ -628,6 +626,38 @@ void VisualizationContainer::SetImageData(vtkImageData* imageData) {
 	volumeView->Reset();
 
 	sliceView->SetImageData(data);	
+}
+
+bool VisualizationContainer::SetLabelData(vtkImageData* labelData) {
+	// Check that volumes match
+	int* dataDims = data->GetDimensions();
+	int* labelDims = data->GetDimensions();
+
+	for (int i = 0; i < 3; i++) {
+		if (dataDims[i] != labelDims[i]) {
+			std::cout << dataDims[i] << " != " << labelDims[i] << std::endl;
+			return false;
+		}
+	}
+
+	// Check that bounds match
+	double* dataBounds = data->GetBounds();
+	double* labelBounds = labelData->GetBounds();
+
+	double epsilon = 1e-6;
+
+	for (int i = 0; i < 6; i++) {
+		if (std::abs(dataBounds[i] - labelBounds[i]) > epsilon) {
+			std::cout << dataBounds[i] << " != " << labelBounds[i] << std::endl;
+			return false;
+		}
+	}
+
+	labels = labelData;
+
+	UpdateLabels();
+
+	return true;
 }
 
 void VisualizationContainer::UpdateLabels() {
