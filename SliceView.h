@@ -25,6 +25,8 @@ public:
 	SliceView(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut);
 	~SliceView();
 
+	void Reset();
+
 	void SetImageData(vtkImageData* data);
 	void SetSegmentationData(vtkImageData* data, RegionCollection* newRegions);
 	void AddRegion(Region* region);
@@ -80,7 +82,8 @@ protected:
 	// Cut plane
 	vtkSmartPointer<vtkPlane> plane;
 
-	// Overlay
+	// Slices
+	vtkSmartPointer<vtkImageSlice> slice;
 	vtkSmartPointer<vtkImageSlice> labelSlice;
 
 	// Probe
@@ -96,11 +99,16 @@ protected:
 	void CreateInteractionModeLabel();
 
 	// Slices
-	void CreateDataSlice(vtkImageData* data);
-	void CreateLabelSlice(vtkImageData* labels);
+	void CreateSlice();
+	void UpdateSlice();
+
+	void CreateLabelSlice();
+	void UpdateLabelSlice();
 
 	void AddRegionActors(Region* region);
 	void FilterRegions();
+
+	void ResetCamera();
 
 	static void cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 };

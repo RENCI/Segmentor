@@ -79,6 +79,8 @@ protected:
 	// Current interaction mode
 	enum InteractionMode interactionMode;
 
+	void SetImageData(vtkImageData* imageData);
+
 	void UpdateLabels();
 	void UpdateColors();
 	void UpdateColors(unsigned short label);

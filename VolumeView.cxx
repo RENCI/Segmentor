@@ -41,6 +41,7 @@ VolumeView::VolumeView(vtkRenderWindowInteractor* interactor) {
 	smoothSurfaces = false;
 	smoothShading = true;
 	
+	regions = nullptr;
 	currentRegion = nullptr;
 
 	// Rendering
@@ -83,6 +84,15 @@ VolumeView::VolumeView(vtkRenderWindowInteractor* interactor) {
 }
 
 VolumeView::~VolumeView() {
+}
+
+void VolumeView::Reset() {
+	SetCurrentRegion(nullptr);
+
+	probe->VisibilityOff();
+	plane->VisibilityOff();
+	corners->VisibilityOff();
+	interactionModeLabel->VisibilityOff();
 }
 
 void VolumeView::SetRegions(vtkImageData* data, RegionCollection* newRegions) {
@@ -132,7 +142,7 @@ void VolumeView::SetCurrentRegion(Region* region) {
 }
 
 void VolumeView::SetShowProbe(bool show) {
-	probe->SetVisibility(show);
+	probe->SetVisibility(show && regions != nullptr);
 }
 
 void VolumeView::SetProbePosition(double x, double y, double z) {
@@ -340,6 +350,8 @@ void VolumeView::UpdateCorners(vtkImageData* data) {
 }
 
 void VolumeView::FilterRegions() {
+	if (!regions) return;
+
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
 		Region* region = regions->Get(it);
 		RegionSurface* surface = region->GetSurface();

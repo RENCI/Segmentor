@@ -29,6 +29,8 @@ public:
   void SetRegions(vtkImageData* data, RegionCollection* newRegions);
   void AddRegion(Region* region);
 
+  void Reset();
+
   void SetShowProbe(bool visibility);
   void SetProbePosition(double x, double y, double z);
 

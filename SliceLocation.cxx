@@ -44,6 +44,16 @@ SliceLocation::~SliceLocation() {
 }
 
 void SliceLocation::UpdateData(vtkImageData* data) {
+	if (data == nullptr) {
+		vtkPropCollection* props = renderer->GetViewProps();
+		props->InitTraversal();
+		for (int i = 0; i < props->GetNumberOfItems(); i++) {
+			props->GetNextProp()->VisibilityOff();
+		}
+
+		return;
+	}
+
 	double* bounds = data->GetBounds();
 	length = data->GetLength();
 

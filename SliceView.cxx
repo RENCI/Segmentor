@@ -44,8 +44,12 @@ SliceView::SliceView(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut)
 	data = nullptr;
 	labels = nullptr;
 
+	regions = nullptr;
 	currentRegion = nullptr;
 
+	labelColors = lut;
+
+	// Create slice pipeline
 	plane = vtkSmartPointer<vtkPlane>::New();
 
 	labelSlice = vtkSmartPointer<vtkImageSlice>::New();
@@ -88,14 +92,15 @@ SliceView::SliceView(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut)
 	interactor->SetInteractorStyle(style);
 	interactor->SetNumberOfFlyFrames(5);
 
+	// Slices
+	CreateSlice();
+	CreateLabelSlice();
+
 	// Camera callback
 	vtkSmartPointer <vtkCallbackCommand> cameraCallback = vtkSmartPointer<vtkCallbackCommand>::New();
 	cameraCallback->SetCallback(cameraChange);
 	cameraCallback->SetClientData(this);
 	renderer->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, cameraCallback);
-
-	// Colors
-	labelColors = lut;
 
 	// Probe
 	CreateProbe();
@@ -111,29 +116,40 @@ SliceView::~SliceView() {
 	delete sliceLocation;
 }
 
+void SliceView::Reset() {
+	data = nullptr;
+	labels = nullptr;
+
+	SetCurrentRegion(nullptr);
+
+	slice->VisibilityOff();
+	labelSlice->VisibilityOff();
+	probe->VisibilityOff();
+	sliceLocation->UpdateData(nullptr);
+	interactionModeLabel->VisibilityOff();
+}
+
 void SliceView::SetImageData(vtkImageData* imageData) {
+	// Update slice
 	data = imageData;
+	UpdateSlice();
 
 	// Update probe
 	UpdateProbe(data);
-	probe->VisibilityOn();
 
 	// Update axes
-	sliceLocation->UpdateData(imageData);
+	sliceLocation->UpdateData(data);
 
 	// Turn on interaction mode
 	interactionModeLabel->VisibilityOn();
 
-	// Create image slice
-	CreateDataSlice(data);
-
-	// Render
-	renderer->ResetCamera();
+	// Reset camera
+	ResetCamera();
 }
 
 void SliceView::SetSegmentationData(vtkImageData* imageLabels, RegionCollection* newRegions) {
 	labels = imageLabels;
-	CreateLabelSlice(labels);
+	UpdateLabelSlice();
 
 	regions = newRegions;
 
@@ -285,6 +301,7 @@ void SliceView::CreateProbe() {
 void SliceView::UpdateProbe(vtkImageData* data) {
 	probe->SetPosition(data->GetCenter());
 	probe->SetScale(data->GetSpacing());
+	probe->VisibilityOn();
 }
 
 void SliceView::CreateInteractionModeLabel() {
@@ -298,11 +315,7 @@ void SliceView::CreateInteractionModeLabel() {
 	renderer->AddActor2D(interactionModeLabel);
 }
 
-void SliceView::CreateDataSlice(vtkImageData* data) {
-	// Get image info
-	double minValue = data->GetScalarRange()[0];
-	double maxValue = data->GetScalarRange()[1];
-
+void SliceView::CreateSlice() {
 	// Mapper
 	vtkSmartPointer<vtkImageResliceMapper> mapper = vtkSmartPointer<vtkImageResliceMapper>::New();
 	mapper->SliceFacesCameraOn();
@@ -312,23 +325,33 @@ void SliceView::CreateDataSlice(vtkImageData* data) {
 	mapper->ResampleToScreenPixelsOn();
 	//mapper->SetSlabThickness(10);
 	//mapper->SetSlabTypeToSum();
-	mapper->SetInputDataObject(data);
 
 	// Image property
 	vtkSmartPointer<vtkImageProperty> property = vtkSmartPointer<vtkImageProperty>::New();
 	property->SetInterpolationTypeToNearest();
-	property->SetColorWindow(maxValue - minValue);
-	property->SetColorLevel(minValue + (maxValue - minValue) / 2);
 
 	// Slice
-	vtkSmartPointer<vtkImageSlice> slice = vtkSmartPointer<vtkImageSlice>::New();
+	slice = vtkSmartPointer<vtkImageSlice>::New();
 	slice->SetMapper(mapper);
 	slice->SetProperty(property);
+	slice->VisibilityOff();
 
 	renderer->AddActor(slice);
 }
 
-void SliceView::CreateLabelSlice(vtkImageData* labels) {
+void SliceView::UpdateSlice() {
+	// Get image info
+	double minValue = data->GetScalarRange()[0];
+	double maxValue = data->GetScalarRange()[1];
+
+	slice->GetMapper()->SetInputDataObject(data);
+	slice->GetProperty()->SetColorWindow(maxValue - minValue);
+	slice->GetProperty()->SetColorLevel(minValue + (maxValue - minValue) / 2);
+
+	slice->VisibilityOn();
+}
+
+void SliceView::CreateLabelSlice() {
 	// Mapper
 	vtkSmartPointer<vtkImageResliceMapper> mapper = vtkSmartPointer<vtkImageResliceMapper>::New();
 	mapper->SliceFacesCameraOn();
@@ -338,7 +361,6 @@ void SliceView::CreateLabelSlice(vtkImageData* labels) {
 	mapper->ResampleToScreenPixelsOn();
 	//mapper->SetSlabThickness(10);
 	//mapper->SetSlabTypeToMin();
-	mapper->SetInputDataObject(labels);
 
 	// Image property
 	vtkSmartPointer<vtkImageProperty> property = vtkSmartPointer<vtkImageProperty>::New();
@@ -350,11 +372,20 @@ void SliceView::CreateLabelSlice(vtkImageData* labels) {
 	// Slice
 	labelSlice->SetMapper(mapper);
 	labelSlice->SetProperty(property);
+	labelSlice->VisibilityOff();
 
 	labelSliceRenderer->AddActor(labelSlice);
 }
 
+void SliceView::UpdateLabelSlice() {
+	labelSlice->GetMapper()->SetInputDataObject(labels);
+
+	labelSlice->VisibilityOn();
+}
+
 void SliceView::FilterRegions() {
+	if (!regions) return;
+
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
 		Region* region = regions->Get(it);
 		RegionOutline* outline = region->GetOutline();
@@ -374,4 +405,13 @@ void SliceView::FilterRegions() {
 
 	renderer->ResetCameraClippingRange();
 	Render();
+}
+
+void SliceView::ResetCamera() {
+
+	renderer->GetActiveCamera()->SetFocalPoint(0, 0, 0);
+	renderer->GetActiveCamera()->SetPosition(0, 0, -1);
+	renderer->GetActiveCamera()->SetViewUp(0, 1, 0);
+	renderer->ResetCamera();
+	renderer->ResetCameraClippingRange();
 }

@@ -136,22 +136,21 @@ bool VisualizationContainer::OpenImageFile(const std::string& fileName) {
 		reader->SetFileName(fileName.c_str());
 		reader->Update();
 
-		data = reader->GetOutput();
+		SetImageData(reader->GetOutput());
+
+		return true;
 	}
 	else if (extension == "nii") {
 		vtkSmartPointer<vtkNIFTIImageReader> reader = vtkSmartPointer<vtkNIFTIImageReader>::New();
 		reader->SetFileName(fileName.c_str());
 		reader->Update();
 
-		data = reader->GetOutput();
+		SetImageData(reader->GetOutput());
+
+		return true;
 	}
-	else {
-		return false;
-	}	
 
-	sliceView->SetImageData(data);
-
-	return true;
+	return false;
 }
 
 bool VisualizationContainer::OpenImageStack(const std::vector<std::string>& fileNames) {
@@ -172,15 +171,12 @@ bool VisualizationContainer::OpenImageStack(const std::vector<std::string>& file
 		reader->SetFileNames(names);
 		reader->Update();
 
-		data = reader->GetOutput();
-	}
-	else {
-		return false;
-	}
+		SetImageData(reader->GetOutput());
 
-	sliceView->SetImageData(data);
-
-	return true;
+		return true;
+	}
+	
+	return false;
 }
 
 bool VisualizationContainer::OpenSegmentationFile(const std::string& fileName) {
@@ -620,6 +616,18 @@ VolumeView* VisualizationContainer::GetVolumeView() {
 
 SliceView* VisualizationContainer::GetSliceView() {
 	return sliceView;
+}
+
+void VisualizationContainer::SetImageData(vtkImageData* imageData) {	
+	regions->RemoveAll();
+	qtWindow->UpdateRegionTable(regions);
+	
+	data = imageData;
+
+	sliceView->Reset();
+	volumeView->Reset();
+
+	sliceView->SetImageData(data);	
 }
 
 void VisualizationContainer::UpdateLabels() {
