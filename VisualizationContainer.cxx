@@ -126,7 +126,7 @@ VisualizationContainer::~VisualizationContainer() {
 	delete regions;
 }
 
-bool VisualizationContainer::OpenImageFile(const std::string& fileName) {
+VisualizationContainer::FileErrorCode VisualizationContainer::OpenImageFile(const std::string& fileName) {
 	// Get the file extension
 	std::string extension = fileName.substr(fileName.find_last_of(".") + 1);
 
@@ -138,7 +138,7 @@ bool VisualizationContainer::OpenImageFile(const std::string& fileName) {
 
 		SetImageData(reader->GetOutput());
 
-		return true;
+		return Success;
 	}
 	else if (extension == "nii") {
 		vtkSmartPointer<vtkNIFTIImageReader> reader = vtkSmartPointer<vtkNIFTIImageReader>::New();
@@ -147,13 +147,13 @@ bool VisualizationContainer::OpenImageFile(const std::string& fileName) {
 
 		SetImageData(reader->GetOutput());
 
-		return true;
+		return Success;
 	}
 
-	return false;
+	return WrongFileType;
 }
 
-bool VisualizationContainer::OpenImageStack(const std::vector<std::string>& fileNames) {
+VisualizationContainer::FileErrorCode VisualizationContainer::OpenImageStack(const std::vector<std::string>& fileNames) {
 	// Get the file extension
 	std::string extension = fileNames[0].substr(fileNames[0].find_last_of(".") + 1);
 
@@ -173,13 +173,15 @@ bool VisualizationContainer::OpenImageStack(const std::vector<std::string>& file
 
 		SetImageData(reader->GetOutput());
 
-		return true;
+		return Success;
 	}
 	
-	return false;
+	return WrongFileType;
 }
 
-bool VisualizationContainer::OpenSegmentationFile(const std::string& fileName) {
+VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationFile(const std::string& fileName) {
+	if (data == nullptr) return NoImageData;
+
 	// Get the file extension
 	std::string extension = fileName.substr(fileName.find_last_of(".") + 1);
 
@@ -194,7 +196,10 @@ bool VisualizationContainer::OpenSegmentationFile(const std::string& fileName) {
 
 			qtWindow->UpdateRegionTable(regions);
 
-			return true;
+			return Success;
+		}
+		else {
+			return VolumeMismatch;
 		}
 	}
 	else if (extension == "nii") {
@@ -207,15 +212,18 @@ bool VisualizationContainer::OpenSegmentationFile(const std::string& fileName) {
 
 			qtWindow->UpdateRegionTable(regions);
 
-			return true;
+			return Success;
+		}
+		else {
+			return VolumeMismatch;
 		}
 	}
 
-	return false;
+	return WrongFileType;
 }
 
-bool VisualizationContainer::OpenSegmentationStack(const std::vector<std::string>& fileNames) {
-	if (fileNames.size() == 0) return false;
+VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationStack(const std::vector<std::string>& fileNames) {
+	if (data == nullptr) return NoImageData;
 
 	// Get the file extension
 	std::string extension = fileNames[0].substr(fileNames[0].find_last_of(".") + 1);
@@ -239,14 +247,17 @@ bool VisualizationContainer::OpenSegmentationStack(const std::vector<std::string
 
 			qtWindow->UpdateRegionTable(regions);
 
-			return true;
+			return Success;
+		}
+		else {
+			return VolumeMismatch;
 		}
 	}
 
-	return false;
+	return WrongFileType;
 }
 
-bool VisualizationContainer::SaveSegmentationData(const std::string& fileName) {
+VisualizationContainer::FileErrorCode VisualizationContainer::SaveSegmentationData(const std::string& fileName) {
 	std::string extension = fileName.substr(fileName.find_last_of(".") + 1);
 
 	if (extension == "vti") {
@@ -272,12 +283,12 @@ bool VisualizationContainer::SaveSegmentationData(const std::string& fileName) {
 		writer->Update();
 	}
 	else {
-		return false;
+		return WrongFileType;
 	}
 
 	SaveRegionMetadata(fileName + ".json");
 	
-	return true;
+	return Success;
 }
 
 void VisualizationContainer::SegmentVolume() {

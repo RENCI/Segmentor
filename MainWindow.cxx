@@ -82,10 +82,23 @@ void MainWindow::on_actionOpen_Image_File_triggered() {
 	SetDefaultDirectory(defaultImageDirectoryKey, fileName);
 
 	// Load data
-	if (!visualizationContainer->OpenImageFile(fileName.toStdString())) {
+	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->OpenImageFile(fileName.toStdString());
+
+	if (errorCode != VisualizationContainer::Success) {
 		QMessageBox errorMessage;
+		errorMessage.setIcon(QMessageBox::Warning);
 		errorMessage.setText("Could not open file.");
-		errorMessage.exec();
+
+		switch (errorCode) {
+		case VisualizationContainer::WrongFileType:
+			errorMessage.setInformativeText("Wrong file type.");
+			errorMessage.exec();
+			break;
+
+		default:
+			errorMessage.setInformativeText("Unknown error.");
+			errorMessage.exec();
+		}
 	}
 }
 
@@ -108,6 +121,16 @@ void MainWindow::on_actionOpen_Image_Stack_triggered() {
 	QDir directory = fileInfo.absoluteDir();
 	QFileInfoList fileInfoList = fileInfo.absoluteDir().entryInfoList(QDir::Files, QDir::Name);
 
+	// Check for files
+	if (fileInfoList.length() == 0) {
+		QMessageBox errorMessage;
+		errorMessage.setIcon(QMessageBox::Warning);
+		errorMessage.setText("Could not open files.");
+		errorMessage.setInformativeText("No files present.");
+		errorMessage.exec();
+		return;
+	}
+
 	// Get file names
 	std::vector<std::string> fileNames;
 
@@ -116,10 +139,23 @@ void MainWindow::on_actionOpen_Image_Stack_triggered() {
 	}
 
 	// Load data
-	if (!visualizationContainer->OpenImageStack(fileNames)) {
+	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->OpenImageFile(fileName.toStdString());
+
+	if (errorCode != VisualizationContainer::Success) {
 		QMessageBox errorMessage;
+		errorMessage.setIcon(QMessageBox::Warning);
 		errorMessage.setText("Could not open files.");
-		errorMessage.exec();
+
+		switch (errorCode) {
+		case VisualizationContainer::WrongFileType:
+			errorMessage.setInformativeText("Wrong file type.");
+			errorMessage.exec();
+			break;
+
+		default:
+			errorMessage.setInformativeText("Unknown error.");
+			errorMessage.exec();
+		}
 	}
 }
 
@@ -138,10 +174,33 @@ void MainWindow::on_actionOpen_Segmentation_File_triggered() {
 	SetDefaultDirectory(defaultSegmentationDirectoryKey, fileName);
 
 	// Load segmentation data
-	if (!visualizationContainer->OpenSegmentationFile(fileName.toStdString())) {
+	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->OpenSegmentationFile(fileName.toStdString());
+
+	if (errorCode != VisualizationContainer::Success) {
 		QMessageBox errorMessage;
+		errorMessage.setIcon(QMessageBox::Warning);
 		errorMessage.setText("Could not open file.");
-		errorMessage.exec();
+
+		switch (errorCode) {
+		case VisualizationContainer::WrongFileType:
+			errorMessage.setInformativeText("Wrong file type.");
+			errorMessage.exec();
+			break;
+
+		case VisualizationContainer::NoImageData:
+			errorMessage.setInformativeText("Load image data first.");
+			errorMessage.exec();
+			break;
+
+		case VisualizationContainer::VolumeMismatch:
+			errorMessage.setInformativeText("Segmentation data volume does not match loaded image data volume.");
+			errorMessage.exec();
+			break;
+
+		default:
+			errorMessage.setInformativeText("Unknown error.");
+			errorMessage.exec();
+		}
 	}
 }
 
@@ -164,6 +223,16 @@ void MainWindow::on_actionOpen_Segmentation_Stack_triggered() {
 	QDir directory = fileInfo.absoluteDir();
 	QFileInfoList fileInfoList = fileInfo.absoluteDir().entryInfoList(QDir::Files, QDir::Name);
 
+	// Check for files
+	if (fileInfoList.length() == 0) {
+		QMessageBox errorMessage;
+		errorMessage.setIcon(QMessageBox::Warning);
+		errorMessage.setText("Could not open files.");
+		errorMessage.setInformativeText("No files present.");
+		errorMessage.exec();
+		return;
+	}
+
 	// Get file names
 	std::vector<std::string> fileNames;
 
@@ -172,10 +241,33 @@ void MainWindow::on_actionOpen_Segmentation_Stack_triggered() {
 	}
 
 	// Load segmentation data
-	if (!visualizationContainer->OpenSegmentationStack(fileNames)) {
+	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->OpenSegmentationStack(fileNames);
+
+	if (errorCode != VisualizationContainer::Success) {
 		QMessageBox errorMessage;
+		errorMessage.setIcon(QMessageBox::Warning);
 		errorMessage.setText("Could not open files.");
-		errorMessage.exec();
+
+		switch (errorCode) {
+		case VisualizationContainer::WrongFileType:
+			errorMessage.setInformativeText("Wrong file type.");
+			errorMessage.exec();
+			break;
+
+		case VisualizationContainer::NoImageData:
+			errorMessage.setInformativeText("Load image data first.");
+			errorMessage.exec();
+			break;
+
+		case VisualizationContainer::VolumeMismatch:
+			errorMessage.setInformativeText("Segmentation data volume does not match loaded image data volume.");
+			errorMessage.exec();
+			break;
+
+		default:
+			errorMessage.setInformativeText("Unknown error.");
+			errorMessage.exec();
+		}
 	}
 }
 
@@ -194,10 +286,23 @@ void MainWindow::on_actionSave_Segmentation_Data_triggered() {
 	SetDefaultDirectory(defaultSegmentationDirectoryKey, fileName);
 
 	// Save segmentation data
-	if (!visualizationContainer->SaveSegmentationData(fileName.toStdString())) {
+	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->SaveSegmentationData(fileName.toStdString());
+
+	if (errorCode != VisualizationContainer::Success) {
 		QMessageBox errorMessage;
-		errorMessage.setText("Could not save file.");
-		errorMessage.exec();
+		errorMessage.setIcon(QMessageBox::Warning);
+		errorMessage.setText("Could not save data.");
+
+		switch (errorCode) {
+		case VisualizationContainer::WrongFileType:
+			errorMessage.setInformativeText("Wrong file type.");
+			errorMessage.exec();
+			break;
+
+		default:
+			errorMessage.setInformativeText("Unknown error.");
+			errorMessage.exec();
+		}
 	}
 }
 

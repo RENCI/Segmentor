@@ -25,14 +25,21 @@ public:
 		MainWindow* mainWindow);
 	~VisualizationContainer();
 
-	bool OpenImageFile(const std::string& fileName);
-	bool OpenImageStack(const std::vector<std::string>& fileNames);
+	enum FileErrorCode {
+		Success = 1,
+		WrongFileType,
+		NoImageData,
+		VolumeMismatch
+	};
 
-	bool OpenSegmentationFile(const std::string& fileName);
-	bool OpenSegmentationStack(const std::vector<std::string>& fileNames);
+	FileErrorCode OpenImageFile(const std::string& fileName);
+	FileErrorCode OpenImageStack(const std::vector<std::string>& fileNames);
+
+	FileErrorCode OpenSegmentationFile(const std::string& fileName);
+	FileErrorCode OpenSegmentationStack(const std::vector<std::string>& fileNames);
 
 	void SegmentVolume();
-	bool SaveSegmentationData(const std::string& fileName);
+	FileErrorCode SaveSegmentationData(const std::string& fileName);
 
 	void ToggleInteractionMode();
 
