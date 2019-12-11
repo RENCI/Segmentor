@@ -319,21 +319,19 @@ void VisualizationContainer::SegmentVolume() {
 	threshold->ReplaceOutOn();
 	threshold->SetOutputScalarTypeToUnsignedChar();
 	threshold->SetInputDataObject(data);
-
-	/*
+	
 	vtkSmartPointer<vtkImageOpenClose3D> openClose = vtkSmartPointer<vtkImageOpenClose3D>::New();
-	openClose->SetKernelSize(1, 1, 1);
+	openClose->SetKernelSize(3, 3, 3);
 	openClose->SetOpenValue(0);
 	openClose->SetCloseValue(255);
 	openClose->SetInputConnection(threshold->GetOutputPort());
-	*/
 
 	// Generate labels
 	vtkSmartPointer<vtkImageConnectivityFilter> connectivity = vtkSmartPointer<vtkImageConnectivityFilter>::New();
 	connectivity->SetScalarRange(255, 255);
 	connectivity->SetLabelScalarTypeToUnsignedShort();
 	connectivity->SetSizeRange(5, VTK_ID_MAX);
-	connectivity->SetInputConnection(threshold->GetOutputPort());
+	connectivity->SetInputConnection(openClose->GetOutputPort());
 	connectivity->Update();
 
 	labels = connectivity->GetOutput();
