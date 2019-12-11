@@ -296,23 +296,26 @@ void VisualizationContainer::SegmentVolume() {
 	threshold->SetOutputScalarTypeToUnsignedChar();
 	threshold->SetInputDataObject(data);
 
+	/*
 	vtkSmartPointer<vtkImageOpenClose3D> openClose = vtkSmartPointer<vtkImageOpenClose3D>::New();
-	openClose->SetKernelSize(10, 10, 10);
+	openClose->SetKernelSize(1, 1, 1);
 	openClose->SetOpenValue(0);
 	openClose->SetCloseValue(255);
 	openClose->SetInputConnection(threshold->GetOutputPort());
+	*/
 
 	// Generate labels
 	vtkSmartPointer<vtkImageConnectivityFilter> connectivity = vtkSmartPointer<vtkImageConnectivityFilter>::New();
 	connectivity->SetScalarRange(255, 255);
 	connectivity->SetLabelScalarTypeToUnsignedShort();
-	connectivity->SetInputConnection(openClose->GetOutputPort());
+	connectivity->SetSizeRange(5, VTK_ID_MAX);
+	connectivity->SetInputConnection(threshold->GetOutputPort());
 	connectivity->Update();
 
 	labels = connectivity->GetOutput();
-
+	
 	UpdateLabels();
-
+	
 	qtWindow->UpdateRegionTable(regions);
 
 	Render();
