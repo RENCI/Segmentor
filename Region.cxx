@@ -46,6 +46,7 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 	// XXX: USE GENERATE REGION EXTENTS FROM vktImageConnectivityFilter AND PASS THIS IN
 	//		ALSO REGION SIZE FROM FILTER
 
+	int numVoxels = 0;
 	for (int i = 0; i < numPoints; i++) {
 		if (scalars[i] == label) {
 			double* point = data->GetPoint(i);
@@ -56,7 +57,16 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 			if (point[1] > extent[3]) extent[3] = point[1];
 			if (point[2] < extent[4]) extent[4] = point[2];
 			if (point[2] > extent[5]) extent[5] = point[2];
+
+			numVoxels++;
 		}
+	}
+
+	// Fix extent if no voxels with this label
+	if (numVoxels == 0) {
+		extent[0] = extent[1] = dataExtent[0];
+		extent[2] = extent[3] = dataExtent[2];
+		extent[4] = extent[5] = dataExtent[4];
 	}
 
 	voi = vtkSmartPointer<vtkExtractVOI>::New();

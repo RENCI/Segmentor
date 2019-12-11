@@ -764,7 +764,14 @@ void VisualizationContainer::ExtractRegions() {
 	regions->RemoveAll();
 
 	for (int label = 1; label <= maxLabel; label++) {
-		regions->Add(new Region(label, labelColors->GetTableValue(label), labels));
+		Region* region = new Region(label, labelColors->GetTableValue(label), labels);
+
+		if (region->GetNumVoxels() > 0) {
+			regions->Add(new Region(label, labelColors->GetTableValue(label), labels));
+		}		
+		else {
+			delete region;
+		}
 	}
 }
 
