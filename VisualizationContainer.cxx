@@ -8,6 +8,7 @@
 #include <vtkImageOpenClose3D.h>
 #include <vtkImageThreshold.h>
 #include <vtkIdTypeArray.h>
+#include <vtkImageCast.h>
 #include <vtkIntArray.h>
 #include <vtkLookupTable.h>
 #include <vtkNIFTIImageReader.h>
@@ -189,9 +190,13 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationFi
 	if (extension == "vti") {
 		vtkSmartPointer<vtkXMLImageDataReader> reader = vtkSmartPointer<vtkXMLImageDataReader>::New();
 		reader->SetFileName(fileName.c_str());
-		reader->Update();
 
-		if (SetLabelData(reader->GetOutput())) {
+		vtkSmartPointer<vtkImageCast> cast = vtkSmartPointer<vtkImageCast>::New();
+		cast->SetOutputScalarTypeToUnsignedShort();
+		cast->SetInputConnection(reader->GetOutputPort());
+		cast->Update();
+
+		if (SetLabelData(cast->GetOutput())) {
 			LoadRegionMetadata(fileName + ".json");
 
 			qtWindow->updateRegions(regions);
@@ -205,9 +210,13 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationFi
 	else if (extension == "nii") {
 		vtkSmartPointer<vtkNIFTIImageReader> reader = vtkSmartPointer<vtkNIFTIImageReader>::New();
 		reader->SetFileName(fileName.c_str());
-		reader->Update();
 
-		if (SetLabelData(reader->GetOutput())) {
+		vtkSmartPointer<vtkImageCast> cast = vtkSmartPointer<vtkImageCast>::New();
+		cast->SetOutputScalarTypeToUnsignedShort();
+		cast->SetInputConnection(reader->GetOutputPort());
+		cast->Update();
+
+		if (SetLabelData(cast->GetOutput())) {
 			LoadRegionMetadata(fileName + ".json");
 
 			qtWindow->updateRegions(regions);
@@ -240,9 +249,13 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationSt
 	if (extension == "tif" || extension == "tiff") {
 		vtkSmartPointer<vtkTIFFReader> reader = vtkSmartPointer<vtkTIFFReader>::New();
 		reader->SetFileNames(names);
-		reader->Update();
 
-		if (SetLabelData(reader->GetOutput())) {
+		vtkSmartPointer<vtkImageCast> cast = vtkSmartPointer<vtkImageCast>::New();
+		cast->SetOutputScalarTypeToUnsignedShort();
+		cast->SetInputConnection(reader->GetOutputPort());
+		cast->Update();
+
+		if (SetLabelData(cast->GetOutput())) {
 			LoadRegionMetadata(fileNames[0] + ".json");
 
 			qtWindow->updateRegions(regions);
