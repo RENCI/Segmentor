@@ -124,6 +124,9 @@ void VolumeView::SetRegions(vtkImageData* data, RegionCollection* newRegions) {
 }
 
 void VolumeView::AddRegion(Region* region) {
+	region->GetSurface()->SetSmoothSurface(smoothSurfaces);
+	region->GetSurface()->SetSmoothShading(smoothShading);
+
 	renderer->AddActor(region->GetSurface()->GetActor());
 }
 
