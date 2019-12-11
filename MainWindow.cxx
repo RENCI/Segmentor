@@ -6,10 +6,7 @@
 #include <QIcon>
 #include <QStyle>
 #include <QPushButton>
-
-#include <QIODevice>
-#include <QJsonDocument>
-#include <QJsonObject>
+#include <QToolBar>
 
 #include <vtkGenericOpenGLRenderWindow.h>
 
@@ -17,6 +14,7 @@
 #include "RegionCollection.h"
 #include "RegionTable.h"
 #include "RegionMetadataIO.h"
+#include "InteractionEnums.h"
 
 #include "vtkCallbackCommand.h"
 #include "vtkSmartPointer.h"
@@ -30,6 +28,9 @@ MainWindow::MainWindow() {
 	// Default directory keys
 	defaultImageDirectoryKey = "default_image_directory";
 	defaultSegmentationDirectoryKey = "default_segmentation_directory";
+
+	// Create tool bar
+	CreateToolBar();
 
 	// Create render windows
 	vtkNew<vtkGenericOpenGLRenderWindow> renderWindowLeft;
@@ -319,6 +320,15 @@ void MainWindow::on_actionExit_triggered() {
 	qApp->exit();
 }
 
+void MainWindow::on_actionNavigation() {
+
+	visualizationContainer->SetInteractionMode(NavigationMode);
+}
+
+void MainWindow::on_actionEdit() {
+	visualizationContainer->SetInteractionMode(EditMode);
+}
+
 void MainWindow::on_regionDone(int label, bool done) {
 	visualizationContainer->SetRegionDone((unsigned short)label, done);
 }
@@ -354,4 +364,29 @@ void MainWindow::SetDefaultDirectory(QString key, QString fileName) {
 
 	QSettings settings;
 	settings.setValue(key, fileInfo.absoluteDir().absolutePath());
+}
+
+void MainWindow::CreateToolBar() {
+	QToolBar* toolBar = new QToolBar();
+	toolBar->setFloatable(true);
+	toolBar->setMovable(true);
+	toolBar->setOrientation(Qt::Vertical);
+
+	QActionGroup* interactionModeGroup = new QActionGroup(this);
+	interactionModeGroup->setExclusive(true);
+
+	QAction* actionNavigation = new QAction("N", interactionModeGroup);
+	actionNavigation->setCheckable(true);
+	actionNavigation->setChecked(true);
+
+	QAction* actionEdit = new QAction("E", interactionModeGroup);
+	actionNavigation->setCheckable(false);
+
+	toolBar->addAction(actionNavigation);
+	toolBar->addAction(actionEdit);
+
+	QObject::connect(actionNavigation, &QAction::triggered, this, &MainWindow::on_actionNavigation);
+	QObject::connect(actionEdit, &QAction::triggered, this, &MainWindow::on_actionEdit);
+
+	toolBarWidget->layout()->addWidget(toolBar);
 }

@@ -17,6 +17,8 @@ class SliceView;
 class Region;
 class RegionCollection;
 
+enum InteractionMode;
+
 class VisualizationContainer {
 public:
 	VisualizationContainer(
@@ -41,6 +43,7 @@ public:
 	void SegmentVolume();
 	FileErrorCode SaveSegmentationData(const std::string& fileName);
 
+	void SetInteractionMode(InteractionMode mode);
 	void ToggleInteractionMode();
 
 	void PickLabel(int x, int y, int z);
@@ -84,7 +87,7 @@ protected:
 	SliceView *sliceView;
 
 	// Current interaction mode
-	enum InteractionMode interactionMode;
+	InteractionMode interactionMode;
 
 	void SetImageData(vtkImageData* imageData);
 	bool SetLabelData(vtkImageData* labelData);

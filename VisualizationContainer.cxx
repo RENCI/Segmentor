@@ -343,13 +343,17 @@ void VisualizationContainer::SegmentVolume() {
 	Render();
 }
 
-void VisualizationContainer::ToggleInteractionMode() {
-	interactionMode = interactionMode == NavigationMode ? EditMode : NavigationMode;
+void VisualizationContainer::SetInteractionMode(InteractionMode mode) {
+	interactionMode = mode;
 
 	sliceView->SetInteractionMode(interactionMode);
 	volumeView->SetInteractionMode(interactionMode);
 
 	Render();
+}
+
+void VisualizationContainer::ToggleInteractionMode() {
+	SetInteractionMode(interactionMode == NavigationMode ? EditMode : NavigationMode);
 }
 
 void VisualizationContainer::PickLabel(int x, int y, int z) {

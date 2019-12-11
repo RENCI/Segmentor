@@ -21,6 +21,8 @@ class Region;
 class RegionSurface;
 class RegionCollection;
 
+enum InteractionMode;
+
 class VolumeView {
 public:
   VolumeView(vtkRenderWindowInteractor* interactor);
@@ -34,7 +36,7 @@ public:
   void SetShowProbe(bool visibility);
   void SetProbePosition(double x, double y, double z);
 
-  void SetInteractionMode(enum InteractionMode mode);
+  void SetInteractionMode(InteractionMode mode);
 
   void SetCurrentRegion(Region* region);
 
