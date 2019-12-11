@@ -9,17 +9,19 @@
 #include <string>
 
 class VisualizationContainer;
+class Region;
 class RegionCollection;
 class RegionTable;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
-  Q_OBJECT
+	Q_OBJECT
 public:
 	MainWindow();
 	virtual ~MainWindow();
 
-	void UpdateRegionTable(RegionCollection* regions);
-	void HighlightRegionTable(unsigned short label);
+	void updateRegions(RegionCollection* regions);
+	void updateRegion(Region* region);
+	void highlightRegion(unsigned short label);
 
 public slots:
 	// Use Qt's auto-connect magic to tie GUI widgets to slots,

@@ -3,8 +3,7 @@
 
 #include <QTableWidget>
 
-class QSignalMapper;
-
+class Region;
 class RegionCollection;
 
 class RegionTable : public QTableWidget {
@@ -13,10 +12,12 @@ public:
 	RegionTable(QWidget* parent = 0);
 
 	void update(RegionCollection* regions);
+	void update(Region* region);
 	void highlight(unsigned short label);
 
 public slots:
 	void on_sort();
+	void on_removeRegion(int label);
 
 signals:
 	void regionDone(int label, bool done);

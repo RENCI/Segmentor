@@ -27,6 +27,7 @@ RegionTable::RegionTable(QWidget* parent)
 	setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
 	QObject::connect(horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &RegionTable::on_sort);
+	QObject::connect(this, &RegionTable::removeRegion, this, &RegionTable::on_removeRegion);
 }
 
 void RegionTable::update(RegionCollection* regions) {
@@ -133,6 +134,32 @@ void RegionTable::update(RegionCollection* regions) {
 	highlight(0);
 }
 
+void RegionTable::update(Region* region) {
+	QStyle* style = QApplication::style();
+	QIcon modifiedIcon = style->standardIcon(QStyle::SP_MessageBoxWarning);
+
+	QString labelString = QString::number(region->GetLabel());
+
+	for (int i = 0; i < rowCount(); i++) {
+		QTableWidgetItem* ti = item(i, 0);
+
+		if (ti->text() == labelString) {
+			// Size
+			item(i, 2)->setData(0, region->GetNumVoxels());
+
+			// Modified
+			item(i, 3)->setData(0, region->GetModified());
+			((QPushButton*)cellWidget(i, 3))->setIcon(region->GetModified() ? modifiedIcon : QIcon());
+
+			// Done
+			item(i, 4)->setData(0, region->GetDone());
+			((QCheckBox*)cellWidget(i, 4))->setChecked(region->GetDone());
+
+			break;
+		}
+	}
+}
+
 void RegionTable::highlight(unsigned short label) {
 	QString labelString = QString::number(label);
 
@@ -154,4 +181,18 @@ void RegionTable::highlight(unsigned short label) {
 
 void RegionTable::on_sort() {
 	resizeColumnsToContents();
+}
+
+void RegionTable::on_removeRegion(int label) {
+	QString labelString = QString::number(label);
+
+	for (int i = 0; i < rowCount(); i++) {
+		QTableWidgetItem* ti = item(i, 0);
+
+		if (ti->text() == labelString) {
+			removeRow(i);
+
+			break;
+		}
+	}
 }

@@ -59,11 +59,15 @@ MainWindow::~MainWindow() {
 	qApp->exit();
 }
 
-void MainWindow::UpdateRegionTable(RegionCollection* regions) {
+void MainWindow::updateRegions(RegionCollection* regions) {
 	regionTable->update(regions);
 }
 
-void MainWindow::HighlightRegionTable(unsigned short label) {
+void MainWindow::updateRegion(Region* region) {
+	regionTable->update(region);
+}
+
+void MainWindow::highlightRegion(unsigned short label) {
 	regionTable->highlight(label);
 }
 

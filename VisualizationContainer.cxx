@@ -194,7 +194,7 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationFi
 		if (SetLabelData(reader->GetOutput())) {
 			LoadRegionMetadata(fileName + ".json");
 
-			qtWindow->UpdateRegionTable(regions);
+			qtWindow->updateRegions(regions);
 
 			return Success;
 		}
@@ -210,7 +210,7 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationFi
 		if (SetLabelData(reader->GetOutput())) {
 			LoadRegionMetadata(fileName + ".json");
 
-			qtWindow->UpdateRegionTable(regions);
+			qtWindow->updateRegions(regions);
 
 			return Success;
 		}
@@ -245,7 +245,7 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationSt
 		if (SetLabelData(reader->GetOutput())) {
 			LoadRegionMetadata(fileNames[0] + ".json");
 
-			qtWindow->UpdateRegionTable(regions);
+			qtWindow->updateRegions(regions);
 
 			return Success;
 		}
@@ -327,7 +327,7 @@ void VisualizationContainer::SegmentVolume() {
 	
 	UpdateLabels();
 	
-	qtWindow->UpdateRegionTable(regions);
+	qtWindow->updateRegions(regions);
 
 	Render();
 }
@@ -355,7 +355,7 @@ void VisualizationContainer::Paint(int x, int y, int z) {
 	SetLabel(x, y, z, currentRegion->GetLabel());
 
 	currentRegion->SetModified(true);
-	qtWindow->UpdateRegionTable(regions);
+	qtWindow->updateRegion(currentRegion);
 }
 
 void VisualizationContainer::Erase(int x, int y, int z) {	
@@ -366,7 +366,7 @@ void VisualizationContainer::Erase(int x, int y, int z) {
 	SetLabel(x, y, z, 0);
 
 	currentRegion->SetModified(true);
-	qtWindow->UpdateRegionTable(regions);
+	qtWindow->updateRegion(currentRegion);
 }
 
 void VisualizationContainer::PickPointLabel(double x, double y, double z) {
@@ -404,7 +404,7 @@ void VisualizationContainer::SetCurrentRegion(Region* region) {
 	volumeView->SetCurrentRegion(currentRegion);
 	sliceView->SetCurrentRegion(currentRegion); 
 
-	qtWindow->HighlightRegionTable(region ? region->GetLabel() : 0);
+	qtWindow->highlightRegion(region ? region->GetLabel() : 0);
 }
 
 void VisualizationContainer::RelabelCurrentRegion() {
@@ -474,7 +474,7 @@ void VisualizationContainer::RelabelCurrentRegion() {
 			}			
 		}
 
-		qtWindow->UpdateRegionTable(regions);
+		qtWindow->updateRegions(regions);
 
 		labels->Modified();
 		Render();
@@ -601,7 +601,7 @@ void VisualizationContainer::SetRegionDone(unsigned short label, bool done) {
 		UpdateColors(label);
 	}
 
-	qtWindow->UpdateRegionTable(regions);
+	qtWindow->updateRegion(region);
 
 	Render();
 }
@@ -612,7 +612,6 @@ void VisualizationContainer::RemoveRegion(unsigned short label) {
 	if (region == currentRegion) SetCurrentRegion(nullptr);
 
 	regions->Remove(label);
-	qtWindow->UpdateRegionTable(regions);
 
 	Render();
 }
@@ -632,7 +631,7 @@ SliceView* VisualizationContainer::GetSliceView() {
 
 void VisualizationContainer::SetImageData(vtkImageData* imageData) {	
 	regions->RemoveAll();
-	qtWindow->UpdateRegionTable(regions);
+	qtWindow->updateRegions(regions);
 	
 	data = imageData;
 
