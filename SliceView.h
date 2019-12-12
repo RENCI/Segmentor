@@ -40,11 +40,15 @@ public:
 
 	void SetCurrentRegion(Region* region);
 	
+	bool GetShowLabelSlice();
+	void ShowLabelSlice(bool show);
 	void ToggleLabelSlice();
 	
+	bool GetShowVoxelOutlines();
 	void ShowVoxelOutlines(bool show);
 	void ToggleVoxelOutlines();
 
+	bool GetShowRegionOutlines();
 	void ShowRegionOutlines(bool show);
 	void ToggleRegionOutlines();
 

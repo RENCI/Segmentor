@@ -43,6 +43,7 @@ public:
 	void SegmentVolume();
 	FileErrorCode SaveSegmentationData(const std::string& fileName);
 
+	InteractionMode GetInteractionMode();
 	void SetInteractionMode(InteractionMode mode);
 	void ToggleInteractionMode();
 

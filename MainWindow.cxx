@@ -15,6 +15,8 @@
 #include "RegionTable.h"
 #include "RegionMetadataIO.h"
 #include "InteractionEnums.h"
+#include "SliceView.h"
+#include "VolumeView.h"
 
 #include "vtkCallbackCommand.h"
 #include "vtkSmartPointer.h"
@@ -29,9 +31,6 @@ MainWindow::MainWindow() {
 	defaultImageDirectoryKey = "default_image_directory";
 	defaultSegmentationDirectoryKey = "default_segmentation_directory";
 
-	// Create tool bar
-	CreateToolBar();
-
 	// Create render windows
 	vtkNew<vtkGenericOpenGLRenderWindow> renderWindowLeft;
 	qvtkWidgetLeft->SetRenderWindow(renderWindowLeft);
@@ -41,6 +40,9 @@ MainWindow::MainWindow() {
 
 	// Create visualization container
 	visualizationContainer = new VisualizationContainer(qvtkWidgetLeft->GetInteractor(), qvtkWidgetRight->GetInteractor(), this);
+
+	// Create tool bar
+	CreateToolBar();
 
 	// Create region table
 	regionTable = new RegionTable();
@@ -321,12 +323,31 @@ void MainWindow::on_actionExit_triggered() {
 }
 
 void MainWindow::on_actionNavigation() {
-
 	visualizationContainer->SetInteractionMode(NavigationMode);
 }
 
 void MainWindow::on_actionEdit() {
 	visualizationContainer->SetInteractionMode(EditMode);
+}
+
+void MainWindow::on_actionOverlay(bool checked) {
+	visualizationContainer->GetSliceView()->ShowLabelSlice(checked);
+}
+
+void MainWindow::on_actionVoxels(bool checked) {
+	visualizationContainer->GetSliceView()->ShowVoxelOutlines(checked);
+}
+
+void MainWindow::on_actionOutline(bool checked) {
+	visualizationContainer->GetSliceView()->ShowRegionOutlines(checked);
+}
+
+void MainWindow::on_actionSmoothNormals(bool checked) {
+	visualizationContainer->GetVolumeView()->SetSmoothShading(checked);
+}
+
+void MainWindow::on_actionSmoothSurfaces(bool checked) {
+	visualizationContainer->GetVolumeView()->SetSmoothSurfaces(checked);
 }
 
 void MainWindow::on_regionDone(int label, bool done) {
@@ -377,16 +398,48 @@ void MainWindow::CreateToolBar() {
 
 	QAction* actionNavigation = new QAction("N", interactionModeGroup);
 	actionNavigation->setCheckable(true);
-	actionNavigation->setChecked(true);
+	actionNavigation->setChecked(visualizationContainer->GetInteractionMode() == NavigationMode);
 
 	QAction* actionEdit = new QAction("E", interactionModeGroup);
-	actionNavigation->setCheckable(false);
+	actionEdit->setCheckable(true);
+
+	QAction* actionOverlay = new QAction(QIcon(":/icons/icon_overlay.svg"), "Show overlay", this);
+	actionOverlay->setCheckable(true);
+	actionOverlay->setChecked(visualizationContainer->GetSliceView()->GetShowLabelSlice());
+
+	QAction* actionVoxels = new QAction(QIcon(":/icons/icon_voxels.svg"), "Show voxels", this);
+	actionVoxels->setCheckable(true);
+	actionVoxels->setChecked(visualizationContainer->GetSliceView()->GetShowVoxelOutlines());
+
+	QAction* actionOutline = new QAction(QIcon(":/icons/icon_outline.svg"), "Show outlines", this);
+	actionOutline->setCheckable(true);
+	actionOutline->setChecked(visualizationContainer->GetSliceView()->GetShowRegionOutlines());
+
+	QAction* actionSmoothNormals = new QAction(QIcon(":/icons/icon_smooth_normals.svg"), "Smooth normals", this);
+	actionSmoothNormals->setCheckable(true);
+	actionSmoothNormals->setChecked(visualizationContainer->GetVolumeView()->GetSmoothShading());
+
+	QAction* actionSmoothSurfaces = new QAction(QIcon(":/icons/icon_smooth_surface.svg"), "Smooth surfaces", this);
+	actionSmoothSurfaces->setCheckable(true);
+	actionSmoothSurfaces->setChecked(visualizationContainer->GetVolumeView()->GetSmoothSurfaces());
 
 	toolBar->addAction(actionNavigation);
 	toolBar->addAction(actionEdit);
+	toolBar->addSeparator();
+	toolBar->addAction(actionOverlay);
+	toolBar->addAction(actionVoxels);
+	toolBar->addAction(actionOutline);
+	toolBar->addSeparator();
+	toolBar->addAction(actionSmoothNormals);
+	toolBar->addAction(actionSmoothSurfaces);
 
 	QObject::connect(actionNavigation, &QAction::triggered, this, &MainWindow::on_actionNavigation);
 	QObject::connect(actionEdit, &QAction::triggered, this, &MainWindow::on_actionEdit);
+	QObject::connect(actionOverlay, &QAction::triggered, this, &MainWindow::on_actionOverlay);
+	QObject::connect(actionVoxels, &QAction::triggered, this, &MainWindow::on_actionVoxels);
+	QObject::connect(actionOutline, &QAction::triggered, this, &MainWindow::on_actionOutline);
+	QObject::connect(actionSmoothNormals, &QAction::triggered, this, &MainWindow::on_actionSmoothNormals);
+	QObject::connect(actionSmoothSurfaces, &QAction::triggered, this, &MainWindow::on_actionSmoothSurfaces);
 
 	toolBarWidget->layout()->addWidget(toolBar);
 }

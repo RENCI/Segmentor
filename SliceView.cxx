@@ -53,7 +53,6 @@ SliceView::SliceView(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut)
 	plane = vtkSmartPointer<vtkPlane>::New();
 
 	labelSlice = vtkSmartPointer<vtkImageSlice>::New();
-	labelSlice->VisibilityOn();
 
 	// Rendering
 	renderer = vtkSmartPointer<vtkRenderer>::New();
@@ -122,8 +121,8 @@ void SliceView::Reset() {
 
 	SetCurrentRegion(nullptr);
 
-	slice->VisibilityOff();
-	labelSlice->VisibilityOff();
+	//slice->VisibilityOff();
+	//labelSlice->VisibilityOff();
 	probe->VisibilityOff();
 	sliceLocation->UpdateData(nullptr);
 	interactionModeLabel->VisibilityOff();
@@ -222,9 +221,22 @@ void SliceView::SetInteractionMode(enum InteractionMode mode) {
 	style->SetMode(mode);
 }
 
-void SliceView::ToggleLabelSlice() {
-	labelSlice->SetVisibility(!labelSlice->GetVisibility());
+bool SliceView::GetShowLabelSlice() {
+	return labelSlice->GetVisibility();
+}
+
+void SliceView::ShowLabelSlice(bool show) {
+	labelSlice->SetVisibility(show);
+
 	Render();
+}
+
+void SliceView::ToggleLabelSlice() {
+	ShowLabelSlice(!labelSlice->GetVisibility());
+}
+
+bool SliceView::GetShowVoxelOutlines() {
+	return showVoxelOutlines;
 }
 
 void SliceView::ShowVoxelOutlines(bool show) {
@@ -237,6 +249,10 @@ void SliceView::ShowVoxelOutlines(bool show) {
 
 void SliceView::ToggleVoxelOutlines() {
 	ShowVoxelOutlines(!showVoxelOutlines);
+}
+
+bool SliceView::GetShowRegionOutlines() {
+	return showRegionOutlines;
 }
 
 void SliceView::ShowRegionOutlines(bool show) {
@@ -334,9 +350,6 @@ void SliceView::CreateSlice() {
 	slice = vtkSmartPointer<vtkImageSlice>::New();
 	slice->SetMapper(mapper);
 	slice->SetProperty(property);
-	slice->VisibilityOff();
-
-	renderer->AddActor(slice);
 }
 
 void SliceView::UpdateSlice() {
@@ -348,7 +361,7 @@ void SliceView::UpdateSlice() {
 	slice->GetProperty()->SetColorWindow(maxValue - minValue);
 	slice->GetProperty()->SetColorLevel(minValue + (maxValue - minValue) / 2);
 
-	slice->VisibilityOn();
+	renderer->AddActor(slice);
 }
 
 void SliceView::CreateLabelSlice() {
@@ -372,15 +385,12 @@ void SliceView::CreateLabelSlice() {
 	// Slice
 	labelSlice->SetMapper(mapper);
 	labelSlice->SetProperty(property);
-	labelSlice->VisibilityOff();
-
-	labelSliceRenderer->AddActor(labelSlice);
 }
 
 void SliceView::UpdateLabelSlice() {
 	labelSlice->GetMapper()->SetInputDataObject(labels);
 
-	labelSlice->VisibilityOn();
+	labelSliceRenderer->AddActor(labelSlice);
 }
 
 void SliceView::FilterRegions() {

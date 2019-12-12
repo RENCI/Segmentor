@@ -343,6 +343,10 @@ void VisualizationContainer::SegmentVolume() {
 	Render();
 }
 
+InteractionMode VisualizationContainer::GetInteractionMode() {
+	return interactionMode;
+}
+
 void VisualizationContainer::SetInteractionMode(InteractionMode mode) {
 	interactionMode = mode;
 

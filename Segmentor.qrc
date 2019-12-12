@@ -1,0 +1,9 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>icons/icon_overlay.svg</file>
+    <file>icons/icon_voxels.svg</file>
+    <file>icons/icon_outline.svg</file>
+    <file>icons/icon_smooth_surface.svg</file>
+    <file>icons/icon_smooth_normals.svg</file>
+</qresource>
+</RCC>

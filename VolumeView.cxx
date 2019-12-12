@@ -159,6 +159,10 @@ void VolumeView::SetInteractionMode(enum InteractionMode mode) {
 	style->SetMode(mode);
 }
 
+bool VolumeView::GetSmoothSurfaces() {
+	return smoothSurfaces;
+}
+
 void VolumeView::SetSmoothSurfaces(bool smooth) {
 	smoothSurfaces = smooth;
 
@@ -171,6 +175,10 @@ void VolumeView::SetSmoothSurfaces(bool smooth) {
 
 void VolumeView::ToggleSmoothSurfaces() {
 	SetSmoothSurfaces(!smoothSurfaces);
+}
+
+bool VolumeView::GetSmoothShading() {
+	return smoothShading;
 }
 
 void VolumeView::SetSmoothShading(bool smooth) {

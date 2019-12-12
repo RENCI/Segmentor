@@ -40,9 +40,11 @@ public:
 
   void SetCurrentRegion(Region* region);
 
+  bool GetSmoothSurfaces();
   void SetSmoothSurfaces(bool smooth);
   void ToggleSmoothSurfaces();
 
+  bool GetSmoothShading();
   void SetSmoothShading(bool smooth);
   void ToggleSmoothShading();
 
