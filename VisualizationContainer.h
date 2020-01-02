@@ -63,6 +63,8 @@ public:
 	void GrowRegion(int x, int y, int z);
 	void RemoveRegion(unsigned short label);
 	void SetRegionDone(unsigned short label, bool done);
+	void HighlightRegion(unsigned short label);
+	void SelectRegion(unsigned short label);
 
 	void Render();
 

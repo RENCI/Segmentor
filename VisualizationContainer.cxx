@@ -423,7 +423,7 @@ void VisualizationContainer::SetCurrentRegion(Region* region) {
 	volumeView->SetCurrentRegion(currentRegion);
 	sliceView->SetCurrentRegion(currentRegion); 
 
-	qtWindow->highlightRegion(region ? region->GetLabel() : 0);
+	qtWindow->selectRegion(region ? region->GetLabel() : 0);
 }
 
 void VisualizationContainer::RelabelCurrentRegion() {
@@ -634,6 +634,24 @@ void VisualizationContainer::RemoveRegion(unsigned short label) {
 
 	Render();
 }
+
+void VisualizationContainer::HighlightRegion(unsigned short label) {
+	Region* region = regions->Get(label);
+
+//	std::cout << "HIGHLIGHT" << std::endl;
+
+	Render();
+}
+
+
+void VisualizationContainer::SelectRegion(unsigned short label) {
+	Region* region = regions->Get(label);
+
+	SetCurrentRegion(region);
+
+	Render();
+}
+
 
 void VisualizationContainer::Render() {
 	volumeView->Render();

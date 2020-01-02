@@ -51,6 +51,8 @@ MainWindow::MainWindow() {
 
 	QObject::connect(regionTable, &RegionTable::regionDone, this, &MainWindow::on_regionDone);
 	QObject::connect(regionTable, &RegionTable::removeRegion, this, &MainWindow::on_removeRegion);
+	QObject::connect(regionTable, &RegionTable::highlightRegion, this, &MainWindow::on_highlightRegion);
+	QObject::connect(regionTable, &RegionTable::selectRegion, this, &MainWindow::on_selectRegion);
 
 	qApp->installEventFilter(this);
 }
@@ -70,8 +72,8 @@ void MainWindow::updateRegion(Region* region) {
 	regionTable->update(region);
 }
 
-void MainWindow::highlightRegion(unsigned short label) {
-	regionTable->highlight(label);
+void MainWindow::selectRegion(unsigned short label) {
+	regionTable->selectRegionLabel(label);
 }
 
 void MainWindow::on_actionOpen_Image_File_triggered() {
@@ -353,8 +355,17 @@ void MainWindow::on_actionSmoothSurfaces(bool checked) {
 void MainWindow::on_regionDone(int label, bool done) {
 	visualizationContainer->SetRegionDone((unsigned short)label, done);
 }
+
 void MainWindow::on_removeRegion(int label) {
 	visualizationContainer->RemoveRegion((unsigned short)label);
+}
+
+void MainWindow::on_highlightRegion(int label) {
+	visualizationContainer->HighlightRegion((unsigned short)label);
+}
+
+void MainWindow::on_selectRegion(int label) {
+	visualizationContainer->SelectRegion((unsigned short)label);
 }
 
 bool MainWindow::eventFilter(QObject* obj, QEvent* event) {

@@ -23,11 +23,15 @@ RegionTable::RegionTable(QWidget* parent)
 	verticalHeader()->setVisible(false);
 	setSortingEnabled(true);
 	resizeColumnsToContents();
-
+	setMouseTracking(true);
 	setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+
+	currentRegionLabel = 0;
 
 	QObject::connect(horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &RegionTable::on_sort);
 	QObject::connect(this, &RegionTable::removeRegion, this, &RegionTable::on_removeRegion);
+	QObject::connect(this, &RegionTable::cellEntered, this, &RegionTable::on_cellEntered);
+	QObject::connect(this, &RegionTable::cellClicked, this, &RegionTable::on_cellClicked);
 }
 
 void RegionTable::update(RegionCollection* regions) {
@@ -131,7 +135,7 @@ void RegionTable::update(RegionCollection* regions) {
 	// Need to reconnect after disabling and enabling sorting
 	QObject::connect(horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &RegionTable::on_sort);
 
-	highlight(0);
+	selectRegionLabel(currentRegionLabel);
 }
 
 void RegionTable::update(Region* region) {
@@ -160,8 +164,9 @@ void RegionTable::update(Region* region) {
 	}
 }
 
-void RegionTable::highlight(unsigned short label) {
-	QString labelString = QString::number(label);
+void RegionTable::selectRegionLabel(unsigned short label) {
+	currentRegionLabel = label;
+	QString labelString = QString::number(currentRegionLabel);
 
 	for (int i = 0; i < rowCount(); i++) {
 		QTableWidgetItem* ti = item(i, 0);
@@ -195,4 +200,57 @@ void RegionTable::on_removeRegion(int label) {
 			break;
 		}
 	}
+}
+
+void RegionTable::on_cellEntered(int row, int column) {
+	QString labelString = QString::number(currentRegionLabel);
+
+	if (column == 0) {
+		// Highlight
+		for (int i = 0; i < rowCount(); i++) {
+			QTableWidgetItem* ti = item(i, 0);
+
+			if (ti->text() == labelString) continue;
+
+			if (i == row) {
+				ti->setBackgroundColor(QColor("#bfe6f5"));
+			}
+			else {
+				ti->setBackgroundColor(QColor("white"));
+			}
+		}
+	}
+	else {
+		// Clear highlight
+		for (int i = 0; i < rowCount(); i++) {
+			QTableWidgetItem* ti = item(i, 0);
+
+			if (ti->text() == labelString) continue;
+
+			ti->setBackgroundColor(QColor("white"));
+		}
+	}
+
+	emit(highlightRegion(rowLabel(row)));
+}
+
+void RegionTable::on_cellClicked(int row, int column) {
+	emit(selectRegion(rowLabel(row)));
+}
+
+void RegionTable::leaveEvent(QEvent* event) {
+	// Clear highlight
+	QString labelString = QString::number(currentRegionLabel);
+
+	for (int i = 0; i < rowCount(); i++) {
+		QTableWidgetItem* ti = item(i, 0);
+
+		if (ti->text() == labelString) continue;
+
+		ti->setBackgroundColor(QColor("white"));
+	}
+}
+
+int RegionTable::rowLabel(int row) {
+	return item(row, 0)->text().toInt();
 }

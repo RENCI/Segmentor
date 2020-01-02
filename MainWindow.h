@@ -21,7 +21,7 @@ public:
 
 	void updateRegions(RegionCollection* regions);
 	void updateRegion(Region* region);
-	void highlightRegion(unsigned short label);
+	void selectRegion(unsigned short label);
 
 public slots:
 
@@ -55,6 +55,8 @@ public slots:
 	// Region table events
 	virtual void on_regionDone(int label, bool done);
 	virtual void on_removeRegion(int label);
+	virtual void on_highlightRegion(int label);
+	virtual void on_selectRegion(int label);
 
 protected:
 	// The visualization container
