@@ -44,6 +44,7 @@ VolumeView::VolumeView(vtkRenderWindowInteractor* interactor) {
 	
 	regions = nullptr;
 	currentRegion = nullptr;
+	highlightRegion = nullptr;
 
 	// Rendering
 	renderer = vtkSmartPointer<vtkRenderer>::New();
@@ -89,6 +90,7 @@ VolumeView::~VolumeView() {
 
 void VolumeView::Reset() {
 	SetCurrentRegion(nullptr);
+	HighlightRegion(nullptr);
 
 	probe->VisibilityOff();
 	plane->VisibilityOff();
@@ -102,6 +104,7 @@ void VolumeView::SetRegions(vtkImageData* data, RegionCollection* newRegions) {
 	// Reset
 	filterRegion = false;
 	currentRegion = nullptr;
+	highlightRegion = nullptr;
 
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
 		AddRegion(regions->Get(it));
@@ -153,13 +156,19 @@ void VolumeView::SetCurrentRegion(Region* region) {
 }
 
 void VolumeView::HighlightRegion(Region* region) {
+	if (!regions) return;
+
+	highlightRegion = region;
+
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
 		regions->Get(it)->GetHighlight3D()->GetActor()->VisibilityOff();
 	}
 
-	if (region) {
-		region->GetHighlight3D()->GetActor()->VisibilityOn();
+	if (highlightRegion) {
+		highlightRegion->GetHighlight3D()->GetActor()->VisibilityOn();
 	}
+
+	FilterRegions();
 }
 
 void VolumeView::SetShowProbe(bool show) {
@@ -397,10 +406,14 @@ void VolumeView::FilterRegions() {
 			
 		if (filterRegion && currentRegion) {
 			surface->GetActor()->SetVisibility(region == currentRegion);
-		}
+		}		
 		else if (!filterPlane) {
 			surface->GetActor()->VisibilityOn();
 		}
+	}
+
+	if (highlightRegion) {
+		highlightRegion->GetSurface()->GetActor()->VisibilityOn();
 	}
 
 	renderer->ResetCameraClippingRange();

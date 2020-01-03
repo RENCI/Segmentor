@@ -72,6 +72,7 @@ protected:
 	bool smoothShading;
 	
 	Region* currentRegion;
+	Region* highlightRegion;
 
 	// Rendering
 	vtkSmartPointer<vtkRenderer> renderer;

@@ -237,7 +237,9 @@ void RegionTable::on_cellEntered(int row, int column) {
 }
 
 void RegionTable::on_cellClicked(int row, int column) {
-	emit(selectRegion(rowLabel(row)));
+	if (column == 0) {
+		emit(selectRegion(rowLabel(row)));
+	}
 }
 
 void RegionTable::leaveEvent(QEvent* event) {

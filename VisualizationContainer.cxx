@@ -649,7 +649,7 @@ void VisualizationContainer::SelectRegion(unsigned short label) {
 
 	SetCurrentRegion(region);
 
-	Render();
+	volumeView->GetInteractorStyle()->GetInteractor()->FlyTo(volumeView->GetRenderer(), region->GetCenter());
 }
 
 
