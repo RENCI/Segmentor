@@ -14,6 +14,7 @@
 #include "RegionSurface.h"
 #include "RegionOutline.h"
 #include "RegionVoxelOutlines.h"
+#include "RegionHighlight3D.h"
 
 Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* inputData) {
 	modified = false;
@@ -79,11 +80,13 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 	threshold->ThresholdBetween(label, label);
 	threshold->SetInputConnection(cells->GetOutputPort());
 
+	UpdateExtent();
+	voi->Update();
+
 	surface = new RegionSurface(this, color);
 	outline = new RegionOutline(this, color);
 	voxelOutlines = new RegionVoxelOutlines(this, color);
-
-	UpdateExtent();
+	highlight3D = new RegionHighlight3D(this, color, inputData->GetLength() * 0.01);
 }
 	
 Region::~Region() {
@@ -111,6 +114,10 @@ RegionOutline* Region::GetOutline() {
 
 RegionVoxelOutlines* Region::GetVoxelOutlines() {
 	return voxelOutlines;
+}
+
+RegionHighlight3D* Region::GetHighlight3D() {
+	return highlight3D;
 }
 
 void Region::SetExtent(int newExtent[6]) {
@@ -174,8 +181,16 @@ void Region::UpdateExtent() {
 	voi->SetVOI(padExtent);
 }
 
+bool Region::GetModified() {
+	return modified;
+}
+
 void Region::SetModified(bool isModified) {
 	modified = isModified;
+}
+
+bool Region::GetDone() {
+	return done;
 }
 
 void Region::SetDone(bool isDone) {
@@ -218,14 +233,13 @@ const int* Region::GetExtent() {
 	return extent;
 }
 
-bool Region::GetDone() {
-	return done;
+double* Region::GetCenter() {
+	return voi->GetOutput()->GetCenter();
 }
 
-bool Region::GetModified() {
-	return modified;
+double Region::GetLength() {
+	return voi->GetOutput()->GetLength();
 }
-
 
 void Region::ClearLabels() {
 	for (int i = extent[0]; i <= extent[1]; i++) {

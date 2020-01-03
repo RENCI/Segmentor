@@ -638,8 +638,8 @@ void VisualizationContainer::RemoveRegion(unsigned short label) {
 void VisualizationContainer::HighlightRegion(unsigned short label) {
 	Region* region = regions->Get(label);
 
-//	std::cout << "HIGHLIGHT" << std::endl;
-
+	volumeView->HighlightRegion(region);
+	
 	Render();
 }
 

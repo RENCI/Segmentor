@@ -40,6 +40,8 @@ public:
 
   void SetCurrentRegion(Region* region);
 
+  void HighlightRegion(Region* region);
+
   bool GetSmoothSurfaces();
   void SetSmoothSurfaces(bool smooth);
   void ToggleSmoothSurfaces();

@@ -219,6 +219,8 @@ void RegionTable::on_cellEntered(int row, int column) {
 				ti->setBackgroundColor(QColor("white"));
 			}
 		}
+
+		emit(highlightRegion(rowLabel(row)));
 	}
 	else {
 		// Clear highlight
@@ -229,9 +231,9 @@ void RegionTable::on_cellEntered(int row, int column) {
 
 			ti->setBackgroundColor(QColor("white"));
 		}
-	}
 
-	emit(highlightRegion(rowLabel(row)));
+		emit(highlightRegion(0));
+	}
 }
 
 void RegionTable::on_cellClicked(int row, int column) {
@@ -249,6 +251,8 @@ void RegionTable::leaveEvent(QEvent* event) {
 
 		ti->setBackgroundColor(QColor("white"));
 	}
+
+	emit(highlightRegion(0));
 }
 
 int RegionTable::rowLabel(int row) {

@@ -23,6 +23,7 @@
 #include "InteractionEnums.h"
 #include "Region.h"
 #include "RegionSurface.h"
+#include "RegionHighlight3D.h"
 #include "RegionCollection.h"
 
 double rescale(double value, double min, double max) {
@@ -124,10 +125,17 @@ void VolumeView::SetRegions(vtkImageData* data, RegionCollection* newRegions) {
 }
 
 void VolumeView::AddRegion(Region* region) {
-	region->GetSurface()->SetSmoothSurface(smoothSurfaces);
-	region->GetSurface()->SetSmoothShading(smoothShading);
+	RegionSurface* surface = region->GetSurface();
+	RegionHighlight3D* highlight = region->GetHighlight3D();
 
-	renderer->AddActor(region->GetSurface()->GetActor());
+	surface->SetSmoothSurface(smoothSurfaces);
+	surface->SetSmoothShading(smoothShading);
+
+	highlight->GetActor()->VisibilityOff();
+	highlight->SetCamera(renderer->GetActiveCamera());
+
+	renderer->AddActor(surface->GetActor());
+	renderer->AddActor(highlight->GetActor());
 }
 
 void VolumeView::SetCurrentRegion(Region* region) {
@@ -142,6 +150,16 @@ void VolumeView::SetCurrentRegion(Region* region) {
 	}
 
 	FilterRegions();
+}
+
+void VolumeView::HighlightRegion(Region* region) {
+	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+		regions->Get(it)->GetHighlight3D()->GetActor()->VisibilityOff();
+	}
+
+	if (region) {
+		region->GetHighlight3D()->GetActor()->VisibilityOn();
+	}
 }
 
 void VolumeView::SetShowProbe(bool show) {
