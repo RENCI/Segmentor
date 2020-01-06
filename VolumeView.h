@@ -25,45 +25,45 @@ enum InteractionMode;
 
 class VolumeView {
 public:
-  VolumeView(vtkRenderWindowInteractor* interactor);
-  ~VolumeView();
+	VolumeView(vtkRenderWindowInteractor* interactor);
+	~VolumeView();
 
-  void SetRegions(vtkImageData* data, RegionCollection* newRegions);
-  void AddRegion(Region* region);
+	void SetRegions(vtkImageData* data, RegionCollection* newRegions);
+	void AddRegion(Region* region);
 
-  void Reset();
+	void Reset();
 
-  void SetShowProbe(bool visibility);
-  void SetProbePosition(double x, double y, double z);
+	void SetShowProbe(bool visibility);
+	void SetProbePosition(double x, double y, double z);
 
-  void SetInteractionMode(InteractionMode mode);
+	void SetInteractionMode(InteractionMode mode);
 
-  void SetCurrentRegion(Region* region);
+	void SetCurrentRegion(Region* region);
 
-  void HighlightRegion(Region* region);
+	void HighlightRegion(Region* region);
 
-  bool GetSmoothSurfaces();
-  void SetSmoothSurfaces(bool smooth);
-  void ToggleSmoothSurfaces();
+	bool GetSmoothSurfaces();
+	void SetSmoothSurfaces(bool smooth);
+	void ToggleSmoothSurfaces();
 
-  bool GetSmoothShading();
-  void SetSmoothShading(bool smooth);
-  void ToggleSmoothShading();
+	bool GetSmoothShading();
+	void SetSmoothShading(bool smooth);
+	void ToggleSmoothShading();
 
-  void SetFilterRegion(bool filter);
-  void ToggleFilterRegion();
+	void SetFilterRegion(bool filter);
+	void ToggleFilterRegion();
 
-  void SetFilterPlane(bool filter);
-  void ToggleFilterPlane();
+	void SetFilterPlane(bool filter);
+	void ToggleFilterPlane();
 
-  void SetShowPlane(bool show);
-  void ToggleShowPlane();
-  void UpdatePlane();
+	void SetShowPlane(bool show);
+	void ToggleShowPlane();
+	void UpdatePlane();
 
-  void Render();
+	void Render();
 
-  vtkRenderer* GetRenderer();	
-  vtkInteractorStyleVolume* GetInteractorStyle();
+	vtkRenderer* GetRenderer();	
+	vtkInteractorStyleVolume* GetInteractorStyle();
 
 protected:
 	bool filterRegion;
