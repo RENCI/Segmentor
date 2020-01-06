@@ -132,8 +132,8 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenImageFile(cons
 	std::string extension = fileName.substr(fileName.find_last_of(".") + 1);
 
 	// Load the data
-	if (extension == "vti") {
-		vtkSmartPointer<vtkXMLImageDataReader> reader = vtkSmartPointer<vtkXMLImageDataReader>::New();
+	if (extension == "nii") {
+		vtkSmartPointer<vtkNIFTIImageReader> reader = vtkSmartPointer<vtkNIFTIImageReader>::New();
 		reader->SetFileName(fileName.c_str());
 		reader->Update();
 
@@ -141,8 +141,17 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenImageFile(cons
 
 		return Success;
 	}
-	else if (extension == "nii") {
-		vtkSmartPointer<vtkNIFTIImageReader> reader = vtkSmartPointer<vtkNIFTIImageReader>::New();
+	else if (extension == "tif" || extension == "tiff") {
+		vtkSmartPointer<vtkTIFFReader> reader = vtkSmartPointer<vtkTIFFReader>::New();
+		reader->SetFileName(fileName.c_str());
+		reader->Update();
+
+		SetImageData(reader->GetOutput());
+
+		return Success;
+	}
+	else if (extension == "vti") {
+		vtkSmartPointer<vtkXMLImageDataReader> reader = vtkSmartPointer<vtkXMLImageDataReader>::New();
 		reader->SetFileName(fileName.c_str());
 		reader->Update();
 
@@ -187,8 +196,8 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationFi
 	std::string extension = fileName.substr(fileName.find_last_of(".") + 1);
 
 	// Load the data
-	if (extension == "vti") {
-		vtkSmartPointer<vtkXMLImageDataReader> reader = vtkSmartPointer<vtkXMLImageDataReader>::New();
+	if (extension == "nii") {
+		vtkSmartPointer<vtkNIFTIImageReader> reader = vtkSmartPointer<vtkNIFTIImageReader>::New();
 		reader->SetFileName(fileName.c_str());
 
 		vtkSmartPointer<vtkImageCast> cast = vtkSmartPointer<vtkImageCast>::New();
@@ -207,8 +216,28 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationFi
 			return VolumeMismatch;
 		}
 	}
-	else if (extension == "nii") {
-		vtkSmartPointer<vtkNIFTIImageReader> reader = vtkSmartPointer<vtkNIFTIImageReader>::New();
+	else if (extension == "tif" || extension == "tiff") {
+		vtkSmartPointer<vtkTIFFReader> reader = vtkSmartPointer<vtkTIFFReader>::New();
+		reader->SetFileName(fileName.c_str());
+
+		vtkSmartPointer<vtkImageCast> cast = vtkSmartPointer<vtkImageCast>::New();
+		cast->SetOutputScalarTypeToUnsignedShort();
+		cast->SetInputConnection(reader->GetOutputPort());
+		cast->Update();
+
+		if (SetLabelData(cast->GetOutput())) {
+			LoadRegionMetadata(fileName + ".json");
+
+			qtWindow->updateRegions(regions);
+
+			return Success;
+		}
+		else {
+			return VolumeMismatch;
+		}
+	}
+	else if (extension == "vti") {
+		vtkSmartPointer<vtkXMLImageDataReader> reader = vtkSmartPointer<vtkXMLImageDataReader>::New();
 		reader->SetFileName(fileName.c_str());
 
 		vtkSmartPointer<vtkImageCast> cast = vtkSmartPointer<vtkImageCast>::New();

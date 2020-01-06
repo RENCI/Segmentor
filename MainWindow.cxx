@@ -81,7 +81,7 @@ void MainWindow::on_actionOpen_Image_File_triggered() {
 	QString fileName = QFileDialog::getOpenFileName(this,
 		"Open Volume",
 		GetDefaultDirectory(defaultImageDirectoryKey),
-		"All files (*.*);;NIfTI (*.nii);;VTK XML ImageData (*.vti)");
+		"All files (*.*);;NIfTI (*.nii);;TIFF (*.tif *.tiff);;VTK XML ImageData (*.vti)");
 
 	// Check for file name
 	if (fileName == "") {
@@ -173,7 +173,7 @@ void MainWindow::on_actionOpen_Segmentation_File_triggered() {
 	QString fileName = QFileDialog::getOpenFileName(this,
 		"Open Segmentation Data",
 		GetDefaultDirectory(defaultSegmentationDirectoryKey),
-		"All files (*.*);;NIfTI (*.nii);;VTK XML ImageData (*.vti)");
+		"All files (*.*);;NIfTI (*.nii);;TIFF (*.tif *.tiff);;VTK XML ImageData (*.vti)");
 
 	// Check for file name
 	if (fileName == "") {
