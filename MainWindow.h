@@ -3,6 +3,7 @@
 
 #include "ui_MainWindow.h"
 
+#include <QAction>
 #include <QMainWindow>
 #include <QSettings>
 
@@ -73,6 +74,10 @@ protected:
 
 	QString GetDefaultDirectory(QString key);
 	void SetDefaultDirectory(QString key, QString fileName);
+
+	// Toolbar
+	//QAction* actionNavigation;
+	//QAction* actionEdit;
 
 	void CreateToolBar();
 };

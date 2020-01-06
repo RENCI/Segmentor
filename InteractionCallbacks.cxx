@@ -66,21 +66,7 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 	vtkRenderWindowInteractor* rwi = static_cast<vtkRenderWindowInteractor*>(caller);
 	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
 
-	switch (rwi->GetKeyCode()) {
-	case 32:
-		vis->ToggleInteractionMode();
-		break;
-
-	case 's':
-	case 'S':
-		vis->GetVolumeView()->ToggleSmoothSurfaces();
-		break;
-
-	case 'n':
-	case 'N':
-		vis->GetVolumeView()->ToggleSmoothShading();
-		break;
-	
+	switch (rwi->GetKeyCode()) {	
 	case 'p':
 	case 'P':
 		vis->GetVolumeView()->ToggleFilterPlane();
@@ -139,18 +125,6 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 		}
 		break;
 	}
-
-	case '1':
-		vis->GetSliceView()->ToggleLabelSlice();
-		break;
-
-	case '2':
-		vis->GetSliceView()->ToggleVoxelOutlines();
-		break;
-
-	case '3':
-		vis->GetSliceView()->ToggleRegionOutlines();
-		break;
 	}
 }
 

@@ -7,6 +7,7 @@
 #include <QStyle>
 #include <QPushButton>
 #include <QToolBar>
+#include <QShortcut>
 
 #include <vtkGenericOpenGLRenderWindow.h>
 
@@ -325,7 +326,7 @@ void MainWindow::on_actionExit_triggered() {
 }
 
 void MainWindow::on_actionNavigation() {
-	visualizationContainer->SetInteractionMode(NavigationMode);
+	visualizationContainer->SetInteractionMode(NavigationMode);	
 }
 
 void MainWindow::on_actionEdit() {
@@ -417,22 +418,27 @@ void MainWindow::CreateToolBar() {
 	QAction* actionOverlay = new QAction(QIcon(":/icons/icon_overlay.svg"), "Show overlay", this);
 	actionOverlay->setCheckable(true);
 	actionOverlay->setChecked(visualizationContainer->GetSliceView()->GetShowLabelSlice());
+	actionOverlay->setShortcut(QKeySequence("1"));
 
 	QAction* actionVoxels = new QAction(QIcon(":/icons/icon_voxels.svg"), "Show voxels", this);
 	actionVoxels->setCheckable(true);
 	actionVoxels->setChecked(visualizationContainer->GetSliceView()->GetShowVoxelOutlines());
+	actionVoxels->setShortcut(QKeySequence("2"));
 
 	QAction* actionOutline = new QAction(QIcon(":/icons/icon_outline.svg"), "Show outlines", this);
 	actionOutline->setCheckable(true);
 	actionOutline->setChecked(visualizationContainer->GetSliceView()->GetShowRegionOutlines());
+	actionOutline->setShortcut(QKeySequence("3"));
 
 	QAction* actionSmoothNormals = new QAction(QIcon(":/icons/icon_smooth_normals.svg"), "Smooth normals", this);
 	actionSmoothNormals->setCheckable(true);
 	actionSmoothNormals->setChecked(visualizationContainer->GetVolumeView()->GetSmoothShading());
+	actionSmoothNormals->setShortcut(QKeySequence("n"));
 
 	QAction* actionSmoothSurfaces = new QAction(QIcon(":/icons/icon_smooth_surface.svg"), "Smooth surfaces", this);
 	actionSmoothSurfaces->setCheckable(true);
 	actionSmoothSurfaces->setChecked(visualizationContainer->GetVolumeView()->GetSmoothSurfaces());
+	actionSmoothSurfaces->setShortcut(QKeySequence("s"));
 
 	toolBar->addAction(actionNavigation);
 	toolBar->addAction(actionEdit);
@@ -451,6 +457,17 @@ void MainWindow::CreateToolBar() {
 	QObject::connect(actionOutline, &QAction::triggered, this, &MainWindow::on_actionOutline);
 	QObject::connect(actionSmoothNormals, &QAction::triggered, this, &MainWindow::on_actionSmoothNormals);
 	QObject::connect(actionSmoothSurfaces, &QAction::triggered, this, &MainWindow::on_actionSmoothSurfaces);
+
+	QObject::connect(new QShortcut(QKeySequence(32), this), &QShortcut::activated, [actionNavigation, actionEdit]() {
+		if (actionEdit->isChecked()) {
+			actionNavigation->toggle();
+			emit(actionNavigation->triggered(true));
+		}
+		else {
+			actionEdit->toggle();
+			emit(actionEdit->triggered(true));
+		}
+	});
 
 	toolBarWidget->layout()->addWidget(toolBar);
 }
