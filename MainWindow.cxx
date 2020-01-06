@@ -148,7 +148,7 @@ void MainWindow::on_actionOpen_Image_Stack_triggered() {
 	}
 
 	// Load data
-	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->OpenImageFile(fileName.toStdString());
+	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->OpenImageStack(fileNames);
 
 	if (errorCode != VisualizationContainer::Success) {
 		QMessageBox errorMessage;
