@@ -86,7 +86,7 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 	surface = new RegionSurface(this, color);
 	outline = new RegionOutline(this, color);
 	voxelOutlines = new RegionVoxelOutlines(this, color);
-	highlight3D = new RegionHighlight3D(this, color, inputData->GetLength() * 0.01);
+	highlight3D = new RegionHighlight3D(this, color);
 }
 	
 Region::~Region() {

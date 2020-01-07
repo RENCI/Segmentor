@@ -165,6 +165,7 @@ void VolumeView::HighlightRegion(Region* region) {
 	}
 
 	if (highlightRegion) {
+		highlightRegion->GetHighlight3D()->Update();
 		highlightRegion->GetHighlight3D()->GetActor()->VisibilityOn();
 	}
 

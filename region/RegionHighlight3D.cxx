@@ -10,16 +10,10 @@
 
 #include "Region.h"
 
-RegionHighlight3D::RegionHighlight3D(Region* inputRegion, double color[3], double width) {
+RegionHighlight3D::RegionHighlight3D(Region* inputRegion, double color[3]) {
 	region = inputRegion;
 
-	double r = region->GetLength() / 2;
-	double ir = r;
-	double or = ir + width;
-
-	vtkSmartPointer<vtkDiskSource> disk = vtkSmartPointer<vtkDiskSource>::New();
-	disk->SetInnerRadius(ir);
-	disk->SetOuterRadius(or);
+	disk = vtkSmartPointer<vtkDiskSource>::New();
 	disk->SetCircumferentialResolution(32);
 
 	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
@@ -33,7 +27,8 @@ RegionHighlight3D::RegionHighlight3D(Region* inputRegion, double color[3], doubl
 	actor->GetProperty()->SetAmbient(1.0);
 	actor->GetProperty()->SetSpecular(0.0);
 	actor->GetProperty()->SetOpacity(0.5);
-	actor->SetPosition(region->GetCenter());
+
+	Update();
 }
 
 RegionHighlight3D::~RegionHighlight3D() {
@@ -48,4 +43,15 @@ void RegionHighlight3D::SetCamera(vtkCamera* camera) {
 
 vtkSmartPointer<vtkActor> RegionHighlight3D::GetActor() {
 	return actor;
+}
+
+void RegionHighlight3D::Update() {
+	double r = region->GetLength() / 2;
+	double or = r;
+	double ir = or / 2;
+
+	disk->SetInnerRadius(ir);
+	disk->SetOuterRadius(or);
+
+	actor->SetPosition(region->GetCenter());
 }
