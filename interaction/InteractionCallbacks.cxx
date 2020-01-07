@@ -72,11 +72,6 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 		vis->GetVolumeView()->ToggleFilterPlane();
 		break;
 
-	case 'o':
-	case 'O':
-		vis->GetVolumeView()->ToggleShowPlane();
-		break;
-
 	case 'l':
 	case 'L':
 		vis->GetSliceView()->ToggleFilterRegion();

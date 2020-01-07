@@ -353,6 +353,10 @@ void MainWindow::on_actionSmoothSurfaces(bool checked) {
 	visualizationContainer->GetVolumeView()->SetSmoothSurfaces(checked);
 }
 
+void MainWindow::on_actionShowPlane(bool checked) {
+	visualizationContainer->GetVolumeView()->SetShowPlane(checked);
+}
+
 void MainWindow::on_regionDone(int label, bool done) {
 	visualizationContainer->SetRegionDone((unsigned short)label, done);
 }
@@ -415,49 +419,20 @@ void MainWindow::CreateToolBar() {
 	QAction* actionEdit = new QAction("E", interactionModeGroup);
 	actionEdit->setCheckable(true);
 
-	QAction* actionOverlay = new QAction(QIcon(":/icons/icon_overlay.svg"), "Show overlay", this);
-	actionOverlay->setCheckable(true);
-	actionOverlay->setChecked(visualizationContainer->GetSliceView()->GetShowLabelSlice());
-	actionOverlay->setShortcut(QKeySequence("1"));
-
-	QAction* actionVoxels = new QAction(QIcon(":/icons/icon_voxels.svg"), "Show voxels", this);
-	actionVoxels->setCheckable(true);
-	actionVoxels->setChecked(visualizationContainer->GetSliceView()->GetShowVoxelOutlines());
-	actionVoxels->setShortcut(QKeySequence("2"));
-
-	QAction* actionOutline = new QAction(QIcon(":/icons/icon_outline.svg"), "Show outlines", this);
-	actionOutline->setCheckable(true);
-	actionOutline->setChecked(visualizationContainer->GetSliceView()->GetShowRegionOutlines());
-	actionOutline->setShortcut(QKeySequence("3"));
-
-	QAction* actionSmoothNormals = new QAction(QIcon(":/icons/icon_smooth_normals.svg"), "Smooth normals", this);
-	actionSmoothNormals->setCheckable(true);
-	actionSmoothNormals->setChecked(visualizationContainer->GetVolumeView()->GetSmoothShading());
-	actionSmoothNormals->setShortcut(QKeySequence("n"));
-
-	QAction* actionSmoothSurfaces = new QAction(QIcon(":/icons/icon_smooth_surface.svg"), "Smooth surfaces", this);
-	actionSmoothSurfaces->setCheckable(true);
-	actionSmoothSurfaces->setChecked(visualizationContainer->GetVolumeView()->GetSmoothSurfaces());
-	actionSmoothSurfaces->setShortcut(QKeySequence("s"));
-
 	toolBar->addAction(actionNavigation);
 	toolBar->addAction(actionEdit);
 	toolBar->addSeparator();
-	toolBar->addAction(actionOverlay);
-	toolBar->addAction(actionVoxels);
-	toolBar->addAction(actionOutline);
+	AddActionIcon(":/icons/icon_overlay.svg", "Show overlay", "1", visualizationContainer->GetSliceView()->GetShowLabelSlice(), &MainWindow::on_actionOverlay, toolBar);
+	AddActionIcon(":/icons/icon_voxels.svg", "Show voxels", "2", visualizationContainer->GetSliceView()->GetShowVoxelOutlines(), &MainWindow::on_actionVoxels, toolBar);
+	AddActionIcon(":/icons/icon_outline.svg", "Show outlines", "3", visualizationContainer->GetSliceView()->GetShowRegionOutlines(), &MainWindow::on_actionOutline, toolBar);
 	toolBar->addSeparator();
-	toolBar->addAction(actionSmoothNormals);
-	toolBar->addAction(actionSmoothSurfaces);
+	AddActionIcon(":/icons/icon_smooth_normals.svg", "Smooth normals", "n", visualizationContainer->GetVolumeView()->GetSmoothShading(), &MainWindow::on_actionSmoothNormals, toolBar);
+	AddActionIcon(":/icons/icon_smooth_surface.svg", "Smooth surfaces", "s", visualizationContainer->GetVolumeView()->GetSmoothSurfaces(), &MainWindow::on_actionSmoothSurfaces, toolBar);
+	toolBar->addSeparator();
+	AddActionIcon(":/icons/icon_plane.svg", "Show plane", "o", visualizationContainer->GetVolumeView()->GetShowPlane(), &MainWindow::on_actionShowPlane, toolBar);
 
 	QObject::connect(actionNavigation, &QAction::triggered, this, &MainWindow::on_actionNavigation);
 	QObject::connect(actionEdit, &QAction::triggered, this, &MainWindow::on_actionEdit);
-	QObject::connect(actionOverlay, &QAction::triggered, this, &MainWindow::on_actionOverlay);
-	QObject::connect(actionVoxels, &QAction::triggered, this, &MainWindow::on_actionVoxels);
-	QObject::connect(actionOutline, &QAction::triggered, this, &MainWindow::on_actionOutline);
-	QObject::connect(actionSmoothNormals, &QAction::triggered, this, &MainWindow::on_actionSmoothNormals);
-	QObject::connect(actionSmoothSurfaces, &QAction::triggered, this, &MainWindow::on_actionSmoothSurfaces);
-
 	QObject::connect(new QShortcut(QKeySequence(32), this), &QShortcut::activated, [actionNavigation, actionEdit]() {
 		if (actionEdit->isChecked()) {
 			actionNavigation->toggle();
@@ -471,3 +446,15 @@ void MainWindow::CreateToolBar() {
 
 	toolBarWidget->layout()->addWidget(toolBar);
 }
+
+void MainWindow::AddActionIcon(const QString& fileName, const QString& text, const QString& shortcut, bool checked, void (MainWindow::*slot)(bool), QToolBar* toolBar) {
+	QAction* action = new QAction(QIcon(fileName), text, this);
+	action->setShortcut(QKeySequence(shortcut));
+	action->setCheckable(true);
+	action->setChecked(checked);
+
+	toolBar->addAction(action);
+
+	QObject::connect(action, &QAction::triggered, this, slot);
+}
+

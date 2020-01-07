@@ -52,6 +52,7 @@ public slots:
 	virtual void on_actionOutline(bool checked);
 	virtual void on_actionSmoothNormals(bool checked);
 	virtual void on_actionSmoothSurfaces(bool checked);
+	virtual void on_actionShowPlane(bool checked);
 
 	// Region table events
 	virtual void on_regionDone(int label, bool done);
@@ -76,10 +77,8 @@ protected:
 	void SetDefaultDirectory(QString key, QString fileName);
 
 	// Toolbar
-	//QAction* actionNavigation;
-	//QAction* actionEdit;
-
 	void CreateToolBar();
+	void AddActionIcon(const QString& fileName, const QString& text, const QString& shortcut, bool checked, void (MainWindow::*slot)(bool), QToolBar* toolBar);
 };
 
 #endif

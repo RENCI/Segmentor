@@ -56,6 +56,7 @@ public:
 	void SetFilterPlane(bool filter);
 	void ToggleFilterPlane();
 
+	bool GetShowPlane();
 	void SetShowPlane(bool show);
 	void ToggleShowPlane();
 	void UpdatePlane();

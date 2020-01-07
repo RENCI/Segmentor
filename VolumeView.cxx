@@ -249,6 +249,10 @@ void VolumeView::UpdatePlane() {
 	planeSource->SetNormal(cam->GetDirectionOfProjection());
 }
 
+bool VolumeView::GetShowPlane() {
+	return plane->GetVisibility();
+}
+
 void VolumeView::SetShowPlane(bool show) {
 	plane->SetVisibility(show);
 	planeWire->SetVisibility(show);
