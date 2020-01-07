@@ -4,6 +4,7 @@
 #include "ui_MainWindow.h"
 
 #include <QAction>
+#include <QLabel>
 #include <QMainWindow>
 #include <QSettings>
 
@@ -80,7 +81,8 @@ protected:
 
 	// Toolbar
 	void CreateToolBar();
-	void AddActionIcon(const QString& fileName, const QString& text, const QString& shortcut, bool checked, void (MainWindow::*slot)(bool), QToolBar* toolBar);
+	QAction* CreateActionIcon(const QString& fileName, const QString& text, const QString& shortcut, bool checked, void (MainWindow::*slot)(bool));
+	QLabel* CreateLabel(const QString& text, int topMargin = 10, int bottomMargin = 5);
 };
 
 #endif

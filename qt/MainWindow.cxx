@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QTableWidgetItem>
 #include <QIcon>
+#include <QLabel>
 #include <QStyle>
 #include <QPushButton>
 #include <QToolBar>
@@ -428,20 +429,25 @@ void MainWindow::CreateToolBar() {
 	QAction* actionEdit = new QAction("E", interactionModeGroup);
 	actionEdit->setCheckable(true);
 
+	toolBar->addWidget(CreateLabel("Mode"));
 	toolBar->addAction(actionNavigation);
 	toolBar->addAction(actionEdit);
 	toolBar->addSeparator();
-	AddActionIcon(":/icons/icon_overlay.svg", "Show overlay", "1", visualizationContainer->GetSliceView()->GetShowLabelSlice(), &MainWindow::on_actionOverlay, toolBar);
-	AddActionIcon(":/icons/icon_voxels.svg", "Show voxels", "2", visualizationContainer->GetSliceView()->GetShowVoxelOutlines(), &MainWindow::on_actionVoxels, toolBar);
-	AddActionIcon(":/icons/icon_outline.svg", "Show outlines", "3", visualizationContainer->GetSliceView()->GetShowRegionOutlines(), &MainWindow::on_actionOutline, toolBar);
+	toolBar->addWidget(CreateLabel("2D"));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_overlay.svg", "Show overlay", "1", visualizationContainer->GetSliceView()->GetShowLabelSlice(), &MainWindow::on_actionOverlay));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_voxels.svg", "Show voxels", "2", visualizationContainer->GetSliceView()->GetShowVoxelOutlines(), &MainWindow::on_actionVoxels));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_outline.svg", "Show outlines", "3", visualizationContainer->GetSliceView()->GetShowRegionOutlines(), &MainWindow::on_actionOutline));
 	toolBar->addSeparator();
-	AddActionIcon(":/icons/icon_smooth_normals.svg", "Smooth normals", "n", visualizationContainer->GetVolumeView()->GetSmoothShading(), &MainWindow::on_actionSmoothNormals, toolBar);
-	AddActionIcon(":/icons/icon_smooth_surface.svg", "Smooth surfaces", "s", visualizationContainer->GetVolumeView()->GetSmoothSurfaces(), &MainWindow::on_actionSmoothSurfaces, toolBar);
+	toolBar->addWidget(CreateLabel("3D"));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_smooth_normals.svg", "Smooth normals", "n", visualizationContainer->GetVolumeView()->GetSmoothShading(), &MainWindow::on_actionSmoothNormals));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_smooth_surface.svg", "Smooth surfaces", "s", visualizationContainer->GetVolumeView()->GetSmoothSurfaces(), &MainWindow::on_actionSmoothSurfaces));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_plane.svg", "Show plane", "o", visualizationContainer->GetVolumeView()->GetShowPlane(), &MainWindow::on_actionShowPlane));
 	toolBar->addSeparator();
-	AddActionIcon(":/icons/icon_plane.svg", "Show plane", "o", visualizationContainer->GetVolumeView()->GetShowPlane(), &MainWindow::on_actionShowPlane, toolBar);
-	AddActionIcon(":/icons/icon_filter_plane.svg", "Filter to plane", "p", visualizationContainer->GetVolumeView()->GetFilterPlane(), &MainWindow::on_actionFilterPlane, toolBar);
-	AddActionIcon(":/icons/icon_filter_region.svg", "Filter region", "l", visualizationContainer->GetVolumeView()->GetFilterRegion(), &MainWindow::on_actionFilterRegion, toolBar);
+	toolBar->addWidget(CreateLabel("Filter"));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_filter_plane.svg", "Filter to plane", "p", visualizationContainer->GetVolumeView()->GetFilterPlane(), &MainWindow::on_actionFilterPlane));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_filter_region.svg", "Filter region", "l", visualizationContainer->GetVolumeView()->GetFilterRegion(), &MainWindow::on_actionFilterRegion));
 
+	// Need extra logic for modes
 	QObject::connect(actionNavigation, &QAction::triggered, this, &MainWindow::on_actionNavigation);
 	QObject::connect(actionEdit, &QAction::triggered, this, &MainWindow::on_actionEdit);
 	QObject::connect(new QShortcut(QKeySequence(32), this), &QShortcut::activated, [actionNavigation, actionEdit]() {
@@ -458,14 +464,23 @@ void MainWindow::CreateToolBar() {
 	toolBarWidget->layout()->addWidget(toolBar);
 }
 
-void MainWindow::AddActionIcon(const QString& fileName, const QString& text, const QString& shortcut, bool checked, void (MainWindow::*slot)(bool), QToolBar* toolBar) {
+QAction* MainWindow::CreateActionIcon(const QString& fileName, const QString& text, const QString& shortcut, bool checked, void (MainWindow::*slot)(bool)) {
 	QAction* action = new QAction(QIcon(fileName), text, this);
 	action->setShortcut(QKeySequence(shortcut));
 	action->setCheckable(true);
 	action->setChecked(checked);
 
-	toolBar->addAction(action);
-
 	QObject::connect(action, &QAction::triggered, this, slot);
+
+	return action;
 }
 
+QLabel* MainWindow::CreateLabel(const QString& text, int topMargin, int bottomMargin) {
+	QString style = QStringLiteral("color:#999;margin-top:%1px;margin-bottom:%2px").arg(topMargin).arg(bottomMargin);
+
+	QLabel* label = new QLabel(text);
+	label->setAlignment(Qt::AlignCenter);
+	label->setStyleSheet(style);
+
+	return label;
+}
