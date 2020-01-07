@@ -44,13 +44,13 @@ file(GLOB CXX_FILES
 if(${VTK_VERSION} VERSION_GREATER "6" AND VTK_QT_VERSION VERSION_GREATER "4")
   qt5_wrap_ui(UISrcs ${UI_FILES} )
   # CMAKE_AUTOMOC in ON so the MOC headers will be automatically wrapped.
-  add_executable(Segmentor MACOSX_BUNDLE ${CXX_FILES} ${UISrcs} ${QT_WRAP} Segmentor.qrc)
+  add_executable(Segmentor MACOSX_BUNDLE ${CXX_FILES} ${UISrcs} ${QT_WRAP} Segmentor.qrc Segmentor.rc)
   qt5_use_modules(Segmentor Core Gui)
   target_link_libraries(Segmentor ${VTK_LIBRARIES})
 else()
   QT4_WRAP_UI(UISrcs ${UI_FILES})
   QT4_WRAP_CPP(MOCSrcs ${QT_WRAP})
-  add_executable(Segmentor MACOSX_BUNDLE ${CXX_FILES} ${UISrcs} ${MOCSrcs} Segmentor.qrc)
+  add_executable(Segmentor MACOSX_BUNDLE ${CXX_FILES} ${UISrcs} ${MOCSrcs} Segmentor.qrc Segmentor.rc)
   target_link_libraries(Segmentor ${VTK_LIBRARIES})
 endif()
 
