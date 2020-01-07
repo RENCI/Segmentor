@@ -6,5 +6,7 @@
     <file>icons/icon_smooth_surface.svg</file>
     <file>icons/icon_smooth_normals.svg</file>
     <file>icons/icon_plane.svg</file>
+    <file>icons/icon_filter_plane.svg</file>
+    <file>icons/icon_filter_region.svg</file>
 </qresource>
 </RCC>

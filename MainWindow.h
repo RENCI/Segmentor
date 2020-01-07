@@ -53,6 +53,8 @@ public slots:
 	virtual void on_actionSmoothNormals(bool checked);
 	virtual void on_actionSmoothSurfaces(bool checked);
 	virtual void on_actionShowPlane(bool checked);
+	virtual void on_actionFilterPlane(bool checked);
+	virtual void on_actionFilterRegion(bool checked);
 
 	// Region table events
 	virtual void on_regionDone(int label, bool done);

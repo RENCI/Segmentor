@@ -222,6 +222,10 @@ void VolumeView::ToggleSmoothShading() {
 	SetSmoothShading(!smoothShading);
 }
 
+bool VolumeView::GetFilterRegion() {
+	return filterRegion;
+}
+
 void VolumeView::SetFilterRegion(bool filter) {
 	filterRegion = filter;
 
@@ -230,6 +234,10 @@ void VolumeView::SetFilterRegion(bool filter) {
 
 void VolumeView::ToggleFilterRegion() {
 	SetFilterRegion(!filterRegion);
+}
+
+bool VolumeView::GetFilterPlane() {
+	return filterPlane;
 }
 
 void VolumeView::SetFilterPlane(bool filter) {

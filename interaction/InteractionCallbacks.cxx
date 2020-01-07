@@ -67,17 +67,6 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
 
 	switch (rwi->GetKeyCode()) {	
-	case 'p':
-	case 'P':
-		vis->GetVolumeView()->ToggleFilterPlane();
-		break;
-
-	case 'l':
-	case 'L':
-		vis->GetSliceView()->ToggleFilterRegion();
-		vis->GetVolumeView()->ToggleFilterRegion();
-		break;
-
 	case 'g':
 	case 'G': {
 		// Pick at the mouse location provided by the interactor	

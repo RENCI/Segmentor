@@ -357,6 +357,15 @@ void MainWindow::on_actionShowPlane(bool checked) {
 	visualizationContainer->GetVolumeView()->SetShowPlane(checked);
 }
 
+void MainWindow::on_actionFilterPlane(bool checked) {
+	visualizationContainer->GetVolumeView()->SetFilterPlane(checked);
+}
+
+void MainWindow::on_actionFilterRegion(bool checked) {
+	visualizationContainer->GetSliceView()->SetFilterRegion(checked);
+	visualizationContainer->GetVolumeView()->SetFilterRegion(checked);
+}
+
 void MainWindow::on_regionDone(int label, bool done) {
 	visualizationContainer->SetRegionDone((unsigned short)label, done);
 }
@@ -430,6 +439,8 @@ void MainWindow::CreateToolBar() {
 	AddActionIcon(":/icons/icon_smooth_surface.svg", "Smooth surfaces", "s", visualizationContainer->GetVolumeView()->GetSmoothSurfaces(), &MainWindow::on_actionSmoothSurfaces, toolBar);
 	toolBar->addSeparator();
 	AddActionIcon(":/icons/icon_plane.svg", "Show plane", "o", visualizationContainer->GetVolumeView()->GetShowPlane(), &MainWindow::on_actionShowPlane, toolBar);
+	AddActionIcon(":/icons/icon_filter_plane.svg", "Filter to plane", "p", visualizationContainer->GetVolumeView()->GetFilterPlane(), &MainWindow::on_actionFilterPlane, toolBar);
+	AddActionIcon(":/icons/icon_filter_region.svg", "Filter region", "l", visualizationContainer->GetVolumeView()->GetFilterRegion(), &MainWindow::on_actionFilterRegion, toolBar);
 
 	QObject::connect(actionNavigation, &QAction::triggered, this, &MainWindow::on_actionNavigation);
 	QObject::connect(actionEdit, &QAction::triggered, this, &MainWindow::on_actionEdit);

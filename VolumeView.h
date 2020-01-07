@@ -50,9 +50,11 @@ public:
 	void SetSmoothShading(bool smooth);
 	void ToggleSmoothShading();
 
+	bool GetFilterRegion();
 	void SetFilterRegion(bool filter);
 	void ToggleFilterRegion();
 
+	bool GetFilterPlane();
 	void SetFilterPlane(bool filter);
 	void ToggleFilterPlane();
 
