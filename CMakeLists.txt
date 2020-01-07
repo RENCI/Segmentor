@@ -22,8 +22,11 @@ endif()
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR} 
   ${CMAKE_CURRENT_SOURCE_DIR}/interaction
+  ${CMAKE_CURRENT_SOURCE_DIR}/qt
   ${CMAKE_CURRENT_SOURCE_DIR}/region
   ${CMAKE_CURRENT_SOURCE_DIR}/utilities
+  ${CMAKE_CURRENT_SOURCE_DIR}/visualization
+  ${CMAKE_CURRENT_SOURCE_DIR}/vtk
   ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -31,14 +34,20 @@ file(GLOB UI_FILES *.ui)
 file(GLOB QT_WRAP 
   ${CMAKE_CURRENT_SOURCE_DIR}/*.h
   ${CMAKE_CURRENT_SOURCE_DIR}/interaction/*.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/qt/*.h
   ${CMAKE_CURRENT_SOURCE_DIR}/region/*.h
   ${CMAKE_CURRENT_SOURCE_DIR}/utilities/*.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/visualization/*.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/vtk/*.h
 )
 file(GLOB CXX_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/*.cxx
   ${CMAKE_CURRENT_SOURCE_DIR}/interaction/*.cxx
+  ${CMAKE_CURRENT_SOURCE_DIR}/qt/*.cxx
   ${CMAKE_CURRENT_SOURCE_DIR}/region/*.cxx
   ${CMAKE_CURRENT_SOURCE_DIR}/utilities/*.cxx
+  ${CMAKE_CURRENT_SOURCE_DIR}/visualization/*.cxx
+  ${CMAKE_CURRENT_SOURCE_DIR}/vtk/*.cxx
 )
 
 if(${VTK_VERSION} VERSION_GREATER "6" AND VTK_QT_VERSION VERSION_GREATER "4")
