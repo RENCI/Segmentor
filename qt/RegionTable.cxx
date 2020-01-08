@@ -205,7 +205,7 @@ void RegionTable::on_removeRegion(int label) {
 void RegionTable::on_cellEntered(int row, int column) {
 	QString labelString = QString::number(currentRegionLabel);
 
-	if (column == 0) {
+	if (column <= 2) {
 		// Highlight
 		for (int i = 0; i < rowCount(); i++) {
 			QTableWidgetItem* ti = item(i, 0);
@@ -237,7 +237,7 @@ void RegionTable::on_cellEntered(int row, int column) {
 }
 
 void RegionTable::on_cellClicked(int row, int column) {
-	if (column == 0) {
+	if (column <= 2) {
 		emit(selectRegion(rowLabel(row)));
 	}
 }
