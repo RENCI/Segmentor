@@ -1,15 +1,19 @@
 #include "VisualizationContainer.h"
 
+#include <algorithm>
+
 #include "MainWindow.h"
 
 #include <vtkCallbackCommand.h>
 #include <vtkCamera.h>
 #include <vtkImageConnectivityFilter.h>
+#include <vtkImageDilateErode3D.h>
 #include <vtkImageOpenClose3D.h>
 #include <vtkImageThreshold.h>
 #include <vtkIdTypeArray.h>
 #include <vtkImageCast.h>
 #include <vtkIntArray.h>
+#include <vtkKMeansStatistics.h>
 #include <vtkLookupTable.h>
 #include <vtkNIFTIImageReader.h>
 #include <vtkNIFTIImageWriter.h>
@@ -19,6 +23,7 @@
 #include <vtkRenderWindowInteractor.h>
 #include <vtkSmartPointer.h>
 #include <vtkStringArray.h>
+#include <vtkTable.h>
 #include <vtkTIFFReader.h>
 #include <vtkTIFFWriter.h>
 #include <vtkXMLImageDataReader.h>
@@ -36,13 +41,6 @@
 #include "Region.h"
 #include "RegionCollection.h"
 #include "RegionMetadataIO.h"
-
-
-
-#include <vtkTable.h>
-#include <vtkKMeansStatistics.h>
-
-
 
 VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volumeInteractor, vtkRenderWindowInteractor* sliceInteractor, MainWindow* mainWindow) {
 	data = nullptr;
@@ -633,7 +631,7 @@ void VisualizationContainer::SplitCurrentRegion(int numRegions) {
 
 	// Update current region
 	currentRegion->SetModified(true);
-	currentRegion->InitializeExtent();
+	currentRegion->ComputeExtent();
 
 	qtWindow->updateRegions(regions);
 
@@ -641,7 +639,7 @@ void VisualizationContainer::SplitCurrentRegion(int numRegions) {
 	Render();
 }
 
-void VisualizationContainer::GrowRegion(int x, int y, int z) {
+void VisualizationContainer::GrowCurrentRegion(int x, int y, int z) {
 	if (!currentRegion) return;
 
 	double value = GetValue(x, y, z);
@@ -705,6 +703,64 @@ void VisualizationContainer::GrowRegion(int x, int y, int z) {
 	Render();
 }
 
+void VisualizationContainer::DilateCurrentRegion() {
+	if (!currentRegion) return;
+
+	DoDilateErode(true);
+}
+
+void VisualizationContainer::ErodeCurrentRegion() {
+	if (!currentRegion) return;
+
+	DoDilateErode(false);
+}
+
+void VisualizationContainer::DoDilateErode(bool doDilate) {
+	int kernelSize = 3;
+
+	unsigned short label = currentRegion->GetLabel();
+
+	vtkSmartPointer<vtkImageDilateErode3D> dilate = vtkSmartPointer<vtkImageDilateErode3D>::New();
+	dilate->SetDilateValue(doDilate ? label : 0);
+	dilate->SetErodeValue(doDilate ? 0 : label);
+	dilate->SetKernelSize(kernelSize, kernelSize, kernelSize);
+	dilate->SetInputDataObject(labels);
+	dilate->Update();
+
+	int dataExtent[6];
+	labels->GetExtent(dataExtent);
+
+	const int* extent = currentRegion->GetExtent();
+
+	int padExtent[6];
+	padExtent[0] = std::max(dataExtent[0], extent[0] - kernelSize);
+	padExtent[1] = std::min(dataExtent[1], extent[1] + kernelSize);
+	padExtent[2] = std::max(dataExtent[2], extent[2] - kernelSize);
+	padExtent[3] = std::min(dataExtent[3], extent[3] + kernelSize);
+	padExtent[4] = std::max(dataExtent[4], extent[4] - kernelSize);
+	padExtent[5] = std::min(dataExtent[5], extent[5] + kernelSize);
+
+	for (int i = padExtent[0]; i <= padExtent[1]; i++) {
+		for (int j = padExtent[2]; j <= padExtent[3]; j++) {
+			for (int k = padExtent[4]; k <= padExtent[5]; k++) {
+				unsigned short* dilateData = static_cast<unsigned short*>(dilate->GetOutput()->GetScalarPointer(i, j, k));
+				unsigned short* labelData = static_cast<unsigned short*>(labels->GetScalarPointer(i, j, k));
+
+				*labelData = *dilateData;
+			}
+		}
+	}
+
+	// Update current region
+	currentRegion->SetModified(true);
+	currentRegion->ComputeExtent();
+
+	qtWindow->updateRegions(regions);
+
+	labels->Modified();
+	Render();
+}
+
 void VisualizationContainer::SetRegionDone(unsigned short label, bool done) {
 	Region* region = regions->Get(label);
 
@@ -753,7 +809,6 @@ void VisualizationContainer::SelectRegion(unsigned short label) {
 
 	volumeView->GetInteractorStyle()->GetInteractor()->FlyTo(volumeView->GetRenderer(), region->GetCenter());
 }
-
 
 void VisualizationContainer::Render() {
 	volumeView->Render();

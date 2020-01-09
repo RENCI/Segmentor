@@ -34,7 +34,7 @@ public:
 
 	void SetExtent(int newExtent[6]);
 	void UpdateExtent(int x, int y, int z);
-	void InitializeExtent();
+	void ComputeExtent();
 
 	bool GetModified();
 	void SetModified(bool isModified);

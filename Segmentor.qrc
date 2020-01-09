@@ -8,5 +8,7 @@
     <file>icons/icon_plane.svg</file>
     <file>icons/icon_filter_plane.svg</file>
     <file>icons/icon_filter_region.svg</file>
+    <file>icons/icon_dilate.svg</file>
+    <file>icons/icon_erode.svg</file>
 </qresource>
 </RCC>

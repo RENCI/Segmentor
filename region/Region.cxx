@@ -1,5 +1,7 @@
 #include "Region.h"
 
+#include <algorithm>
+
 #include <vtkActor.h>
 #include <vtkExtractVOI.h>
 #include <vtkImageData.h>
@@ -8,8 +10,6 @@
 #include <vtkProperty.h>
 #include <vtkTable.h>
 #include <vtkThreshold.h>
-
-#include <algorithm>
 
 #include "vtkImageDataCells.h"
 
@@ -33,9 +33,6 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 	color[1] = regionColor[1];
 	color[2] = regionColor[2];
 
-	// Initialize extent for this region
-	InitializeExtent();
-
 	voi = vtkSmartPointer<vtkExtractVOI>::New();
 	voi->SetInputDataObject(data);
 
@@ -46,7 +43,9 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 	threshold->ThresholdBetween(label, label);
 	threshold->SetInputConnection(cells->GetOutputPort());
 
-	UpdateExtent();
+	// Initialize the extent for this region
+	ComputeExtent();
+
 	voi->Update();
 
 	surface = new RegionSurface(this, color);
@@ -182,7 +181,7 @@ void Region::UpdateExtent() {
 	voi->SetVOI(padExtent);
 }
 
-void Region::InitializeExtent() {
+void Region::ComputeExtent() {
 	unsigned short* scalars = static_cast<unsigned short*>(data->GetScalarPointer());
 	int numPoints = data->GetNumberOfPoints();
 
@@ -222,6 +221,8 @@ void Region::InitializeExtent() {
 		extent[2] = extent[3] = dataExtent[2];
 		extent[4] = extent[5] = dataExtent[4];
 	}
+
+	UpdateExtent();
 }
 
 bool Region::GetModified() {

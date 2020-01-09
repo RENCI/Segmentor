@@ -56,6 +56,8 @@ public slots:
 	virtual void on_actionShowPlane(bool checked);
 	virtual void on_actionFilterPlane(bool checked);
 	virtual void on_actionFilterRegion(bool checked);
+	virtual void on_actionDilateRegion(bool checked);
+	virtual void on_actionErodeRegion(bool checked);
 
 	// Region table events
 	virtual void on_regionDone(int label, bool done);
@@ -81,6 +83,7 @@ protected:
 
 	// Toolbar
 	void CreateToolBar();
+	QAction* CreateActionIcon(const QString& fileName, const QString& text, const QString& shortcut, void (MainWindow::*slot)(bool));
 	QAction* CreateActionIcon(const QString& fileName, const QString& text, const QString& shortcut, bool checked, void (MainWindow::*slot)(bool));
 	QLabel* CreateLabel(const QString& text, int topMargin = 10, int bottomMargin = 5);
 };

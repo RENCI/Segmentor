@@ -57,15 +57,17 @@ public:
 
 	void SetCurrentRegion(Region* region);
 
-	void RelabelCurrentRegion();
-	void MergeWithCurrentRegion(int x, int y, int z);
-	void SplitCurrentRegion(int numRegions);
-
-	void GrowRegion(int x, int y, int z);
 	void RemoveRegion(unsigned short label);
 	void SetRegionDone(unsigned short label, bool done);
 	void HighlightRegion(unsigned short label);
 	void SelectRegion(unsigned short label);
+
+	void RelabelCurrentRegion();
+	void MergeWithCurrentRegion(int x, int y, int z);
+	void SplitCurrentRegion(int numRegions);
+	void DilateCurrentRegion();
+	void ErodeCurrentRegion();
+	void GrowCurrentRegion(int x, int y, int z);
 
 	void Render();
 
@@ -101,6 +103,8 @@ protected:
 	void UpdateColors(unsigned short label);
 
 	void ExtractRegions();
+
+	void DoDilateErode(bool doDilate);
 
 	// Region metadata
 	void LoadRegionMetadata(std::string fileName);

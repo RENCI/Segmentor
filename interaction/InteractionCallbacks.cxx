@@ -81,7 +81,7 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 
 			if (p[0] == 0 && p[1] == 0 && p[3] == 0) break;
 				
-			vis->GrowRegion(p[0], p[1], p[2]);
+			vis->GrowCurrentRegion(p[0], p[1], p[2]);
 		}
 		break;
 	}

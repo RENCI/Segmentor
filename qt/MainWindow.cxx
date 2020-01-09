@@ -367,6 +367,14 @@ void MainWindow::on_actionFilterRegion(bool checked) {
 	visualizationContainer->GetVolumeView()->SetFilterRegion(checked);
 }
 
+void MainWindow::on_actionDilateRegion(bool) {
+	visualizationContainer->DilateCurrentRegion();
+}
+
+void MainWindow::on_actionErodeRegion(bool) {
+	visualizationContainer->ErodeCurrentRegion();
+}
+
 void MainWindow::on_regionDone(int label, bool done) {
 	visualizationContainer->SetRegionDone((unsigned short)label, done);
 }
@@ -446,6 +454,9 @@ void MainWindow::CreateToolBar() {
 	toolBar->addWidget(CreateLabel("Filter"));
 	toolBar->addAction(CreateActionIcon(":/icons/icon_filter_plane.svg", "Filter to plane", "p", visualizationContainer->GetVolumeView()->GetFilterPlane(), &MainWindow::on_actionFilterPlane));
 	toolBar->addAction(CreateActionIcon(":/icons/icon_filter_region.svg", "Filter region", "l", visualizationContainer->GetVolumeView()->GetFilterRegion(), &MainWindow::on_actionFilterRegion));
+	toolBar->addSeparator();
+	toolBar->addAction(CreateActionIcon(":/icons/icon_dilate.svg", "Dilate region", "z", &MainWindow::on_actionDilateRegion));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_erode.svg", "Erode region", "x",&MainWindow::on_actionErodeRegion));
 
 	// Need extra logic for modes
 	QObject::connect(actionNavigation, &QAction::triggered, this, &MainWindow::on_actionNavigation);
@@ -462,6 +473,16 @@ void MainWindow::CreateToolBar() {
 	});
 
 	toolBarWidget->layout()->addWidget(toolBar);
+}
+
+QAction* MainWindow::CreateActionIcon(const QString& fileName, const QString& text, const QString& shortcut, void (MainWindow::*slot)(bool)) {
+	QAction* action = new QAction(QIcon(fileName), text, this);
+	action->setShortcut(QKeySequence(shortcut));
+	action->setCheckable(false);
+
+	QObject::connect(action, &QAction::triggered, this, slot);
+
+	return action;
 }
 
 QAction* MainWindow::CreateActionIcon(const QString& fileName, const QString& text, const QString& shortcut, bool checked, void (MainWindow::*slot)(bool)) {
