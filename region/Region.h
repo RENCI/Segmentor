@@ -7,6 +7,7 @@ class vtkAlgorithmOutput;
 class vtkExtractVOI;
 class vtkImageData;
 class vtkPlane;
+class vtkTable;
 class vtkThreshold;
 
 class vtkImageDataCells;
@@ -24,6 +25,8 @@ public:
 	vtkAlgorithmOutput* GetOutput();
 	vtkAlgorithmOutput* GetCells();
 
+	vtkSmartPointer<vtkTable> GetPointTable();
+
 	RegionSurface* GetSurface();
 	RegionOutline* GetOutline();
 	RegionVoxelOutlines* GetVoxelOutlines();
@@ -31,6 +34,7 @@ public:
 
 	void SetExtent(int newExtent[6]);
 	void UpdateExtent(int x, int y, int z);
+	void InitializeExtent();
 
 	bool GetModified();
 	void SetModified(bool isModified);

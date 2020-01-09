@@ -434,9 +434,9 @@ void MainWindow::CreateToolBar() {
 	toolBar->addAction(actionEdit);
 	toolBar->addSeparator();
 	toolBar->addWidget(CreateLabel("2D"));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_overlay.svg", "Show overlay", "1", visualizationContainer->GetSliceView()->GetShowLabelSlice(), &MainWindow::on_actionOverlay));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_voxels.svg", "Show voxels", "2", visualizationContainer->GetSliceView()->GetShowVoxelOutlines(), &MainWindow::on_actionVoxels));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_outline.svg", "Show outlines", "3", visualizationContainer->GetSliceView()->GetShowRegionOutlines(), &MainWindow::on_actionOutline));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_overlay.svg", "Show overlay", "q", visualizationContainer->GetSliceView()->GetShowLabelSlice(), &MainWindow::on_actionOverlay));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_voxels.svg", "Show voxels", "w", visualizationContainer->GetSliceView()->GetShowVoxelOutlines(), &MainWindow::on_actionVoxels));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_outline.svg", "Show outlines", "e", visualizationContainer->GetSliceView()->GetShowRegionOutlines(), &MainWindow::on_actionOutline));
 	toolBar->addSeparator();
 	toolBar->addWidget(CreateLabel("3D"));
 	toolBar->addAction(CreateActionIcon(":/icons/icon_smooth_normals.svg", "Smooth normals", "n", visualizationContainer->GetVolumeView()->GetSmoothShading(), &MainWindow::on_actionSmoothNormals));

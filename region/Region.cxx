@@ -3,8 +3,10 @@
 #include <vtkActor.h>
 #include <vtkExtractVOI.h>
 #include <vtkImageData.h>
+#include <vtkIntArray.h>
 #include <vtkPlane.h>
 #include <vtkProperty.h>
+#include <vtkTable.h>
 #include <vtkThreshold.h>
 
 #include <algorithm>
@@ -22,12 +24,7 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 
 	// Input data info
 	data = inputData;
-	unsigned short* scalars = static_cast<unsigned short*>(data->GetScalarPointer());
-	int numPoints = data->GetNumberOfPoints();
-
-	int dataExtent[6];
-	data->GetExtent(dataExtent);
-
+	
 	// Label for this region
 	label = regionLabel;
 
@@ -37,38 +34,7 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 	color[2] = regionColor[2];
 
 	// Initialize extent for this region
-	extent[0] = dataExtent[1];
-	extent[1] = dataExtent[0];
-	extent[2] = dataExtent[3];
-	extent[3] = dataExtent[2];
-	extent[4] = dataExtent[5];
-	extent[5] = dataExtent[4];
-
-	// XXX: USE GENERATE REGION EXTENTS FROM vktImageConnectivityFilter AND PASS THIS IN
-	//		ALSO REGION SIZE FROM FILTER
-
-	int numVoxels = 0;
-	for (int i = 0; i < numPoints; i++) {
-		if (scalars[i] == label) {
-			double* point = data->GetPoint(i);
-
-			if (point[0] < extent[0]) extent[0] = point[0];
-			if (point[0] > extent[1]) extent[1] = point[0];
-			if (point[1] < extent[2]) extent[2] = point[1];
-			if (point[1] > extent[3]) extent[3] = point[1];
-			if (point[2] < extent[4]) extent[4] = point[2];
-			if (point[2] > extent[5]) extent[5] = point[2];
-
-			numVoxels++;
-		}
-	}
-
-	// Fix extent if no voxels with this label
-	if (numVoxels == 0) {
-		extent[0] = extent[1] = dataExtent[0];
-		extent[2] = extent[3] = dataExtent[2];
-		extent[4] = extent[5] = dataExtent[4];
-	}
+	InitializeExtent();
 
 	voi = vtkSmartPointer<vtkExtractVOI>::New();
 	voi->SetInputDataObject(data);
@@ -102,6 +68,41 @@ vtkAlgorithmOutput* Region::GetOutput() {
 
 vtkAlgorithmOutput* Region::GetCells() {
 	return threshold->GetOutputPort();
+}
+
+vtkSmartPointer<vtkTable> Region::GetPointTable() {	
+	vtkSmartPointer<vtkTable> table = vtkSmartPointer<vtkTable>::New();
+
+	vtkSmartPointer<vtkIntArray> x = vtkSmartPointer<vtkIntArray>::New();
+	x->SetNumberOfComponents(1);
+	x->SetName("x");
+
+	vtkSmartPointer<vtkIntArray> y = vtkSmartPointer<vtkIntArray>::New();
+	y->SetNumberOfComponents(1);
+	y->SetName("y");
+
+	vtkSmartPointer<vtkIntArray> z = vtkSmartPointer<vtkIntArray>::New();
+	z->SetNumberOfComponents(1);
+	z->SetName("z");
+
+	for (int i = extent[0]; i <= extent[1]; i++) {
+		for (int j = extent[2]; j <= extent[3]; j++) {
+			for (int k = extent[4]; k <= extent[5]; k++) {
+				unsigned short* p = static_cast<unsigned short*>(data->GetScalarPointer(i, j, k));
+				if (*p == label) {
+					x->InsertNextValue(i);
+					y->InsertNextValue(j);
+					z->InsertNextValue(k);
+				}
+			}
+		}
+	}
+
+	table->AddColumn(x);
+	table->AddColumn(y);
+	table->AddColumn(z);
+
+	return table;
 }
 
 RegionSurface* Region::GetSurface() {
@@ -179,6 +180,48 @@ void Region::UpdateExtent() {
 	padExtent[5] = std::min(dataExtent[5], extent[5] + padding);
 
 	voi->SetVOI(padExtent);
+}
+
+void Region::InitializeExtent() {
+	unsigned short* scalars = static_cast<unsigned short*>(data->GetScalarPointer());
+	int numPoints = data->GetNumberOfPoints();
+
+	int dataExtent[6];
+	data->GetExtent(dataExtent);
+	
+	// Initialize extent for this region
+	extent[0] = dataExtent[1];
+	extent[1] = dataExtent[0];
+	extent[2] = dataExtent[3];
+	extent[3] = dataExtent[2];
+	extent[4] = dataExtent[5];
+	extent[5] = dataExtent[4];
+
+	// XXX: USE GENERATE REGION EXTENTS FROM vktImageConnectivityFilter AND PASS THIS IN
+	//		ALSO REGION SIZE FROM FILTER
+
+	int numVoxels = 0;
+	for (int i = 0; i < numPoints; i++) {
+		if (scalars[i] == label) {
+			double* point = data->GetPoint(i);
+
+			if (point[0] < extent[0]) extent[0] = point[0];
+			if (point[0] > extent[1]) extent[1] = point[0];
+			if (point[1] < extent[2]) extent[2] = point[1];
+			if (point[1] > extent[3]) extent[3] = point[1];
+			if (point[2] < extent[4]) extent[4] = point[2];
+			if (point[2] > extent[5]) extent[5] = point[2];
+
+			numVoxels++;
+		}
+	}
+
+	// Fix extent if no voxels with this label
+	if (numVoxels == 0) {
+		extent[0] = extent[1] = dataExtent[0];
+		extent[2] = extent[3] = dataExtent[2];
+		extent[4] = extent[5] = dataExtent[4];
+	}
 }
 
 bool Region::GetModified() {

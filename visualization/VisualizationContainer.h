@@ -59,6 +59,7 @@ public:
 
 	void RelabelCurrentRegion();
 	void MergeWithCurrentRegion(int x, int y, int z);
+	void SplitCurrentRegion(int numRegions);
 
 	void GrowRegion(int x, int y, int z);
 	void RemoveRegion(unsigned short label);

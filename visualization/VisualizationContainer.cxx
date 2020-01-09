@@ -37,6 +37,13 @@
 #include "RegionCollection.h"
 #include "RegionMetadataIO.h"
 
+
+
+#include <vtkTable.h>
+#include <vtkKMeansStatistics.h>
+
+
+
 VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volumeInteractor, vtkRenderWindowInteractor* sliceInteractor, MainWindow* mainWindow) {
 	data = nullptr;
 	labels = nullptr;
@@ -568,6 +575,70 @@ void VisualizationContainer::MergeWithCurrentRegion(int x, int y, int z) {
 
 	// Remove region
 	RemoveRegion(label);
+}
+
+void VisualizationContainer::SplitCurrentRegion(int numRegions) {
+	if (!currentRegion) return;
+	
+	vtkSmartPointer<vtkTable> table = currentRegion->GetPointTable();
+
+	vtkSmartPointer<vtkKMeansStatistics> kMeans = vtkSmartPointer<vtkKMeansStatistics>::New();
+
+	kMeans->SetInputData(vtkStatisticsAlgorithm::INPUT_DATA, table);
+	kMeans->SetColumnStatus(table->GetColumnName(0), 1);
+	kMeans->SetColumnStatus(table->GetColumnName(1), 1);
+	kMeans->SetColumnStatus(table->GetColumnName(2), 1);
+	kMeans->RequestSelectedColumns();
+	kMeans->SetAssessOption(true);
+	kMeans->SetDefaultNumberOfClusters(numRegions);
+	kMeans->Update();
+
+	vtkTable* output = kMeans->GetOutput();
+
+	std::vector<std::vector<int>> newRegionRows(numRegions - 1);
+
+	for (int i = 0; i < output->GetNumberOfRows(); i++) {
+		int c = output->GetValue(i, output->GetNumberOfColumns() - 1).ToInt();
+
+		if (c > 0) newRegionRows[c - 1].push_back(i);
+	}
+
+	for (int i = 1; i < numRegions; i++) {
+		// Get label for new region
+		unsigned short newLabel = regions->GetNewLabel();
+
+		// Update label data
+		for (int j = 0; j < (int)newRegionRows[i - 1].size(); j++) {
+			int row = newRegionRows[i - 1][j];
+
+			int x = output->GetValue(row, 0).ToInt();
+			int y = output->GetValue(row, 1).ToInt();
+			int z = output->GetValue(row, 2).ToInt();
+
+			unsigned short* labelData = static_cast<unsigned short*>(labels->GetScalarPointer(x, y, z));
+
+			*labelData = newLabel;
+		}
+
+		UpdateColors(newLabel);
+
+		// Create new region
+		Region* newRegion = new Region(newLabel, labelColors->GetTableValue(newLabel), labels);
+		regions->Add(newRegion);
+		volumeView->AddRegion(newRegion);
+		sliceView->AddRegion(newRegion);
+
+		newRegion->SetModified(true);
+	}
+
+	// Update current region
+	currentRegion->SetModified(true);
+	currentRegion->InitializeExtent();
+
+	qtWindow->updateRegions(regions);
+
+	labels->Modified();
+	Render();
 }
 
 void VisualizationContainer::GrowRegion(int x, int y, int z) {
