@@ -46,7 +46,7 @@ void vtkInteractorStyleSlice::StartSelect()
 void vtkInteractorStyleSlice::EndSelect()
 {
 	// Enable select in either mode
-	if (!(this->State == VTKIS_SELECT_SLICE || this->State == VTKIS_PAN))
+	if (!(this->State == VTKIS_SELECT_SLICE || this->State == VTKIS_PAN || this->State == VTKIS_SPIN))
 	{
 		return;
 	}
@@ -208,6 +208,10 @@ void vtkInteractorStyleSlice::OnLeftButtonUp() {
 		if (this->State == VTKIS_PAINT_SLICE) 
 		{
 			this->InvokeEvent(PaintEvent, nullptr);
+		}
+		else if (this->State == VTKIS_SPIN)
+		{
+			this->EndSelect();
 		}
 	}
 

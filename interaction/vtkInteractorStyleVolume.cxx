@@ -45,7 +45,7 @@ void vtkInteractorStyleVolume::StartSelect()
 void vtkInteractorStyleVolume::EndSelect()
 {
 	// Enable select in either mode
-	if (!(this->State == VTKIS_SELECT_VOLUME || this->State == VTKIS_PAN))
+	if (!(this->State == VTKIS_SELECT_VOLUME || this->State == VTKIS_PAN || this->State == VTKIS_SPIN))
 	{
 		return;
 	}
@@ -223,6 +223,10 @@ void vtkInteractorStyleVolume::OnLeftButtonUp()
 		if (this->State == VTKIS_PAINT_VOLUME)
 		{
 			this->InvokeEvent(PaintEvent, nullptr);
+		}
+		else if (this->State == VTKIS_SPIN)
+		{
+			this->EndSelect();
 		}
 	}
 
