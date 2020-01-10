@@ -134,9 +134,12 @@ void InteractionCallbacks::VolumeSelectLabel(vtkObject* caller, unsigned long ev
 
 	if (pick) {
 		// Get the position for the pick event
-		double p[3];
+		//double p[3];
+		//VolumePick(p);
+		//vis->PickPointLabel(p[0], p[1], p[2]);
+		int p[3];
 		VolumePick(p);
-		vis->PickPointLabel(p[0], p[1], p[2]);
+		vis->PickLabel(p[0], p[1], p[2]);
 		vis->Render();
 	}
 }
@@ -166,9 +169,9 @@ void InteractionCallbacks::VolumePaint(vtkObject* caller, unsigned long eventId,
 
 	if (pick) {
 		// Get the position for the pick event
-		double p[3];
+		int p[3];
 		VolumePick(p);
-		vis->PaintPoint(p[0], p[1], p[2]);
+		vis->Paint(p[0], p[1], p[2]);
 		vis->Render();
 	}
 }
@@ -198,9 +201,9 @@ void InteractionCallbacks::VolumeErase(vtkObject* caller, unsigned long eventId,
 
 	if (pick) {
 		// Get the position for the pick event
-		double p[3];
+		int p[3];
 		VolumePick(p);
-		vis->ErasePoint(p[0], p[1], p[2]);
+		vis->Erase(p[0], p[1], p[2]);
 		vis->Render();
 	}
 }
@@ -242,7 +245,7 @@ void InteractionCallbacks::MouseMove(vtkRenderWindowInteractor* rwi, Visualizati
 			vis->GetSliceView()->SetProbePosition(p[0], p[1], p[2]);
 		}
 		else {
-			double p[3];
+			int p[3];
 			VolumePick(p); 
 			vis->GetVolumeView()->SetProbePosition(p[0], p[1], p[2]);
 			vis->GetSliceView()->SetProbePosition(p[0], p[1], p[2]);		
@@ -267,12 +270,13 @@ int InteractionCallbacks::Pick(vtkRenderWindowInteractor* rwi) {
 	return picker->Pick(x, y, 0.0, rwi->FindPokedRenderer(x, y));
 }
 
-void InteractionCallbacks::VolumePick(double p[3]) {
-	picker->GetPickPosition(p);
+void InteractionCallbacks::VolumePick(int p[3]) {
+	double p0[3];
+	picker->GetPickPosition(p0);
 
-	p[0] = round(p[0]);
-	p[1] = round(p[1]);
-	p[2] = round(p[2]);
+	p[0] = round(p0[0]);
+	p[1] = round(p0[1]);
+	p[2] = round(p0[2]);
 }
 
 void InteractionCallbacks::SlicePick(int p[3]) {

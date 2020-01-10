@@ -46,6 +46,7 @@
 
 #include <vtkThreshold.h>
 #include <vtkCellLocator.h>
+#include <vtkUnstructuredGrid.h>
 
 
 VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volumeInteractor, vtkRenderWindowInteractor* sliceInteractor, MainWindow* mainWindow) {
@@ -430,6 +431,7 @@ void VisualizationContainer::Erase(int x, int y, int z) {
 	qtWindow->updateRegion(currentRegion);
 }
 
+/*
 void VisualizationContainer::PickPointLabel(double x, double y, double z) {
 	if (!labels) return;
 
@@ -459,6 +461,7 @@ void VisualizationContainer::ErasePoint(double x, double y, double z) {
 
 	Erase(s[0], s[1], s[2]);
 }
+*/
 
 void VisualizationContainer::SetCurrentRegion(Region* region) {
 	currentRegion = region;
@@ -976,6 +979,7 @@ double VisualizationContainer::GetValue(int x, int y, int z) {
 	return data->GetScalarComponentAsDouble(x, y, z, 0);
 }
 
+/*
 void VisualizationContainer::PointToStructured(double p[3], int s[3]) {
 	// Find closest non-zero cell
 	vtkSmartPointer<vtkThreshold> threshold = vtkSmartPointer<vtkThreshold>::New();
@@ -984,7 +988,7 @@ void VisualizationContainer::PointToStructured(double p[3], int s[3]) {
 	threshold->Update();
 
 	vtkSmartPointer<vtkCellLocator> locator = vtkSmartPointer<vtkCellLocator>::New();
-	locator->SetDataSet((vtkDataSet*)threshold->GetOutput());
+	locator->SetDataSet(threshold->GetOutput());
 	locator->BuildLocator();
 
 	double p2[3];
@@ -997,3 +1001,4 @@ void VisualizationContainer::PointToStructured(double p[3], int s[3]) {
 	double pc[3];
 	labels->ComputeStructuredCoordinates(p2, s, pc);
 }
+*/

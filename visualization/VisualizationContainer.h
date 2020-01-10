@@ -51,9 +51,9 @@ public:
 	void Paint(int x, int y, int z);
 	void Erase(int x, int y, int z);
 
-	void PickPointLabel(double x, double y, double z);
-	void PaintPoint(double x, double y, double z);
-	void ErasePoint(double x, double y, double z);
+	//void PickPointLabel(double x, double y, double z);
+	//void PaintPoint(double x, double y, double z);
+	//void ErasePoint(double x, double y, double z);
 
 	void SetCurrentRegion(Region* region);
 
@@ -115,7 +115,7 @@ protected:
 
 	double GetValue(int x, int y, int z);
 
-	void PointToStructured(double p[3], int s[3]);
+	//void PointToStructured(double p[3], int s[3]);
 };
 
 #endif
