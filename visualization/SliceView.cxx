@@ -156,6 +156,10 @@ void SliceView::SetSegmentationData(vtkImageData* imageLabels, RegionCollection*
 		AddRegionActors(regions->Get(it));
 	}
 
+	// Adjust clipping plane so everything matches
+	vtkCamera* cam = renderer->GetActiveCamera();
+	cam->SetDistance(cam->GetDistance() - imageLabels->GetSpacing()[0] * 0.5);
+
 	FilterRegions();
 }
 
