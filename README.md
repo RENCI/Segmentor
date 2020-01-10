@@ -47,7 +47,6 @@ Switch between **Navigation** and **Edit** modes with the space bar.
 
 ### Edit mode:
 
-* Select current label: `Middle-click or Ctrl-left-click segmentation region`
 * Paint: `Left-click or left-click and drag`
 * Erase: `Right-click or right-click and drag`
 * Region grow: `g` (2D slice view only)
@@ -56,6 +55,7 @@ Switch between **Navigation** and **Edit** modes with the space bar.
 
 #### General 
 
+* Select current label: `Middle-click or Ctrl-left-click segmentation region`
 * Move clipping plane: `Ctrl-right-click and drag`
 * Zoom to point: `f`
 * Relabel current region: `u`
