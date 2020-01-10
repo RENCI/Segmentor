@@ -44,7 +44,8 @@ void vtkInteractorStyleVolume::StartSelect()
 //----------------------------------------------------------------------------
 void vtkInteractorStyleVolume::EndSelect()
 {
-	if (this->State != VTKIS_SELECT_VOLUME)
+	// Enable select in either mode
+	if (!(this->State == VTKIS_SELECT_VOLUME || this->State == VTKIS_PAN))
 	{
 		return;
 	}
@@ -278,7 +279,8 @@ void vtkInteractorStyleVolume::OnMiddleButtonUp() {
 		return;
 	}
 
-	if (this->State == VTKIS_SELECT_VOLUME)
+	// Enable select in either mode
+	if (this->State == VTKIS_SELECT_VOLUME || (this->State == VTKIS_PAN && !this->MouseMoved))
 	{
 		this->EndSelect();
 	}

@@ -455,6 +455,7 @@ void MainWindow::CreateToolBar() {
 	toolBar->addAction(CreateActionIcon(":/icons/icon_filter_plane.svg", "Filter to plane", "p", visualizationContainer->GetVolumeView()->GetFilterPlane(), &MainWindow::on_actionFilterPlane));
 	toolBar->addAction(CreateActionIcon(":/icons/icon_filter_region.svg", "Filter region", "l", visualizationContainer->GetVolumeView()->GetFilterRegion(), &MainWindow::on_actionFilterRegion));
 	toolBar->addSeparator();
+	toolBar->addWidget(CreateLabel("Edit"));
 	toolBar->addAction(CreateActionIcon(":/icons/icon_dilate.svg", "Dilate region", "z", &MainWindow::on_actionDilateRegion));
 	toolBar->addAction(CreateActionIcon(":/icons/icon_erode.svg", "Erode region", "x",&MainWindow::on_actionErodeRegion));
 
