@@ -42,13 +42,6 @@
 #include "RegionCollection.h"
 #include "RegionMetadataIO.h"
 
-
-
-#include <vtkThreshold.h>
-#include <vtkCellLocator.h>
-#include <vtkUnstructuredGrid.h>
-
-
 VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volumeInteractor, vtkRenderWindowInteractor* sliceInteractor, MainWindow* mainWindow) {
 	data = nullptr;
 	labels = nullptr;
@@ -927,6 +920,8 @@ void VisualizationContainer::ExtractRegions() {
 			delete region;
 		}
 	}
+
+	currentRegion = nullptr;
 }
 
 void VisualizationContainer::LoadRegionMetadata(std::string fileName) {
