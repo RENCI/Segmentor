@@ -42,6 +42,12 @@
 #include "RegionCollection.h"
 #include "RegionMetadataIO.h"
 
+
+
+#include <vtkThreshold.h>
+#include <vtkCellLocator.h>
+
+
 VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volumeInteractor, vtkRenderWindowInteractor* sliceInteractor, MainWindow* mainWindow) {
 	data = nullptr;
 	labels = nullptr;
@@ -971,9 +977,23 @@ double VisualizationContainer::GetValue(int x, int y, int z) {
 }
 
 void VisualizationContainer::PointToStructured(double p[3], int s[3]) {
-	vtkIdType point = labels->FindPoint(p);
-	double* p2 = labels->GetPoint(point);
-	double c[3];
-	
-	labels->ComputeStructuredCoordinates(p2, s, c);
+	// Find closest non-zero cell
+	vtkSmartPointer<vtkThreshold> threshold = vtkSmartPointer<vtkThreshold>::New();
+	threshold->ThresholdByUpper(1);
+	threshold->SetInputData(labels);
+	threshold->Update();
+
+	vtkSmartPointer<vtkCellLocator> locator = vtkSmartPointer<vtkCellLocator>::New();
+	locator->SetDataSet((vtkDataSet*)threshold->GetOutput());
+	locator->BuildLocator();
+
+	double p2[3];
+	double d2;
+	vtkIdType cellId;
+	int subId;
+	locator->FindClosestPoint(p, p2, cellId, subId, d2);
+
+	// Convert to structured coordinates
+	double pc[3];
+	labels->ComputeStructuredCoordinates(p2, s, pc);
 }

@@ -294,6 +294,7 @@ void VolumeView::CreateProbe() {
 	probe->SetMapper(mapper);
 	probe->GetProperty()->SetRepresentationToWireframe();
 	probe->GetProperty()->LightingOff();
+	probe->GetProperty()->SetLineWidth(2);
 	probe->VisibilityOff();
 	probe->PickableOff();
 

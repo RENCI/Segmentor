@@ -41,8 +41,8 @@ private:
 	static void MouseMove(vtkRenderWindowInteractor* rwi, VisualizationContainer* vis, ViewType viewType);
 
 	static int Pick(vtkRenderWindowInteractor* rwi);
-	static double* VolumePick();
-	static int* SlicePick();
+	static void VolumePick(double p[3]);
+	static void SlicePick(int p[3]);
 
 	InteractionCallbacks();
 	~InteractionCallbacks();

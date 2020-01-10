@@ -74,7 +74,8 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 
 		if (pick) {
 			// Get the pixel indeces for the pick event		
-			int* p = SlicePick();
+			int p[3];
+			SlicePick(p);
 
 			// XXX: HACK TO GUARD AGAINST INVALID VOLUME PICK
 			//		NEED TO FIX VOLUME PICKING AND DIFFERENTIATE BETWEEN THEM FOR KEYSTROKE CALLBACK
@@ -98,7 +99,8 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 
 		if (pick) {
 			// Get the pixel indeces for the pick event		
-			int* p = SlicePick();
+			int p[3];
+			SlicePick(p);
 
 			// XXX: HACK TO GUARD AGAINST INVALID VOLUME PICK
 			//		NEED TO FIX VOLUME PICKING AND DIFFERENTIATE BETWEEN THEM FOR KEYSTROKE CALLBACK
@@ -132,7 +134,8 @@ void InteractionCallbacks::VolumeSelectLabel(vtkObject* caller, unsigned long ev
 
 	if (pick) {
 		// Get the position for the pick event
-		double* p = VolumePick();
+		double p[3];
+		VolumePick(p);
 		vis->PickPointLabel(p[0], p[1], p[2]);
 		vis->Render();
 	}
@@ -147,7 +150,8 @@ void InteractionCallbacks::SliceSelectLabel(vtkObject* caller, unsigned long eve
 
 	if (pick) {
 		// Get the pixel indeces for the pick event		
-		int* p = SlicePick();
+		int p[3];
+		SlicePick(p);
 		vis->PickLabel(p[0], p[1], p[2]);
 		vis->Render();
 	}
@@ -162,7 +166,8 @@ void InteractionCallbacks::VolumePaint(vtkObject* caller, unsigned long eventId,
 
 	if (pick) {
 		// Get the position for the pick event
-		double* p = VolumePick();
+		double p[3];
+		VolumePick(p);
 		vis->PaintPoint(p[0], p[1], p[2]);
 		vis->Render();
 	}
@@ -177,7 +182,8 @@ void InteractionCallbacks::SlicePaint(vtkObject* caller, unsigned long eventId, 
 
 	if (pick) {
 		// Get the pixel indeces for the pick event
-		int* p = SlicePick();
+		int p[3];
+		SlicePick(p);
 		vis->Paint(p[0], p[1], p[2]);
 		vis->Render();		
 	}
@@ -192,7 +198,8 @@ void InteractionCallbacks::VolumeErase(vtkObject* caller, unsigned long eventId,
 
 	if (pick) {
 		// Get the position for the pick event
-		double* p = VolumePick();
+		double p[3];
+		VolumePick(p);
 		vis->ErasePoint(p[0], p[1], p[2]);
 		vis->Render();
 	}
@@ -207,7 +214,8 @@ void InteractionCallbacks::SliceErase(vtkObject* caller, unsigned long eventId, 
 
 	if (pick) {
 		// Get the pixel indeces for the pick event
-		int* p = SlicePick();
+		int p[3];
+		SlicePick(p);
 		vis->Erase(p[0], p[1], p[2]);
 		vis->Render();
 	}
@@ -228,12 +236,14 @@ void InteractionCallbacks::MouseMove(vtkRenderWindowInteractor* rwi, Visualizati
 	if (pick) {
 		// Get the point coordinate for the pick event
 		if (viewType == SliceView) {
-			int* p = SlicePick();
+			int p[3];
+			SlicePick(p);
 			vis->GetVolumeView()->SetProbePosition(p[0], p[1], p[2]);
 			vis->GetSliceView()->SetProbePosition(p[0], p[1], p[2]);
 		}
 		else {
-			double* p = VolumePick(); 
+			double p[3];
+			VolumePick(p); 
 			vis->GetVolumeView()->SetProbePosition(p[0], p[1], p[2]);
 			vis->GetSliceView()->SetProbePosition(p[0], p[1], p[2]);		
 		}
@@ -257,10 +267,14 @@ int InteractionCallbacks::Pick(vtkRenderWindowInteractor* rwi) {
 	return picker->Pick(x, y, 0.0, rwi->FindPokedRenderer(x, y));
 }
 
-double* InteractionCallbacks::VolumePick() {
-	return picker->GetPickPosition();
+void InteractionCallbacks::VolumePick(double p[3]) {
+	picker->GetPickPosition(p);
+
+	p[0] = round(p[0]);
+	p[1] = round(p[1]);
+	p[2] = round(p[2]);
 }
 
-int* InteractionCallbacks::SlicePick() {
-	return picker->GetPointIJK();
+void InteractionCallbacks::SlicePick(int p[3]) {
+	picker->GetPointIJK(p);
 }
