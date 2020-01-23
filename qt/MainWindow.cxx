@@ -471,8 +471,8 @@ void MainWindow::CreateToolBar() {
 	toolBar->addAction(actionFilterRegion);
 	toolBar->addSeparator();
 	toolBar->addWidget(CreateLabel("Edit"));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_dilate.svg", "Dilate region", "z", &MainWindow::on_actionDilateRegion));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_erode.svg", "Erode region", "x",&MainWindow::on_actionErodeRegion));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_dilate.svg", "Dilate region", "c", &MainWindow::on_actionDilateRegion));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_erode.svg", "Erode region", "v",&MainWindow::on_actionErodeRegion));
 
 	// Need extra logic for interaction mode
 	QObject::connect(actionNavigation, &QAction::triggered, this, &MainWindow::on_actionNavigation);
