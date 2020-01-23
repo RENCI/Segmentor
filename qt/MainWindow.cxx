@@ -502,7 +502,6 @@ void MainWindow::CreateToolBar() {
 		this->visualizationContainer->SetFilterMode(actionFilterNeighbors->isChecked() ? FilterNeighbors : FilterNone);
 	});
 	QObject::connect(actionFilterRegion, &QAction::triggered, [actionFilterPlane, actionFilterNeighbors, actionFilterRegion, this]() {
-		//actionFilterRegion->toggle();
 		actionFilterPlane->setChecked(false);
 		actionFilterNeighbors->setChecked(false);
 
