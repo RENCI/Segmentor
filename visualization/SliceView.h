@@ -21,6 +21,7 @@ class RegionCollection;
 class SliceLocation;
 
 enum InteractionMode;
+enum FilterMode;
 
 class SliceView {
 public:
@@ -37,6 +38,7 @@ public:
 	void SetProbePosition(double x, double y, double z);
 
 	void SetInteractionMode(InteractionMode mode);
+	void SetFilterMode(FilterMode mode);
 
 	void SetCurrentRegion(Region* region);
 	
@@ -52,9 +54,6 @@ public:
 	void ShowRegionOutlines(bool show);
 	void ToggleRegionOutlines();
 
-	void SetFilterRegion(bool filter);
-	void ToggleFilterRegion();
-
 	void UpdatePlane();
 
 	void Render();
@@ -63,9 +62,9 @@ public:
 	vtkSmartPointer<vtkInteractorStyleSlice> GetInteractorStyle();
 
 protected:
+	FilterMode filterMode;
 	bool showVoxelOutlines;
 	bool showRegionOutlines;
-	bool filterRegion;
 
 	Region* currentRegion;
 

@@ -6,4 +6,11 @@ enum InteractionMode {
 	EditMode
 };
 
+enum FilterMode {
+	FilterNone,
+	FilterPlane,
+	FilterNeighbors,
+	FilterRegion
+};
+
 #endif

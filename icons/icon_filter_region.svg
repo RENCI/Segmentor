@@ -114,6 +114,66 @@
        apply_no_weight="true"
        apply_with_weight="true"
        only_selected="false" />
+    <inkscape:path-effect
+       effect="bspline"
+       id="path-effect4518-35-0-76"
+       is_visible="true"
+       weight="33.333333"
+       steps="2"
+       helper_size="0"
+       apply_no_weight="true"
+       apply_with_weight="true"
+       only_selected="false" />
+    <inkscape:path-effect
+       effect="bspline"
+       id="path-effect4518-35-0-1"
+       is_visible="true"
+       weight="33.333333"
+       steps="2"
+       helper_size="0"
+       apply_no_weight="true"
+       apply_with_weight="true"
+       only_selected="false" />
+    <inkscape:path-effect
+       effect="bspline"
+       id="path-effect4518-35-0-1-4"
+       is_visible="true"
+       weight="33.333333"
+       steps="2"
+       helper_size="0"
+       apply_no_weight="true"
+       apply_with_weight="true"
+       only_selected="false" />
+    <inkscape:path-effect
+       effect="bspline"
+       id="path-effect4518-35-0-1-4-1"
+       is_visible="true"
+       weight="33.333333"
+       steps="2"
+       helper_size="0"
+       apply_no_weight="true"
+       apply_with_weight="true"
+       only_selected="false" />
+    <inkscape:path-effect
+       effect="bspline"
+       id="path-effect4518-35-0-1-4-1-7"
+       is_visible="true"
+       weight="33.333333"
+       steps="2"
+       helper_size="0"
+       apply_no_weight="true"
+       apply_with_weight="true"
+       only_selected="false" />
+    <inkscape:path-effect
+       effect="bspline"
+       id="path-effect4518-35-0-1-4-19"
+       is_visible="true"
+       weight="33.333333"
+       steps="2"
+       helper_size="0"
+       apply_no_weight="true"
+       apply_with_weight="true"
+       only_selected="false" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -123,7 +183,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="28.5"
-     inkscape:cx="21.062725"
+     inkscape:cx="15.360971"
      inkscape:cy="24"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
@@ -155,11 +215,11 @@
      style="opacity:1">
     <path
        style="opacity:1;fill:none;fill-opacity:0.39215686;stroke:#606060;stroke-width:0.79375;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 3.0200376,285.69544 c -0.2225676,0.14314 -0.6677093,0.42944 -0.7135809,0.77467 -0.045872,0.34524 0.3076262,0.74887 0.3305606,1.24 0.022934,0.49113 -0.2848433,1.06931 -0.090809,1.37535 0.194034,0.30604 0.8898698,0.3396 1.5004798,0.23053 0.61061,-0.10908 1.1361076,-0.36081 1.3656716,-0.78807 0.2295641,-0.42727 0.1633959,-1.03036 -0.024223,-1.51802 -0.187619,-0.48766 -0.4968037,-0.86023 -0.8745852,-1.08394 -0.3777814,-0.22372 -0.8243261,-0.29868 -1.047636,-0.33616 -0.22331,-0.0375 -0.22331,-0.0375 -0.4458775,0.10564 z"
+       d="m 5.7834133,289.16945 c -0.1367637,0.088 -0.4102913,0.26388 -0.438479,0.47602 -0.028188,0.21214 0.1890294,0.46017 0.203121,0.76196 0.014092,0.30178 -0.1750279,0.65706 -0.0558,0.84512 0.1192285,0.18806 0.5468063,0.20869 0.9220123,0.14167 0.375206,-0.067 0.698114,-0.22171 0.8391759,-0.48425 0.1410619,-0.26254 0.1004025,-0.63313 -0.014885,-0.93279 -0.1152875,-0.29965 -0.3052778,-0.52859 -0.537411,-0.66606 -0.2321332,-0.13746 -0.5065361,-0.18352 -0.6437536,-0.20656 -0.1372175,-0.023 -0.1372175,-0.0231 -0.2739811,0.0649 z"
        id="path4516"
        inkscape:connector-curvature="0"
        inkscape:path-effect="#path-effect4518-35"
-       inkscape:original-d="m 3.2426051,285.55229 c -0.4451501,0.28627 -0.8902903,0.57257 -1.3357783,0.85912 0.3538672,0.40384 0.7073621,0.80748 1.0609898,1.21148 -0.3078201,0.57837 -0.6156023,1.15655 -0.9235954,1.73504 0.696029,0.0334 1.3918629,0.067 2.0876307,0.10069 0.525431,-0.25174 1.0509209,-0.50349 1.5762186,-0.75507 -0.066028,-0.60291 -0.1321975,-1.206 -0.1984585,-1.80885 -0.3089846,-0.37255 -0.6181659,-0.74512 -0.9274119,-1.11753 -0.4464024,-0.0751 -0.8929541,-0.15001 -1.339595,-0.22485 z"
+       inkscape:original-d="m 5.9201769,289.08149 c -0.2735349,0.17591 -0.5470638,0.35183 -0.8208064,0.52791 0.2174436,0.24815 0.4346585,0.49618 0.6519549,0.74443 -0.1891487,0.3554 -0.3782741,0.71067 -0.5675291,1.06614 0.4276946,0.0205 0.8552692,0.0412 1.2828032,0.0619 0.3228658,-0.15469 0.6457678,-0.30939 0.9685517,-0.46398 -0.040573,-0.37047 -0.081233,-0.74106 -0.1219484,-1.1115 -0.1898642,-0.22892 -0.3798493,-0.45786 -0.5698742,-0.68669 -0.2743045,-0.0461 -0.5487007,-0.0922 -0.8231517,-0.13817 z"
        sodipodi:nodetypes="ccccccccc" />
   </g>
 </svg>

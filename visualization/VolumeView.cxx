@@ -37,8 +37,7 @@ void VolumeView::cameraChange(vtkObject* caller, unsigned long eventId, void* cl
 }
 
 VolumeView::VolumeView(vtkRenderWindowInteractor* interactor) {
-	filterRegion = false;
-	filterPlane = false;
+	filterMode = FilterNone;
 	smoothSurfaces = false;
 	smoothShading = true;
 	
@@ -102,7 +101,7 @@ void VolumeView::SetRegions(vtkImageData* data, RegionCollection* newRegions) {
 	regions = newRegions;
 
 	// Reset
-	filterRegion = false;
+	filterMode = FilterNone;
 	currentRegion = nullptr;
 	highlightRegion = nullptr;
 
@@ -187,6 +186,12 @@ void VolumeView::SetInteractionMode(enum InteractionMode mode) {
 	style->SetMode(mode);
 }
 
+void VolumeView::SetFilterMode(enum FilterMode mode) {
+	filterMode = mode;
+
+	FilterRegions();
+}
+
 bool VolumeView::GetSmoothSurfaces() {
 	return smoothSurfaces;
 }
@@ -221,34 +226,6 @@ void VolumeView::SetSmoothShading(bool smooth) {
 
 void VolumeView::ToggleSmoothShading() {
 	SetSmoothShading(!smoothShading);
-}
-
-bool VolumeView::GetFilterRegion() {
-	return filterRegion;
-}
-
-void VolumeView::SetFilterRegion(bool filter) {
-	filterRegion = filter;
-
-	FilterRegions();
-}
-
-void VolumeView::ToggleFilterRegion() {
-	SetFilterRegion(!filterRegion);
-}
-
-bool VolumeView::GetFilterPlane() {
-	return filterPlane;
-}
-
-void VolumeView::SetFilterPlane(bool filter) {
-	filterPlane = filter;
-
-	FilterRegions();
-}
-
-void VolumeView::ToggleFilterPlane() {
-	SetFilterPlane(!filterPlane);
 }
 
 void VolumeView::UpdatePlane() {
@@ -404,25 +381,56 @@ void VolumeView::UpdateCorners(vtkImageData* data) {
 void VolumeView::FilterRegions() {
 	if (!regions) return;
 
+	vtkCamera * cam = renderer->GetActiveCamera();
+
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
 		Region* region = regions->Get(it);
 		RegionSurface* surface = region->GetSurface();
 
-		if (filterPlane) {
-			vtkCamera* cam = renderer->GetActiveCamera();
-			bool ix = surface->IntersectsPlane(cam->GetFocalPoint(), cam->GetDirectionOfProjection());
+		// Reset opacity
+		surface->GetActor()->GetProperty()->SetOpacity(1);
 
-			surface->GetActor()->SetVisibility(ix);
-		}
-		else {
+		// Always show current region
+		if (currentRegion && region == currentRegion) {
 			surface->GetActor()->VisibilityOn();
+			continue;
 		}
-			
-		if (filterRegion && currentRegion) {
-			surface->GetActor()->SetVisibility(region == currentRegion);
-		}		
-		else if (!filterPlane) {
+
+		switch (filterMode) {
+		case FilterNone:
 			surface->GetActor()->VisibilityOn();
+			break;
+
+		case FilterPlane:
+			surface->GetActor()->SetVisibility(surface->IntersectsPlane(cam->GetFocalPoint(), cam->GetDirectionOfProjection()));
+			break;
+
+		case FilterNeighbors:
+			if (currentRegion) {
+				double d = sqrt(vtkMath::Distance2BetweenPoints(currentRegion->GetCenter(), region->GetCenter()));
+				double r = (currentRegion->GetLength() + region->GetLength()) / 4;
+
+				if (d <= r * 1.05) {
+					surface->GetActor()->VisibilityOn();
+					surface->GetActor()->GetProperty()->SetOpacity(0.25);
+				}
+				else {
+					surface->GetActor()->VisibilityOff();
+				}
+			}
+			else {
+				surface->GetActor()->VisibilityOn();
+			}
+			break;
+
+		case FilterRegion: 
+			if (currentRegion) {
+				surface->GetActor()->VisibilityOff();
+			}
+			else {
+				surface->GetActor()->VisibilityOn();
+			}
+			break;
 		}
 	}
 

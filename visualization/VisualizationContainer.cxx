@@ -59,9 +59,11 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	volumeView = new VolumeView(volumeInteractor);
 	sliceView = new SliceView(sliceInteractor, labelColors);
 
-	// Set to edit mode, then toggle to propagate change
-	interactionMode = EditMode;
-	ToggleInteractionMode();
+	// Set to navigation mode
+	SetInteractionMode(NavigationMode);
+
+	// Set to no filter
+	SetFilterMode(FilterNone);
 
 	// Callbacks
 
@@ -394,6 +396,17 @@ void VisualizationContainer::SetInteractionMode(InteractionMode mode) {
 
 void VisualizationContainer::ToggleInteractionMode() {
 	SetInteractionMode(interactionMode == NavigationMode ? EditMode : NavigationMode);
+}
+
+FilterMode VisualizationContainer::GetFilterMode() {
+	return filterMode;
+}
+
+void VisualizationContainer::SetFilterMode(FilterMode mode) {
+	filterMode = mode;
+
+	volumeView->SetFilterMode(filterMode);
+	sliceView->SetFilterMode(filterMode);
 }
 
 void VisualizationContainer::PickLabel(int x, int y, int z) {

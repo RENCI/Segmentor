@@ -358,15 +358,6 @@ void MainWindow::on_actionShowPlane(bool checked) {
 	visualizationContainer->GetVolumeView()->SetShowPlane(checked);
 }
 
-void MainWindow::on_actionFilterPlane(bool checked) {
-	visualizationContainer->GetVolumeView()->SetFilterPlane(checked);
-}
-
-void MainWindow::on_actionFilterRegion(bool checked) {
-	visualizationContainer->GetSliceView()->SetFilterRegion(checked);
-	visualizationContainer->GetVolumeView()->SetFilterRegion(checked);
-}
-
 void MainWindow::on_actionDilateRegion(bool) {
 	visualizationContainer->DilateCurrentRegion();
 }
@@ -422,11 +413,13 @@ void MainWindow::SetDefaultDirectory(QString key, QString fileName) {
 }
 
 void MainWindow::CreateToolBar() {
+	// Create tool bar
 	QToolBar* toolBar = new QToolBar();
 	toolBar->setFloatable(true);
 	toolBar->setMovable(true);
 	toolBar->setOrientation(Qt::Vertical);
 
+	// Interaction toggle
 	QActionGroup* interactionModeGroup = new QActionGroup(this);
 	interactionModeGroup->setExclusive(true);
 
@@ -437,6 +430,27 @@ void MainWindow::CreateToolBar() {
 	QAction* actionEdit = new QAction("E", interactionModeGroup);
 	actionEdit->setCheckable(true);
 
+	// Filter mode toggle
+	// XXX: With Qt 5.14, should be able to set exclusion policy to avoid extra logic below
+	//QActionGroup* filterModeGroup = new QActionGroup(this);
+	//interactionModeGroup->setExclusive(false);
+
+	QAction* actionFilterPlane = new QAction(QIcon(":/icons/icon_filter_plane.svg"), "Filter to plane", this);
+	actionFilterPlane->setShortcut(QKeySequence("p"));
+	actionFilterPlane->setCheckable(true);
+	actionFilterPlane->setChecked(visualizationContainer->GetFilterMode() == FilterPlane);
+
+	QAction* actionFilterNeighbors = new QAction(QIcon(":/icons/icon_filter_neighbors.svg"), "Filter neighbors", this);
+	actionFilterNeighbors->setShortcut(QKeySequence("k"));
+	actionFilterNeighbors->setCheckable(true);
+	actionFilterNeighbors->setChecked(visualizationContainer->GetFilterMode() == FilterNeighbors);
+
+	QAction* actionFilterRegion = new QAction(QIcon(":/icons/icon_filter_region.svg"), "Filter region", this);
+	actionFilterRegion->setShortcut(QKeySequence("l"));
+	actionFilterRegion->setCheckable(true);
+	actionFilterRegion->setChecked(visualizationContainer->GetFilterMode() == FilterRegion);
+
+	// Add widgets to tool bar
 	toolBar->addWidget(CreateLabel("Mode"));
 	toolBar->addAction(actionNavigation);
 	toolBar->addAction(actionEdit);
@@ -452,14 +466,15 @@ void MainWindow::CreateToolBar() {
 	toolBar->addAction(CreateActionIcon(":/icons/icon_plane.svg", "Show plane", "o", visualizationContainer->GetVolumeView()->GetShowPlane(), &MainWindow::on_actionShowPlane));
 	toolBar->addSeparator();
 	toolBar->addWidget(CreateLabel("Filter"));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_filter_plane.svg", "Filter to plane", "p", visualizationContainer->GetVolumeView()->GetFilterPlane(), &MainWindow::on_actionFilterPlane));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_filter_region.svg", "Filter region", "l", visualizationContainer->GetVolumeView()->GetFilterRegion(), &MainWindow::on_actionFilterRegion));
+	toolBar->addAction(actionFilterPlane);
+	toolBar->addAction(actionFilterNeighbors);
+	toolBar->addAction(actionFilterRegion);
 	toolBar->addSeparator();
 	toolBar->addWidget(CreateLabel("Edit"));
 	toolBar->addAction(CreateActionIcon(":/icons/icon_dilate.svg", "Dilate region", "z", &MainWindow::on_actionDilateRegion));
 	toolBar->addAction(CreateActionIcon(":/icons/icon_erode.svg", "Erode region", "x",&MainWindow::on_actionErodeRegion));
 
-	// Need extra logic for modes
+	// Need extra logic for interaction mode
 	QObject::connect(actionNavigation, &QAction::triggered, this, &MainWindow::on_actionNavigation);
 	QObject::connect(actionEdit, &QAction::triggered, this, &MainWindow::on_actionEdit);
 	QObject::connect(new QShortcut(QKeySequence(32), this), &QShortcut::activated, [actionNavigation, actionEdit]() {
@@ -471,6 +486,27 @@ void MainWindow::CreateToolBar() {
 			actionEdit->toggle();
 			emit(actionEdit->triggered(true));
 		}
+	});
+
+	// Need extra logic for filter mode
+	QObject::connect(actionFilterPlane, &QAction::triggered, [actionFilterPlane, actionFilterNeighbors, actionFilterRegion, this]() {
+		actionFilterNeighbors->setChecked(false);
+		actionFilterRegion->setChecked(false);
+
+		this->visualizationContainer->SetFilterMode(actionFilterPlane->isChecked() ? FilterPlane : FilterNone);
+	});
+	QObject::connect(actionFilterNeighbors, &QAction::triggered, [actionFilterPlane, actionFilterNeighbors, actionFilterRegion, this]() {
+		actionFilterPlane->setChecked(false);
+		actionFilterRegion->setChecked(false);
+
+		this->visualizationContainer->SetFilterMode(actionFilterNeighbors->isChecked() ? FilterNeighbors : FilterNone);
+	});
+	QObject::connect(actionFilterRegion, &QAction::triggered, [actionFilterPlane, actionFilterNeighbors, actionFilterRegion, this]() {
+		//actionFilterRegion->toggle();
+		actionFilterPlane->setChecked(false);
+		actionFilterNeighbors->setChecked(false);
+
+		this->visualizationContainer->SetFilterMode(actionFilterRegion->isChecked() ? FilterRegion : FilterNone);
 	});
 
 	toolBarWidget->layout()->addWidget(toolBar);

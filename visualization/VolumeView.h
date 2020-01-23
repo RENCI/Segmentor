@@ -22,6 +22,7 @@ class RegionSurface;
 class RegionCollection;
 
 enum InteractionMode;
+enum FilterMode;
 
 class VolumeView {
 public:
@@ -37,6 +38,7 @@ public:
 	void SetProbePosition(double x, double y, double z);
 
 	void SetInteractionMode(InteractionMode mode);
+	void SetFilterMode(FilterMode mode);
 
 	void SetCurrentRegion(Region* region);
 
@@ -50,14 +52,6 @@ public:
 	void SetSmoothShading(bool smooth);
 	void ToggleSmoothShading();
 
-	bool GetFilterRegion();
-	void SetFilterRegion(bool filter);
-	void ToggleFilterRegion();
-
-	bool GetFilterPlane();
-	void SetFilterPlane(bool filter);
-	void ToggleFilterPlane();
-
 	bool GetShowPlane();
 	void SetShowPlane(bool show);
 	void ToggleShowPlane();
@@ -69,8 +63,7 @@ public:
 	vtkInteractorStyleVolume* GetInteractorStyle();
 
 protected:
-	bool filterRegion;
-	bool filterPlane;
+	FilterMode filterMode;
 	bool smoothSurfaces;
 	bool smoothShading;
 	

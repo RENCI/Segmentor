@@ -18,6 +18,7 @@ class Region;
 class RegionCollection;
 
 enum InteractionMode;
+enum FilterMode;
 
 class VisualizationContainer {
 public:
@@ -46,6 +47,9 @@ public:
 	InteractionMode GetInteractionMode();
 	void SetInteractionMode(InteractionMode mode);
 	void ToggleInteractionMode();
+
+	FilterMode GetFilterMode();
+	void SetFilterMode(FilterMode mode);
 
 	void PickLabel(int x, int y, int z);
 	void Paint(int x, int y, int z);
@@ -94,6 +98,9 @@ protected:
 
 	// Current interaction mode
 	InteractionMode interactionMode;
+
+	// Current filter mode
+	FilterMode filterMode;
 
 	void SetImageData(vtkImageData* imageData);
 	bool SetLabelData(vtkImageData* labelData);

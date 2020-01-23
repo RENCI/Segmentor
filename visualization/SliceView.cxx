@@ -27,6 +27,7 @@
 #include "Region.h"
 #include "RegionOutline.h"
 #include "RegionVoxelOutlines.h"
+#include "RegionSurface.h"
 #include "RegionCollection.h"
 #include "SliceLocation.h"
 
@@ -37,9 +38,9 @@ void SliceView::cameraChange(vtkObject* caller, unsigned long eventId, void* cli
 }
 
 SliceView::SliceView(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut) {
+	filterMode = FilterNone;
 	showRegionOutlines = true;
 	showVoxelOutlines = false;
-	filterRegion = false;
 
 	data = nullptr;
 	labels = nullptr;
@@ -225,6 +226,13 @@ void SliceView::SetInteractionMode(enum InteractionMode mode) {
 	style->SetMode(mode);
 }
 
+void SliceView::SetFilterMode(enum FilterMode mode) {
+	filterMode = mode;
+
+	FilterRegions();
+}
+
+
 bool SliceView::GetShowLabelSlice() {
 	return labelSlice->GetVisibility();
 }
@@ -269,16 +277,6 @@ void SliceView::ShowRegionOutlines(bool show) {
 
 void SliceView::ToggleRegionOutlines() {
 	ShowRegionOutlines(!showRegionOutlines);
-}
-
-void SliceView::SetFilterRegion(bool filter) {
-	filterRegion = filter;
-
-	FilterRegions();
-}
-
-void SliceView::ToggleFilterRegion() {
-	SetFilterRegion(!filterRegion);
 }
 
 void SliceView::UpdatePlane() {
@@ -405,16 +403,13 @@ void SliceView::FilterRegions() {
 		RegionOutline* outline = region->GetOutline();
 		RegionVoxelOutlines* voxelOutlines = region->GetVoxelOutlines();
 
-		if (filterRegion && currentRegion) {			
-			bool visible = region == currentRegion;
+		// XXX: Setting based on surface visiblity probably indicates that the logic should be pushed up to visualization container,
+		// with a method in region for turning on and off individual pieces
 
-			outline->GetActor()->SetVisibility(visible && showRegionOutlines);
-			voxelOutlines->GetActor()->SetVisibility(visible && showVoxelOutlines);
-		}
-		else {
-			outline->GetActor()->SetVisibility(showRegionOutlines);
-			voxelOutlines->GetActor()->SetVisibility(showVoxelOutlines);
-		}
+		bool visible = region->GetSurface()->GetActor()->GetVisibility();
+
+		outline->GetActor()->SetVisibility(visible && showRegionOutlines);
+		voxelOutlines->GetActor()->SetVisibility(visible && showVoxelOutlines);
 	}
 
 	renderer->ResetCameraClippingRange();
