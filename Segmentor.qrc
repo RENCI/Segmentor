@@ -1,15 +1,15 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
-    <file>icons/icon_overlay.svg</file>
-    <file>icons/icon_voxels.svg</file>
-    <file>icons/icon_outline.svg</file>
-    <file>icons/icon_smooth_surface.svg</file>
-    <file>icons/icon_smooth_normals.svg</file>
-    <file>icons/icon_plane.svg</file>
-    <file>icons/icon_filter_plane.svg</file>
-    <file>icons/icon_filter_neighbors.svg</file>
-    <file>icons/icon_filter_region.svg</file>
-    <file>icons/icon_dilate.svg</file>
-    <file>icons/icon_erode.svg</file>
+    <file>icons/icon_overlay.png</file>
+    <file>icons/icon_voxels.png</file>
+    <file>icons/icon_outline.png</file>
+    <file>icons/icon_smooth_surface.png</file>
+    <file>icons/icon_smooth_normals.png</file>
+    <file>icons/icon_plane.png</file>
+    <file>icons/icon_filter_plane.png</file>
+    <file>icons/icon_filter_neighbors.png</file>
+    <file>icons/icon_filter_region.png</file>
+    <file>icons/icon_dilate.png</file>
+    <file>icons/icon_erode.png</file>
 </qresource>
 </RCC>
