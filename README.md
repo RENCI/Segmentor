@@ -6,9 +6,9 @@ Segmentation tool for 3D tissue cleared microscopy images of nuclei.
 The following data formats are supported for loading image and segmentation data, and saving segmentation data:
 
 1. NIfTI (Neuroimaging Informatics Technology Initiative)
-2. VTI (VTK'S XML Image Data format)
-3. Single multipage TIFF file
-4. Stack of TIFFs
+2. Single multipage TIFF file
+3. Stack of TIFFs
+4. VTI (VTK'S XML Image Data format)
 
 When loading data as a stack of TIFFs, it is assumed that all files in the directory belong to the stack, and that the file names are in alphabetical order (e.g. image_001.tif, image_002.tif, etc.).
 
@@ -32,7 +32,7 @@ To load segmentation data in stack of TIFFs format, select `File->Open Segmentat
 
 ## Segmentation Saving
 
-To save the current segmentation select `File->Save Segmentation Data...`. The format will be based on the file extension  provided `(.vti, .nii, or .tif)`. 
+To save the current segmentation select `File->Save Segmentation Data...`. The format will be based on the file extension  provided `(.nii, .vti, or .tif)`. 
 
 ## Controls:
 
