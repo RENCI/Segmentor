@@ -32,7 +32,7 @@ To load segmentation data in stack of TIFFs format, select `File->Open Segmentat
 
 ## Segmentation Saving
 
-To save the current segmentation select `File->Save Segmentation Data...`. The format will be based on the file extension  provided `(.vti, .nii, or .tif)`. 
+To save the current segmentation select `File->Save Segmentation Data...`. The format will be based on the file extension  provided `(.nii, .vti, or .tif)`. 
 
 ## Controls:
 
