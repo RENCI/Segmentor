@@ -54,6 +54,8 @@ public:
 	void ShowRegionOutlines(bool show);
 	void ToggleRegionOutlines();
 
+	void SetWindowLevel(double window, double level);
+
 	void UpdatePlane();
 
 	void Render();
@@ -103,6 +105,10 @@ protected:
 	vtkSmartPointer<vtkTextActor> interactionModeLabel;
 	void CreateInteractionModeLabel();
 
+	// Window level label
+	vtkSmartPointer<vtkTextActor> windowLevelLabel;
+	void CreateWindowLevelLabel();
+
 	// Slices
 	void CreateSlice();
 	void UpdateSlice();
@@ -115,6 +121,7 @@ protected:
 
 	void ResetCamera();
 
+	static void windowLevelChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 	static void cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 };
 

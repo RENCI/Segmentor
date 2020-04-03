@@ -1,5 +1,7 @@
 #include "SliceView.h"
 
+#include <sstream>
+
 #include "vtkInteractorStyleSlice.h"
 #include "vtkImageDataCells.h"
 
@@ -30,6 +32,13 @@
 #include "RegionSurface.h"
 #include "RegionCollection.h"
 #include "SliceLocation.h"
+
+void SliceView::windowLevelChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+	vtkInteractorStyleSlice* style = static_cast<vtkInteractorStyleSlice*>(caller);
+	SliceView* pipeline = static_cast<SliceView*>(clientData);
+
+	pipeline->SetWindowLevel(style->GetWindow(), style->GetLevel());
+}
 
 void SliceView::cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
 	SliceView* pipeline = static_cast<SliceView*>(clientData);
@@ -96,8 +105,14 @@ SliceView::SliceView(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut)
 	CreateSlice();
 	CreateLabelSlice();
 
+	// Window/level callback
+	vtkSmartPointer<vtkCallbackCommand> windowLevelCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+	windowLevelCallback->SetCallback(windowLevelChange);
+	windowLevelCallback->SetClientData(this);
+	style->AddObserver(vtkCommand::WindowLevelEvent, windowLevelCallback);
+
 	// Camera callback
-	vtkSmartPointer <vtkCallbackCommand> cameraCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+	vtkSmartPointer<vtkCallbackCommand> cameraCallback = vtkSmartPointer<vtkCallbackCommand>::New();
 	cameraCallback->SetCallback(cameraChange);
 	cameraCallback->SetClientData(this);
 	renderer->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, cameraCallback);
@@ -108,8 +123,9 @@ SliceView::SliceView(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut)
 	// Slice location
 	sliceLocation = new SliceLocation(sliceLocationRenderer);
 
-	// Interaction mode label
+	// Labels
 	CreateInteractionModeLabel();
+	CreateWindowLevelLabel();
 }
 
 SliceView::~SliceView() {
@@ -127,6 +143,7 @@ void SliceView::Reset() {
 	probe->VisibilityOff();
 	sliceLocation->UpdateData(nullptr);
 	interactionModeLabel->VisibilityOff();
+	windowLevelLabel->VisibilityOff();
 }
 
 void SliceView::SetImageData(vtkImageData* imageData) {
@@ -140,8 +157,11 @@ void SliceView::SetImageData(vtkImageData* imageData) {
 	// Update axes
 	sliceLocation->UpdateData(data);
 
-	// Turn on interaction mode
+	// Turn on labels
 	interactionModeLabel->VisibilityOn();
+	windowLevelLabel->VisibilityOn();
+
+	SetWindowLevel(style->GetWindow(), style->GetLevel());
 
 	// Reset camera
 	ResetCamera();
@@ -221,6 +241,7 @@ void SliceView::SetProbePosition(double x, double y, double z) {
 
 void SliceView::SetInteractionMode(enum InteractionMode mode) {
 	std::string s = mode == NavigationMode ? "Navigation mode" : "Edit mode";
+
 	interactionModeLabel->SetInput(s.c_str());
 
 	style->SetMode(mode);
@@ -279,6 +300,22 @@ void SliceView::ToggleRegionOutlines() {
 	ShowRegionOutlines(!showRegionOutlines);
 }
 
+void SliceView::SetWindowLevel(double window, double level) {
+	std::ostringstream convert;
+	convert.precision(1);
+
+	convert << std::fixed << window;
+
+	std::string s = "Window: " + convert.str();
+	
+	convert.seekp(0);
+	convert << std::fixed << level;
+
+	s += ", Level " + convert.str();
+
+	windowLevelLabel->SetInput(s.c_str());
+}
+
 void SliceView::UpdatePlane() {
 	vtkCamera* cam = renderer->GetActiveCamera();
 
@@ -331,6 +368,17 @@ void SliceView::CreateInteractionModeLabel() {
 	interactionModeLabel->PickableOff();
 
 	renderer->AddActor2D(interactionModeLabel);
+}
+
+void SliceView::CreateWindowLevelLabel() {
+	windowLevelLabel = vtkSmartPointer<vtkTextActor>::New();
+	windowLevelLabel->SetPosition(10, 40);
+	windowLevelLabel->GetTextProperty()->SetFontSize(18);
+	windowLevelLabel->GetTextProperty()->SetColor(0.5, 0.5, 0.5);
+	windowLevelLabel->VisibilityOff();
+	windowLevelLabel->PickableOff();
+
+	renderer->AddActor2D(windowLevelLabel);
 }
 
 void SliceView::CreateSlice() {

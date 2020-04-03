@@ -38,6 +38,10 @@ public:
 	virtual void StartErase();
 	virtual void EndErase();
 
+	virtual void WindowLevel();
+	double GetWindow();
+	double GetLevel();
+
 	enum SliceEventIds {
 		SelectLabelEvent = vtkCommand::UserEvent + 1,
 		StartPaintEvent,

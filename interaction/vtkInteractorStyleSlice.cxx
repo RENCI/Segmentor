@@ -116,16 +116,101 @@ void vtkInteractorStyleSlice::EndErase()
 }
 
 //----------------------------------------------------------------------------
-void vtkInteractorStyleSlice::OnMouseMove() 
+void vtkInteractorStyleSlice::WindowLevel()
+{
+	vtkRenderWindowInteractor *rwi = this->Interactor;
+
+	this->WindowLevelCurrentPosition[0] = rwi->GetEventPosition()[0];
+	this->WindowLevelCurrentPosition[1] = rwi->GetEventPosition()[1];
+
+	if (this->HandleObservers &&
+		this->HasObserver(vtkCommand::WindowLevelEvent))
+	{
+		this->InvokeEvent(vtkCommand::WindowLevelEvent, this);
+	}
+	
+	if (this->CurrentImageProperty)
+	{
+		int *size = this->CurrentRenderer->GetSize();
+
+		double window = this->WindowLevelInitial[0];
+		double level = this->WindowLevelInitial[1];
+
+		// Compute normalized delta
+
+		double dx = (this->WindowLevelCurrentPosition[0] -
+			this->WindowLevelStartPosition[0]) * 4.0 / size[0];
+		double dy = (this->WindowLevelStartPosition[1] -
+			this->WindowLevelCurrentPosition[1]) * 4.0 / size[1];
+
+		// Scale by current values
+
+		if (fabs(window) > 0.01)
+		{
+			dx = dx * window;
+		}
+		else
+		{
+			dx = dx * (window < 0 ? -0.01 : 0.01);
+		}
+		if (fabs(level) > 0.01)
+		{
+			dy = dy * level;
+		}
+		else
+		{
+			dy = dy * (level < 0 ? -0.01 : 0.01);
+		}
+
+		// Abs so that direction does not flip
+
+		if (window < 0.0)
+		{
+			dx = -1 * dx;
+		}
+		if (level < 0.0)
+		{
+			dy = -1 * dy;
+		}
+
+		// Compute new window level
+
+		double newWindow = dx + window;
+		double newLevel = level - dy;
+
+		if (newWindow < 0.01)
+		{
+			newWindow = 0.01;
+		}
+
+		this->CurrentImageProperty->SetColorWindow(newWindow);
+		this->CurrentImageProperty->SetColorLevel(newLevel);
+
+		this->Interactor->Render();
+	}
+}
+
+//----------------------------------------------------------------------------
+double vtkInteractorStyleSlice::GetWindow() {
+	return this->CurrentImageProperty ? this->CurrentImageProperty->GetColorWindow() : 0.0;
+}
+
+//----------------------------------------------------------------------------
+double vtkInteractorStyleSlice::GetLevel() {
+	return this->CurrentImageProperty ? this->CurrentImageProperty->GetColorLevel() : 0.0;
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::OnMouseMove()
 {
 	this->MouseMoved = true;
 
 	int x = this->Interactor->GetEventPosition()[0];
-	int y = this->Interactor->GetEventPosition()[1]; 
+	int y = this->Interactor->GetEventPosition()[1];
 
 	switch (this->State)
 	{
-	case VTKIS_PAINT_SLICE:		
+	case VTKIS_PAINT_SLICE:
 		this->InvokeEvent(PaintEvent, nullptr);
 		break;
 

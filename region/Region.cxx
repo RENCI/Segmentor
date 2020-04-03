@@ -55,7 +55,7 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 }
 	
 Region::~Region() {
-	ClearLabels();
+	//ClearLabels();
 
 	delete outline;
 	delete surface;
@@ -187,6 +187,20 @@ void Region::ComputeExtent() {
 
 	int dataExtent[6];
 	data->GetExtent(dataExtent);
+
+/*
+	for (int i = 0; i < 6; i++) {
+		std::cout << dataExtent[i] << std::endl;
+	}
+	cout << "***" << std::endl;
+
+	double bounds[6];
+	data->GetBounds(bounds);
+	for (int i = 0; i < 6; i++) {
+		std::cout << bounds[i] << std::endl;
+	}
+	cout << "***" << std::endl;
+*/
 	
 	// Initialize extent for this region
 	extent[0] = dataExtent[1];
@@ -196,6 +210,10 @@ void Region::ComputeExtent() {
 	extent[4] = dataExtent[5];
 	extent[5] = dataExtent[4];
 
+
+//	data->GetScalarPointer(bounds[1], bounds[3], bounds[5]);
+
+
 	// XXX: USE GENERATE REGION EXTENTS FROM vktImageConnectivityFilter AND PASS THIS IN
 	//		ALSO REGION SIZE FROM FILTER
 
@@ -203,6 +221,8 @@ void Region::ComputeExtent() {
 	for (int i = 0; i < numPoints; i++) {
 		if (scalars[i] == label) {
 			double* point = data->GetPoint(i);
+
+//			std::cout << point[0] << " " << point[1] << " " << point[2] << std::endl;
 
 			if (point[0] < extent[0]) extent[0] = point[0];
 			if (point[0] > extent[1]) extent[1] = point[0];
@@ -214,6 +234,8 @@ void Region::ComputeExtent() {
 			numVoxels++;
 		}
 	}
+
+//	cout << "***" << std::endl;
 
 	// Fix extent if no voxels with this label
 	if (numVoxels == 0) {

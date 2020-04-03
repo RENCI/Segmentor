@@ -12,6 +12,7 @@
 #include <vtkImageThreshold.h>
 #include <vtkIdTypeArray.h>
 #include <vtkImageCast.h>
+#include <vtkImageChangeInformation.h>
 #include <vtkIntArray.h>
 #include <vtkKMeansStatistics.h>
 #include <vtkLookupTable.h>
@@ -164,7 +165,16 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenImageFile(cons
 		reader->SetFileName(fileName.c_str());
 		reader->Update();
 
+/*
+		// For testing z scale
+		vtkSmartPointer<vtkImageChangeInformation> info = vtkSmartPointer<vtkImageChangeInformation>::New();
+		info->SetInputConnection(reader->GetOutputPort());
+		info->SetSpacingScale(1, 1, 2);
+		info->Update();
+*/
+
 		SetImageData(reader->GetOutput());
+//		SetImageData(info->GetOutput());
 
 		return Success;
 	}
