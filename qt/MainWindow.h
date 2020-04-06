@@ -27,6 +27,9 @@ public:
 
 	void setWindowLevel(double window, double level);
 
+	void setExtent(double xMin, double xMax, double yMin, double yMax, double zMin, double zMax);
+	void setPosition(double x, double y, double z);
+
 public slots:
 
 	// Menu events
@@ -62,6 +65,17 @@ public slots:
 	// Widget events
 	virtual void on_windowSpinBox_valueChanged(double value);
 	virtual void on_levelSpinBox_valueChanged(double value);
+
+	virtual void on_xSpinBox_valueChanged(double value);
+	virtual void on_ySpinBox_valueChanged(double value);
+	virtual void on_zSpinBox_valueChanged(double value);
+
+	virtual void on_xUp();
+	virtual void on_xDown();
+	virtual void on_yUp();
+	virtual void on_yDown();
+	virtual void on_zUp();
+	virtual void on_zDown();
 
 	// Region table events
 	virtual void on_regionDone(int label, bool done);

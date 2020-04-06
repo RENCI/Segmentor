@@ -63,6 +63,16 @@ void InteractionCallbacks::SliceCameraChange(vtkObject* caller, unsigned long ev
 	firstCameraCallback = true;
 }
 
+void InteractionCallbacks::CameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+	vtkCamera* camera = static_cast<vtkCamera*>(caller);
+	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
+
+	double fp[3];
+	camera->GetFocalPoint(fp);
+
+	vis->SetFocalPoint(fp[0], fp[1], fp[2]);
+}
+
 void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
 	vtkRenderWindowInteractor* rwi = static_cast<vtkRenderWindowInteractor*>(caller);
 	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);

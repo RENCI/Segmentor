@@ -75,6 +75,12 @@ public:
 
 	void SetWindowLevel(double window, double level);
 
+	void SetX(double x);
+	void SetY(double y);
+	void SetZ(double z);
+
+	void SetFocalPoint(double x, double y, double z);
+
 	void Render();
 
 	VolumeView* GetVolumeView();
@@ -123,6 +129,8 @@ protected:
 	unsigned short GetLabel(int x, int y, int z);
 
 	double GetValue(int x, int y, int z);
+
+	void SetCoordinate(int index, double value);
 
 	//void PointToStructured(double p[3], int s[3]);
 };

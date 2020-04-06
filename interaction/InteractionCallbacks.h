@@ -13,6 +13,7 @@ class InteractionCallbacks {
 public:
 	static void VolumeCameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 	static void SliceCameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
+	static void CameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 	
 	static void OnChar(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 
