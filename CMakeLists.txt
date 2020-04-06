@@ -30,7 +30,7 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-file(GLOB UI_FILES *.ui)
+file(GLOB UI_FILES ${CMAKE_CURRENT_SOURCE_DIR}/qt/*.ui)
 file(GLOB QT_WRAP 
   ${CMAKE_CURRENT_SOURCE_DIR}/*.h
   ${CMAKE_CURRENT_SOURCE_DIR}/interaction/*.h

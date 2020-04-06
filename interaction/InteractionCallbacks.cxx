@@ -10,6 +10,7 @@
 #include "VisualizationContainer.h"
 #include "VolumeView.h"
 #include "SliceView.h"
+#include "vtkInteractorStyleSlice.h"
 
 bool InteractionCallbacks::firstCameraCallback = true;
 
@@ -281,4 +282,11 @@ void InteractionCallbacks::VolumePick(int p[3]) {
 
 void InteractionCallbacks::SlicePick(int p[3]) {
 	picker->GetPointIJK(p);
+}
+
+void InteractionCallbacks::WindowLevel(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+	vtkInteractorStyleSlice* style = static_cast<vtkInteractorStyleSlice*>(caller);
+	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
+
+	vis->SetWindowLevel(style->GetWindow(), style->GetLevel());
 }

@@ -41,7 +41,7 @@
 #include "VolumeView.h"
 #include "Region.h"
 #include "RegionCollection.h"
-#include "RegionMetadataIO.h"
+#include "RegionMetadataIO.h"}
 
 VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volumeInteractor, vtkRenderWindowInteractor* sliceInteractor, MainWindow* mainWindow) {
 	data = nullptr;
@@ -129,6 +129,12 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	sliceMouseMoveCallback->SetCallback(InteractionCallbacks::SliceMouseMove);
 	sliceMouseMoveCallback->SetClientData(this);
 	sliceInteractor->AddObserver(vtkCommand::MouseMoveEvent, sliceMouseMoveCallback);
+
+	// Window/level callback
+	vtkSmartPointer<vtkCallbackCommand> windowLevelCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+	windowLevelCallback->SetCallback(InteractionCallbacks::WindowLevel);
+	windowLevelCallback->SetClientData(this);
+	sliceView->GetInteractorStyle()->AddObserver(vtkCommand::WindowLevelEvent, windowLevelCallback);
 }
 
 VisualizationContainer::~VisualizationContainer() {
@@ -835,6 +841,10 @@ void VisualizationContainer::SelectRegion(unsigned short label) {
 	volumeView->GetInteractorStyle()->GetInteractor()->FlyTo(volumeView->GetRenderer(), region->GetCenter());
 }
 
+void VisualizationContainer::SetWindowLevel(double window, double level) {
+	qtWindow->setWindowLevel(window, level);
+}
+
 void VisualizationContainer::Render() {
 	volumeView->Render();
 	sliceView->Render();
@@ -858,6 +868,10 @@ void VisualizationContainer::SetImageData(vtkImageData* imageData) {
 	volumeView->Reset();
 
 	sliceView->SetImageData(data);	
+
+	qtWindow->setWindowLevel(sliceView->GetWindow(), sliceView->GetLevel());
+
+	Render();
 }
 
 bool VisualizationContainer::SetLabelData(vtkImageData* labelData) {

@@ -73,6 +73,8 @@ public:
 	void ErodeCurrentRegion();
 	void GrowCurrentRegion(int x, int y, int z);
 
+	void SetWindowLevel(double window, double level);
+
 	void Render();
 
 	VolumeView* GetVolumeView();

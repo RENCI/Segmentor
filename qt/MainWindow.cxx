@@ -56,6 +56,15 @@ MainWindow::MainWindow() {
 	QObject::connect(regionTable, &RegionTable::highlightRegion, this, &MainWindow::on_highlightRegion);
 	QObject::connect(regionTable, &RegionTable::selectRegion, this, &MainWindow::on_selectRegion);
 
+	// Window/level range
+	windowSpinBox->setMinimum(0);
+	windowSpinBox->setMaximum(9999);
+	windowSpinBox->setSingleStep(100);
+
+	levelSpinBox->setMinimum(-9999);
+	levelSpinBox->setMaximum(9999);
+	levelSpinBox->setSingleStep(100);
+
 	qApp->installEventFilter(this);
 }
 
@@ -76,6 +85,11 @@ void MainWindow::updateRegion(Region* region) {
 
 void MainWindow::selectRegion(unsigned short label) {
 	regionTable->selectRegionLabel(label);
+}
+
+void MainWindow::setWindowLevel(double window, double level) {
+	windowSpinBox->setValue(window);
+	levelSpinBox->setValue(level);
 }
 
 void MainWindow::on_actionOpen_Image_File_triggered() {
@@ -364,6 +378,14 @@ void MainWindow::on_actionDilateRegion(bool) {
 
 void MainWindow::on_actionErodeRegion(bool) {
 	visualizationContainer->ErodeCurrentRegion();
+}
+
+void MainWindow::on_windowSpinBox_valueChanged(double value) {
+	visualizationContainer->GetSliceView()->SetWindow(value);
+}
+
+void MainWindow::on_levelSpinBox_valueChanged(double value) {
+	visualizationContainer->GetSliceView()->SetLevel(value);
 }
 
 void MainWindow::on_regionDone(int label, bool done) {

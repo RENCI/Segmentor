@@ -28,6 +28,8 @@ public:
 	static void VolumeMouseMove(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 	static void SliceMouseMove(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 
+	static void WindowLevel(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
+
 private:
 	static bool firstCameraCallback;
 

@@ -54,7 +54,10 @@ public:
 	void ShowRegionOutlines(bool show);
 	void ToggleRegionOutlines();
 
-	void SetWindowLevel(double window, double level);
+	double GetWindow();
+	double GetLevel();
+	void SetWindow(double window);
+	void SetLevel(double level);
 
 	void UpdatePlane();
 
@@ -104,10 +107,6 @@ protected:
 	// Interaction mode label
 	vtkSmartPointer<vtkTextActor> interactionModeLabel;
 	void CreateInteractionModeLabel();
-
-	// Window level label
-	vtkSmartPointer<vtkTextActor> windowLevelLabel;
-	void CreateWindowLevelLabel();
 
 	// Slices
 	void CreateSlice();

@@ -25,6 +25,8 @@ public:
 	void updateRegion(Region* region);
 	void selectRegion(unsigned short label);
 
+	void setWindowLevel(double window, double level);
+
 public slots:
 
 	// Menu events
@@ -56,6 +58,10 @@ public slots:
 	virtual void on_actionShowPlane(bool checked);
 	virtual void on_actionDilateRegion(bool checked);
 	virtual void on_actionErodeRegion(bool checked);
+
+	// Widget events
+	virtual void on_windowSpinBox_valueChanged(double value);
+	virtual void on_levelSpinBox_valueChanged(double value);
 
 	// Region table events
 	virtual void on_regionDone(int label, bool done);
