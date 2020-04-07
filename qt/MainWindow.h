@@ -27,7 +27,7 @@ public:
 
 	void setWindowLevel(double window, double level);
 
-	void setFocalPoint(double x, double y, double z);
+	void setSlicePosition(double x, double y, double z);
 
 public slots:
 

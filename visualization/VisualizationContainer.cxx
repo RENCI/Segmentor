@@ -871,7 +871,7 @@ void VisualizationContainer::SliceStep(double amount) {
 }
 
 void VisualizationContainer::SetFocalPoint(double x, double y, double z) {
-	qtWindow->setFocalPoint(x, y, z);
+	qtWindow->setSlicePosition(x, y, z);
 }
 
 void VisualizationContainer::Render() {

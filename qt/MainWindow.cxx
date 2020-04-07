@@ -68,14 +68,20 @@ MainWindow::MainWindow() {
 	levelSpinBox->setSingleStep(100);
 	levelSpinBox->setDecimals(1);
 
-	QShortcut* sliceUpShortcut = new QShortcut(QKeySequence(Qt::Key_Up), this);
-	QShortcut* sliceDownShortcut = new QShortcut(QKeySequence(Qt::Key_Down), this);
+	// Slice up and down
+	QAction* sliceUpAction = new QAction("+", this);
+	sliceUpAction->setShortcut(QKeySequence(Qt::Key_Up));
+	sliceUpAction->setToolTip("Move slice up: up arrow");
+	QObject::connect(sliceUpAction, &QAction::triggered, this, &MainWindow::on_sliceUp);
 
-	QObject::connect(sliceUpShortcut, &QShortcut::activated, this, &MainWindow::on_sliceUp);
-	QObject::connect(sliceDownShortcut, &QShortcut::activated, this, &MainWindow::on_sliceDown);
+	sliceUpButton->setDefaultAction(sliceUpAction);
 
-	QObject::connect(sliceUpButton, &QPushButton::pressed, this, &MainWindow::on_sliceUp);
-	QObject::connect(sliceDownButton, &QPushButton::pressed, this, &MainWindow::on_sliceDown);
+	QAction* sliceDownAction = new QAction("-", this);
+	sliceDownAction->setShortcut(QKeySequence(Qt::Key_Down));
+	sliceUpAction->setToolTip("Move slice down: down arrow");
+	QObject::connect(sliceDownAction, &QAction::triggered, this, &MainWindow::on_sliceDown);
+
+	sliceDownButton->setDefaultAction(sliceDownAction);
 
 	qApp->installEventFilter(this);
 }
@@ -104,13 +110,13 @@ void MainWindow::setWindowLevel(double window, double level) {
 	levelSpinBox->setValue(level);
 }
 
-void MainWindow::setFocalPoint(double x, double y, double z) {
-	QString s = "Focal Point: (" + 
+void MainWindow::setSlicePosition(double x, double y, double z) {
+	QString s = "Slice Position: (" + 
 		QString::number(x, 'f', 1) + ", " + 
 		QString::number(y, 'f', 1) + ", " + 
 		QString::number(z, 'f' , 1) + ")";
 
-	focalPointLabel->setText(s);
+	slicePositionLabel->setText(s);
 }
 
 void MainWindow::on_actionOpen_Image_File_triggered() {
