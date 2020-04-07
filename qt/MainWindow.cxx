@@ -71,14 +71,14 @@ MainWindow::MainWindow() {
 	// Slice up and down
 	QAction* sliceUpAction = new QAction("+", this);
 	sliceUpAction->setShortcut(QKeySequence(Qt::Key_Up));
-	sliceUpAction->setToolTip("Move slice up: up arrow");
+	sliceUpAction->setToolTip("Move slice up (up arrow)");
 	QObject::connect(sliceUpAction, &QAction::triggered, this, &MainWindow::on_sliceUp);
 
 	sliceUpButton->setDefaultAction(sliceUpAction);
 
 	QAction* sliceDownAction = new QAction("-", this);
 	sliceDownAction->setShortcut(QKeySequence(Qt::Key_Down));
-	sliceUpAction->setToolTip("Move slice down: down arrow");
+	sliceDownAction->setToolTip("Move slice down (down arrow)");
 	QObject::connect(sliceDownAction, &QAction::triggered, this, &MainWindow::on_sliceDown);
 
 	sliceDownButton->setDefaultAction(sliceDownAction);
@@ -481,10 +481,12 @@ void MainWindow::CreateToolBar() {
 	interactionModeGroup->setExclusive(true);
 
 	QAction* actionNavigation = new QAction("N", interactionModeGroup);
+	actionNavigation->setToolTip("Navigation mode (space bar)");
 	actionNavigation->setCheckable(true);
 	actionNavigation->setChecked(visualizationContainer->GetInteractionMode() == NavigationMode);
 
 	QAction* actionEdit = new QAction("E", interactionModeGroup);
+	actionEdit->setToolTip("Edit mode (space bar)");
 	actionEdit->setCheckable(true);
 
 	// Filter mode toggle
@@ -492,17 +494,17 @@ void MainWindow::CreateToolBar() {
 	//QActionGroup* filterModeGroup = new QActionGroup(this);
 	//interactionModeGroup->setExclusive(false);
 
-	QAction* actionFilterPlane = new QAction(QIcon(":/icons/icon_filter_plane.png"), "Filter to plane", this);
+	QAction* actionFilterPlane = new QAction(QIcon(":/icons/icon_filter_plane.png"), "Filter to plane (p)", this);
 	actionFilterPlane->setShortcut(QKeySequence("p"));
 	actionFilterPlane->setCheckable(true);
 	actionFilterPlane->setChecked(visualizationContainer->GetFilterMode() == FilterPlane);
 
-	QAction* actionFilterNeighbors = new QAction(QIcon(":/icons/icon_filter_neighbors.png"), "Filter neighbors", this);
+	QAction* actionFilterNeighbors = new QAction(QIcon(":/icons/icon_filter_neighbors.png"), "Filter neighbors (k)", this);
 	actionFilterNeighbors->setShortcut(QKeySequence("k"));
 	actionFilterNeighbors->setCheckable(true);
 	actionFilterNeighbors->setChecked(visualizationContainer->GetFilterMode() == FilterNeighbors);
 
-	QAction* actionFilterRegion = new QAction(QIcon(":/icons/icon_filter_region.png"), "Filter region", this);
+	QAction* actionFilterRegion = new QAction(QIcon(":/icons/icon_filter_region.png"), "Filter region: l", this);
 	actionFilterRegion->setShortcut(QKeySequence("l"));
 	actionFilterRegion->setCheckable(true);
 	actionFilterRegion->setChecked(visualizationContainer->GetFilterMode() == FilterRegion);
@@ -513,14 +515,14 @@ void MainWindow::CreateToolBar() {
 	toolBar->addAction(actionEdit);
 	toolBar->addSeparator();
 	toolBar->addWidget(CreateLabel("2D"));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_overlay.png", "Show overlay", "q", visualizationContainer->GetSliceView()->GetShowLabelSlice(), &MainWindow::on_actionOverlay));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_voxels.png", "Show voxels", "w", visualizationContainer->GetSliceView()->GetShowVoxelOutlines(), &MainWindow::on_actionVoxels));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_outline.png", "Show outlines", "e", visualizationContainer->GetSliceView()->GetShowRegionOutlines(), &MainWindow::on_actionOutline));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_overlay.png", "Show overlay (q)", "q", visualizationContainer->GetSliceView()->GetShowLabelSlice(), &MainWindow::on_actionOverlay));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_voxels.png", "Show voxels (w)", "w", visualizationContainer->GetSliceView()->GetShowVoxelOutlines(), &MainWindow::on_actionVoxels));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_outline.png", "Show outlines (e)", "e", visualizationContainer->GetSliceView()->GetShowRegionOutlines(), &MainWindow::on_actionOutline));
 	toolBar->addSeparator();
 	toolBar->addWidget(CreateLabel("3D"));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_smooth_normals.png", "Smooth normals", "n", visualizationContainer->GetVolumeView()->GetSmoothShading(), &MainWindow::on_actionSmoothNormals));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_smooth_surface.png", "Smooth surfaces", "s", visualizationContainer->GetVolumeView()->GetSmoothSurfaces(), &MainWindow::on_actionSmoothSurfaces));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_plane.png", "Show plane", "o", visualizationContainer->GetVolumeView()->GetShowPlane(), &MainWindow::on_actionShowPlane));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_smooth_normals.png", "Smooth normals (n)", "n", visualizationContainer->GetVolumeView()->GetSmoothShading(), &MainWindow::on_actionSmoothNormals));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_smooth_surface.png", "Smooth surfaces (s)", "s", visualizationContainer->GetVolumeView()->GetSmoothSurfaces(), &MainWindow::on_actionSmoothSurfaces));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_plane.png", "Show plane (o)", "o", visualizationContainer->GetVolumeView()->GetShowPlane(), &MainWindow::on_actionShowPlane));
 	toolBar->addSeparator();
 	toolBar->addWidget(CreateLabel("Filter"));
 	toolBar->addAction(actionFilterPlane);
@@ -528,8 +530,8 @@ void MainWindow::CreateToolBar() {
 	toolBar->addAction(actionFilterRegion);
 	toolBar->addSeparator();
 	toolBar->addWidget(CreateLabel("Edit"));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_dilate.png", "Dilate region", "c", &MainWindow::on_actionDilateRegion));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_erode.png", "Erode region", "v",&MainWindow::on_actionErodeRegion));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_dilate.png", "Dilate region (c)", "c", &MainWindow::on_actionDilateRegion));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_erode.png", "Erode region (v)", "v",&MainWindow::on_actionErodeRegion));
 
 	// Need extra logic for interaction mode
 	QObject::connect(actionNavigation, &QAction::triggered, this, &MainWindow::on_actionNavigation);
