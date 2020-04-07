@@ -61,10 +61,12 @@ MainWindow::MainWindow() {
 	windowSpinBox->setMinimum(0);
 	windowSpinBox->setMaximum(9999);
 	windowSpinBox->setSingleStep(100);
+	windowSpinBox->setDecimals(1);
 
 	levelSpinBox->setMinimum(-9999);
 	levelSpinBox->setMaximum(9999);
 	levelSpinBox->setSingleStep(100);
+	levelSpinBox->setDecimals(1);
 
 	QShortcut* sliceUpShortcut = new QShortcut(QKeySequence(Qt::Key_Up), this);
 	QShortcut* sliceDownShortcut = new QShortcut(QKeySequence(Qt::Key_Down), this);
