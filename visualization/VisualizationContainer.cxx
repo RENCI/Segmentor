@@ -850,44 +850,28 @@ void VisualizationContainer::SetWindowLevel(double window, double level) {
 	qtWindow->setWindowLevel(window, level);
 }
 
-void VisualizationContainer::SetX(double x) {
-	SetCoordinate(0, x);
+void VisualizationContainer::SliceUp() {
+	SliceStep(1);
 }
 
-void VisualizationContainer::SetY(double x) {
-	SetCoordinate(1, x);
+void VisualizationContainer::SliceDown() {
+	SliceStep(-1);
 }
 
-void VisualizationContainer::SetZ(double x) {
-	SetCoordinate(2, x);
+void VisualizationContainer::SliceStep(double amount) {
+	vtkCamera* cam = sliceView->GetRenderer()->GetActiveCamera();
+
+	double distance = cam->GetDistance();
+
+	distance += amount;
+
+	cam->SetDistance(distance);
+
+	Render();
 }
 
 void VisualizationContainer::SetFocalPoint(double x, double y, double z) {
-	qtWindow->setPosition(x, y, z);
-}
-
-void VisualizationContainer::SetCoordinate(int index, double value) {
-	double pos[3];
-	double foc[3];
-
-	vtkCamera* cam = sliceView->GetRenderer()->GetActiveCamera();
-
-	cam->GetPosition(pos);
-	cam->GetFocalPoint(foc);
-
-	double diff = value - foc[index];
-
-	foc[index] = value;
-	cam->SetFocalPoint(foc);
-
-	if (index != 2) {
-		pos[index] += diff;
-		cam->SetPosition(pos);
-	}
-
-	sliceView->GetRenderer()->ResetCameraClippingRange();
-
-	Render();
+	qtWindow->setFocalPoint(x, y, z);
 }
 
 void VisualizationContainer::Render() {
@@ -915,10 +899,6 @@ void VisualizationContainer::SetImageData(vtkImageData* imageData) {
 	sliceView->SetImageData(data);	
 
 	// Update GUI
-	int extent[6];
-	data->GetExtent(extent);
-
-	qtWindow->setExtent(extent[0], extent[1], extent[2], extent[3], extent[4], extent[5]);
 	qtWindow->setWindowLevel(sliceView->GetWindow(), sliceView->GetLevel());
 
 	Render();

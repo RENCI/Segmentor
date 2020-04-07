@@ -75,9 +75,8 @@ public:
 
 	void SetWindowLevel(double window, double level);
 
-	void SetX(double x);
-	void SetY(double y);
-	void SetZ(double z);
+	void SliceUp();
+	void SliceDown();
 
 	void SetFocalPoint(double x, double y, double z);
 
@@ -130,7 +129,7 @@ protected:
 
 	double GetValue(int x, int y, int z);
 
-	void SetCoordinate(int index, double value);
+	void SliceStep(double amount);
 
 	//void PointToStructured(double p[3], int s[3]);
 };

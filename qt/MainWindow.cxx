@@ -9,6 +9,7 @@
 #include <QPushButton>
 #include <QToolBar>
 #include <QShortcut>
+#include <QPushButton>
 
 #include <vtkGenericOpenGLRenderWindow.h>
 
@@ -65,19 +66,14 @@ MainWindow::MainWindow() {
 	levelSpinBox->setMaximum(9999);
 	levelSpinBox->setSingleStep(100);
 
-	QShortcut* xUp = new QShortcut(QKeySequence(Qt::Key_Left), this);
-	QShortcut* xDown = new QShortcut(QKeySequence(Qt::Key_Right), this);
-	QShortcut* yUp = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Up), this);
-	QShortcut* yDown = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Down), this);
-	QShortcut* zUp = new QShortcut(QKeySequence(Qt::Key_Up), this);
-	QShortcut* zDown = new QShortcut(QKeySequence(Qt::Key_Down), this);
+	QShortcut* sliceUpShortcut = new QShortcut(QKeySequence(Qt::Key_Up), this);
+	QShortcut* sliceDownShortcut = new QShortcut(QKeySequence(Qt::Key_Down), this);
 
-	QObject::connect(xUp, &QShortcut::activated, this, &MainWindow::on_xUp);
-	QObject::connect(xDown, &QShortcut::activated, this, &MainWindow::on_xDown); 
-	QObject::connect(yUp, &QShortcut::activated, this, &MainWindow::on_yUp);
-	QObject::connect(yDown, &QShortcut::activated, this, &MainWindow::on_yDown); 
-	QObject::connect(zUp, &QShortcut::activated, this, &MainWindow::on_zUp);
-	QObject::connect(zDown, &QShortcut::activated, this, &MainWindow::on_zDown);
+	QObject::connect(sliceUpShortcut, &QShortcut::activated, this, &MainWindow::on_sliceUp);
+	QObject::connect(sliceDownShortcut, &QShortcut::activated, this, &MainWindow::on_sliceDown);
+
+	QObject::connect(sliceUpButton, &QPushButton::pressed, this, &MainWindow::on_sliceUp);
+	QObject::connect(sliceDownButton, &QPushButton::pressed, this, &MainWindow::on_sliceDown);
 
 	qApp->installEventFilter(this);
 }
@@ -106,21 +102,13 @@ void MainWindow::setWindowLevel(double window, double level) {
 	levelSpinBox->setValue(level);
 }
 
-void MainWindow::setExtent(double xMin, double xMax, double yMin, double yMax, double zMin, double zMax) {
-	xSpinBox->setMinimum(xMin);
-	xSpinBox->setMaximum(xMax);
+void MainWindow::setFocalPoint(double x, double y, double z) {
+	QString s = "Focal Point: (" + 
+		QString::number(x, 'f', 1) + ", " + 
+		QString::number(y, 'f', 1) + ", " + 
+		QString::number(z, 'f' , 1) + ")";
 
-	ySpinBox->setMinimum(yMin);
-	ySpinBox->setMaximum(yMax);
-
-	zSpinBox->setMinimum(zMin);
-	zSpinBox->setMaximum(zMax);
-}
-
-void MainWindow::setPosition(double x, double y, double z) {
-	xSpinBox->setValue(x);
-	ySpinBox->setValue(y);
-	zSpinBox->setValue(z);
+	focalPointLabel->setText(s);
 }
 
 void MainWindow::on_actionOpen_Image_File_triggered() {
@@ -419,42 +407,13 @@ void MainWindow::on_levelSpinBox_valueChanged(double value) {
 	visualizationContainer->GetSliceView()->SetLevel(value);
 }
 
-void MainWindow::on_xSpinBox_valueChanged(double value) {
-	visualizationContainer->SetX(value);
+void MainWindow::on_sliceUp() {
+	visualizationContainer->SliceUp();
 }
 
-void MainWindow::on_ySpinBox_valueChanged(double value) {
-	visualizationContainer->SetY(value);
+void MainWindow::on_sliceDown() {
+	visualizationContainer->SliceDown();
 }
-
-void MainWindow::on_zSpinBox_valueChanged(double value) {
-	visualizationContainer->SetZ(value);
-}
-
-void MainWindow::on_xUp() {	
-	xSpinBox->stepUp();
-}
-
-void MainWindow::on_xDown() {
-	xSpinBox->stepDown();	
-}
-
-void MainWindow::on_yUp() {
-	ySpinBox->stepUp();
-}
-
-void MainWindow::on_yDown() {
-	ySpinBox->stepDown();
-}
-
-void MainWindow::on_zUp() {
-	zSpinBox->stepUp();
-}
-
-void MainWindow::on_zDown() {
-	zSpinBox->stepDown();
-}
-
 
 void MainWindow::on_regionDone(int label, bool done) {
 	visualizationContainer->SetRegionDone((unsigned short)label, done);
