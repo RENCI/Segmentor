@@ -62,11 +62,19 @@ public slots:
 	virtual void on_actionErodeRegion(bool checked);
 
 	// Widget events
+	virtual void on_sliceUp();
+	virtual void on_sliceDown();
+
 	virtual void on_windowSpinBox_valueChanged(double value);
 	virtual void on_levelSpinBox_valueChanged(double value);
 
-	virtual void on_sliceUp();
-	virtual void on_sliceDown();
+	virtual void on_overlaySpinBox_valueChanged(double value);
+	virtual void on_overlayUp();
+	virtual void on_overlayDown();
+
+	virtual void on_neighborSpinBox_valueChanged(double value);
+	virtual void on_neighborUp();
+	virtual void on_neighborDown();
 
 	// Region table events
 	virtual void on_regionDone(int label, bool done);

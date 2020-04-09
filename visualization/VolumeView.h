@@ -57,6 +57,8 @@ public:
 	void ToggleShowPlane();
 	void UpdatePlane();
 
+	void SetNeighborOpacity(double opacity);
+
 	void Render();
 
 	vtkRenderer* GetRenderer();	
@@ -100,6 +102,8 @@ protected:
 	void CreateInteractionModeLabel();
 
 	void FilterRegions();
+
+	double neighborOpacity;
 
 	static void cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 };

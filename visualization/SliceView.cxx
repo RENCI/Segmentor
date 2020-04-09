@@ -302,6 +302,12 @@ void SliceView::SetLevel(double level) {
 	Render();
 }
 
+void SliceView::SetOverlayOpacity(double opacity) {
+	labelSlice->GetProperty()->SetOpacity(opacity);
+
+	Render();
+}
+
 void SliceView::UpdatePlane() {
 	vtkCamera* cam = renderer->GetActiveCamera();
 

@@ -45,6 +45,8 @@ VolumeView::VolumeView(vtkRenderWindowInteractor* interactor) {
 	currentRegion = nullptr;
 	highlightRegion = nullptr;
 
+	neighborOpacity = 0.25;
+
 	// Rendering
 	renderer = vtkSmartPointer<vtkRenderer>::New();
 
@@ -249,6 +251,12 @@ void VolumeView::ToggleShowPlane() {
 	SetShowPlane(!plane->GetVisibility());
 }
 
+void VolumeView::SetNeighborOpacity(double opacity) {
+	neighborOpacity = opacity;
+
+	FilterRegions();
+}
+
 void VolumeView::Render() {
 	renderer->GetRenderWindow()->Render();
 }
@@ -412,7 +420,7 @@ void VolumeView::FilterRegions() {
 
 				if (d <= r * 1.05) {
 					surface->GetActor()->VisibilityOn();
-					surface->GetActor()->GetProperty()->SetOpacity(0.25);
+					surface->GetActor()->GetProperty()->SetOpacity(neighborOpacity);
 				}
 				else {
 					surface->GetActor()->VisibilityOff();

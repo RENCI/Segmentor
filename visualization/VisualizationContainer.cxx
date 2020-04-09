@@ -962,7 +962,7 @@ void VisualizationContainer::UpdateColors() {
 	// Label colors
 	labelColors->SetNumberOfTableValues(maxLabel + 1);
 	labelColors->SetRange(0, maxLabel);
-	labelColors->SetTableValue(0, 0.0, 0.0, 0.0);
+	labelColors->SetTableValue(0, 0.0, 0.0, 0.0, 0.0);
 	for (int i = 1; i <= maxLabel; i++) {
 		double* c = LabelColors::GetColor(i - 1);
 		labelColors->SetTableValue(i, c[0], c[1], c[2]);

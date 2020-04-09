@@ -46,6 +46,26 @@
            <number>0</number>
           </property>
           <item>
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Neighbor opacity</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="neighborSpinBox">
+            <property name="maximum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.050000000000000</double>
+            </property>
+            <property name="value">
+             <double>0.250000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="horizontalSpacer">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -61,7 +81,7 @@
           <item>
            <widget class="QLabel" name="slicePositionLabel">
             <property name="text">
-             <string>Slice Position: (0, 0, 0)</string>
+             <string>Slice position: (0, 0, 0)</string>
             </property>
            </widget>
           </item>
@@ -118,6 +138,39 @@
           </item>
           <item>
            <widget class="QDoubleSpinBox" name="levelSpinBox"/>
+          </item>
+          <item>
+           <widget class="Line" name="line_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Overlay opacity</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="overlaySpinBox">
+            <property name="decimals">
+             <number>2</number>
+            </property>
+            <property name="minimum">
+             <double>0.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.050000000000000</double>
+            </property>
+            <property name="value">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>

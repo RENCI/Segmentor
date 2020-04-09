@@ -59,6 +59,8 @@ public:
 	void SetWindow(double window);
 	void SetLevel(double level);
 
+	void SetOverlayOpacity(double opacity);
+
 	void UpdatePlane();
 
 	void Render();

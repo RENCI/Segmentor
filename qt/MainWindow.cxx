@@ -57,17 +57,6 @@ MainWindow::MainWindow() {
 	QObject::connect(regionTable, &RegionTable::highlightRegion, this, &MainWindow::on_highlightRegion);
 	QObject::connect(regionTable, &RegionTable::selectRegion, this, &MainWindow::on_selectRegion);
 
-	// Window/level range
-	windowSpinBox->setMinimum(0);
-	windowSpinBox->setMaximum(9999);
-	windowSpinBox->setSingleStep(100);
-	windowSpinBox->setDecimals(1);
-
-	levelSpinBox->setMinimum(-9999);
-	levelSpinBox->setMaximum(9999);
-	levelSpinBox->setSingleStep(100);
-	levelSpinBox->setDecimals(1);
-
 	// Slice up and down
 	QAction* sliceUpAction = new QAction("+", this);
 	sliceUpAction->setShortcut(QKeySequence(Qt::Key_Up));
@@ -82,6 +71,35 @@ MainWindow::MainWindow() {
 	QObject::connect(sliceDownAction, &QAction::triggered, this, &MainWindow::on_sliceDown);
 
 	sliceDownButton->setDefaultAction(sliceDownAction);
+
+	// Window/level range
+	windowSpinBox->setMinimum(0);
+	windowSpinBox->setMaximum(9999);
+	windowSpinBox->setSingleStep(100);
+	windowSpinBox->setDecimals(1);
+
+	levelSpinBox->setMinimum(-9999);
+	levelSpinBox->setMaximum(9999);
+	levelSpinBox->setSingleStep(100);
+	levelSpinBox->setDecimals(1);
+
+	// Overlay opacity
+	QShortcut* overlayUp = new QShortcut(QKeySequence(Qt::Key_Right), this);
+	QShortcut* overlayDown = new QShortcut(QKeySequence(Qt::Key_Left), this);
+
+	QObject::connect(overlayUp, &QShortcut::activated, this, &MainWindow::on_overlayUp);
+	QObject::connect(overlayDown, &QShortcut::activated, this, &MainWindow::on_overlayDown);
+
+	overlaySpinBox->valueChanged(overlaySpinBox->value());
+
+	// Neighbor opacity
+	QShortcut* neighborUp = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Right), this);
+	QShortcut* neighborDown = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Left), this);
+
+	QObject::connect(neighborUp, &QShortcut::activated, this, &MainWindow::on_neighborUp);
+	QObject::connect(neighborDown, &QShortcut::activated, this, &MainWindow::on_neighborDown);
+
+	neighborSpinBox->valueChanged(neighborSpinBox->value());
 
 	qApp->installEventFilter(this);
 }
@@ -407,6 +425,14 @@ void MainWindow::on_actionErodeRegion(bool) {
 	visualizationContainer->ErodeCurrentRegion();
 }
 
+void MainWindow::on_sliceUp() {
+	visualizationContainer->SliceUp();
+}
+
+void MainWindow::on_sliceDown() {
+	visualizationContainer->SliceDown();
+}
+
 void MainWindow::on_windowSpinBox_valueChanged(double value) {
 	visualizationContainer->GetSliceView()->SetWindow(value);
 }
@@ -415,12 +441,28 @@ void MainWindow::on_levelSpinBox_valueChanged(double value) {
 	visualizationContainer->GetSliceView()->SetLevel(value);
 }
 
-void MainWindow::on_sliceUp() {
-	visualizationContainer->SliceUp();
+void MainWindow::on_overlaySpinBox_valueChanged(double value) {
+	visualizationContainer->GetSliceView()->SetOverlayOpacity(value);
 }
 
-void MainWindow::on_sliceDown() {
-	visualizationContainer->SliceDown();
+void MainWindow::on_overlayUp() {
+	overlaySpinBox->stepUp();
+}
+
+void MainWindow::on_overlayDown() {
+	overlaySpinBox->stepDown();
+}
+
+void MainWindow::on_neighborSpinBox_valueChanged(double value) {
+	visualizationContainer->GetVolumeView()->SetNeighborOpacity(value);
+}
+
+void MainWindow::on_neighborUp() {
+	neighborSpinBox->stepUp();
+}
+
+void MainWindow::on_neighborDown() {
+	neighborSpinBox->stepDown();
 }
 
 void MainWindow::on_regionDone(int label, bool done) {
