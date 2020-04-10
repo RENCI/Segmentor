@@ -68,7 +68,7 @@ Switch between **Navigation** and **Edit** modes with the space bar.
 #### 2D Visualization:
 
 * Window/level: `Shift + left-click and drag` (2D slice view only)
-
+****
 * Toggle voxel overlay: `q`
 * Toggle voxel outline: `w`
 * Toggle region outline: `e`
