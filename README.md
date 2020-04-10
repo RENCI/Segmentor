@@ -58,9 +58,11 @@ Switch between **Navigation** and **Edit** modes with the space bar.
 * Select current label: `Middle-click or Ctrl + left-click` on segmentation region
 * Move clipping plane: `Ctrl + right-click and drag`
 * Zoom to point: `f`
+****
 * Relabel current region: `u`
 * Merge with current region: `m`
 * Split current region: `2-9` (for number of split regions)
+****
 * Dilate current region: `z'
 * Erode current region: `x`
 * Region grow: `g` (2D slice view only)
@@ -72,9 +74,8 @@ Switch between **Navigation** and **Edit** modes with the space bar.
 * Toggle voxel overlay: `q`
 * Toggle voxel outline: `w`
 * Toggle region outline: `e`
-
+****
 * Move slice up or down: `up arrow` or `down arrow`
-
 * Adjust overlay opacity: `right arrow` or `left arrow`
 
 #### 3D Visualization
@@ -82,11 +83,11 @@ Switch between **Navigation** and **Edit** modes with the space bar.
 * Toggle surface smoothing: `s`
 * Toggle surface normals: `n`
 * Toggle slice plane visualization: `o`
-
+****
 * Toggle slice plane filtering: `p`
 * Toggle neighbor filtering: `k`
 * Toggle region filtering: `l`
-
+****
 * Adjust neighbor opacity (in neighbor filter mode): `Shift + right arrow` or `Shift + left arrow`
 
 ## Region Table:
