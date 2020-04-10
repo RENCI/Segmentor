@@ -73,14 +73,21 @@ Switch between **Navigation** and **Edit** modes with the space bar.
 * Toggle voxel outline: `w`
 * Toggle region outline: `e`
 
-#### 3D Visualization
+* Move slice up or down: `up arrow` or `down arrow`
 
-* Toggle slice plane visualization: `o`
-* Toggle slice plane filtering: `p`
-* Toggle region filtering: `l`
+* Adjust overlay opacity: `right arrow` or `left arrow`
+
+#### 3D Visualization
 
 * Toggle surface smoothing: `s`
 * Toggle surface normals: `n`
+* Toggle slice plane visualization: `o`
+
+* Toggle slice plane filtering: `p`
+* Toggle neighbor filtering: `k`
+* Toggle region filtering: `l`
+
+* Adjust neighbor opacity (in neighbor filter mode): `Shift + right arrow` or `Shift + left arrow`
 
 ## Region Table:
 
