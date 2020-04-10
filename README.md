@@ -43,7 +43,7 @@ Switch between **Navigation** and **Edit** modes with the space bar.
 * Rotate: `Left-click and drag`
 * Translate: `Middle-click and drag`
 * Zoom: `Right-click and drag`
-* Spin: `Ctrl-left-click and drag`
+* Spin: `Ctrl + left-click and drag`
 
 ### Edit mode:
 
@@ -55,8 +55,8 @@ Switch between **Navigation** and **Edit** modes with the space bar.
 
 #### General 
 
-* Select current label: `Middle-click or Ctrl-left-click segmentation region`
-* Move clipping plane: `Ctrl-right-click and drag`
+* Select current label: `Middle-click or Ctrl + left-click` on segmentation region
+* Move clipping plane: `Ctrl + right-click and drag`
 * Zoom to point: `f`
 * Relabel current region: `u`
 * Merge with current region: `m`
@@ -67,7 +67,7 @@ Switch between **Navigation** and **Edit** modes with the space bar.
 
 #### 2D Visualization:
 
-* Window/level: `Shift-left-click and drag` (2D slice view only)
+* Window/level: `Shift + left-click and drag` (2D slice view only)
 
 * Toggle voxel overlay: `q`
 * Toggle voxel outline: `w`
