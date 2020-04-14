@@ -8,8 +8,9 @@ SegmentorMath::SegmentorMath() {
 SegmentorMath::~SegmentorMath() {
 }
 
+SegmentorMath::OtsuValues SegmentorMath::OtsuThreshold(vtkImageData* image) {	
+	// Based on code here: http://www.labbookpages.co.uk/software/imgProc/otsuThreshold.html	
 
-double SegmentorMath::OtsuThreshold(vtkImageData* image) {
 	// Get image dimensions and extent
 	int dims[3];
 	image->GetDimensions(dims);
@@ -20,11 +21,19 @@ double SegmentorMath::OtsuThreshold(vtkImageData* image) {
 	// Initialize values
 	double minValue = image->GetScalarRange()[0];
 	double maxValue = image->GetScalarRange()[1];
-	double mean = 0.0;
-	double sigma = 0.0;
+
+	if (minValue == maxValue) {
+		OtsuValues otsuValues;
+		otsuValues.threshold = minValue;
+		otsuValues.backgroundMean = minValue;
+		otsuValues.foregroundMean = minValue;
+
+		return otsuValues;
+	}
+
 	const int count = dims[0] * dims[1] * dims[2];
 
-	// Bin values
+	// Get values normalized to histogram bins
 	std::vector<int> histogram(256, 0);
 	std::vector<int> values(count, 0);
 
@@ -38,96 +47,68 @@ double SegmentorMath::OtsuThreshold(vtkImageData* image) {
 		}
 	}
 
-	// Compute histogram and mean
+	// Compute histogram
 	for (int i = 0; i < values.size(); i++) {
 		int v = values[i];
 		histogram[v]++;
-		mean += v;
 	}
 
-	mean /= count;
-
-	std::cout << "Mean: " << mean << std::endl;
-
-	// Calculate sigma
-	for (int i = 0; i < histogram.size(); i++) {
-		double v = i - mean;
-
-		sigma += v * v * histogram[i] / count;
-	}
-
-	std::cout << "Sigma: " << sigma << std::endl;
-
-	// Calculate threshold bin
-	int bin = 0;
-	double criterion = 0.0;
-
-	for (int i = 0; i < histogram.size(); i++) {
-		double c = OtsuCriterion(image, histogram, values, sigma, count, i);
-		if (c > criterion) {
-			criterion = c;
-			bin = i;
-		}
-	}
-
-	std::cout << "Bin: " << bin << std::endl;
-
-	double threshold = minValue + (maxValue - minValue) * bin / histogram.size();
-
-	std::cout << "Threshold: " << threshold << std::endl;
-
-	return threshold;
-}
-
-double SegmentorMath::OtsuCriterion(vtkImageData* image, const std::vector<int>& histogram, const std::vector<int>& values, double sigma, int count, int bin) {
 	// Initialize values
-	double meanA = 0.0;
-	double wA = 0.0;
-	int countA = 0;
+	double sum = 0.0;
+	for (int i = 0; i < histogram.size(); i++) {
+		sum += i * histogram[i];
+	}
 
+	double sumB = 0.0;
+	int wB = 0;
+	int wF = 0;
+
+	double varMax = 0.0;
+	double threshold = 0.0;
 	double meanB = 0.0;
-	double wB = 0.0;
-	int countB = 0;
+	double meanF = 0.0;
 
-	// Get class means
-	for (int i = 0; i < values.size(); i++) {
-		int v = values[i];
-		if (v < bin) {
-			meanA += v;
-			countA++;
+	for (int t = 0; t < histogram.size(); t++) {
+		// Weight Background
+		wB += histogram[t];
+		if (wB == 0) continue;
+
+		// Weight Foreground
+		wF = count - wB;
+		if (wF == 0) break;
+
+		sumB += (double)(t * histogram[t]);
+
+		// Mean Background
+		double mB = sumB / wB;
+
+		// Mean Foreground
+		double mF = (sum - sumB) / wF;
+
+		// Calculate Between Class Variance
+		double varBetween = (double)wB * (double)wF * (mB - mF) * (mB - mF);
+
+		// Check if new maximum found
+		if (varBetween > varMax) {
+			varMax = varBetween;
+			threshold = t;
+			meanB = mB;
+			meanF = mF;
 		}
-		else {
-			meanB += v;
-			countB++;
-		}
 	}
 
-	meanA /= countA;
-	wA = (double)countA / count;
+	threshold = minValue + (maxValue - minValue) * threshold / histogram.size();
+	meanB = minValue + (maxValue - minValue) * meanB / histogram.size();
+	meanF = minValue + (maxValue - minValue) * meanF / histogram.size();
 
-	meanB /= countB;
-	wB = (double)countB / count;
+	//std::cout << "Threshold: " << threshold << std::endl;
+	//std::cout << "Mean Background: " << meanB << std::endl;
+	//std::cout << "Mean Foreground: " << meanF << std::endl;
 
-	// Get the variance for each class
-	double sigmaA = 0.0;
-	double sigmaB = 0.0;
+	OtsuValues otsuValues;
+	otsuValues.threshold = threshold;
+	otsuValues.backgroundMean = meanB;
+	otsuValues.foregroundMean = meanF;
 
-	for (int i = 0; i < bin; i++) {
-		double v = i - meanA;
-
-		sigmaA += v * v * histogram[i] / countA;
-	}
-
-	for (int i = bin; i < histogram.size(); i++) {
-		double v = i - meanB;
-
-		sigmaB += v * v * histogram[i] / countB;
-	}
-
-	// Get the inter-class variance
-	double meanAB = meanA - meanB;
-	double sigmaAB = wA * wB * meanAB * meanAB;
-	double criterion = sigmaAB / sigma;
-
-	return criterion;
+	return otsuValues;
 }

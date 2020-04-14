@@ -59,6 +59,9 @@ public:
 	void SetWindow(double window);
 	void SetLevel(double level);
 
+	void RescaleFull();
+	void RescalePartial();
+
 	void SetOverlayOpacity(double opacity);
 
 	void UpdatePlane();
@@ -121,6 +124,8 @@ protected:
 	void FilterRegions();
 
 	void ResetCamera();
+
+	vtkSmartPointer<vtkImageData> GetSlice();
 
 	static void windowLevelChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 	static void cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);

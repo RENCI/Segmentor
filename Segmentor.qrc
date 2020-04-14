@@ -3,6 +3,8 @@
     <file>icons/icon_overlay.png</file>
     <file>icons/icon_voxels.png</file>
     <file>icons/icon_outline.png</file>
+    <file>icons/icon_rescale_full.png</file>
+    <file>icons/icon_rescale_partial.png</file>
     <file>icons/icon_smooth_surface.png</file>
     <file>icons/icon_smooth_normals.png</file>
     <file>icons/icon_plane.png</file>

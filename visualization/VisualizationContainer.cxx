@@ -43,6 +43,8 @@
 #include "RegionCollection.h"
 #include "RegionMetadataIO.h"
 
+#include <vtkImageGradientMagnitude.h>
+
 VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volumeInteractor, vtkRenderWindowInteractor* sliceInteractor, MainWindow* mainWindow) {
 	data = nullptr;
 	labels = nullptr;
@@ -184,8 +186,17 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenImageFile(cons
 		info->Update();
 */
 
+/*
+		// For testing gradient
+		vtkSmartPointer<vtkImageGradientMagnitude> gradient = vtkSmartPointer<vtkImageGradientMagnitude>::New();
+		gradient->SetInputConnection(reader->GetOutputPort());
+		gradient->SetDimensionality(3);
+		gradient->Update();
+*/
+
 		SetImageData(reader->GetOutput());
 //		SetImageData(info->GetOutput());
+//		SetImageData(gradient->GetOutput());
 
 		return Success;
 	}
@@ -367,11 +378,11 @@ void VisualizationContainer::SegmentVolume() {
 	if (!data) return;
 
 	// Get Otsu threshold
-	double value = SegmentorMath::OtsuThreshold(data);
+	SegmentorMath::OtsuValues otsu = SegmentorMath::OtsuThreshold(data);
 
 	// Filter
 	vtkSmartPointer<vtkImageThreshold> threshold = vtkSmartPointer<vtkImageThreshold>::New();
-	threshold->ThresholdByUpper(value);
+	threshold->ThresholdByUpper(otsu.threshold);
 	threshold->SetInValue(255);
 	threshold->SetOutValue(0);
 	threshold->ReplaceInOn();

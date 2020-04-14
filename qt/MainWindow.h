@@ -55,6 +55,8 @@ public slots:
 	virtual void on_actionOverlay(bool checked);
 	virtual void on_actionVoxels(bool checked);
 	virtual void on_actionOutline(bool checked);
+	virtual void on_actionRescaleFull(bool checked);
+	virtual void on_actionRescalePartial(bool checked);
 	virtual void on_actionSmoothNormals(bool checked);
 	virtual void on_actionSmoothSurfaces(bool checked);
 	virtual void on_actionShowPlane(bool checked);

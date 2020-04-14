@@ -405,6 +405,22 @@ void MainWindow::on_actionOutline(bool checked) {
 	visualizationContainer->GetSliceView()->ShowRegionOutlines(checked);
 }
 
+void MainWindow::on_actionRescaleFull(bool checked) {
+	SliceView* sliceView = visualizationContainer->GetSliceView();
+
+	sliceView->RescaleFull();
+
+	setWindowLevel(sliceView->GetWindow(), sliceView->GetLevel());
+}
+
+void MainWindow::on_actionRescalePartial(bool checked) {
+	SliceView* sliceView = visualizationContainer->GetSliceView();
+
+	sliceView->RescalePartial();
+
+	setWindowLevel(sliceView->GetWindow(), sliceView->GetLevel());
+}
+
 void MainWindow::on_actionSmoothNormals(bool checked) {
 	visualizationContainer->GetVolumeView()->SetSmoothShading(checked);
 }
@@ -560,6 +576,8 @@ void MainWindow::CreateToolBar() {
 	toolBar->addAction(CreateActionIcon(":/icons/icon_overlay.png", "Show overlay (q)", "q", visualizationContainer->GetSliceView()->GetShowLabelSlice(), &MainWindow::on_actionOverlay));
 	toolBar->addAction(CreateActionIcon(":/icons/icon_voxels.png", "Show voxels (w)", "w", visualizationContainer->GetSliceView()->GetShowVoxelOutlines(), &MainWindow::on_actionVoxels));
 	toolBar->addAction(CreateActionIcon(":/icons/icon_outline.png", "Show outlines (e)", "e", visualizationContainer->GetSliceView()->GetShowRegionOutlines(), &MainWindow::on_actionOutline));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_rescale_full.png", "Rescale full (=)", "=", &MainWindow::on_actionRescaleFull));
+	toolBar->addAction(CreateActionIcon(":/icons/icon_rescale_partial.png", "Rescale partial (-)", "-", &MainWindow::on_actionRescalePartial));
 	toolBar->addSeparator();
 	toolBar->addWidget(CreateLabel("3D"));
 	toolBar->addAction(CreateActionIcon(":/icons/icon_smooth_normals.png", "Smooth normals (n)", "n", visualizationContainer->GetVolumeView()->GetSmoothShading(), &MainWindow::on_actionSmoothNormals));

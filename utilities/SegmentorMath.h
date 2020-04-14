@@ -7,13 +7,17 @@ class vtkImageData;
 
 class SegmentorMath {
 public:
-	static double OtsuThreshold(vtkImageData* image);	
+	struct OtsuValues {
+		double threshold;
+		double backgroundMean;
+		double foregroundMean;
+	};
+
+	static OtsuValues OtsuThreshold(vtkImageData* image);
 
 private:
 	SegmentorMath();
 	~SegmentorMath();
-
-	static double OtsuCriterion(vtkImageData* image, const std::vector<int>& histogram, const std::vector<int>& values, double sigma, int count, int bin);
 };
 
 #endif

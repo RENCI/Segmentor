@@ -33,6 +33,10 @@
 #include "RegionCollection.h"
 #include "SliceLocation.h"
 
+#include <vtkImageReslice.h>
+#include <vtkTransform.h>
+#include "SegmentorMath.h"
+
 void SliceView::cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
 	SliceView* pipeline = static_cast<SliceView*>(clientData);
 
@@ -300,6 +304,53 @@ void SliceView::SetLevel(double level) {
 	slice->GetProperty()->SetColorLevel(level);
 
 	Render();
+}
+
+void SliceView::RescaleFull() {
+	vtkSmartPointer<vtkImageData> scaleSlice = GetSlice();
+
+	double minValue = scaleSlice->GetScalarRange()[0];
+	double maxValue = scaleSlice->GetScalarRange()[1];
+
+	double range = maxValue - minValue;
+
+	slice->GetProperty()->SetColorWindow(range);
+	slice->GetProperty()->SetColorLevel(minValue + range / 2);
+
+	Render();
+}
+
+void SliceView::RescalePartial() {
+	vtkSmartPointer<vtkImageData> scaleSlice = GetSlice();
+
+	SegmentorMath::OtsuValues otsu = SegmentorMath::OtsuThreshold(scaleSlice);
+
+	double minValue = otsu.backgroundMean;
+	double maxValue = otsu.foregroundMean;
+
+	double range = maxValue - minValue;;
+
+	slice->GetProperty()->SetColorWindow(range * 1.5);
+	slice->GetProperty()->SetColorLevel(minValue + range / 2);
+
+	Render();
+}
+
+vtkSmartPointer<vtkImageData> SliceView::GetSlice() {
+	vtkCamera* camera = renderer->GetActiveCamera();
+	double* wxyz = camera->GetOrientationWXYZ();
+
+	vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
+	transform->Translate(camera->GetFocalPoint());
+	transform->RotateWXYZ(wxyz[0], wxyz[1], wxyz[2], wxyz[3]);
+
+	vtkSmartPointer<vtkImageReslice> reslice = vtkSmartPointer<vtkImageReslice>::New();
+	reslice->SetOutputDimensionality(2);
+	reslice->SetResliceAxes(transform->GetMatrix());
+	reslice->SetInputDataObject(data);
+	reslice->Update();
+	
+	return reslice->GetOutput();
 }
 
 void SliceView::SetOverlayOpacity(double opacity) {
