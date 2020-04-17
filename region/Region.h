@@ -64,7 +64,6 @@ protected:
 	RegionSurface* surface;
 	RegionOutline* outline;
 	RegionVoxelOutlines* voxelOutlines;
-
 	RegionHighlight3D* highlight3D;	
 
 	void UpdateExtent();

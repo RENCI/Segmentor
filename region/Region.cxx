@@ -55,10 +55,12 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 }
 	
 Region::~Region() {
-	//ClearLabels();
+	ClearLabels();
 
-	delete outline;
 	delete surface;
+	delete outline;
+	delete voxelOutlines;
+	delete highlight3D;
 }
 
 vtkAlgorithmOutput* Region::GetOutput() {
