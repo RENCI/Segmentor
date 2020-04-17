@@ -32,7 +32,8 @@ public:
 		Success = 1,
 		WrongFileType,
 		NoImageData,
-		VolumeMismatch
+		VolumeMismatch,
+		NoFileName
 	};
 
 	FileErrorCode OpenImageFile(const std::string& fileName);
@@ -42,6 +43,7 @@ public:
 	FileErrorCode OpenSegmentationStack(const std::vector<std::string>& fileNames);
 
 	void SegmentVolume();
+	FileErrorCode SaveSegmentationData();
 	FileErrorCode SaveSegmentationData(const std::string& fileName);
 
 	InteractionMode GetInteractionMode();
@@ -108,6 +110,9 @@ protected:
 
 	// Current filter mode
 	FilterMode filterMode;
+
+	// Current segmentation data filename
+	std::string segmentationDataFileName;
 
 	void SetImageData(vtkImageData* imageData);
 	bool SetLabelData(vtkImageData* labelData);

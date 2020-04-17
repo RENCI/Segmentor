@@ -49,7 +49,7 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	data = nullptr;
 	labels = nullptr;
 	regions = new RegionCollection();
-	currentRegion = nullptr;
+	currentRegion = nullptr;	
 
 	// Qt main window
 	qtWindow = mainWindow;
@@ -251,6 +251,8 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationFi
 
 			qtWindow->updateRegions(regions);
 
+			segmentationDataFileName = fileName;
+
 			return Success;
 		}
 		else {
@@ -271,6 +273,8 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationFi
 
 			qtWindow->updateRegions(regions);
 
+			segmentationDataFileName = fileName;
+
 			return Success;
 		}
 		else {
@@ -290,6 +294,8 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationFi
 			LoadRegionMetadata(fileName + ".json");
 
 			qtWindow->updateRegions(regions);
+
+			segmentationDataFileName = fileName;
 
 			return Success;
 		}
@@ -330,6 +336,8 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationSt
 
 			qtWindow->updateRegions(regions);
 
+			segmentationDataFileName = fileNames[0];
+
 			return Success;
 		}
 		else {
@@ -338,6 +346,15 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationSt
 	}
 
 	return WrongFileType;
+}
+
+VisualizationContainer::FileErrorCode VisualizationContainer::SaveSegmentationData() {
+	if (segmentationDataFileName.size() == 0) {
+		return NoFileName;
+	}
+	else {
+		return SaveSegmentationData(segmentationDataFileName);
+	}
 }
 
 VisualizationContainer::FileErrorCode VisualizationContainer::SaveSegmentationData(const std::string& fileName) {
@@ -370,6 +387,8 @@ VisualizationContainer::FileErrorCode VisualizationContainer::SaveSegmentationDa
 	}
 
 	SaveRegionMetadata(fileName + ".json");
+
+	segmentationDataFileName = fileName;
 	
 	return Success;
 }

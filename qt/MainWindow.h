@@ -44,6 +44,7 @@ public slots:
 	virtual void on_actionOpen_Segmentation_Stack_triggered();
 
 	virtual void on_actionSave_Segmentation_Data_triggered();
+	virtual void on_actionSave_Segmentation_Data_As_triggered();
 
 	virtual void on_actionSegment_Volume_triggered();
 
