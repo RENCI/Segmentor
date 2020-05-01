@@ -6,6 +6,8 @@
 
 #include <vtkSmartPointer.h>
 
+#include "InteractionCallbacks.h"
+
 class MainWindow;
 
 class vtkImageData;
