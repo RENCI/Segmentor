@@ -91,7 +91,7 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 			// XXX: HACK TO GUARD AGAINST INVALID VOLUME PICK
 			//		NEED TO FIX VOLUME PICKING AND DIFFERENTIATE BETWEEN THEM FOR KEYSTROKE CALLBACK
 
-			if (p[0] == 0 && p[1] == 0 && p[3] == 0) break;
+			if (p[0] == 0 && p[1] == 0 && p[2] == 0) break;
 				
 			vis->GrowCurrentRegion(p[0], p[1], p[2]);
 		}
@@ -116,7 +116,7 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 			// XXX: HACK TO GUARD AGAINST INVALID VOLUME PICK
 			//		NEED TO FIX VOLUME PICKING AND DIFFERENTIATE BETWEEN THEM FOR KEYSTROKE CALLBACK
 
-			if (p[0] == 0 && p[1] == 0 && p[3] == 0) break;
+			if (p[0] == 0 && p[1] == 0 && p[2] == 0) break;
 
 			vis->MergeWithCurrentRegion(p[0], p[1], p[2]);
 		}
