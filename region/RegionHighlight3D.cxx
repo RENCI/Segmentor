@@ -47,11 +47,11 @@ vtkSmartPointer<vtkActor> RegionHighlight3D::GetActor() {
 
 void RegionHighlight3D::Update() {
 	double r = region->GetLength() / 2;
-	double or = r;
-	double ir = or / 2;
+	double rOut = r;
+	double rIn = rOut / 2;
 
-	disk->SetInnerRadius(ir);
-	disk->SetOuterRadius(or);
+	disk->SetInnerRadius(rIn);
+	disk->SetOuterRadius(rOut);
 
 	actor->SetPosition(region->GetCenter());
 }
