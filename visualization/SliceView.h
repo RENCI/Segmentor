@@ -20,9 +20,6 @@ class RegionOutline;
 class RegionCollection;
 class SliceLocation;
 
-enum InteractionMode;
-enum FilterMode;
-
 class SliceView {
 public:
 	SliceView(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut);
@@ -37,8 +34,8 @@ public:
 	void SetShowProbe(bool show);
 	void SetProbePosition(double x, double y, double z);
 
-	void SetInteractionMode(InteractionMode mode);
-	void SetFilterMode(FilterMode mode);
+	void SetInteractionMode(enum InteractionMode mode);
+	void SetFilterMode(enum FilterMode mode);
 
 	void SetCurrentRegion(Region* region);
 	

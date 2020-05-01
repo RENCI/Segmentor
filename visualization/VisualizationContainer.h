@@ -17,9 +17,6 @@ class SliceView;
 class Region;
 class RegionCollection;
 
-enum InteractionMode;
-enum FilterMode;
-
 class VisualizationContainer {
 public:
 	VisualizationContainer(
@@ -46,12 +43,12 @@ public:
 	FileErrorCode SaveSegmentationData();
 	FileErrorCode SaveSegmentationData(const std::string& fileName);
 
-	InteractionMode GetInteractionMode();
-	void SetInteractionMode(InteractionMode mode);
+	enum InteractionMode GetInteractionMode();
+	void SetInteractionMode(enum InteractionMode mode);
 	void ToggleInteractionMode();
 
-	FilterMode GetFilterMode();
-	void SetFilterMode(FilterMode mode);
+	enum FilterMode GetFilterMode();
+	void SetFilterMode(enum FilterMode mode);
 
 	void PickLabel(int x, int y, int z);
 	void Paint(int x, int y, int z);
