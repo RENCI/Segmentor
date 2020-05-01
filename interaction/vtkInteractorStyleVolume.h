@@ -7,7 +7,7 @@
 #include <vtkSetGet.h>
 #include <vtkSmartPointer.h>
 
-#include "InteractionCallbacks.h"
+#include "InteractionEnums.h"
 
 class vtkCellPicker;
 

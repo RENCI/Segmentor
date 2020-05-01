@@ -3,7 +3,7 @@
 
 #include <vtkSmartPointer.h>
 
-#include "InteractionCallbacks.h"
+#include "InteractionEnums.h"
 
 class vtkActor;
 class vtkImageData;

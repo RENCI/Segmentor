@@ -6,9 +6,7 @@
 
 #include <vtkSmartPointer.h>
 
-#include "InteractionCallbacks.h"
-
-enum InteractionMode;
+#include "InteractionEnums.h"
 
 class MainWindow;
 

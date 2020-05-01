@@ -5,7 +5,7 @@
 
 #include <vector>
 
-#include "InteractionCallbacks.h"
+#include "InteractionEnums.h"
 
 class vtkActor;
 class vtkBox;
