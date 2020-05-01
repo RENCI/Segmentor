@@ -8,6 +8,8 @@
 
 #include "InteractionCallbacks.h"
 
+enum InteractionMode;
+
 class MainWindow;
 
 class vtkImageData;
