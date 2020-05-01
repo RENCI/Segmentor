@@ -5,6 +5,8 @@
 
 #include <vector>
 
+#include "InteractionCallbacks.h"
+
 class vtkActor;
 class vtkBox;
 class vtkImageData;

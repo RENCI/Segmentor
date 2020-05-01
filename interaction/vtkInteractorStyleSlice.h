@@ -7,6 +7,8 @@
 #include <vtkSetGet.h>
 #include <vtkSmartPointer.h>
 
+#include "InteractionCallbacks.h"
+
 class vtkCellPicker;
 
 // Interaction flags

@@ -3,6 +3,8 @@
 
 #include <vtkSmartPointer.h>
 
+#include "InteractionCallbacks.h"
+
 class vtkActor;
 class vtkImageData;
 class vtkImageSlice;
