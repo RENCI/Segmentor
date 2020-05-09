@@ -6,6 +6,8 @@ endif()
 
 project(Segmentor)
 
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
+
 find_package(VTK REQUIRED)
 include(${VTK_USE_FILE})
 
@@ -61,6 +63,10 @@ add_executable(Segmentor MACOSX_BUNDLE ${CXX_FILES} ${UISrcs} ${QT_WRAP} ${UI_RE
 qt5_use_modules(Segmentor Core Gui)
 target_link_libraries(Segmentor ${VTK_LIBRARIES})
 install(TARGETS Segmentor RUNTIME DESTINATION bin BUNDLE DESTINATION .)
+install(CODE "
+  include(BundleUtilities) 
+  fixup_bundle(${CMAKE_INSTALL_PREFIX}/Segmentor.app \"\" \"\")
+" COMPONENT Runtime)
 
 # For visual studio debugging
 set(DEBUG_PATH "${VTK_DIR}/bin/Debug;PATH=%PATH%")
