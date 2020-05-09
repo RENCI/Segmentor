@@ -63,22 +63,21 @@ add_executable(Segmentor MACOSX_BUNDLE ${CXX_FILES} ${UISrcs} ${QT_WRAP} ${UI_RE
 qt5_use_modules(Segmentor Core Gui)
 target_link_libraries(Segmentor ${VTK_LIBRARIES})
 install(TARGETS Segmentor RUNTIME DESTINATION bin BUNDLE DESTINATION .)
-install(CODE "
-  include(BundleUtilities) 
-  fixup_bundle(${CMAKE_INSTALL_PREFIX}/Segmentor.app \"\" \"\")
-" COMPONENT Runtime)
 
-# For visual studio debugging
-set(DEBUG_PATH "${VTK_DIR}/bin/Debug;PATH=%PATH%")
-set_target_properties(Segmentor PROPERTIES VS_DEBUGGER_ENVIRONMENT "${DEBUG_PATH}")
-
-# CPack
-if(WIN32)
-	set(CPACK_GENERATOR NSIS)
+if (WIN32)
+  # For visual studio debugging
+  set(DEBUG_PATH "${VTK_DIR}/bin/Debug;PATH=%PATH%")
+  set_target_properties(Segmentor PROPERTIES VS_DEBUGGER_ENVIRONMENT "${DEBUG_PATH}")
+  set(CPACK_GENERATOR NSIS)
 elseif(APPLE)
-	set(CPACK_GENERATOR DragNDrop)
+  install(CODE "
+    include(BundleUtilities) 
+    fixup_bundle(${CMAKE_INSTALL_PREFIX}/Segmentor.app \"\" \"\")
+  #" COMPONENT Runtime)
+  set(CPACK_GENERATOR DragNDrop)
 endif()
 
+# CPack
 set(CPACK_PACKAGE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Installer)
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "Segmentor")
 set(CPACK_PACKAGE_EXECUTABLES Segmentor;Segmentor)
