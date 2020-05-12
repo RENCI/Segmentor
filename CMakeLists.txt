@@ -6,9 +6,18 @@ endif()
 
 project(Segmentor)
 
+if(WIN32)
+  set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/Install)
+else()
+  #set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
 
-#set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
-set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/Install)
+  #set(CMAKE_SKIP_BUILD_RPATH FALSE)
+  #set(CMAKE)BUILD_WITH_INSTALL_RPATH FALSE)
+  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+  #set(CMAKE_SKIP_RPATH TRUE)
+	
+endif()
 
 
 find_package(VTK REQUIRED)
@@ -70,35 +79,42 @@ install(TARGETS Segmentor
   BUNDLE DESTINATION . COMPONENT Segmentor
 )
 
-if (WIN32)
+if(WIN32)
   # For visual studio debugging
   set(DEBUG_PATH "${VTK_DIR}/bin/Debug;PATH=%PATH%")
   set_target_properties(Segmentor PROPERTIES VS_DEBUGGER_ENVIRONMENT "${DEBUG_PATH}")
 
-  install(FILES ${VTK_DIR}/bin/Release/QVTKWidgetPlugin.dll DESTINATION bin COMPONENT Segmentor)
-  
+  set(plugin_dest_dir bin)
+  set(qtconf_dest_dir bin)
   set(APPS \${CMAKE_INSTALL_PREFIX}/bin/Segmentor.exe)
   set(QVTK \${CMAKE_INSTALL_PREFIX}/bin/QVTKWidgetPlugin.dll)
-
+  
+  install(FILES ${VTK_DIR}/bin/Release/QVTKWidgetPlugin.dll DESTINATION bin COMPONENT Segmentor)
+ 
   install(CODE "
-	file(GLOB PLUGINS ${QVTK})
+    file(GLOB PLUGINS ${QVTK})
     include(BundleUtilities) 
-	fixup_bundle(${APPS} \"\${PLUGINS}\" \"\")
-	execute_process(COMMAND windeployqt.exe --release ${APPS})
+    fixup_bundle(${APPS} \"\${PLUGINS}\" \"\")
+    execute_process(COMMAND windeployqt.exe --release ${APPS})
   " COMPONENT Segmentor)
   
   set(CPACK_GENERATOR NSIS)
 elseif(APPLE)
-  set(APPS ${CMAKE_BINARY_DIR}/Segmentor.app)
+  set(plugin_dest_dir Segmentor.app/Contents/MacOS)
+  set(APPS \${CMAKE_INSTALL_PREFIX}/Segmentor.app)
+  set(DIRS ${QT_LIBRARY_DIRS})
 
-  install(FILES ${VTK_DIR}/bin/Release/QVTKWidgetPlugin.dll DESTINATION bin COMPONENT Segmentor)
+  install(FILES ${VTK_DIR}/lib/libQVTKWidgetPlugin.dylib DESTINATION ${plugin_dest_dir}/plugins COMPONENT Segmentor)
 
-  set(APPS \${CMAKE_INSTALL_PREFIX}/bin/Segmentor.exe)
-  set(QVTK \${CMAKE_INSTALL_PREFIX}/bin/QVTKWidgetPlugin.dll)
+  get_target_property(QMAKE_EXECUTABLE Qt5::qmake IMPORTED_LOCATION)
+  get_filename_component(QT_BIN_DIR ${QMAKE_EXECUTABLE} DIRECTORY)
+  find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS ${QT_BIN_DIR})
 
   install(CODE "
+    file(GLOB PLUGINS \"\${CMAKE_INSTALL_PREFIX}/$plugin_dest_dir}/plugins/QVTKWidgetPlugin.dylib\")
     include(BundleUtilities) 
-	fixup_bundle(${APPS} \"\" \"\")
+    fixup_bundle(\"${APPS}\" \"\${PLUGINS}\" \"${DIRS}\")
+    execute_process(COMMAND ${MACDEPLOYQT_EXECUTABLE} ${APPS})
   " COMPONENT Segmentor)
 
   set(CPACK_GENERATOR DragNDrop)
