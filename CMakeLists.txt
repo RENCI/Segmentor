@@ -75,7 +75,7 @@ if (WIN32)
   set(DEBUG_PATH "${VTK_DIR}/bin/Debug;PATH=%PATH%")
   set_target_properties(Segmentor PROPERTIES VS_DEBUGGER_ENVIRONMENT "${DEBUG_PATH}")
 
-  install(FILES ${VTK_DIR}/bin/Release/QVTKWidgetPlugin.dll DESTINATION ${CMAKE_INSTALL_PREFIX}/bin COMPONENT Runtime)
+  install(FILES ${VTK_DIR}/bin/Release/QVTKWidgetPlugin.dll DESTINATION bin COMPONENT Segmentor)
   
   set(APPS \${CMAKE_INSTALL_PREFIX}/bin/Segmentor.exe)
   set(QVTK \${CMAKE_INSTALL_PREFIX}/bin/QVTKWidgetPlugin.dll)
