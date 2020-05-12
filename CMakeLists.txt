@@ -91,6 +91,11 @@ if (WIN32)
 elseif(APPLE)
   set(APPS ${CMAKE_BINARY_DIR}/Segmentor.app)
 
+  install(FILES ${VTK_DIR}/bin/Release/QVTKWidgetPlugin.dll DESTINATION bin COMPONENT Segmentor)
+
+  set(APPS \${CMAKE_INSTALL_PREFIX}/bin/Segmentor.exe)
+  set(QVTK \${CMAKE_INSTALL_PREFIX}/bin/QVTKWidgetPlugin.dll)
+
   install(CODE "
     include(BundleUtilities) 
 	fixup_bundle(${APPS} \"\" \"\")
