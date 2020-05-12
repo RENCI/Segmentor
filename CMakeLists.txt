@@ -6,7 +6,10 @@ endif()
 
 project(Segmentor)
 
-set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
+
+#set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/Install)
+
 
 find_package(VTK REQUIRED)
 include(${VTK_USE_FILE})
@@ -62,18 +65,37 @@ qt5_wrap_ui(UISrcs ${UI_FILES} )
 add_executable(Segmentor MACOSX_BUNDLE ${CXX_FILES} ${UISrcs} ${QT_WRAP} ${UI_RESOURCES})
 qt5_use_modules(Segmentor Core Gui)
 target_link_libraries(Segmentor ${VTK_LIBRARIES})
-install(TARGETS Segmentor RUNTIME DESTINATION bin BUNDLE DESTINATION .)
+install(TARGETS Segmentor 
+  RUNTIME DESTINATION bin COMPONENT Segmentor
+  BUNDLE DESTINATION . COMPONENT Segmentor
+)
 
 if (WIN32)
   # For visual studio debugging
   set(DEBUG_PATH "${VTK_DIR}/bin/Debug;PATH=%PATH%")
   set_target_properties(Segmentor PROPERTIES VS_DEBUGGER_ENVIRONMENT "${DEBUG_PATH}")
+
+  install(FILES ${VTK_DIR}/bin/Release/QVTKWidgetPlugin.dll DESTINATION ${CMAKE_INSTALL_PREFIX}/bin COMPONENT Runtime)
+  
+  set(APPS \${CMAKE_INSTALL_PREFIX}/bin/Segmentor.exe)
+  set(QVTK \${CMAKE_INSTALL_PREFIX}/bin/QVTKWidgetPlugin.dll)
+
+  install(CODE "
+	file(GLOB PLUGINS ${QVTK})
+    include(BundleUtilities) 
+	fixup_bundle(${APPS} \"\${PLUGINS}\" \"\")
+	execute_process(COMMAND windeployqt.exe --release ${APPS})
+  " COMPONENT Segmentor)
+  
   set(CPACK_GENERATOR NSIS)
 elseif(APPLE)
+  set(APPS ${CMAKE_BINARY_DIR}/Segmentor.app)
+
   install(CODE "
     include(BundleUtilities) 
-    fixup_bundle(${CMAKE_INSTALL_PREFIX}/Segmentor.app \"\" \"\")
-  #" COMPONENT Runtime)
+	fixup_bundle(${APPS} \"\" \"\")
+  " COMPONENT Segmentor)
+
   set(CPACK_GENERATOR DragNDrop)
 endif()
 
