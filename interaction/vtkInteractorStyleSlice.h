@@ -40,7 +40,7 @@ public:
 	virtual void StartErase();
 	virtual void EndErase();
 
-	virtual void WindowLevel();
+	virtual void WindowLevel() override;
 	double GetWindow();
 	double GetLevel();
 
