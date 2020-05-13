@@ -4,6 +4,10 @@ if(POLICY CMP0020)
   cmake_policy(SET CMP0020 NEW)
 endif()
 
+if(APPLE)
+#  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13.0" CACHE STRING "Minimum OS X deployment version")
+endif()
+
 project(Segmentor)
 
 if(WIN32)
