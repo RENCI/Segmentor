@@ -4,7 +4,7 @@ if(POLICY CMP0020)
   cmake_policy(SET CMP0020 NEW)
 endif()
 
-project(Segmentor)
+project(Segmentor VERSION 0.2.0)
 
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/Install)
 
@@ -90,7 +90,6 @@ if(WIN32)
 elseif(APPLE)
   set(PLUGIN_DEST_DIR Segmentor.app/Contents/PlugIns)
   set(APPS \${CMAKE_INSTALL_PREFIX}/Segmentor.app)
-  set(QVTK \${CMAKE_INSTALL_PREFIX}/${PLUGIN_DEST_DIR}/libQVTKWidgetPlugin.dylib)
 
   install(FILES ${VTK_DIR}/lib/libQVTKWidgetPlugin.dylib DESTINATION ${PLUGIN_DEST_DIR} COMPONENT Segmentor)
 
@@ -99,13 +98,12 @@ elseif(APPLE)
   find_program(MACDEPLOYQT macdeployqt HINTS ${QT_BIN_DIR})
 
   install(CODE "
-    file(GLOB PLUGINS \"${QVTK}\")
-    include(BundleUtilities) 
-#    fixup_bundle(${APPS} \"\${PLUGINS}\" \"\")
-    execute_process(COMMAND ${MACDEPLOYQT} ${APPS} -verbose=2 -always-overwrite)
+    execute_process(COMMAND ${MACDEPLOYQT} ${APPS} -always-overwrite)
   " COMPONENT Segmentor)
 
   set(CPACK_GENERATOR DragNDrop)
+  set(CPACK_BUNDLE_PLIST \$CMAKE_INSTALL_PREFIX}/Segmentor.app/Contents/Info.plist) 
+  set(CPACK_BUNDLE_ICON ${CMAKE_CURRENT_SOURCE_DIR}/icons/Segmentor.icns)
 endif()
 
 # CPack
