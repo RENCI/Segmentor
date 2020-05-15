@@ -16,7 +16,6 @@ public:
 	void selectRegionLabel(unsigned short label);
 
 public slots:
-	void on_sort();
 	void on_removeRegion(int label);
 	void on_cellEntered(int row, int column);
 	void on_cellClicked(int row, int column);
@@ -33,6 +32,9 @@ protected:
 	void leaveEvent(QEvent *event);
 
 	int rowLabel(int row);
+
+	void disableSorting();
+	void enableSorting();
 };
 
 #endif

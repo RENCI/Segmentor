@@ -21,26 +21,21 @@ RegionTable::RegionTable(QWidget* parent)
 	setColumnCount(headers.length());
 	setHorizontalHeaderLabels(headers);
 	verticalHeader()->setVisible(false);
-	setSortingEnabled(true);
-	resizeColumnsToContents();
+	enableSorting();
 	setMouseTracking(true);
 	setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
 	currentRegionLabel = 0;
 
-	QObject::connect(horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &RegionTable::on_sort);
 	QObject::connect(this, &RegionTable::removeRegion, this, &RegionTable::on_removeRegion);
 	QObject::connect(this, &RegionTable::cellEntered, this, &RegionTable::on_cellEntered);
 	QObject::connect(this, &RegionTable::cellClicked, this, &RegionTable::on_cellClicked);
 }
 
 void RegionTable::update(RegionCollection* regions) {
+	disableSorting();
+
 	int numRegions = regions->Size();
-
-	// Need to disable sorting 
-	setSortingEnabled(false);
-
-	// Clear table
 	setRowCount(numRegions);
 
 	// Icon for remove
@@ -66,7 +61,7 @@ void RegionTable::update(RegionCollection* regions) {
 		// Color
 		const double* col = region->GetDone() ? grey : region->GetColor();
 		QColor color(col[0] * 255, col[1] * 255, col[2] * 255);
-		QTableWidgetItem* colorItem = new QTableWidgetItem("");
+		QTableWidgetItem* colorItem = new QTableWidgetItem();
 		colorItem->setBackgroundColor(color);
 		colorItem->setFlags(Qt::ItemIsSelectable);
 
@@ -98,9 +93,7 @@ void RegionTable::update(RegionCollection* regions) {
 		QCheckBox* doneCheckBox = new QCheckBox();
 		doneCheckBox->setChecked(region->GetDone());
 		doneCheckBox->setStyleSheet("margin-left:10%;margin-right:5%;");
-		QObject::connect(doneCheckBox, &QCheckBox::stateChanged, [this, label](int state) {
-			regionDone(label, state);
-		});
+		doneCheckBox->setAttribute(Qt::WA_TransparentForMouseEvents);
 
 		// Remove button
 		QTableWidgetItem* removeItem = new QTableWidgetItem();
@@ -108,6 +101,7 @@ void RegionTable::update(RegionCollection* regions) {
 
 		QPushButton* removeButton = new QPushButton();
 		removeButton->setIcon(removeIcon);
+		doneCheckBox->setAttribute(Qt::WA_TransparentForMouseEvents);
 		QObject::connect(removeButton, &QPushButton::clicked, [this, label]() {
 			removeRegion(label);
 		});
@@ -126,19 +120,14 @@ void RegionTable::update(RegionCollection* regions) {
 		setCellWidget(i, 5, removeButton);
 	}
 
-	// Enable sorting
-	setSortingEnabled(true);
-
-	// Resize columns
-	resizeColumnsToContents();
-
-	// Need to reconnect after disabling and enabling sorting
-	QObject::connect(horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &RegionTable::on_sort);
+	enableSorting();
 
 	selectRegionLabel(currentRegionLabel);
 }
 
 void RegionTable::update(Region* region) {
+	disableSorting();
+
 	QStyle* style = QApplication::style();
 	QIcon modifiedIcon = style->standardIcon(QStyle::SP_MessageBoxWarning);
 
@@ -162,6 +151,8 @@ void RegionTable::update(Region* region) {
 			break;
 		}
 	}
+
+	enableSorting();
 }
 
 void RegionTable::selectRegionLabel(unsigned short label) {
@@ -182,10 +173,6 @@ void RegionTable::selectRegionLabel(unsigned short label) {
 			ti->setTextColor(QColor("black"));
 		}
 	}
-}
-
-void RegionTable::on_sort() {
-	resizeColumnsToContents();
 }
 
 void RegionTable::on_removeRegion(int label) {
@@ -237,9 +224,19 @@ void RegionTable::on_cellEntered(int row, int column) {
 }
 
 void RegionTable::on_cellClicked(int row, int column) {
+	disableSorting();
+
 	if (column <= 2) {
 		emit(selectRegion(rowLabel(row)));
 	}
+	if (column == 4) {
+		QCheckBox* checkBox = (QCheckBox*)cellWidget(row, column);
+		checkBox->toggle();
+
+		emit(regionDone(rowLabel(row), checkBox->isChecked()));
+	}
+
+	enableSorting();
 }
 
 void RegionTable::leaveEvent(QEvent* event) {
@@ -259,4 +256,15 @@ void RegionTable::leaveEvent(QEvent* event) {
 
 int RegionTable::rowLabel(int row) {
 	return item(row, 0)->text().toInt();
+}
+
+void RegionTable::disableSorting() {
+	QObject::disconnect(horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &QTableWidget::resizeColumnsToContents);
+	setSortingEnabled(false);
+}
+
+void RegionTable::enableSorting() {
+	setSortingEnabled(true);
+	QObject::connect(horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &QTableWidget::resizeColumnsToContents);
+	resizeColumnsToContents();
 }
