@@ -381,6 +381,7 @@ void vtkInteractorStyleSlice::OnRightButtonDown()
 	// Slice if ctrl is held down
 	if (this->Interactor->GetControlKey())
 	{
+		this->CurrentRenderer->ResetCameraClippingRange();
 		this->StartSlice();
 	}
 	else
