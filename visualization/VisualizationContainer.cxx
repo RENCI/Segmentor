@@ -609,6 +609,9 @@ void VisualizationContainer::MergeWithCurrentRegion(int x, int y, int z) {
 
 	// Get the region at the point
 	unsigned short label = GetLabel(x, y, z);
+
+	if (label == currentLabel) return;
+
 	Region* region = regions->Get(label);
 
 	const int* extent = region->GetExtent();
