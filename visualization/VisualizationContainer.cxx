@@ -900,6 +900,8 @@ void VisualizationContainer::SliceStep(double amount) {
 
 	cam->SetDistance(distance);
 
+	sliceView->GetRenderer()->ResetCameraClippingRange();
+
 	Render();
 }
 
