@@ -41,6 +41,8 @@ public:
 	FileErrorCode OpenSegmentationFile(const std::string& fileName);
 	FileErrorCode OpenSegmentationStack(const std::vector<std::string>& fileNames);
 
+	FileErrorCode SaveImageData(const std::string& fileName);
+
 	void SegmentVolume();
 	FileErrorCode SaveSegmentationData();
 	FileErrorCode SaveSegmentationData(const std::string& fileName);

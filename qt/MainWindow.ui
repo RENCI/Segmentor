@@ -316,6 +316,8 @@
     <addaction name="actionOpen_Segmentation_File"/>
     <addaction name="actionOpen_Segmentation_Stack"/>
     <addaction name="separator"/>
+    <addaction name="actionSave_Image_Data_As"/>
+    <addaction name="separator"/>
     <addaction name="actionSave_Segmentation_Data"/>
     <addaction name="actionSave_Segmentation_Data_As"/>
     <addaction name="separator"/>
@@ -394,6 +396,11 @@
    </property>
    <property name="text">
     <string>3D View</string>
+   </property>
+  </action>
+  <action name="actionSave_Image_Data_As">
+   <property name="text">
+    <string>Save Image Data As...</string>
    </property>
   </action>
  </widget>

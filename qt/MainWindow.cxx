@@ -341,6 +341,41 @@ void MainWindow::on_actionOpen_Segmentation_Stack_triggered() {
 	}
 }
 
+void MainWindow::on_actionSave_Image_Data_As_triggered() {
+	// Open a file dialog to save the file
+	QString fileName = QFileDialog::getSaveFileName(this,
+		"Save Image Data",
+		GetDefaultDirectory(defaultImageDirectoryKey),
+		"All files (*.*);;TIFF (*.tif);;NIfTI (*.nii);;VTK XML ImageData (*.vti)");
+
+	// Check for file name
+	if (fileName == "") {
+		return;
+	}
+
+	SetDefaultDirectory(defaultImageDirectoryKey, fileName);
+
+	// Save image data
+	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->SaveImageData(fileName.toStdString());
+
+	if (errorCode != VisualizationContainer::Success) {
+		QMessageBox errorMessage;
+		errorMessage.setIcon(QMessageBox::Warning);
+		errorMessage.setText("Could not save data.");
+
+		switch (errorCode) {
+		case VisualizationContainer::WrongFileType:
+			errorMessage.setInformativeText("Wrong file type.");
+			errorMessage.exec();
+			break;
+
+		default:
+			errorMessage.setInformativeText("Unknown error.");
+			errorMessage.exec();
+		}
+	}
+}
+
 void MainWindow::on_actionSave_Segmentation_Data_triggered() {
 	// Save segmentation data
 	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->SaveSegmentationData();

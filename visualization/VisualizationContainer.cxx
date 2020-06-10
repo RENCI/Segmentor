@@ -348,6 +348,38 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationSt
 	return WrongFileType;
 }
 
+VisualizationContainer::FileErrorCode VisualizationContainer::SaveImageData(const std::string& fileName) {
+	std::string extension = fileName.substr(fileName.find_last_of(".") + 1);
+
+	if (extension == "vti") {
+		vtkSmartPointer<vtkXMLImageDataWriter> writer = vtkSmartPointer<vtkXMLImageDataWriter>::New();
+		writer->SetFileName(fileName.c_str());
+		writer->SetInputDataObject(data);
+		writer->Update();
+	}
+	else if (extension == "nii") {
+		vtkSmartPointer<vtkNIFTIImageWriter> writer = vtkSmartPointer<vtkNIFTIImageWriter>::New();
+		writer->SetFileName(fileName.c_str());
+		writer->SetInputDataObject(data);
+		writer->Update();
+	}
+	else if (extension == "tif" || extension == "tiff") {
+		std::string prefix = fileName.substr(0, fileName.find_last_of("."));
+
+		vtkSmartPointer<vtkTIFFWriter> writer = vtkSmartPointer<vtkTIFFWriter>::New();
+		writer->SetFilePrefix(prefix.c_str());
+		writer->SetFilePattern("%s_%04d.tif");
+		writer->SetFileDimensionality(2);
+		writer->SetInputDataObject(data);
+		writer->Update();
+	}
+	else {
+		return WrongFileType;
+	}
+
+	return Success;
+}
+
 VisualizationContainer::FileErrorCode VisualizationContainer::SaveSegmentationData() {
 	if (segmentationDataFileName.size() == 0) {
 		return NoFileName;
