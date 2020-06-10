@@ -327,8 +327,15 @@
     </property>
     <addaction name="actionSegment_Volume"/>
    </widget>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Settings</string>
+    </property>
+    <addaction name="action3D_View"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuAnalyze"/>
+   <addaction name="menuSettings"/>
   </widget>
   <action name="actionOpen_Image_File">
    <property name="text">
@@ -376,6 +383,17 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="action3D_View">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>3D View</string>
    </property>
   </action>
  </widget>

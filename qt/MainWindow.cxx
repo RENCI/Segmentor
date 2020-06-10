@@ -410,6 +410,10 @@ void MainWindow::on_actionExit_triggered() {
 	qApp->exit();
 }
 
+void MainWindow::on_action3D_View_triggered(bool checked) {
+	visualizationContainer->GetVolumeView()->Enable(checked);
+}
+
 void MainWindow::on_actionNavigation() {
 	visualizationContainer->SetInteractionMode(NavigationMode);	
 }

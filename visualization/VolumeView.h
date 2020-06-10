@@ -32,6 +32,7 @@ public:
 	void AddRegion(Region* region);
 
 	void Reset();
+	void Enable(bool enable);
 
 	void SetShowProbe(bool visibility);
 	void SetProbePosition(double x, double y, double z);

@@ -50,6 +50,8 @@ public slots:
 
 	virtual void on_actionExit_triggered();
 
+	virtual void on_action3D_View_triggered(bool checked);
+
 	// Tool bar events
 	virtual void on_actionNavigation();
 	virtual void on_actionEdit();

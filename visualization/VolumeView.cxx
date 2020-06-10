@@ -13,6 +13,7 @@
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
 #include <vtkRenderer.h>
+#include <vtkRendererCollection.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkTextActor.h>
@@ -97,6 +98,28 @@ void VolumeView::Reset() {
 	plane->VisibilityOff();
 	corners->VisibilityOff();
 	interactionModeLabel->VisibilityOff();
+}
+
+void VolumeView::Enable(bool enable) {
+	vtkRenderWindow* window = style->GetInteractor()->GetRenderWindow();
+
+	if (enable) {
+		// Remove dummy renderer
+		vtkRendererCollection* renderers = window->GetRenderers();
+		renderers->InitTraversal();
+		for (vtkRenderer* ren = renderers->GetFirstRenderer(); ren != nullptr; ren = renderers->GetNextItem()) {
+			if (ren != renderer) {
+				window->RemoveRenderer(ren);
+			}
+		}
+	}
+	else {
+		// Hide with dummy renderer
+		vtkSmartPointer<vtkRenderer> dummy = vtkSmartPointer<vtkRenderer>::New();
+		window->AddRenderer(dummy);
+	}
+
+	Render();
 }
 
 void VolumeView::SetRegions(vtkImageData* data, RegionCollection* newRegions) {
