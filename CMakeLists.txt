@@ -4,7 +4,7 @@ if(POLICY CMP0020)
   cmake_policy(SET CMP0020 NEW)
 endif()
 
-project(Segmentor VERSION 0.2.1)
+project(Segmentor VERSION 0.2.2)
 
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/Install)
 
