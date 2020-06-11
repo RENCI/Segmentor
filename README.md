@@ -62,8 +62,8 @@ Switch between **Navigation** and **Edit** modes with the space bar.
 * Merge with current region: `m`
 * Split current region: `2-9` (for number of split regions)
 ****
-* Dilate current region: `z'
-* Erode current region: `x`
+* Dilate current region: `c'
+* Erode current region: `v`
 * Region grow: `g` (2D slice view only)
 
 #### 2D Visualization:
