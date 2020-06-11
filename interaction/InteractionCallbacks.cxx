@@ -94,7 +94,7 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 
 			if (p[0] == 0 && p[1] == 0 && p[2] == 0) break;
 				
-			vis->GrowCurrentRegion(p[0], p[1], p[2]);
+			vis->GrowCurrentRegion(p);
 		}
 		break;
 	}
@@ -119,7 +119,7 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 
 			if (p[0] == 0 && p[1] == 0 && p[2] == 0) break;
 
-			vis->MergeWithCurrentRegion(p[0], p[1], p[2]);
+			vis->MergeWithCurrentRegion(p);
 		}
 		break;
 	}

@@ -75,11 +75,11 @@ public:
 	void SelectRegion(unsigned short label);
 
 	void RelabelCurrentRegion();
-	void MergeWithCurrentRegion(int x, int y, int z);
+	void MergeWithCurrentRegion(double point[3]);
 	void SplitCurrentRegion(int numRegions);
 	void DilateCurrentRegion();
 	void ErodeCurrentRegion();
-	void GrowCurrentRegion(int x, int y, int z);
+	void GrowCurrentRegion(double point[3]);
 
 	void SetWindowLevel(double window, double level);
 

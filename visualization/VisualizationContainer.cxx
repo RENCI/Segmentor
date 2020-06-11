@@ -645,8 +645,14 @@ void VisualizationContainer::RelabelCurrentRegion() {
 	}
 }
 
-void VisualizationContainer::MergeWithCurrentRegion(int x, int y, int z) {
+void VisualizationContainer::MergeWithCurrentRegion(double point[3]) {
 	if (!currentRegion) return;
+
+	int ijk[3];
+	PointToIndex(point, ijk);
+	int x = ijk[0];
+	int y = ijk[1];
+	int z = ijk[2];
 
 	unsigned short currentLabel = currentRegion->GetLabel();
 
@@ -751,9 +757,15 @@ void VisualizationContainer::SplitCurrentRegion(int numRegions) {
 	Render();
 }
 
-void VisualizationContainer::GrowCurrentRegion(int x, int y, int z) {
+void VisualizationContainer::GrowCurrentRegion(double point[3]) {
 	if (!currentRegion) return;
 
+	int ijk[3];
+	PointToIndex(point, ijk);
+	int x = ijk[0];
+	int y = ijk[1];
+	int z = ijk[2];
+	
 	double value = GetValue(x, y, z);
 	double label = GetLabel(x, y, z);
 
@@ -763,7 +775,7 @@ void VisualizationContainer::GrowCurrentRegion(int x, int y, int z) {
 
 	vtkSmartPointer<vtkPointSource> seed = vtkSmartPointer<vtkPointSource>::New();
 	seed->SetNumberOfPoints(1);
-	seed->SetCenter(x, y, z);
+	seed->SetCenter(point);
 	seed->SetRadius(0);
 
 	// Variables for growing vs. shrinking
