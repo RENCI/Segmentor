@@ -54,9 +54,14 @@ public:
 	enum FilterMode GetFilterMode();
 	void SetFilterMode(enum FilterMode mode);
 
-	void PickLabel(int x, int y, int z);
-	void Paint(int x, int y, int z);
-	void Erase(int x, int y, int z);
+	void PickLabel(double point[3]);
+	void Paint(double point[3]);
+	void Erase(double point[3]);
+
+	void Paint(int i, int j, int k);
+	void Erase(int i, int j, int );
+
+	void SetProbePosition(double point[3]);
 
 	//void PickPointLabel(double x, double y, double z);
 	//void PaintPoint(double x, double y, double z);
@@ -136,6 +141,9 @@ protected:
 	double GetValue(int x, int y, int z);
 
 	void SliceStep(double amount);
+
+	void PointToIndex(double point[3], int ijk[3]);
+	void IndexToPoint(int ijk[3], double point[3]);
 
 	//void PointToStructured(double p[3], int s[3]);
 };

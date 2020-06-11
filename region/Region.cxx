@@ -220,20 +220,22 @@ void Region::ComputeExtent() {
 	//		ALSO REGION SIZE FROM FILTER
 
 	int numVoxels = 0;
-	for (int i = 0; i < numPoints; i++) {
-		if (scalars[i] == label) {
-			double* point = data->GetPoint(i);
 
-//			std::cout << point[0] << " " << point[1] << " " << point[2] << std::endl;
+	for (int i = dataExtent[0]; i <= dataExtent[1]; i++) {
+		for (int j = dataExtent[2]; j <= dataExtent[3]; j++) {
+			for (int k = dataExtent[4]; k <= dataExtent[5]; k++) {
+				unsigned short* p = static_cast<unsigned short*>(data->GetScalarPointer(i, j, k));
+				if (*p == label) {
+					if (i < extent[0]) extent[0] = i;
+					if (i > extent[1]) extent[1] = i;
+					if (j < extent[2]) extent[2] = j;
+					if (j > extent[3]) extent[3] = j;
+					if (k < extent[4]) extent[4] = k;
+					if (k > extent[5]) extent[5] = k;
 
-			if (point[0] < extent[0]) extent[0] = point[0];
-			if (point[0] > extent[1]) extent[1] = point[0];
-			if (point[1] < extent[2]) extent[2] = point[1];
-			if (point[1] > extent[3]) extent[3] = point[1];
-			if (point[2] < extent[4]) extent[4] = point[2];
-			if (point[2] > extent[5]) extent[5] = point[2];
-
-			numVoxels++;
+					numVoxels++;
+				}
+			}
 		}
 	}
 
