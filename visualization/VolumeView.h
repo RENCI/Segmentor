@@ -34,6 +34,8 @@ public:
 	void Reset();
 	void Enable(bool enable);
 
+	void UpdateVoxelSize(vtkImageData* data);
+
 	void SetShowProbe(bool visibility);
 	void SetProbePosition(double x, double y, double z);
 

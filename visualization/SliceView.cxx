@@ -200,6 +200,10 @@ void SliceView::SetCurrentRegion(Region* region) {
 	FilterRegions();
 }
 
+void SliceView::UpdateVoxelSize() {
+	sliceLocation->UpdateData(data);
+}
+
 void SliceView::SetShowProbe(bool show) {
 	probe->SetVisibility(show);
 }

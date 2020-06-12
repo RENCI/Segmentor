@@ -10,6 +10,7 @@
 #include <QToolBar>
 #include <QShortcut>
 #include <QPushButton>
+#include <QDoubleSpinBox>
 
 #include <vtkGenericOpenGLRenderWindow.h>
 
@@ -71,6 +72,11 @@ MainWindow::MainWindow() {
 	QObject::connect(sliceDownAction, &QAction::triggered, this, &MainWindow::on_sliceDown);
 
 	sliceDownButton->setDefaultAction(sliceDownAction);
+
+	// Voxel size
+	QObject::connect(xSizeSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::on_voxelSizeSpinBox);
+	QObject::connect(ySizeSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::on_voxelSizeSpinBox);
+	QObject::connect(zSizeSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::on_voxelSizeSpinBox);
 
 	// Window/level range
 	windowSpinBox->setMinimum(0);
@@ -543,6 +549,14 @@ void MainWindow::on_neighborUp() {
 
 void MainWindow::on_neighborDown() {
 	neighborSpinBox->stepDown();
+}
+
+void MainWindow::on_voxelSizeSpinBox() {
+	visualizationContainer->SetVoxelSize(
+		xSizeSpinBox->value(),
+		ySizeSpinBox->value(),
+		zSizeSpinBox->value()
+	);
 }
 
 void MainWindow::on_regionDone(int label, bool done) {

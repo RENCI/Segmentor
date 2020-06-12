@@ -122,6 +122,10 @@ void VolumeView::Enable(bool enable) {
 	Render();
 }
 
+void VolumeView::UpdateVoxelSize(vtkImageData* data) {
+	UpdatePlane(data);
+}
+
 void VolumeView::SetRegions(vtkImageData* data, RegionCollection* newRegions) {
 	regions = newRegions;
 

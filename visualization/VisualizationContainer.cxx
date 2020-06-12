@@ -51,6 +51,10 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	regions = new RegionCollection();
 	currentRegion = nullptr;	
 
+	// For changing voxel size
+	info = vtkSmartPointer<vtkImageChangeInformation>::New();
+	labelInfo = vtkSmartPointer<vtkImageChangeInformation>::New();
+
 	// Qt main window
 	qtWindow = mainWindow;
 
@@ -162,21 +166,17 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenImageFile(cons
 		reader->SetFileName(fileName.c_str());
 		reader->Update();
 
-		// For testing z scale
-		vtkSmartPointer<vtkImageChangeInformation> info = vtkSmartPointer<vtkImageChangeInformation>::New();
 		info->SetInputConnection(reader->GetOutputPort());
-		info->SetSpacingScale(1, 1, 2);
 		info->Update();
 
 /*
 		// For testing gradient
 		vtkSmartPointer<vtkImageGradientMagnitude> gradient = vtkSmartPointer<vtkImageGradientMagnitude>::New();
-		gradient->SetInputConnection(reader->GetOutputPort());
+		gradient->SetInputConnection(info->GetOutputPort());
 		gradient->SetDimensionality(3);
 		gradient->Update();
 */
 
-//		SetImageData(reader->GetOutput());
 		SetImageData(info->GetOutput());
 //		SetImageData(gradient->GetOutput());
 
@@ -435,13 +435,28 @@ void VisualizationContainer::SegmentVolume() {
 	connectivity->SetLabelScalarTypeToUnsignedShort();
 	connectivity->SetSizeRange(5, VTK_ID_MAX);
 	connectivity->SetInputConnection(openClose->GetOutputPort());
-	connectivity->Update();
 
-	labels = connectivity->GetOutput();
+	labelInfo->SetInputConnection(connectivity->GetOutputPort());
+	labelInfo->Update();
+
+	labels = labelInfo->GetOutput();
 	
 	UpdateLabels();
 	
 	qtWindow->updateRegions(regions);
+
+	Render();
+}
+
+void VisualizationContainer::SetVoxelSize(double x, double y, double z) {
+	info->SetOutputSpacing(x, y, z);
+	info->Update();
+
+	labelInfo->SetOutputSpacing(x, y, z);
+	labelInfo->Update();
+
+	volumeView->UpdateVoxelSize(labels);
+	sliceView->UpdateVoxelSize();
 
 	Render();
 }

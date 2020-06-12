@@ -10,6 +10,7 @@
 
 class MainWindow;
 
+class vtkImageChangeInformation;
 class vtkImageData;
 class vtkLookupTable;
 class vtkRenderWindowInteractor;
@@ -46,6 +47,8 @@ public:
 	void SegmentVolume();
 	FileErrorCode SaveSegmentationData();
 	FileErrorCode SaveSegmentationData(const std::string& fileName);
+
+	void SetVoxelSize(double x, double y, double z);
 
 	enum InteractionMode GetInteractionMode();
 	void SetInteractionMode(enum InteractionMode mode);
@@ -100,6 +103,9 @@ protected:
 	// The data
 	vtkSmartPointer<vtkImageData> data;
 	vtkSmartPointer<vtkImageData> labels;
+
+	vtkSmartPointer<vtkImageChangeInformation> info;
+	vtkSmartPointer<vtkImageChangeInformation> labelInfo;
 
 	// Regions
 	RegionCollection* regions;

@@ -83,6 +83,8 @@ public slots:
 	virtual void on_neighborUp();
 	virtual void on_neighborDown();
 
+	virtual void on_voxelSizeSpinBox();
+
 	// Region table events
 	virtual void on_regionDone(int label, bool done);
 	virtual void on_removeRegion(int label);

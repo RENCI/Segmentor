@@ -33,6 +33,8 @@ public:
 	void SetSegmentationData(vtkImageData* data, RegionCollection* newRegions);
 	void AddRegion(Region* region);
 
+	void UpdateVoxelSize();
+
 	void SetShowProbe(bool show);
 	void SetProbePosition(double x, double y, double z);
 
