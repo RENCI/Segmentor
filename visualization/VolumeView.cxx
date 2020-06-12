@@ -123,6 +123,7 @@ void VolumeView::Enable(bool enable) {
 }
 
 void VolumeView::UpdateVoxelSize(vtkImageData* data) {
+	UpdateProbe(data);
 	UpdatePlane(data);
 }
 

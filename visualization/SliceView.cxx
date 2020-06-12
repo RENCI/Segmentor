@@ -201,6 +201,7 @@ void SliceView::SetCurrentRegion(Region* region) {
 }
 
 void SliceView::UpdateVoxelSize() {
+	UpdateProbe(data);
 	sliceLocation->UpdateData(data);
 }
 
