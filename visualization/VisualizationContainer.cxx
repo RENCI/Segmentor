@@ -146,44 +146,35 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenImageFile(cons
 	if (extension == "nii") {
 		vtkSmartPointer<vtkNIFTIImageReader> reader = vtkSmartPointer<vtkNIFTIImageReader>::New();
 		reader->SetFileName(fileName.c_str());
-		reader->Update();
 
-		SetImageData(reader->GetOutput());
-
-		return Success;
+		info->SetInputConnection(reader->GetOutputPort());
 	}
 	else if (extension == "tif" || extension == "tiff") {
 		vtkSmartPointer<vtkTIFFReader> reader = vtkSmartPointer<vtkTIFFReader>::New();
 		reader->SetFileName(fileName.c_str());
-		reader->Update();
-
-		SetImageData(reader->GetOutput());
-
-		return Success;
+		
+		info->SetInputConnection(reader->GetOutputPort());
 	}
 	else if (extension == "vti") {
 		vtkSmartPointer<vtkXMLImageDataReader> reader = vtkSmartPointer<vtkXMLImageDataReader>::New();
 		reader->SetFileName(fileName.c_str());
-		reader->Update();
 
 		info->SetInputConnection(reader->GetOutputPort());
-		info->Update();
-
-/*
-		// For testing gradient
-		vtkSmartPointer<vtkImageGradientMagnitude> gradient = vtkSmartPointer<vtkImageGradientMagnitude>::New();
-		gradient->SetInputConnection(info->GetOutputPort());
-		gradient->SetDimensionality(3);
-		gradient->Update();
-*/
-
-		SetImageData(info->GetOutput());
-//		SetImageData(gradient->GetOutput());
-
-		return Success;
+	}
+	else {
+		return WrongFileType;
 	}
 
-	return WrongFileType;
+	info->Update();
+
+	SetImageData(info->GetOutput());
+
+	double x, y, z;
+	data->GetSpacing(x, y, z);
+
+	qtWindow->setVoxelSize(x, y, z);
+
+	return Success;
 }
 
 VisualizationContainer::FileErrorCode VisualizationContainer::OpenImageStack(const std::vector<std::string>& fileNames) {
@@ -202,14 +193,23 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenImageStack(con
 	if (extension == "tif" || extension == "tiff") {
 		vtkSmartPointer<vtkTIFFReader> reader = vtkSmartPointer<vtkTIFFReader>::New();
 		reader->SetFileNames(names);
-		reader->Update();
 
-		SetImageData(reader->GetOutput());
-
-		return Success;
+		info->SetInputConnection(reader->GetOutputPort());
 	}
-	
-	return WrongFileType;
+	else {
+		return WrongFileType;
+	}
+
+	info->Update();
+
+	SetImageData(info->GetOutput());
+
+	double x, y, z;
+	data->GetSpacing(x, y, z);
+
+	qtWindow->setVoxelSize(x, y, z);
+
+	return Success;
 }
 
 VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationFile(const std::string& fileName) {
@@ -218,75 +218,49 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationFi
 	// Get the file extension
 	std::string extension = fileName.substr(fileName.find_last_of(".") + 1);
 
+	// For casting images
+	vtkSmartPointer<vtkImageCast> cast = vtkSmartPointer<vtkImageCast>::New();
+	cast->SetOutputScalarTypeToUnsignedShort();
+
 	// Load the data
 	if (extension == "nii") {
 		vtkSmartPointer<vtkNIFTIImageReader> reader = vtkSmartPointer<vtkNIFTIImageReader>::New();
 		reader->SetFileName(fileName.c_str());
 
-		vtkSmartPointer<vtkImageCast> cast = vtkSmartPointer<vtkImageCast>::New();
-		cast->SetOutputScalarTypeToUnsignedShort();
 		cast->SetInputConnection(reader->GetOutputPort());
-		cast->Update();
-
-		if (SetLabelData(cast->GetOutput())) {
-			LoadRegionMetadata(fileName + ".json");
-
-			qtWindow->updateRegions(regions);
-
-			segmentationDataFileName = fileName;
-
-			return Success;
-		}
-		else {
-			return VolumeMismatch;
-		}
 	}
 	else if (extension == "tif" || extension == "tiff") {
 		vtkSmartPointer<vtkTIFFReader> reader = vtkSmartPointer<vtkTIFFReader>::New();
 		reader->SetFileName(fileName.c_str());
 
-		vtkSmartPointer<vtkImageCast> cast = vtkSmartPointer<vtkImageCast>::New();
-		cast->SetOutputScalarTypeToUnsignedShort();
 		cast->SetInputConnection(reader->GetOutputPort());
-		cast->Update();
-
-		if (SetLabelData(cast->GetOutput())) {
-			LoadRegionMetadata(fileName + ".json");
-
-			qtWindow->updateRegions(regions);
-
-			segmentationDataFileName = fileName;
-
-			return Success;
-		}
-		else {
-			return VolumeMismatch;
-		}
 	}
 	else if (extension == "vti") {
 		vtkSmartPointer<vtkXMLImageDataReader> reader = vtkSmartPointer<vtkXMLImageDataReader>::New();
 		reader->SetFileName(fileName.c_str());
 
-		vtkSmartPointer<vtkImageCast> cast = vtkSmartPointer<vtkImageCast>::New();
-		cast->SetOutputScalarTypeToUnsignedShort();
 		cast->SetInputConnection(reader->GetOutputPort());
-		cast->Update();
-
-		if (SetLabelData(cast->GetOutput())) {
-			LoadRegionMetadata(fileName + ".json");
-
-			qtWindow->updateRegions(regions);
-
-			segmentationDataFileName = fileName;
-
-			return Success;
-		}
-		else {
-			return VolumeMismatch;
-		}
+	}
+	else {
+		return WrongFileType;
 	}
 
-	return WrongFileType;
+	labelInfo->SetInputConnection(cast->GetOutputPort());
+	labelInfo->SetOutputSpacing(info->GetOutputSpacing());
+	labelInfo->Update();
+
+	if (SetLabelData(labelInfo->GetOutput())) {
+		LoadRegionMetadata(fileName + ".json");
+
+		qtWindow->updateRegions(regions);
+
+		segmentationDataFileName = fileName;
+
+		return Success;
+	}
+	else {
+		return VolumeMismatch;
+	}
 }
 
 VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationStack(const std::vector<std::string>& fileNames) {
@@ -303,31 +277,37 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationSt
 		names->SetValue(i, fileNames[i].c_str());
 	}
 
+	// For casting images
+	vtkSmartPointer<vtkImageCast> cast = vtkSmartPointer<vtkImageCast>::New();
+	cast->SetOutputScalarTypeToUnsignedShort();
+
 	// Load the data
 	if (extension == "tif" || extension == "tiff") {
 		vtkSmartPointer<vtkTIFFReader> reader = vtkSmartPointer<vtkTIFFReader>::New();
 		reader->SetFileNames(names);
 
-		vtkSmartPointer<vtkImageCast> cast = vtkSmartPointer<vtkImageCast>::New();
-		cast->SetOutputScalarTypeToUnsignedShort();
 		cast->SetInputConnection(reader->GetOutputPort());
-		cast->Update();
-
-		if (SetLabelData(cast->GetOutput())) {
-			LoadRegionMetadata(fileNames[0] + ".json");
-
-			qtWindow->updateRegions(regions);
-
-			segmentationDataFileName = fileNames[0];
-
-			return Success;
-		}
-		else {
-			return VolumeMismatch;
-		}
+	}
+	else {
+		return WrongFileType;
 	}
 
-	return WrongFileType;
+	labelInfo->SetInputConnection(cast->GetOutputPort());
+	labelInfo->SetOutputSpacing(info->GetOutputSpacing());
+	labelInfo->Update();
+
+	if (SetLabelData(labelInfo->GetOutput())) {
+		LoadRegionMetadata(fileNames[0] + ".json");
+
+		qtWindow->updateRegions(regions);
+
+		segmentationDataFileName = fileNames[0];
+
+		return Success;
+	}
+	else {
+		return VolumeMismatch;
+	}
 }
 
 VisualizationContainer::FileErrorCode VisualizationContainer::SaveImageData(const std::string& fileName) {
@@ -449,14 +429,20 @@ void VisualizationContainer::SegmentVolume() {
 }
 
 void VisualizationContainer::SetVoxelSize(double x, double y, double z) {
-	info->SetOutputSpacing(x, y, z);
-	info->Update();
 
-	labelInfo->SetOutputSpacing(x, y, z);
-	labelInfo->Update();
+	if (data) {
+		info->SetOutputSpacing(x, y, z);
+		info->Update();
 
-	volumeView->UpdateVoxelSize(labels);
-	sliceView->UpdateVoxelSize();
+		sliceView->UpdateVoxelSize();
+	}
+
+	if (labels) {
+		labelInfo->SetOutputSpacing(x, y, z);
+		labelInfo->Update();
+
+		volumeView->UpdateVoxelSize(labels);
+	}
 
 	Render();
 }

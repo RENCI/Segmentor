@@ -143,6 +143,12 @@ void MainWindow::setSlicePosition(double x, double y, double z) {
 	slicePositionLabel->setText(s);
 }
 
+void MainWindow::setVoxelSize(double x, double y, double z) {
+	xSizeSpinBox->setValue(x);
+	ySizeSpinBox->setValue(y);
+	zSizeSpinBox->setValue(z);
+}
+
 void MainWindow::on_actionOpen_Image_File_triggered() {
 	// Open a file dialog to read the file
 	QString fileName = QFileDialog::getOpenFileName(this,

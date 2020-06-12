@@ -4,7 +4,7 @@ if(POLICY CMP0020)
   cmake_policy(SET CMP0020 NEW)
 endif()
 
-project(Segmentor VERSION 0.2.2)
+project(Segmentor VERSION 0.2.3)
 
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/Install)
 
@@ -63,7 +63,7 @@ set(UI_RESOURCES
 # Create executable
 qt5_wrap_ui(UISrcs ${UI_FILES} )
 # CMAKE_AUTOMOC in ON so the MOC headers will be automatically wrapped.
-add_executable(Segmentor MACOSX_BUNDLE ${CXX_FILES} ${UISrcs} ${QT_WRAP} ${UI_RESOURCES})
+add_executable(Segmentor MACOSX_BUNDLE WIN32 ${CXX_FILES} ${UISrcs} ${QT_WRAP} ${UI_RESOURCES})
 qt5_use_modules(Segmentor Core Gui)
 target_link_libraries(Segmentor ${VTK_LIBRARIES})
 install(TARGETS Segmentor 

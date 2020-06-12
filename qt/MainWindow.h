@@ -29,6 +29,8 @@ public:
 
 	void setSlicePosition(double x, double y, double z);
 
+	void setVoxelSize(double x, double y, double z);
+
 public slots:
 
 	// Menu events
