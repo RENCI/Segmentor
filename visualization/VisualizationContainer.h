@@ -10,7 +10,6 @@
 
 class MainWindow;
 
-class vtkImageChangeInformation;
 class vtkImageData;
 class vtkLookupTable;
 class vtkRenderWindowInteractor;
@@ -103,9 +102,6 @@ protected:
 	// The data
 	vtkSmartPointer<vtkImageData> data;
 	vtkSmartPointer<vtkImageData> labels;
-
-	vtkSmartPointer<vtkImageChangeInformation> info;
-	vtkSmartPointer<vtkImageChangeInformation> labelInfo;
 
 	// Regions
 	RegionCollection* regions;

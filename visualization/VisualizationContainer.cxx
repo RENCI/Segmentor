@@ -12,7 +12,6 @@
 #include <vtkImageThreshold.h>
 #include <vtkIdTypeArray.h>
 #include <vtkImageCast.h>
-#include <vtkImageChangeInformation.h>
 #include <vtkIntArray.h>
 #include <vtkKMeansStatistics.h>
 #include <vtkLookupTable.h>
@@ -50,10 +49,6 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	labels = nullptr;
 	regions = new RegionCollection();
 	currentRegion = nullptr;	
-
-	// For changing voxel size
-	info = vtkSmartPointer<vtkImageChangeInformation>::New();
-	labelInfo = vtkSmartPointer<vtkImageChangeInformation>::New();
 
 	// Qt main window
 	qtWindow = mainWindow;
@@ -146,29 +141,28 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenImageFile(cons
 	if (extension == "nii") {
 		vtkSmartPointer<vtkNIFTIImageReader> reader = vtkSmartPointer<vtkNIFTIImageReader>::New();
 		reader->SetFileName(fileName.c_str());
+		reader->Update();
 
-		info->SetInputConnection(reader->GetOutputPort());
+		SetImageData(reader->GetOutput());
 	}
 	else if (extension == "tif" || extension == "tiff") {
 		vtkSmartPointer<vtkTIFFReader> reader = vtkSmartPointer<vtkTIFFReader>::New();
 		reader->SetFileName(fileName.c_str());
-		
-		info->SetInputConnection(reader->GetOutputPort());
+		reader->Update();
+
+		SetImageData(reader->GetOutput());
 	}
 	else if (extension == "vti") {
 		vtkSmartPointer<vtkXMLImageDataReader> reader = vtkSmartPointer<vtkXMLImageDataReader>::New();
 		reader->SetFileName(fileName.c_str());
+		reader->Update();
 
-		info->SetInputConnection(reader->GetOutputPort());
+		SetImageData(reader->GetOutput());
 	}
 	else {
 		return WrongFileType;
 	}
-
-	info->Update();
-
-	SetImageData(info->GetOutput());
-
+	
 	double x, y, z;
 	data->GetSpacing(x, y, z);
 
@@ -193,16 +187,13 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenImageStack(con
 	if (extension == "tif" || extension == "tiff") {
 		vtkSmartPointer<vtkTIFFReader> reader = vtkSmartPointer<vtkTIFFReader>::New();
 		reader->SetFileNames(names);
+		reader->Update();
 
-		info->SetInputConnection(reader->GetOutputPort());
+		SetImageData(reader->GetOutput());
 	}
 	else {
 		return WrongFileType;
 	}
-
-	info->Update();
-
-	SetImageData(info->GetOutput());
 
 	double x, y, z;
 	data->GetSpacing(x, y, z);
@@ -245,11 +236,9 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationFi
 		return WrongFileType;
 	}
 
-	labelInfo->SetInputConnection(cast->GetOutputPort());
-	labelInfo->SetOutputSpacing(info->GetOutputSpacing());
-	labelInfo->Update();
+	cast->Update();
 
-	if (SetLabelData(labelInfo->GetOutput())) {
+	if (SetLabelData(cast->GetOutput())) {
 		LoadRegionMetadata(fileName + ".json");
 
 		qtWindow->updateRegions(regions);
@@ -292,11 +281,9 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationSt
 		return WrongFileType;
 	}
 
-	labelInfo->SetInputConnection(cast->GetOutputPort());
-	labelInfo->SetOutputSpacing(info->GetOutputSpacing());
-	labelInfo->Update();
+	cast->Update();
 
-	if (SetLabelData(labelInfo->GetOutput())) {
+	if (SetLabelData(cast->GetOutput())) {
 		LoadRegionMetadata(fileNames[0] + ".json");
 
 		qtWindow->updateRegions(regions);
@@ -415,11 +402,9 @@ void VisualizationContainer::SegmentVolume() {
 	connectivity->SetLabelScalarTypeToUnsignedShort();
 	connectivity->SetSizeRange(5, VTK_ID_MAX);
 	connectivity->SetInputConnection(openClose->GetOutputPort());
+	connectivity->Update();
 
-	labelInfo->SetInputConnection(connectivity->GetOutputPort());
-	labelInfo->Update();
-
-	labels = labelInfo->GetOutput();
+	labels = connectivity->GetOutput();
 	
 	UpdateLabels();
 	
@@ -431,15 +416,13 @@ void VisualizationContainer::SegmentVolume() {
 void VisualizationContainer::SetVoxelSize(double x, double y, double z) {
 
 	if (data) {
-		info->SetOutputSpacing(x, y, z);
-		info->Update();
+		data->SetSpacing(x, y, z);
 
 		sliceView->UpdateVoxelSize();
 	}
 
 	if (labels) {
-		labelInfo->SetOutputSpacing(x, y, z);
-		labelInfo->Update();
+		labels->SetSpacing(x, y, z);
 
 		volumeView->UpdateVoxelSize(labels);
 	}
@@ -996,7 +979,7 @@ void VisualizationContainer::SetImageData(vtkImageData* imageData) {
 bool VisualizationContainer::SetLabelData(vtkImageData* labelData) {
 	// Check that volumes match
 	int* dataDims = data->GetDimensions();
-	int* labelDims = data->GetDimensions();
+	int* labelDims = labelData->GetDimensions();
 
 	for (int i = 0; i < 3; i++) {
 		if (dataDims[i] != labelDims[i]) {
@@ -1004,6 +987,8 @@ bool VisualizationContainer::SetLabelData(vtkImageData* labelData) {
 			return false;
 		}
 	}
+
+	labelData->SetSpacing(data->GetSpacing());
 
 	// Check that bounds match
 	double* dataBounds = data->GetBounds();
