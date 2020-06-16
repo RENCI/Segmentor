@@ -44,8 +44,6 @@
 
 #include <vtkImageGradientMagnitude.h>
 
-#include <crtdbg.h>
-
 VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volumeInteractor, vtkRenderWindowInteractor* sliceInteractor, MainWindow* mainWindow) {
 	data = nullptr;
 	labels = nullptr;
