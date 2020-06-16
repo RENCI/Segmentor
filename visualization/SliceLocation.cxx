@@ -18,6 +18,7 @@
 #include <vtkProperty.h>
 #include <vtkPropCollection.h>
 #include <vtkRenderer.h>
+#include <vtkSphereSource.h>
 
 SliceLocation::SliceLocation(vtkRenderer* ren) {
 	sliceColor[0] = 0;
@@ -39,7 +40,7 @@ SliceLocation::SliceLocation(vtkRenderer* ren) {
 	CreatePlane();
 	CreatePlaneInset();
 	CreateViewDirection();
-//	CreateAxes();
+	CreateAxes();
 }
 
 SliceLocation::~SliceLocation() {
@@ -58,6 +59,12 @@ void SliceLocation::UpdateData(vtkImageData* data) {
 
 	double* bounds = data->GetBounds();
 	length = data->GetLength();
+	
+	double minAxis = 0;
+	for (int i = 0; i < 3; i++) {
+		double d = bounds[i * 2 + 1] - bounds[i * 2];
+		if (d > minAxis) minAxis = d;
+	}
 
 	outline->SetInputDataObject(data);
 	corners->SetInputDataObject(data);
@@ -65,7 +72,10 @@ void SliceLocation::UpdateData(vtkImageData* data) {
 	planeCube->SetBounds(bounds);
 	box->SetBounds(bounds);
 
-	//axes->SetBounds(bounds);
+	sphereActor->SetScale(minAxis / 20);
+
+	double a = minAxis / 3;
+	axes->SetTotalLength(a, a, a);
 
 	vtkPropCollection* props = renderer->GetViewProps();
 	props->InitTraversal();
@@ -101,6 +111,8 @@ void SliceLocation::UpdateView(vtkCamera* camera, vtkPlane* cutPlane) {
 	double s = length * 0.1;
 	lineSource->SetPoint1(o);
 	lineSource->SetPoint2(o[0] - v[0] * s, o[1] - v[1] * s, o[2] - v[2] * s);
+
+	sphereActor->SetPosition(o);
 }
 
 void SliceLocation::CreateOutline() {
@@ -191,11 +203,25 @@ void SliceLocation::CreateViewDirection() {
 	actor->VisibilityOff();
 
 	renderer->AddActor(actor);
+
+	vtkSmartPointer<vtkSphereSource> sphereSource = vtkSmartPointer<vtkSphereSource>::New();
+
+	vtkSmartPointer<vtkPolyDataMapper> mapper2 = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper2->SetInputConnection(sphereSource->GetOutputPort());
+
+	sphereActor = vtkSmartPointer<vtkActor>::New();
+	sphereActor->GetProperty()->SetColor(sliceColor);
+	sphereActor->GetProperty()->LightingOff();
+	sphereActor->SetMapper(mapper2);
+	sphereActor->VisibilityOff();
+
+	renderer->AddActor(sphereActor);
 }
 
 void SliceLocation::CreateAxes() {
 	axes = vtkAxesActor::New();
-
+	axes->VisibilityOff();
+	axes->GetXAxisShaftProperty()->SetLineWidth(2);
 
 	renderer->AddActor(axes);
 }

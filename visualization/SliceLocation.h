@@ -3,6 +3,7 @@
 
 #include <vtkSmartPointer.h>
 
+class vtkActor;
 class vtkBox;
 class vtkCamera;
 class vtkAxesActor;
@@ -48,6 +49,7 @@ protected:
 
 	// View direction
 	vtkSmartPointer<vtkLineSource> lineSource;
+	vtkSmartPointer<vtkActor> sphereActor;
 
 	// Axes
 	vtkSmartPointer<vtkAxesActor> axes;
