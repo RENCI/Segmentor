@@ -5,6 +5,7 @@
 
 class vtkBox;
 class vtkCamera;
+class vtkAxesActor;
 class vtkCubeSource;
 class vtkCutter;
 class vtkImageData;
@@ -48,11 +49,15 @@ protected:
 	// View direction
 	vtkSmartPointer<vtkLineSource> lineSource;
 
+	// Axes
+	vtkSmartPointer<vtkAxesActor> axes;
+
 	void CreateOutline();
 	void CreateCorners();
 	void CreatePlane();
 	void CreatePlaneInset();
 	void CreateViewDirection();
+	void CreateAxes();
 };
 
 #endif

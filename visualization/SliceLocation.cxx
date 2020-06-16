@@ -4,6 +4,7 @@
 #include <vtkBox.h>
 #include <vtkCamera.h>
 #include <vtkClipPolyData.h>
+#include <vtkAxesActor.h>
 #include <vtkCubeSource.h>
 #include <vtkCutter.h>
 #include <vtkImageData.h>
@@ -38,6 +39,7 @@ SliceLocation::SliceLocation(vtkRenderer* ren) {
 	CreatePlane();
 	CreatePlaneInset();
 	CreateViewDirection();
+//	CreateAxes();
 }
 
 SliceLocation::~SliceLocation() {
@@ -62,6 +64,8 @@ void SliceLocation::UpdateData(vtkImageData* data) {
 
 	planeCube->SetBounds(bounds);
 	box->SetBounds(bounds);
+
+	//axes->SetBounds(bounds);
 
 	vtkPropCollection* props = renderer->GetViewProps();
 	props->InitTraversal();
@@ -187,4 +191,11 @@ void SliceLocation::CreateViewDirection() {
 	actor->VisibilityOff();
 
 	renderer->AddActor(actor);
+}
+
+void SliceLocation::CreateAxes() {
+	axes = vtkAxesActor::New();
+
+
+	renderer->AddActor(axes);
 }
