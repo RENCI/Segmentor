@@ -44,6 +44,8 @@
 
 #include <vtkImageGradientMagnitude.h>
 
+#include <crtdbg.h>
+
 VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volumeInteractor, vtkRenderWindowInteractor* sliceInteractor, MainWindow* mainWindow) {
 	data = nullptr;
 	labels = nullptr;
@@ -374,6 +376,23 @@ VisualizationContainer::FileErrorCode VisualizationContainer::SaveSegmentationDa
 	return Success;
 }
 
+void VisualizationContainer::InitializeLabelData() {
+	if (!data) return;
+
+	// Threshold above maximum value
+	vtkSmartPointer<vtkImageThreshold> threshold = vtkSmartPointer<vtkImageThreshold>::New();
+	threshold->ThresholdByUpper(0);
+	threshold->SetInValue(0);
+	threshold->SetOutValue(0);
+	threshold->ReplaceInOn();
+	threshold->ReplaceOutOn();
+	threshold->SetOutputScalarTypeToUnsignedChar();
+	threshold->SetInputDataObject(data);
+	threshold->Update();
+
+	labels = threshold->GetOutput();
+}
+
 void VisualizationContainer::SegmentVolume() {
 	if (!data) return;
 
@@ -549,10 +568,42 @@ void VisualizationContainer::ErasePoint(double x, double y, double z) {
 
 void VisualizationContainer::SetCurrentRegion(Region* region) {
 	currentRegion = region;
-	volumeView->SetCurrentRegion(currentRegion);
-	sliceView->SetCurrentRegion(currentRegion); 
+	volumeView->SetCurrentRegion(region);
+	sliceView->SetCurrentRegion(region);
 
 	qtWindow->selectRegion(region ? region->GetLabel() : 0);
+}
+
+void VisualizationContainer::CreateNewRegion(double point[3]) {
+	int ijk[3];
+	PointToIndex(point, ijk);
+	int x = ijk[0];
+	int y = ijk[1];
+	int z = ijk[2];
+
+	// Create new label
+	unsigned short newLabel = regions->GetNewLabel();
+
+	UpdateColors(newLabel);
+
+	// Add first voxel
+	unsigned short* labelData = static_cast<unsigned short*>(labels->GetScalarPointer(x, y, z));
+	*labelData = newLabel;
+
+	// Create new region
+	Region* newRegion = new Region(newLabel, labelColors->GetTableValue(newLabel), labels);
+	regions->Add(newRegion);
+	volumeView->AddRegion(newRegion);
+	sliceView->AddRegion(newRegion);
+
+	newRegion->SetModified(true);
+
+	qtWindow->updateRegions(regions);
+
+	SetCurrentRegion(newRegion);
+
+	labels->Modified();
+	Render();
 }
 
 void VisualizationContainer::RelabelCurrentRegion() {
@@ -965,13 +1016,18 @@ void VisualizationContainer::SetImageData(vtkImageData* imageData) {
 	
 	data = imageData;
 
+	InitializeLabelData();
+
 	sliceView->Reset();
 	volumeView->Reset();
 
 	sliceView->SetImageData(data);	
 
+	UpdateLabels();
+
 	// Update GUI
 	qtWindow->setWindowLevel(sliceView->GetWindow(), sliceView->GetLevel());
+	qtWindow->updateRegions(regions);
 
 	Render();
 }

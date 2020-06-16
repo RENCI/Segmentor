@@ -43,6 +43,8 @@ public:
 
 	FileErrorCode SaveImageData(const std::string& fileName);
 
+	void InitializeLabelData();
+
 	void SegmentVolume();
 	FileErrorCode SaveSegmentationData();
 	FileErrorCode SaveSegmentationData(const std::string& fileName);
@@ -76,6 +78,7 @@ public:
 	void HighlightRegion(unsigned short label);
 	void SelectRegion(unsigned short label);
 
+	void CreateNewRegion(double point[3]);
 	void RelabelCurrentRegion();
 	void MergeWithCurrentRegion(double point[3]);
 	void SplitCurrentRegion(int numRegions);
