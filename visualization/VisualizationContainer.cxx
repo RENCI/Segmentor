@@ -972,11 +972,13 @@ void VisualizationContainer::SetWindowLevel(double window, double level) {
 }
 
 void VisualizationContainer::SliceUp() {
-	SliceStep(1);
+	double* spacing = data->GetSpacing();
+	SliceStep(spacing[2]);
 }
 
 void VisualizationContainer::SliceDown() {
-	SliceStep(-1);
+	double* spacing = data->GetSpacing();
+	SliceStep(-spacing[2]);
 }
 
 void VisualizationContainer::SliceStep(double amount) {
