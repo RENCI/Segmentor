@@ -167,8 +167,8 @@ void SliceView::SetSegmentationData(vtkImageData* imageLabels, RegionCollection*
 
 	// Make sure slices line up
 	vtkCamera* cam = renderer->GetActiveCamera();
-	double distance = cam->GetDistance();
-	cam->SetDistance((int)distance);
+	double* f = cam->GetFocalPoint();
+	cam->SetFocalPoint(f[0], f[1], (int)f[2]);
 }
 
 void SliceView::AddRegion(Region* region) {
