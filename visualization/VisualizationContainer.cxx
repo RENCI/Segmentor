@@ -389,6 +389,10 @@ void VisualizationContainer::InitializeLabelData() {
 	threshold->Update();
 
 	labels = threshold->GetOutput();
+
+	UpdateLabels();
+
+	qtWindow->updateRegions(regions);
 }
 
 void VisualizationContainer::SegmentVolume() {
@@ -1016,18 +1020,15 @@ void VisualizationContainer::SetImageData(vtkImageData* imageData) {
 	
 	data = imageData;
 
-	InitializeLabelData();
-
 	sliceView->Reset();
 	volumeView->Reset();
 
 	sliceView->SetImageData(data);	
 
-	UpdateLabels();
-
 	// Update GUI
 	qtWindow->setWindowLevel(sliceView->GetWindow(), sliceView->GetLevel());
-	qtWindow->updateRegions(regions);
+
+	InitializeLabelData();
 
 	Render();
 }

@@ -162,12 +162,13 @@ void SliceView::SetSegmentationData(vtkImageData* imageLabels, RegionCollection*
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
 		AddRegionActors(regions->Get(it));
 	}
-
-	// Adjust clipping plane so everything matches
-	vtkCamera* cam = renderer->GetActiveCamera();
-	cam->SetDistance(cam->GetDistance() - imageLabels->GetSpacing()[0] * 0.5);
-
+		
 	FilterRegions();
+
+	// Make sure slices line up
+	vtkCamera* cam = renderer->GetActiveCamera();
+	double distance = cam->GetDistance();
+	cam->SetDistance((int)distance);
 }
 
 void SliceView::AddRegion(Region* region) {
@@ -267,8 +268,6 @@ void SliceView::ShowVoxelOutlines(bool show) {
 	showVoxelOutlines = show;
 
 	FilterRegions();
-
-	Render();
 }
 
 void SliceView::ToggleVoxelOutlines() {
@@ -283,8 +282,6 @@ void SliceView::ShowRegionOutlines(bool show) {
 	showRegionOutlines = show;
 
 	FilterRegions();
-
-	Render();
 }
 
 void SliceView::ToggleRegionOutlines() {
