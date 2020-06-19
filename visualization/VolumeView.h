@@ -9,6 +9,7 @@
 
 class vtkActor;
 class vtkBox;
+class vtkCubeAxesActor;
 class vtkImageData;
 class vtkPlaneSource;
 class vtkObject;
@@ -98,6 +99,11 @@ protected:
 	vtkSmartPointer<vtkActor> corners;
 	void CreateCorners();
 	void UpdateCorners(vtkImageData* data);
+
+	// Axes
+	vtkSmartPointer<vtkCubeAxesActor> axes;
+	void CreateAxes();
+	void UpdateAxes(vtkImageData* data);
 
 	// Interaction mode label
 	vtkSmartPointer<vtkTextActor> interactionModeLabel;

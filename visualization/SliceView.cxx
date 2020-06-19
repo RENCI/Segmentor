@@ -500,7 +500,7 @@ void SliceView::FilterRegions() {
 
 void SliceView::ResetCamera() {
 	renderer->GetActiveCamera()->SetFocalPoint(0, 0, 0);
-	renderer->GetActiveCamera()->SetPosition(0, 0, -1);
+	renderer->GetActiveCamera()->SetPosition(0, 0, 1);
 	renderer->GetActiveCamera()->SetViewUp(0, 1, 0);
 	renderer->ResetCamera();
 	renderer->ResetCameraClippingRange();

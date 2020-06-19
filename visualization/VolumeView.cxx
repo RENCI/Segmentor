@@ -3,6 +3,7 @@
 #include <vtkActor.h>
 #include <vtkCallbackCommand.h>
 #include <vtkCamera.h>
+#include <vtkCubeAxesActor.h>
 #include <vtkCubeSource.h>
 #include <vtkImageData.h>
 #include <vtkInteractorStyle.h>
@@ -71,6 +72,9 @@ VolumeView::VolumeView(vtkRenderWindowInteractor* interactor) {
 
 	// Corners
 	CreateCorners();
+
+	// Axes
+	CreateAxes();
 
 	// Interaction mode label
 	CreateInteractionModeLabel();
@@ -149,6 +153,10 @@ void VolumeView::SetRegions(vtkImageData* data, RegionCollection* newRegions) {
 	// Update corners
 	UpdateCorners(data);
 	corners->VisibilityOn();
+
+	// Update axes
+	UpdateAxes(data);
+	axes->VisibilityOn();
 
 	// Turn on interaction mode
 	interactionModeLabel->VisibilityOn();
@@ -412,6 +420,32 @@ void VolumeView::CreateCorners() {
 
 void VolumeView::UpdateCorners(vtkImageData* data) {
 	cornerFilter->SetInputDataObject(data);
+}
+
+void VolumeView::CreateAxes() {
+	double color[3] = { 0.5, 0.5, 0.5 };
+
+	axes = vtkSmartPointer<vtkCubeAxesActor>::New();
+	axes->SetCamera(renderer->GetActiveCamera());
+	axes->GetXAxesLinesProperty()->SetColor(color);
+	axes->GetYAxesLinesProperty()->SetColor(color);
+	axes->GetZAxesLinesProperty()->SetColor(color);
+	axes->GetTitleTextProperty(0)->SetColor(color);
+	axes->GetTitleTextProperty(1)->SetColor(color);
+	axes->GetTitleTextProperty(2)->SetColor(color);
+	axes->GetLabelTextProperty(0)->SetColor(color);
+	axes->GetLabelTextProperty(1)->SetColor(color);
+	axes->GetLabelTextProperty(2)->SetColor(color);
+	axes->GetProperty()->LightingOff();
+	axes->PickableOff();
+	axes->VisibilityOff();
+
+	renderer->AddActor(axes);
+}
+
+void VolumeView::UpdateAxes(vtkImageData* data) {
+	axes->SetBounds(data->GetBounds());
+	axes->SetFlyModeToStaticTriad();
 }
 
 void VolumeView::FilterRegions() {

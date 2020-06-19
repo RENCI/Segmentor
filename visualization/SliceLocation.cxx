@@ -32,7 +32,7 @@ SliceLocation::SliceLocation(vtkRenderer* ren) {
 	length = 0;
 
 	renderer = ren;
-	renderer->GetActiveCamera()->Azimuth(-45.0);
+	renderer->GetActiveCamera()->Azimuth(-30.0);
 	renderer->GetActiveCamera()->Elevation(20.0);
 
 	CreateOutline();

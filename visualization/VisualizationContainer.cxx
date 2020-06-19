@@ -1015,6 +1015,13 @@ SliceView* VisualizationContainer::GetSliceView() {
 }
 
 void VisualizationContainer::SetImageData(vtkImageData* imageData) {	
+/*
+	vtkSmartPointer<vtkImageGradientMagnitude> gradient = vtkSmartPointer<vtkImageGradientMagnitude>::New();
+	gradient->SetInputData(imageData);
+	gradient->SetDimensionality(2);
+	gradient->Update();
+*/
+
 	regions->RemoveAll();
 	qtWindow->updateRegions(regions);
 	
