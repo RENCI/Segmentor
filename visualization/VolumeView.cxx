@@ -129,6 +129,7 @@ void VolumeView::Enable(bool enable) {
 void VolumeView::UpdateVoxelSize(vtkImageData* data) {
 	UpdateProbe(data);
 	UpdatePlane(data);
+	UpdateAxes(data);
 }
 
 void VolumeView::SetRegions(vtkImageData* data, RegionCollection* newRegions) {
