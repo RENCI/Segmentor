@@ -106,6 +106,13 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	volumeView->GetInteractorStyle()->AddObserver(vtkInteractorStyleVolume::PaintEvent, paintCallback);
 	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::PaintEvent, paintCallback);
 
+	// Overwrite
+	vtkSmartPointer<vtkCallbackCommand> overwriteCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+	overwriteCallback->SetCallback(InteractionCallbacks::Overwrite);
+	overwriteCallback->SetClientData(this);
+//	volumeView->GetInteractorStyle()->AddObserver(vtkInteractorStyleVolume::OverwriteEvent, overwriteCallback);
+	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::OverwriteEvent, overwriteCallback);
+
 	// Erase
 	vtkSmartPointer<vtkCallbackCommand> eraseCallback = vtkSmartPointer<vtkCallbackCommand>::New();
 	eraseCallback->SetCallback(InteractionCallbacks::Erase);
@@ -488,22 +495,35 @@ void VisualizationContainer::PickLabel(double point[3]) {
 	SetCurrentRegion(regions->Get(GetLabel(ijk[0], ijk[1], ijk[2])));
 }
 
-void VisualizationContainer::Paint(double point[3]) {
+void VisualizationContainer::Paint(double point[3], bool overwrite) {
 	int ijk[3];
 	PointToIndex(point, ijk);
 
-	Paint(ijk[0], ijk[1], ijk[2]);
+	Paint(ijk[0], ijk[1], ijk[2], overwrite);
 }
 
-void VisualizationContainer::Paint(int i, int j, int k) {
+void VisualizationContainer::Paint(int i, int j, int k, bool overwrite) {
 	if (!labels || !currentRegion) return;
-	
-	currentRegion->UpdateExtent(i, j, k);
 
-	SetLabel(i, j, k, currentRegion->GetLabel());
+	int value = SetLabel(i, j, k, currentRegion->GetLabel(), overwrite);
 
-	currentRegion->SetModified(true);
-	qtWindow->updateRegion(currentRegion);
+	if (value != -1) {
+		currentRegion->UpdateExtent(i, j, k);
+		currentRegion->SetModified(true);
+		qtWindow->updateRegion(currentRegion);
+
+		if (value != 0 && value != currentRegion->GetLabel()) {
+			Region* previous = regions->Get(value);
+
+			if (previous) {
+				// TODO: SHRINK EXTENT
+
+				previous->UpdateExtent(i, j, k);
+				previous->SetModified(true);
+				qtWindow->updateRegion(previous);
+			}
+		}
+	}
 }
 
 void VisualizationContainer::Erase(double point[3]) {
@@ -1160,15 +1180,22 @@ void VisualizationContainer::SaveRegionMetadata(std::string fileName) {
 	RegionMetadataIO::Write(fileName, metadata);
 }
 
-void VisualizationContainer::SetLabel(int x, int y, int z, unsigned short label) {
+int VisualizationContainer::SetLabel(int x, int y, int z, unsigned short label, bool overwrite) {
 	unsigned short* p = static_cast<unsigned short*>(labels->GetScalarPointer(x, y, z));
 
-	// Restrict painting to no label, and erasing to current label
-	if ((label != 0 && *p == 0) ||
-		(label == 0 && *p == currentRegion->GetLabel())) {
+	unsigned short old = *p;
+
+	// Restrict painting to no label and erasing to current label, unless overwrite is true
+	if (overwrite ||
+		(label != 0 && old == 0) ||
+		(label == 0 && old == currentRegion->GetLabel())) {
 		*p = label;
 		labels->Modified();
+
+		return old;
 	}
+
+	return -1;
 }
 
 unsigned short VisualizationContainer::GetLabel(int x, int y, int z) {

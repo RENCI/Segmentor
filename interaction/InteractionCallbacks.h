@@ -20,6 +20,7 @@ public:
 	static void SelectLabel(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 
 	static void Paint(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
+	static void Overwrite(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 	static void Erase(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 
 	static void MouseMove(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);

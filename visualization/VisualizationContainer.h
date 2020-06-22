@@ -59,10 +59,10 @@ public:
 	void SetFilterMode(enum FilterMode mode);
 
 	void PickLabel(double point[3]);
-	void Paint(double point[3]);
+	void Paint(double point[3], bool overwrite = false);
 	void Erase(double point[3]);
 
-	void Paint(int i, int j, int k);
+	void Paint(int i, int j, int k, bool overwrite = false);
 	void Erase(int i, int j, int );
 
 	void SetProbePosition(double point[3]);
@@ -140,7 +140,7 @@ protected:
 	void LoadRegionMetadata(std::string fileName);
 	void SaveRegionMetadata(std::string fileName);
 
-	void SetLabel(int x, int y, int z, unsigned short label);
+	int SetLabel(int x, int y, int z, unsigned short label, bool overwrite = false);
 	unsigned short GetLabel(int x, int y, int z);
 
 	double GetValue(int x, int y, int z);

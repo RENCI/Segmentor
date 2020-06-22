@@ -87,6 +87,36 @@ void vtkInteractorStyleSlice::EndPaint()
 }
 
 //----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::StartOverwrite()
+{
+	if (this->State != VTKIS_NONE)
+	{
+		return;
+	}
+	this->StartState(VTKIS_OVERWRITE_SLICE);
+
+	if (this->HandleObservers)
+	{
+		this->InvokeEvent(StartOverwriteEvent, nullptr);
+	}
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::EndOverwrite()
+{
+	if (this->State != VTKIS_OVERWRITE_SLICE)
+	{
+		return;
+	}
+	if (this->HandleObservers)
+	{
+		this->InvokeEvent(EndOverwriteEvent, nullptr);
+	}
+	this->StopState();
+}
+
+
+//----------------------------------------------------------------------------
 void vtkInteractorStyleSlice::StartErase()
 {
 	if (this->State != VTKIS_NONE)
@@ -214,6 +244,10 @@ void vtkInteractorStyleSlice::OnMouseMove()
 		this->InvokeEvent(PaintEvent, nullptr);
 		break;
 
+	case VTKIS_OVERWRITE_SLICE:
+		this->InvokeEvent(OverwriteEvent, nullptr);
+		break;
+
 	case VTKIS_ERASE_SLICE:
 		this->InvokeEvent(EraseEvent, nullptr);
 		break;
@@ -250,8 +284,15 @@ void vtkInteractorStyleSlice::OnLeftButtonDown()
 		if (this->Mode == EditMode)
 		{
 			// If ctrl is held down, select the region label
-			if (this->Interactor->GetControlKey()) {
+			if (this->Interactor->GetControlKey()) 
+			{
 				this->StartSelect();
+			}
+
+			// If alt is held down, overwrite
+			else if (this->Interactor->GetAltKey()) 
+			{
+				this->StartOverwrite();
 			}
 
 			// Otherwise paint
@@ -294,6 +335,10 @@ void vtkInteractorStyleSlice::OnLeftButtonUp() {
 		{
 			this->InvokeEvent(PaintEvent, nullptr);
 		}
+		else if (this->State == VTKIS_OVERWRITE_SLICE)
+		{
+			this->InvokeEvent(OverwriteEvent, nullptr);
+		}
 		else if (this->State == VTKIS_SPIN)
 		{
 			this->EndSelect();
@@ -308,6 +353,10 @@ void vtkInteractorStyleSlice::OnLeftButtonUp() {
 
 	case VTKIS_PAINT_SLICE:
 		this->EndPaint();
+		break;
+
+	case VTKIS_OVERWRITE_SLICE:
+		this->EndOverwrite();
 		break;
 	}
 

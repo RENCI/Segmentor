@@ -189,6 +189,22 @@ void InteractionCallbacks::Paint(vtkObject* caller, unsigned long eventId, void*
 	}
 }
 
+void InteractionCallbacks::Overwrite(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+	vtkRenderWindowInteractor* rwi = static_cast<vtkInteractorStyle*>(caller)->GetInteractor();
+	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
+
+	// Pick at the mouse location provided by the interactor	
+	int pick = Pick(rwi);
+
+	if (pick) {
+		// Get the position for the pick event
+		double p[3];
+		PickPosition(p);
+		vis->Paint(p, true);
+		vis->Render();
+	}
+}
+
 void InteractionCallbacks::Erase(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
 	vtkRenderWindowInteractor* rwi = static_cast<vtkInteractorStyle*>(caller)->GetInteractor();
 	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
