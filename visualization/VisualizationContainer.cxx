@@ -1207,14 +1207,12 @@ double VisualizationContainer::GetValue(int x, int y, int z) {
 }
 
 void VisualizationContainer::PointToIndex(double point[3], int ijk[3]) {
-	double p[3];
-	p[0] = round(point[0]);
-	p[1] = round(point[1]);
-	p[2] = round(point[2]);
-
 	double pc[3];
+	data->ComputeStructuredCoordinates(point, ijk, pc);
 
-	data->ComputeStructuredCoordinates(p, ijk, pc);
+	if (pc[0] > 0.5) ijk[0]++;
+	if (pc[1] > 0.5) ijk[1]++;
+	if (pc[2] > 0.5) ijk[2]++;
 }
 
 void VisualizationContainer::IndexToPoint(int ijk[3], double point[3]) {
