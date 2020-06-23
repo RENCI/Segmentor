@@ -442,7 +442,21 @@ void VisualizationContainer::SegmentVolume() {
 }
 
 void VisualizationContainer::SetVoxelSize(double x, double y, double z) {
+	// Get current bounds
+	double bounds[6];
+	data->GetBounds(bounds);
 
+	// Get current focal point as a fraction of the volume
+	vtkCamera* cam = sliceView->GetRenderer()->GetActiveCamera();
+	double focus[3];
+
+	cam->GetFocalPoint(focus);
+
+	focus[0] = (focus[0] - bounds[0]) / (bounds[1] - bounds[0]);
+	focus[1] = (focus[1] - bounds[2]) / (bounds[3] - bounds[2]);
+	focus[2] = (focus[2] - bounds[4]) / (bounds[5] - bounds[4]);
+
+	// Update voxel size
 	if (data) {
 		data->SetSpacing(x, y, z);
 
@@ -454,6 +468,18 @@ void VisualizationContainer::SetVoxelSize(double x, double y, double z) {
 
 		volumeView->UpdateVoxelSize(labels);
 	}
+
+	// Scale focal point to match in scaled volume
+	data->GetBounds(bounds);
+
+	focus[0] = bounds[0] + (bounds[1] - bounds[0]) * focus[0];
+	focus[1] = bounds[2] + (bounds[3] - bounds[2]) * focus[1];
+	focus[2] = bounds[4] + (bounds[5] - bounds[4]) * focus[2];
+
+	cam->SetFocalPoint(focus);
+	
+	sliceView->GetRenderer()->ResetCameraClippingRange();
+	volumeView->GetRenderer()->ResetCameraClippingRange();
 
 	Render();
 }
