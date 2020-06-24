@@ -406,6 +406,37 @@ void vtkInteractorStyleVolume::OnChar()
 	}
 	break;
 
+	case 'f':
+	case 'F':
+	{
+		if (this->CurrentRenderer != nullptr)
+		{
+			this->AnimState = VTKIS_ANIM_ON;
+			vtkAssemblyPath *path = nullptr;
+			this->FindPokedRenderer(rwi->GetEventPosition()[0],
+				rwi->GetEventPosition()[1]);
+			rwi->GetPicker()->Pick(rwi->GetEventPosition()[0],
+				rwi->GetEventPosition()[1],
+				0.0,
+				this->CurrentRenderer);
+			vtkAbstractPropPicker *picker;
+			if ((picker = vtkAbstractPropPicker::SafeDownCast(rwi->GetPicker())))
+			{
+				path = picker->GetPath();
+			}
+			if (path != nullptr)
+			{
+				this->FlyTo(picker->GetPickPosition());
+			}
+			this->AnimState = VTKIS_ANIM_OFF;
+		}
+		else
+		{
+			vtkWarningMacro(<< "no current renderer on the interactor style.");
+		}
+	}
+	break;
+
 	// Ignore defaults
 	case 'e':
 	case 'E':
@@ -508,6 +539,43 @@ void vtkInteractorStyleVolume::SetOrientation(
 			focus[2] + d * vector[2]);
 		camera->SetFocalPoint(focus);
 		camera->SetViewUp(viewUp);
+	}
+}
+
+//----------------------------------------------------------------------
+void vtkInteractorStyleVolume::FlyTo(double flyTo[3])
+{
+	vtkRenderer* ren = this->CurrentRenderer;
+	int frames = this->Interactor->GetNumberOfFlyFrames();
+
+	double flyFrom[3], direction[3], d[3], focalPt[3], position[3];
+	int i, j;
+
+	ren->GetActiveCamera()->GetFocalPoint(flyFrom);
+	ren->GetActiveCamera()->GetDirectionOfProjection(direction);
+	double focalDistance = ren->GetActiveCamera()->GetDistance();
+
+	for (i = 0; i < 3; i++)
+	{
+		d[i] = flyTo[i] - flyFrom[i];
+	}
+
+	double distance = vtkMath::Normalize(d);
+	double delta = distance / frames;
+
+	for (i = 1; i <= frames; i++)
+	{
+		for (j = 0; j < 3; j++)
+		{
+			focalPt[j] = (int)(flyFrom[j] + d[j] * i * delta);
+			position[j] = focalPt[j] - direction[j] * focalDistance;
+		}
+
+		ren->GetActiveCamera()->SetFocalPoint(focalPt);
+		ren->GetActiveCamera()->SetPosition(position);
+		ren->GetActiveCamera()->OrthogonalizeViewUp();
+		ren->ResetCameraClippingRange();
+		this->Interactor->Render();
 	}
 }
 

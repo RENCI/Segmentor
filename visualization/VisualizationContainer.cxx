@@ -58,6 +58,8 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	labelColors = vtkSmartPointer<vtkLookupTable>::New();
 
 	// Create rendering pipelines
+	sliceInteractor->SetDolly(0);
+
 	volumeView = new VolumeView(volumeInteractor);
 	sliceView = new SliceView(sliceInteractor, labelColors);
 
@@ -417,25 +419,65 @@ void VisualizationContainer::SegmentVolume() {
 	threshold->ReplaceOutOn();
 	threshold->SetOutputScalarTypeToUnsignedChar();
 	threshold->SetInputDataObject(data);
-	
+
+/*	
 	vtkSmartPointer<vtkImageOpenClose3D> openClose = vtkSmartPointer<vtkImageOpenClose3D>::New();
-	openClose->SetKernelSize(3, 3, 3);
+	openClose->SetKernelSize(10, 10, 10);
 	openClose->SetOpenValue(0);
 	openClose->SetCloseValue(255);
 	openClose->SetInputConnection(threshold->GetOutputPort());
+*/
 
 	// Generate labels
 	vtkSmartPointer<vtkImageConnectivityFilter> connectivity = vtkSmartPointer<vtkImageConnectivityFilter>::New();
 	connectivity->SetScalarRange(255, 255);
 	connectivity->SetLabelScalarTypeToUnsignedShort();
 	connectivity->SetSizeRange(5, VTK_ID_MAX);
-	connectivity->SetInputConnection(openClose->GetOutputPort());
+	//connectivity->SetInputConnection(openClose->GetOutputPort());
+	connectivity->SetInputConnection(threshold->GetOutputPort());
 	connectivity->Update();
 
 	labels = connectivity->GetOutput();
 	
 	UpdateLabels();
-	
+
+/*
+	std::vector<int> sizes;
+
+	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+		Region* region = regions->Get(it);
+
+		std::cout << region->GetNumVoxels() << std::endl;
+
+		sizes.push_back(region->GetNumVoxels());
+	}
+
+	std::cout << "************" << std::endl;
+
+	std::sort(sizes.begin(), sizes.end());
+
+
+
+	for (int i = 0; i < sizes.size(); i++) {
+		std::cout << sizes[i] << std::endl;
+	}
+
+
+	int regionThreshold = 200;
+
+	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+		Region* region = regions->Get(it);
+
+		int n = region->GetNumVoxels();
+
+		if (n > regionThreshold) {
+			int m = n / regionThreshold;
+
+			SplitRegion(region, m);
+		}
+	}
+*/
+
 	qtWindow->updateRegions(regions);
 
 	Render();
@@ -779,7 +821,13 @@ void VisualizationContainer::MergeWithCurrentRegion(double point[3]) {
 void VisualizationContainer::SplitCurrentRegion(int numRegions) {
 	if (!currentRegion) return;
 	
-	vtkSmartPointer<vtkTable> table = currentRegion->GetPointTable();
+	SplitRegion(currentRegion, numRegions);
+
+	Render();
+}
+
+void VisualizationContainer::SplitRegion(Region* region, int numRegions) {
+	vtkSmartPointer<vtkTable> table = region->GetPointTable();
 
 	vtkSmartPointer<vtkKMeansStatistics> kMeans = vtkSmartPointer<vtkKMeansStatistics>::New();
 
@@ -831,13 +879,12 @@ void VisualizationContainer::SplitCurrentRegion(int numRegions) {
 	}
 
 	// Update current region
-	currentRegion->SetModified(true);
-	currentRegion->ComputeExtent();
+	region->SetModified(true);
+	region->ComputeExtent();
 
 	qtWindow->updateRegions(regions);
 
 	labels->Modified();
-	Render();
 }
 
 void VisualizationContainer::GrowCurrentRegion(double point[3]) {
@@ -1014,7 +1061,7 @@ void VisualizationContainer::SelectRegion(unsigned short label) {
 
 	SetCurrentRegion(region);
 
-	volumeView->GetInteractorStyle()->GetInteractor()->FlyTo(volumeView->GetRenderer(), region->GetCenter());
+	sliceView->GetInteractorStyle()->GetInteractor()->FlyTo(volumeView->GetRenderer(), region->GetCenter());
 }
 
 void VisualizationContainer::SetWindowLevel(double window, double level) {

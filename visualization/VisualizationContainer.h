@@ -134,6 +134,8 @@ protected:
 
 	void ExtractRegions();
 
+	void SplitRegion(Region* region, int numRegions);
+
 	void DoDilateErode(bool doDilate);
 
 	// Region metadata

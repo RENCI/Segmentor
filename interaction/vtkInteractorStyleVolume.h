@@ -66,6 +66,8 @@ protected:
 
 	void SetOrientation(const double leftToRight[3], const double viewUp[3]);
 
+	void FlyTo(double focalPoint[3]);
+
 private:
 	vtkInteractorStyleVolume(const vtkInteractorStyleVolume&) = delete;
 	void operator=(const vtkInteractorStyleVolume&) = delete;
