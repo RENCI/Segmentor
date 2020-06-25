@@ -42,6 +42,7 @@
 #include "RegionCollection.h"
 #include "RegionMetadataIO.h"
 
+#include <vtkExtractVOI.h>
 #include <vtkImageGradientMagnitude.h>
 
 VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volumeInteractor, vtkRenderWindowInteractor* sliceInteractor, MainWindow* mainWindow) {
@@ -573,22 +574,48 @@ void VisualizationContainer::Paint(double point[3], bool overwrite) {
 void VisualizationContainer::Paint(int i, int j, int k, bool overwrite) {
 	if (!labels || !currentRegion) return;
 
-	int value = SetLabel(i, j, k, currentRegion->GetLabel(), overwrite);
+	int extent[6];
+	data->GetExtent(extent);
 
-	if (value != -1) {
-		currentRegion->UpdateExtent(i, j, k);
-		currentRegion->SetModified(true);
-		qtWindow->updateRegion(currentRegion);
+	int brushRadius = 0;
 
-		if (value != 0 && value != currentRegion->GetLabel()) {
-			Region* previous = regions->Get(value);
+	int i1 = std::max(extent[0], i - brushRadius);
+	int i2 = std::min(extent[1], i + brushRadius);
 
-			if (previous) {
-				// TODO: SHRINK EXTENT
+	int j1 = std::max(extent[2], j - brushRadius);
+	int j2 = std::min(extent[3], j + brushRadius);
 
-				previous->UpdateExtent(i, j, k);
-				previous->SetModified(true);
-				qtWindow->updateRegion(previous);
+	bool update = false;
+
+	for (int m = i1; m <= i2; m++) {
+		for (int n = j1; n <= j2; n++) {
+			int md = i - m;
+			int nd = j - n;
+			int d2 = md * md + nd * nd;
+			if (d2 > brushRadius * brushRadius) continue;
+
+			int value = SetLabel(m, n, k, currentRegion->GetLabel(), overwrite);
+
+			if (value != -1) {
+				update = true;
+
+				// TODO: Store what needs to be changed, do after loop
+
+				currentRegion->UpdateExtent(m, n, k);
+				currentRegion->SetModified(true);
+				qtWindow->updateRegion(currentRegion);
+
+				if (value != 0 && value != currentRegion->GetLabel()) {
+					Region* previous = regions->Get(value);
+
+					if (previous) {
+						// TODO: SHRINK EXTENT
+
+						previous->UpdateExtent(m, n, k);
+						previous->SetModified(true);
+						qtWindow->updateRegion(previous);
+					}
+				}
 			}
 		}
 	}
@@ -919,6 +946,15 @@ void VisualizationContainer::GrowCurrentRegion(double point[3]) {
 		max = value;
 	}
 
+	// Extract z slice
+	int dataExtent[6];
+	data->GetExtent(dataExtent);
+
+	vtkSmartPointer<vtkExtractVOI> extract = vtkSmartPointer<vtkExtractVOI>::New();
+	extract->SetVOI(dataExtent[0], dataExtent[1], dataExtent[2], dataExtent[3], z, z);
+	extract->SetInputDataObject(data);
+
+	// Grow region
 	vtkSmartPointer<vtkImageConnectivityFilter> regionGrow = vtkSmartPointer<vtkImageConnectivityFilter>::New();
 	regionGrow->SetExtractionModeToSeededRegions();
 	regionGrow->SetSeedConnection(seed->GetOutputPort());
@@ -926,7 +962,8 @@ void VisualizationContainer::GrowCurrentRegion(double point[3]) {
 	regionGrow->SetLabelModeToConstantValue();
 	regionGrow->SetLabelConstantValue(growValue);
 	regionGrow->GenerateRegionExtentsOn();
-	regionGrow->SetInputDataObject(data);
+	//regionGrow->SetInputDataObject(data);
+	regionGrow->SetInputConnection(extract->GetOutputPort());
 	regionGrow->Update();
 
 	if (regionGrow->GetNumberOfExtractedRegions() != 1) {
