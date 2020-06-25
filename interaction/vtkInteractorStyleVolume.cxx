@@ -373,8 +373,8 @@ void vtkInteractorStyleVolume::OnChar()
 	case 'x':
 	case 'X':
 	{
-		const double right[3] = { 0, 1, 0 };
-		const double up[3] = { 0, 0, -1 };
+		const double right[3] = { 0, 0, 1 };
+		const double up[3] = { 0, 1, 0 };
 
 		this->SetOrientation(right, up);
 		this->CurrentRenderer->ResetCameraClippingRange();
@@ -386,7 +386,7 @@ void vtkInteractorStyleVolume::OnChar()
 	case 'Y':
 	{
 		const double right[3] = { 1, 0, 0 };
-		const double up[3] = { 0, 0, -1 };
+		const double up[3] = { 0, 0, 1 };
 
 		this->SetOrientation(right, up);
 		this->CurrentRenderer->ResetCameraClippingRange();
