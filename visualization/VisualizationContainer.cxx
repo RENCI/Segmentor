@@ -1061,7 +1061,7 @@ void VisualizationContainer::SelectRegion(unsigned short label) {
 
 	SetCurrentRegion(region);
 
-	sliceView->GetInteractorStyle()->GetInteractor()->FlyTo(volumeView->GetRenderer(), region->GetCenter());
+	volumeView->GetInteractorStyle()->FlyTo(region->GetCenter());
 }
 
 void VisualizationContainer::SetWindowLevel(double window, double level) {

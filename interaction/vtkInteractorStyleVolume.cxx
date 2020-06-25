@@ -545,6 +545,15 @@ void vtkInteractorStyleVolume::SetOrientation(
 //----------------------------------------------------------------------
 void vtkInteractorStyleVolume::FlyTo(double flyTo[3])
 {
+	if (this->CurrentRenderer == nullptr) {
+		this->FindPokedRenderer(0, 0);
+
+		if (this->CurrentRenderer == nullptr)
+		{
+			return;
+		}
+	}
+
 	vtkRenderer* ren = this->CurrentRenderer;
 	int frames = this->Interactor->GetNumberOfFlyFrames();
 

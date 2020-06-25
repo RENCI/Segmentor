@@ -25,6 +25,8 @@ public:
 
 	void SetMode(enum InteractionMode mode);
 
+	void FlyTo(double focalPoint[3]);
+
 	void OnMouseMove() override;
 	void OnLeftButtonDown() override;
 	void OnLeftButtonUp() override;
@@ -65,8 +67,6 @@ protected:
 	vtkSmartPointer<vtkCellPicker> Picker;
 
 	void SetOrientation(const double leftToRight[3], const double viewUp[3]);
-
-	void FlyTo(double focalPoint[3]);
 
 private:
 	vtkInteractorStyleVolume(const vtkInteractorStyleVolume&) = delete;
