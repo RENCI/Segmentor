@@ -851,6 +851,8 @@ void VisualizationContainer::MergeWithCurrentRegion(double point[3]) {
 
 	Region* region = regions->Get(label);
 
+	if (!region) return;
+
 	const int* extent = region->GetExtent();
 
 	// Update label data
