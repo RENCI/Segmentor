@@ -997,12 +997,18 @@ void VisualizationContainer::GrowCurrentRegion(double point[3]) {
 		// Compute distance to region
 		int distance = round(currentRegion->GetXYDistance(x, y, z));
 
-		const int* regionExtent = currentRegion->GetExtent();
+		if (distance < 0) {
+			extractExtent[0] = extractExtent[1] = x;
+			extractExtent[2] = extractExtent[3] = y;
+		}
+		else {
+			const int* regionExtent = currentRegion->GetExtent();
 
-		extractExtent[0] = std::max(extractExtent[0], regionExtent[0] - distance);
-		extractExtent[1] = std::min(extractExtent[1], regionExtent[1] + distance);
-		extractExtent[2] = std::max(extractExtent[2], regionExtent[2] - distance);
-		extractExtent[3] = std::min(extractExtent[3], regionExtent[3] + distance);
+			extractExtent[0] = std::max(extractExtent[0], regionExtent[0] - distance);
+			extractExtent[1] = std::min(extractExtent[1], regionExtent[1] + distance);
+			extractExtent[2] = std::max(extractExtent[2], regionExtent[2] - distance);
+			extractExtent[3] = std::min(extractExtent[3], regionExtent[3] + distance);
+		}
 
 		// Extract z slice around region with space to dilate
 		vtkSmartPointer<vtkExtractVOI> extract = vtkSmartPointer<vtkExtractVOI>::New();
