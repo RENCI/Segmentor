@@ -397,7 +397,7 @@ void VisualizationContainer::InitializeLabelData() {
 	threshold->SetOutValue(0);
 	threshold->ReplaceInOn();
 	threshold->ReplaceOutOn();
-	threshold->SetOutputScalarTypeToUnsignedChar();
+	threshold->SetOutputScalarTypeToUnsignedShort();
 	threshold->SetInputDataObject(data);
 	threshold->Update();
 
