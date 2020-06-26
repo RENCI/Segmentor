@@ -565,6 +565,10 @@ void MainWindow::on_voxelSizeSpinBox() {
 	);
 }
 
+void MainWindow::on_brushRadiusSpinBox_valueChanged(int value) {
+	visualizationContainer->SetBrushRadius(value);
+}
+
 void MainWindow::on_regionDone(int label, bool done) {
 	visualizationContainer->SetRegionDone((unsigned short)label, done);
 }

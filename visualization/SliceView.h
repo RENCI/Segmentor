@@ -6,6 +6,7 @@
 #include "InteractionEnums.h"
 
 class vtkActor;
+class vtkCylinderSource;
 class vtkImageData;
 class vtkImageSlice;
 class vtkLookupTable;
@@ -67,6 +68,8 @@ public:
 
 	void UpdatePlane();
 
+	void SetBrushRadius(int radius);
+
 	void Render();
 
 	vtkSmartPointer<vtkRenderer> GetRenderer();
@@ -104,6 +107,8 @@ protected:
 
 	// Probe
 	vtkSmartPointer<vtkActor> probe;
+	vtkSmartPointer<vtkCylinderSource> brushCylinder;
+	vtkSmartPointer<vtkActor> brush;
 	void CreateProbe();
 	void UpdateProbe(vtkImageData* data);
 

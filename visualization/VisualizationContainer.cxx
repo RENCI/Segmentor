@@ -1,6 +1,7 @@
 #include "VisualizationContainer.h"
 
 #include <algorithm>
+#include <set>
 
 #include "MainWindow.h"
 
@@ -50,6 +51,8 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	labels = nullptr;
 	regions = new RegionCollection();
 	currentRegion = nullptr;	
+
+	brushRadius = 1;
 
 	// Qt main window
 	qtWindow = mainWindow;
@@ -577,33 +580,31 @@ void VisualizationContainer::Paint(int i, int j, int k, bool overwrite) {
 	int extent[6];
 	data->GetExtent(extent);
 
-	int brushRadius = 0;
+	int r = brushRadius - 1;
+	int r2 = r * r;
 
-	int i1 = std::max(extent[0], i - brushRadius);
-	int i2 = std::min(extent[1], i + brushRadius);
+	int i1 = std::max(extent[0], i - r);
+	int i2 = std::min(extent[1], i + r);
 
-	int j1 = std::max(extent[2], j - brushRadius);
-	int j2 = std::min(extent[3], j + brushRadius);
+	int j1 = std::max(extent[2], j - r);
+	int j2 = std::min(extent[3], j + r);
 
-	bool update = false;
+	std::set<Region*> update;
 
 	for (int m = i1; m <= i2; m++) {
 		for (int n = j1; n <= j2; n++) {
 			int md = i - m;
 			int nd = j - n;
 			int d2 = md * md + nd * nd;
-			if (d2 > brushRadius * brushRadius) continue;
+
+			if (d2 > r2) continue;
 
 			int value = SetLabel(m, n, k, currentRegion->GetLabel(), overwrite);
 
 			if (value != -1) {
-				update = true;
-
-				// TODO: Store what needs to be changed, do after loop
-
 				currentRegion->UpdateExtent(m, n, k);
-				currentRegion->SetModified(true);
-				qtWindow->updateRegion(currentRegion);
+
+				update.insert(currentRegion);
 
 				if (value != 0 && value != currentRegion->GetLabel()) {
 					Region* previous = regions->Get(value);
@@ -612,12 +613,17 @@ void VisualizationContainer::Paint(int i, int j, int k, bool overwrite) {
 						// TODO: SHRINK EXTENT
 
 						previous->UpdateExtent(m, n, k);
-						previous->SetModified(true);
-						qtWindow->updateRegion(previous);
+
+						update.insert(previous);
 					}
 				}
 			}
 		}
+	}
+
+	for (auto region : update) {
+		region->SetModified(true);
+		qtWindow->updateRegion(region);
 	}
 }
 
@@ -631,12 +637,42 @@ void VisualizationContainer::Erase(double point[3]) {
 void VisualizationContainer::Erase(int i, int j, int k) {
 	if (!labels || !currentRegion) return;
 
-	// TODO: SHRINK EXTENT
+	int extent[6];
+	data->GetExtent(extent);
 
-	SetLabel(i, j, k, 0);
+	int r = brushRadius - 1;
+	int r2 = r * r;
 
-	currentRegion->SetModified(true);
-	qtWindow->updateRegion(currentRegion);
+	int i1 = std::max(extent[0], i - r);
+	int i2 = std::min(extent[1], i + r);
+
+	int j1 = std::max(extent[2], j - r);
+	int j2 = std::min(extent[3], j + r);
+
+	bool update = false;
+
+	for (int m = i1; m <= i2; m++) {
+		for (int n = j1; n <= j2; n++) {
+			int md = i - m;
+			int nd = j - n;
+			int d2 = md * md + nd * nd;
+
+			if (d2 > r2) continue;
+
+			int value = SetLabel(m, n, k, 0);
+
+			if (value != -1) {				
+				// TODO: SHRINK EXTENT
+
+				update = true;
+			}
+		}
+	}
+
+	if (update) {
+		currentRegion->SetModified(true);
+		qtWindow->updateRegion(currentRegion);
+	}
 }
 
 void VisualizationContainer::SetProbePosition(double point[3]) {
@@ -1129,6 +1165,13 @@ void VisualizationContainer::SliceStep(double amount) {
 
 void VisualizationContainer::SetFocalPoint(double x, double y, double z) {
 	qtWindow->setSlicePosition(x, y, z);
+}
+
+void VisualizationContainer::SetBrushRadius(int radius) {
+	brushRadius = radius;
+	sliceView->SetBrushRadius(radius);
+
+	Render();
 }
 
 void VisualizationContainer::Render() {

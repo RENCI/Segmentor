@@ -93,6 +93,8 @@ public:
 
 	void SetFocalPoint(double x, double y, double z);
 
+	void SetBrushRadius(int radius);
+
 	void Render();
 
 	VolumeView* GetVolumeView();
@@ -124,6 +126,9 @@ protected:
 
 	// Current segmentation data filename
 	std::string segmentationDataFileName;
+
+	// Brush radius
+	int brushRadius;
 
 	void SetImageData(vtkImageData* imageData);
 	bool SetLabelData(vtkImageData* labelData);

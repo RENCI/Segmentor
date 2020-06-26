@@ -9,6 +9,7 @@
 #include <vtkCallbackCommand.h>
 #include <vtkCamera.h>
 #include <vtkCubeSource.h>
+#include <vtkCylinderSource.h>
 #include <vtkImageData.h>
 #include <vtkImageMapToColors.h>
 #include <vtkImageProperty.h>
@@ -131,6 +132,7 @@ void SliceView::Reset() {
 	//slice->VisibilityOff();
 	//labelSlice->VisibilityOff();
 	probe->VisibilityOff();
+	brush->VisibilityOff();
 	sliceLocation->UpdateData(nullptr);
 	interactionModeLabel->VisibilityOff();
 }
@@ -208,6 +210,7 @@ void SliceView::UpdateVoxelSize() {
 
 void SliceView::SetShowProbe(bool show) {
 	probe->SetVisibility(show);
+	brush->SetVisibility(brushCylinder->GetRadius() > 1);
 }
 
 void SliceView::SetProbePosition(double x, double y, double z) {
@@ -229,6 +232,7 @@ void SliceView::SetProbePosition(double x, double y, double z) {
 	}	
 
 	probe->SetPosition(p2);
+	brush->SetPosition(p2);
 }
 
 void SliceView::SetInteractionMode(enum InteractionMode mode) {
@@ -370,6 +374,11 @@ void SliceView::UpdatePlane() {
 	sliceLocation->UpdateView(cam, plane);
 }
 
+void SliceView::SetBrushRadius(int radius) {
+	brushCylinder->SetRadius(radius - 0.5);
+	brush->SetVisibility(radius > 1);
+}
+
 void SliceView::Render() {
 	renderer->GetRenderWindow()->Render();
 }
@@ -396,12 +405,37 @@ void SliceView::CreateProbe() {
 	probe->PickableOff();
 
 	renderer->AddActor(probe);
+
+	// Brush
+	brushCylinder = vtkSmartPointer<vtkCylinderSource>::New();
+	brushCylinder->SetResolution(16);
+	brushCylinder->CappingOff();
+
+	vtkSmartPointer<vtkPolyDataMapper> brushMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	brushMapper->SetInputConnection(brushCylinder->GetOutputPort());
+
+	brush = vtkSmartPointer<vtkActor>::New();
+	brush->SetMapper(brushMapper);
+	brush->RotateX(90);
+	brush->GetProperty()->SetRepresentationToPoints();
+	brush->GetProperty()->LightingOff();
+	brush->GetProperty()->SetColor(0.5, 0.5, 0.5);
+	brush->VisibilityOff();
+	brush->PickableOff();
+
+	renderer->AddActor(brush);
 } 
 
 void SliceView::UpdateProbe(vtkImageData* data) {
 	probe->SetPosition(data->GetCenter());
 	probe->SetScale(data->GetSpacing());
 	probe->VisibilityOn();
+
+	std::cout << brushCylinder->GetRadius() << std::endl;
+
+	brush->SetPosition(data->GetCenter());
+	brush->SetScale(data->GetSpacing()[0], data->GetSpacing()[2], data->GetSpacing()[0]);
+	brush->SetVisibility(brushCylinder->GetRadius() > 1);
 }
 
 void SliceView::CreateInteractionModeLabel() {
