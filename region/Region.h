@@ -49,6 +49,8 @@ public:
 	double* GetCenter();
 	double GetLength();
 
+	double GetXYDistance(int x, int y, int z);
+
 protected:
 	unsigned short label;
 	double color[3];

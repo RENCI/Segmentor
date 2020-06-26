@@ -13,6 +13,7 @@
 #include <vtkImageThreshold.h>
 #include <vtkIdTypeArray.h>
 #include <vtkImageCast.h>
+#include <vtkImageToImageStencil.h>
 #include <vtkIntArray.h>
 #include <vtkKMeansStatistics.h>
 #include <vtkLookupTable.h>
@@ -984,18 +985,57 @@ void VisualizationContainer::GrowCurrentRegion(double point[3]) {
 		max = value;
 	}
 
-	// Extract z slice
-	int dataExtent[6];
-	data->GetExtent(dataExtent);
+	// Extent for extracting
+	int extractExtent[6];
+	data->GetExtent(extractExtent);
+	extractExtent[4] = extractExtent[5] = z;
 
+	// Stencil for growing
+	vtkSmartPointer<vtkImageToImageStencil> stencil;
+
+	if (grow) {
+		// Compute distance to region
+		int distance = round(currentRegion->GetXYDistance(x, y, z));
+
+		const int* regionExtent = currentRegion->GetExtent();
+
+		extractExtent[0] = std::max(extractExtent[0], regionExtent[0] - distance);
+		extractExtent[1] = std::min(extractExtent[1], regionExtent[1] + distance);
+		extractExtent[2] = std::max(extractExtent[2], regionExtent[2] - distance);
+		extractExtent[3] = std::min(extractExtent[3], regionExtent[3] + distance);
+
+		// Extract z slice around region with space to dilate
+		vtkSmartPointer<vtkExtractVOI> extract = vtkSmartPointer<vtkExtractVOI>::New();
+		extract->SetVOI(extractExtent[0], extractExtent[1], extractExtent[2], extractExtent[3], extractExtent[4], extractExtent[5]);
+		extract->SetInputDataObject(labels);
+
+		// Dilate
+		int kernelSize = distance * 2 + 1;
+
+		unsigned short label = currentRegion->GetLabel();
+
+		vtkSmartPointer<vtkImageDilateErode3D> dilate = vtkSmartPointer<vtkImageDilateErode3D>::New();
+		dilate->SetDilateValue(label);
+		dilate->SetErodeValue(0);
+		dilate->SetKernelSize(kernelSize, kernelSize, 1);
+		dilate->SetInputConnection(extract->GetOutputPort());
+
+		// Stencil
+		stencil = vtkSmartPointer<vtkImageToImageStencil>::New();
+		stencil->ThresholdBetween(label, label);
+		stencil->SetInputConnection(dilate->GetOutputPort());
+	}
+
+	// Extract z slice around region
 	vtkSmartPointer<vtkExtractVOI> extract = vtkSmartPointer<vtkExtractVOI>::New();
-	extract->SetVOI(dataExtent[0], dataExtent[1], dataExtent[2], dataExtent[3], z, z);
+	extract->SetVOI(extractExtent[0], extractExtent[1], extractExtent[2], extractExtent[3], extractExtent[4], extractExtent[5]);
 	extract->SetInputDataObject(data);
 
 	// Grow region
 	vtkSmartPointer<vtkImageConnectivityFilter> regionGrow = vtkSmartPointer<vtkImageConnectivityFilter>::New();
 	regionGrow->SetExtractionModeToSeededRegions();
 	regionGrow->SetSeedConnection(seed->GetOutputPort());
+	if (grow) regionGrow->SetStencilConnection(stencil->GetOutputPort());
 	regionGrow->SetScalarRange(min, max);
 	regionGrow->SetLabelModeToConstantValue();
 	regionGrow->SetLabelConstantValue(growValue);
@@ -1014,6 +1054,8 @@ void VisualizationContainer::GrowCurrentRegion(double point[3]) {
 
 	for (int i = extent[0]; i <= extent[1]; i++) {
 		for (int j = extent[2]; j <= extent[3]; j++) {
+			
+
 			for (int k = extent[4]; k <= extent[5]; k++) {
 				double v = regionGrow->GetOutput()->GetScalarComponentAsDouble(i, j, k, 0);
 

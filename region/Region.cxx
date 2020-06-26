@@ -311,6 +311,25 @@ double Region::GetLength() {
 	return voi->GetOutput()->GetLength();
 }
 
+double Region::GetXYDistance(int x, int y, int z) {
+	double distance2 = VTK_DOUBLE_MAX;
+
+	for (int i = extent[0]; i <= extent[1]; i++) {
+		for (int j = extent[2]; j <= extent[3]; j++) {
+			unsigned short* p = static_cast<unsigned short*>(data->GetScalarPointer(i, j, z));
+			if (*p == label) {
+				double dx = x - i;
+				double dy = y - j;
+				double d2 = dx * dx + dy * dy;
+
+				if (d2 < distance2) distance2 = d2;
+			}
+		}
+	}
+
+	return sqrt(distance2);
+}
+
 void Region::ClearLabels() {
 	for (int i = extent[0]; i <= extent[1]; i++) {
 		for (int j = extent[2]; j <= extent[3]; j++) {
