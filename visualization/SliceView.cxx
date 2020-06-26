@@ -430,11 +430,9 @@ void SliceView::UpdateProbe(vtkImageData* data) {
 	probe->SetPosition(data->GetCenter());
 	probe->SetScale(data->GetSpacing());
 	probe->VisibilityOn();
-
-	std::cout << brushCylinder->GetRadius() << std::endl;
-
+	
 	brush->SetPosition(data->GetCenter());
-	brush->SetScale(data->GetSpacing()[0], data->GetSpacing()[2], data->GetSpacing()[0]);
+	brush->SetScale(data->GetSpacing()[0], data->GetSpacing()[2], data->GetSpacing()[1]);
 	brush->SetVisibility(brushCylinder->GetRadius() > 1);
 }
 

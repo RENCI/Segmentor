@@ -88,6 +88,8 @@ public slots:
 	virtual void on_voxelSizeSpinBox();
 
 	virtual void on_brushRadiusSpinBox_valueChanged(int value);
+	virtual void on_brushRadiusUp();
+	virtual void on_brushRadiusDown();
 
 	// Region table events
 	virtual void on_regionDone(int label, bool done);

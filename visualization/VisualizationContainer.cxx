@@ -574,13 +574,13 @@ void VisualizationContainer::Paint(double point[3], bool overwrite) {
 	Paint(ijk[0], ijk[1], ijk[2], overwrite);
 }
 
-void VisualizationContainer::Paint(int i, int j, int k, bool overwrite) {
+void VisualizationContainer::Paint(int i, int j, int k, bool overwrite, bool useBrush) {
 	if (!labels || !currentRegion) return;
 
 	int extent[6];
 	data->GetExtent(extent);
 
-	int r = brushRadius - 1;
+	int r = useBrush ? brushRadius - 1 : 0;
 	int r2 = r * r;
 
 	int i1 = std::max(extent[0], i - r);
@@ -634,13 +634,13 @@ void VisualizationContainer::Erase(double point[3]) {
 	Erase(ijk[0], ijk[1], ijk[2]);
 }
 
-void VisualizationContainer::Erase(int i, int j, int k) {
+void VisualizationContainer::Erase(int i, int j, int k, bool useBrush) {
 	if (!labels || !currentRegion) return;
 
 	int extent[6];
 	data->GetExtent(extent);
 
-	int r = brushRadius - 1;
+	int r = useBrush ? brushRadius - 1 : 0;
 	int r2 = r * r;
 
 	int i1 = std::max(extent[0], i - r);
@@ -1019,15 +1019,17 @@ void VisualizationContainer::GrowCurrentRegion(double point[3]) {
 
 				if (v >= growValue) {
 					if (grow) {
-						Paint(i, j, k);
+						Paint(i, j, k, false, false);
 					}
 					else {
-						Erase(i, j, k);
+						Erase(i, j, k, false);
 					}
 				}
 			}
 		}
 	}
+
+	labels->Modified();
 
 	Render();
 }

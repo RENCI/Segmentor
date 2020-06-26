@@ -62,8 +62,8 @@ public:
 	void Paint(double point[3], bool overwrite = false);
 	void Erase(double point[3]);
 
-	void Paint(int i, int j, int k, bool overwrite = false);
-	void Erase(int i, int j, int );
+	void Paint(int i, int j, int k, bool overwrite = false, bool useBrush = true);
+	void Erase(int i, int j, int k, bool useBrush = true);
 
 	void SetProbePosition(double point[3]);
 

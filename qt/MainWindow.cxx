@@ -107,6 +107,15 @@ MainWindow::MainWindow() {
 
 	neighborSpinBox->valueChanged(neighborSpinBox->value());
 
+	// Brush radius
+	QShortcut* brushRadiusUp = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Right), this);
+	QShortcut* brushRadiusDown = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Left), this);
+
+	QObject::connect(brushRadiusUp, &QShortcut::activated, this, &MainWindow::on_brushRadiusUp);
+	QObject::connect(brushRadiusDown, &QShortcut::activated, this, &MainWindow::on_brushRadiusDown);
+
+	brushRadiusSpinBox->valueChanged(brushRadiusSpinBox->value());
+
 	qApp->installEventFilter(this);
 }
 
@@ -567,6 +576,14 @@ void MainWindow::on_voxelSizeSpinBox() {
 
 void MainWindow::on_brushRadiusSpinBox_valueChanged(int value) {
 	visualizationContainer->SetBrushRadius(value);
+}
+
+void MainWindow::on_brushRadiusUp() {
+	brushRadiusSpinBox->stepUp();
+}
+
+void MainWindow::on_brushRadiusDown() {
+	brushRadiusSpinBox->stepDown();
 }
 
 void MainWindow::on_regionDone(int label, bool done) {
