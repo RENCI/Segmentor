@@ -15,6 +15,7 @@
 #include <vtkGenericOpenGLRenderWindow.h>
 
 #include "VisualizationContainer.h"
+#include "Region.h"
 #include "RegionCollection.h"
 #include "RegionTable.h"
 #include "RegionMetadataIO.h"
@@ -48,7 +49,7 @@ MainWindow::MainWindow() {
 	visualizationContainer = new VisualizationContainer(qvtkWidgetLeft->GetInteractor(), qvtkWidgetRight->GetInteractor(), this);
 
 	// Create tool bar
-	CreateToolBar();
+	createToolBar();
 
 	// Create region table
 	regionTable = new RegionTable();
@@ -130,10 +131,14 @@ MainWindow::~MainWindow() {
 
 void MainWindow::updateRegions(RegionCollection* regions) {
 	regionTable->update(regions);
+
+	updateLabels(regions);
 }
 
-void MainWindow::updateRegion(Region* region) {
+void MainWindow::updateRegion(Region* region, RegionCollection* regions) {
 	regionTable->update(region);
+
+	updateLabels(regions);
 }
 
 void MainWindow::selectRegion(unsigned short label) {
@@ -164,7 +169,7 @@ void MainWindow::on_actionOpen_Image_File_triggered() {
 	// Open a file dialog to read the file
 	QString fileName = QFileDialog::getOpenFileName(this,
 		"Open Volume",
-		GetDefaultDirectory(defaultImageDirectoryKey),
+		getDefaultDirectory(defaultImageDirectoryKey),
 		"All files (*.*);;NIfTI (*.nii);;TIFF (*.tif *.tiff);;VTK XML ImageData (*.vti)");
 
 	// Check for file name
@@ -172,7 +177,7 @@ void MainWindow::on_actionOpen_Image_File_triggered() {
 		return;
 	}
 
-	SetDefaultDirectory(defaultImageDirectoryKey, fileName);
+	setDefaultDirectory(defaultImageDirectoryKey, fileName);
 
 	// Load data
 	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->OpenImageFile(fileName.toStdString());
@@ -199,7 +204,7 @@ void MainWindow::on_actionOpen_Image_Stack_triggered() {
 	// Open a file dialog to read the file
 	QString fileName = QFileDialog::getOpenFileName(this,
 		"Open Volume",
-		GetDefaultDirectory(defaultImageDirectoryKey),
+		getDefaultDirectory(defaultImageDirectoryKey),
 		"All files (*.*);;TIFF (*.tif *.tiff)");
 
 	// Check for file name
@@ -207,7 +212,7 @@ void MainWindow::on_actionOpen_Image_Stack_triggered() {
 		return;
 	}
 
-	SetDefaultDirectory(defaultImageDirectoryKey, fileName);
+	setDefaultDirectory(defaultImageDirectoryKey, fileName);
 
 	// Get all files in directory
 	QFileInfo fileInfo(fileName);
@@ -256,7 +261,7 @@ void MainWindow::on_actionOpen_Segmentation_File_triggered() {
 	// Open a file dialog to read the file
 	QString fileName = QFileDialog::getOpenFileName(this,
 		"Open Segmentation Data",
-		GetDefaultDirectory(defaultSegmentationDirectoryKey),
+		getDefaultDirectory(defaultSegmentationDirectoryKey),
 		"All files (*.*);;NIfTI (*.nii);;TIFF (*.tif *.tiff);;VTK XML ImageData (*.vti)");
 
 	// Check for file name
@@ -264,7 +269,7 @@ void MainWindow::on_actionOpen_Segmentation_File_triggered() {
 		return;
 	}
 
-	SetDefaultDirectory(defaultSegmentationDirectoryKey, fileName);
+	setDefaultDirectory(defaultSegmentationDirectoryKey, fileName);
 
 	// Load segmentation data
 	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->OpenSegmentationFile(fileName.toStdString());
@@ -301,7 +306,7 @@ void MainWindow::on_actionOpen_Segmentation_Stack_triggered() {
 	// Open a file dialog to read the file
 	QString fileName = QFileDialog::getOpenFileName(this,
 		"Open Segmentation Data",
-		GetDefaultDirectory(defaultSegmentationDirectoryKey),
+		getDefaultDirectory(defaultSegmentationDirectoryKey),
 		"All files (*.*);;TIFF (*.tif *.tiff)");
 
 	// Check for file name
@@ -309,7 +314,7 @@ void MainWindow::on_actionOpen_Segmentation_Stack_triggered() {
 		return;
 	}
 
-	SetDefaultDirectory(defaultSegmentationDirectoryKey, fileName);
+	setDefaultDirectory(defaultSegmentationDirectoryKey, fileName);
 
 	// Get all files in directory
 	QFileInfo fileInfo(fileName);
@@ -368,7 +373,7 @@ void MainWindow::on_actionSave_Image_Data_As_triggered() {
 	// Open a file dialog to save the file
 	QString fileName = QFileDialog::getSaveFileName(this,
 		"Save Image Data",
-		GetDefaultDirectory(defaultImageDirectoryKey),
+		getDefaultDirectory(defaultImageDirectoryKey),
 		"All files (*.*);;TIFF (*.tif);;NIfTI (*.nii);;VTK XML ImageData (*.vti)");
 
 	// Check for file name
@@ -376,7 +381,7 @@ void MainWindow::on_actionSave_Image_Data_As_triggered() {
 		return;
 	}
 
-	SetDefaultDirectory(defaultImageDirectoryKey, fileName);
+	setDefaultDirectory(defaultImageDirectoryKey, fileName);
 
 	// Save image data
 	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->SaveImageData(fileName.toStdString());
@@ -428,7 +433,7 @@ void MainWindow::on_actionSave_Segmentation_Data_As_triggered() {
 	// Open a file dialog to save the file
 	QString fileName = QFileDialog::getSaveFileName(this,
 		"Save Segmentation Data",
-		GetDefaultDirectory(defaultSegmentationDirectoryKey),
+		getDefaultDirectory(defaultSegmentationDirectoryKey),
 		"All files (*.*);;TIFF (*.tif);;NIfTI (*.nii);;VTK XML ImageData (*.vti)");
 
 	// Check for file name
@@ -436,7 +441,7 @@ void MainWindow::on_actionSave_Segmentation_Data_As_triggered() {
 		return;
 	}
 
-	SetDefaultDirectory(defaultSegmentationDirectoryKey, fileName);
+	setDefaultDirectory(defaultSegmentationDirectoryKey, fileName);
 
 	// Save segmentation data
 	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->SaveSegmentationData(fileName.toStdString());
@@ -622,6 +627,40 @@ void MainWindow::on_selectRegion(int label) {
 	visualizationContainer->SelectRegion((unsigned short)label);
 }
 
+void MainWindow::updateLabels(RegionCollection* regions) {
+	int modifiedCount = 0, doneCount = 0;
+	int minSize = 0, maxSize = 0, total = 0;
+
+	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+		Region* region = regions->Get(it);
+
+		int size = region->GetNumVoxels();
+
+		if (it == regions->Begin()) {
+			minSize = maxSize = size;
+		}
+		else {
+			minSize = std::min(minSize, size);
+			maxSize = std::max(maxSize, size);
+		}
+
+		total += size;
+
+		if (region->GetModified()) modifiedCount++;
+		if (region->GetDone()) doneCount++;
+	}
+
+	int n = regions->Size();
+
+	total_Label->setText(QString::number(n));
+	modified_Label->setText(QString::number(modifiedCount));
+	done_Label->setText(QString::number(doneCount));
+
+	min_Label->setText(QString::number(minSize));
+	max_Label->setText(QString::number(maxSize));
+	median_Label->setText(QString::number(n > 0 ? (double)total / n : 0, 'f', 1));
+}
+
 bool MainWindow::eventFilter(QObject* obj, QEvent* event) {
 	if (event->type() == QEvent::Enter) {
 		if (obj == qvtkWidgetLeft) {
@@ -639,20 +678,20 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event) {
 	return QObject::eventFilter(obj, event);
 }
 
-QString MainWindow::GetDefaultDirectory(QString key) {
+QString MainWindow::getDefaultDirectory(QString key) {
 	QSettings settings;
 
 	return settings.value(key).toString();
 }
 
-void MainWindow::SetDefaultDirectory(QString key, QString fileName) {
+void MainWindow::setDefaultDirectory(QString key, QString fileName) {
 	QFileInfo fileInfo(fileName);
 
 	QSettings settings;
 	settings.setValue(key, fileInfo.absoluteDir().absolutePath());
 }
 
-void MainWindow::CreateToolBar() {
+void MainWindow::createToolBar() {
 	// Create tool bar
 	QToolBar* toolBar = new QToolBar();
 	toolBar->setFloatable(true);
@@ -693,30 +732,30 @@ void MainWindow::CreateToolBar() {
 	actionFilterRegion->setChecked(visualizationContainer->GetFilterMode() == FilterRegion);
 
 	// Add widgets to tool bar
-	toolBar->addWidget(CreateLabel("Mode"));
+	toolBar->addWidget(createLabel("Mode"));
 	toolBar->addAction(actionNavigation);
 	toolBar->addAction(actionEdit);
 	toolBar->addSeparator();
-	toolBar->addWidget(CreateLabel("2D"));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_overlay.png", "Show overlay (q)", "q", visualizationContainer->GetSliceView()->GetShowLabelSlice(), &MainWindow::on_actionOverlay));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_voxels.png", "Show voxels (w)", "w", visualizationContainer->GetSliceView()->GetShowVoxelOutlines(), &MainWindow::on_actionVoxels));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_outline.png", "Show outlines (e)", "e", visualizationContainer->GetSliceView()->GetShowRegionOutlines(), &MainWindow::on_actionOutline));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_rescale_full.png", "Rescale full (=)", "=", &MainWindow::on_actionRescaleFull));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_rescale_partial.png", "Rescale partial (-)", "-", &MainWindow::on_actionRescalePartial));
+	toolBar->addWidget(createLabel("2D"));
+	toolBar->addAction(createActionIcon(":/icons/icon_overlay.png", "Show overlay (q)", "q", visualizationContainer->GetSliceView()->GetShowLabelSlice(), &MainWindow::on_actionOverlay));
+	toolBar->addAction(createActionIcon(":/icons/icon_voxels.png", "Show voxels (w)", "w", visualizationContainer->GetSliceView()->GetShowVoxelOutlines(), &MainWindow::on_actionVoxels));
+	toolBar->addAction(createActionIcon(":/icons/icon_outline.png", "Show outlines (e)", "e", visualizationContainer->GetSliceView()->GetShowRegionOutlines(), &MainWindow::on_actionOutline));
+	toolBar->addAction(createActionIcon(":/icons/icon_rescale_full.png", "Rescale full (=)", "=", &MainWindow::on_actionRescaleFull));
+	toolBar->addAction(createActionIcon(":/icons/icon_rescale_partial.png", "Rescale partial (-)", "-", &MainWindow::on_actionRescalePartial));
 	toolBar->addSeparator();
-	toolBar->addWidget(CreateLabel("3D"));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_smooth_normals.png", "Smooth normals (n)", "n", visualizationContainer->GetVolumeView()->GetSmoothShading(), &MainWindow::on_actionSmoothNormals));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_smooth_surface.png", "Smooth surfaces (s)", "s", visualizationContainer->GetVolumeView()->GetSmoothSurfaces(), &MainWindow::on_actionSmoothSurfaces));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_plane.png", "Show plane (o)", "o", visualizationContainer->GetVolumeView()->GetShowPlane(), &MainWindow::on_actionShowPlane));
+	toolBar->addWidget(createLabel("3D"));
+	toolBar->addAction(createActionIcon(":/icons/icon_smooth_normals.png", "Smooth normals (n)", "n", visualizationContainer->GetVolumeView()->GetSmoothShading(), &MainWindow::on_actionSmoothNormals));
+	toolBar->addAction(createActionIcon(":/icons/icon_smooth_surface.png", "Smooth surfaces (s)", "s", visualizationContainer->GetVolumeView()->GetSmoothSurfaces(), &MainWindow::on_actionSmoothSurfaces));
+	toolBar->addAction(createActionIcon(":/icons/icon_plane.png", "Show plane (o)", "o", visualizationContainer->GetVolumeView()->GetShowPlane(), &MainWindow::on_actionShowPlane));
 	toolBar->addSeparator();
-	toolBar->addWidget(CreateLabel("Filter"));
+	toolBar->addWidget(createLabel("Filter"));
 	toolBar->addAction(actionFilterPlane);
 	toolBar->addAction(actionFilterNeighbors);
 	toolBar->addAction(actionFilterRegion);
 	toolBar->addSeparator();
-	toolBar->addWidget(CreateLabel("Edit"));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_dilate.png", "Dilate region (c)", "c", &MainWindow::on_actionDilateRegion));
-	toolBar->addAction(CreateActionIcon(":/icons/icon_erode.png", "Erode region (v)", "v",&MainWindow::on_actionErodeRegion));
+	toolBar->addWidget(createLabel("Edit"));
+	toolBar->addAction(createActionIcon(":/icons/icon_dilate.png", "Dilate region (c)", "c", &MainWindow::on_actionDilateRegion));
+	toolBar->addAction(createActionIcon(":/icons/icon_erode.png", "Erode region (v)", "v",&MainWindow::on_actionErodeRegion));
 
 	// Need extra logic for interaction mode
 	QObject::connect(actionNavigation, &QAction::triggered, this, &MainWindow::on_actionNavigation);
@@ -755,7 +794,7 @@ void MainWindow::CreateToolBar() {
 	toolBarWidget->layout()->addWidget(toolBar);
 }
 
-QAction* MainWindow::CreateActionIcon(const QString& fileName, const QString& text, const QString& shortcut, void (MainWindow::*slot)(bool)) {
+QAction* MainWindow::createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, void (MainWindow::*slot)(bool)) {
 	QAction* action = new QAction(QIcon(fileName), text, this);
 	action->setShortcut(QKeySequence(shortcut));
 	action->setCheckable(false);
@@ -765,7 +804,7 @@ QAction* MainWindow::CreateActionIcon(const QString& fileName, const QString& te
 	return action;
 }
 
-QAction* MainWindow::CreateActionIcon(const QString& fileName, const QString& text, const QString& shortcut, bool checked, void (MainWindow::*slot)(bool)) {
+QAction* MainWindow::createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, bool checked, void (MainWindow::*slot)(bool)) {
 	QAction* action = new QAction(QIcon(fileName), text, this);
 	action->setShortcut(QKeySequence(shortcut));
 	action->setCheckable(true);
@@ -776,7 +815,7 @@ QAction* MainWindow::CreateActionIcon(const QString& fileName, const QString& te
 	return action;
 }
 
-QLabel* MainWindow::CreateLabel(const QString& text, int topMargin, int bottomMargin) {
+QLabel* MainWindow::createLabel(const QString& text, int topMargin, int bottomMargin) {
 	QString style = QStringLiteral("color:#999;margin-top:%1px;margin-bottom:%2px").arg(topMargin).arg(bottomMargin);
 
 	QLabel* label = new QLabel(text);

@@ -22,7 +22,7 @@ public:
 	virtual ~MainWindow();
 
 	void updateRegions(RegionCollection* regions);
-	void updateRegion(Region* region);
+	void updateRegion(Region* region, RegionCollection* regions);
 	void selectRegion(unsigned short label);
 
 	void setWindowLevel(double window, double level);
@@ -108,20 +108,22 @@ protected:
 	// Region table
 	RegionTable* regionTable;
 
+	void updateLabels(RegionCollection* regions);
+
 	bool eventFilter(QObject* obj, QEvent* event);
 
 	// Default directories
 	QString defaultImageDirectoryKey;
 	QString defaultSegmentationDirectoryKey;
 
-	QString GetDefaultDirectory(QString key);
-	void SetDefaultDirectory(QString key, QString fileName);
+	QString getDefaultDirectory(QString key);
+	void setDefaultDirectory(QString key, QString fileName);
 
 	// Toolbar
-	void CreateToolBar();
-	QAction* CreateActionIcon(const QString& fileName, const QString& text, const QString& shortcut, void (MainWindow::*slot)(bool));
-	QAction* CreateActionIcon(const QString& fileName, const QString& text, const QString& shortcut, bool checked, void (MainWindow::*slot)(bool));
-	QLabel* CreateLabel(const QString& text, int topMargin = 10, int bottomMargin = 5);
+	void createToolBar();
+	QAction* createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, void (MainWindow::*slot)(bool));
+	QAction* createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, bool checked, void (MainWindow::*slot)(bool));
+	QLabel* createLabel(const QString& text, int topMargin = 10, int bottomMargin = 5);
 };
 
 #endif

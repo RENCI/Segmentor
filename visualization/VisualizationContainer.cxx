@@ -624,7 +624,7 @@ void VisualizationContainer::Paint(int i, int j, int k, bool overwrite, bool use
 
 	for (auto region : update) {
 		region->SetModified(true);
-		qtWindow->updateRegion(region);
+		qtWindow->updateRegion(region, regions);
 	}
 }
 
@@ -672,7 +672,7 @@ void VisualizationContainer::Erase(int i, int j, int k, bool useBrush) {
 
 	if (update) {
 		currentRegion->SetModified(true);
-		qtWindow->updateRegion(currentRegion);
+		qtWindow->updateRegion(currentRegion, regions);
 	}
 }
 
@@ -1157,7 +1157,7 @@ void VisualizationContainer::SetRegionDone(unsigned short label, bool done) {
 		UpdateColors(label);
 	}
 
-	qtWindow->updateRegion(region);
+	qtWindow->updateRegion(region, regions);
 
 	Render();
 }
