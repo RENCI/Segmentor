@@ -26,6 +26,8 @@
 #include "vtkSmartPointer.h"
 #include "vtkRenderWindowInteractor.h"
 
+#include <vtkRenderer.h>
+
 // Constructor
 MainWindow::MainWindow() {
 	// Create the GUI from the Qt Designer file
@@ -472,12 +474,14 @@ void MainWindow::on_actionBlank_3D_View_triggered(bool checked) {
 
 void MainWindow::on_actionShow_3D_View_triggered(bool checked) {
 	qvtkWidgetLeft->setVisible(!qvtkWidgetLeft->isVisible());
+	visualizationContainer->GetVolumeView()->GetRenderer()->SetDraw(checked);
 
 	actionShow_2D_View->setEnabled(qvtkWidgetLeft->isVisible());
 }
 
 void MainWindow::on_actionShow_2D_View_triggered(bool checked) {
 	qvtkWidgetRight->setVisible(!qvtkWidgetRight->isVisible());
+	visualizationContainer->GetSliceView()->GetRenderer()->SetDraw(checked);
 
 	actionShow_3D_View->setEnabled(qvtkWidgetRight->isVisible());
 }
