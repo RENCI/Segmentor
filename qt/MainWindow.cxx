@@ -466,8 +466,24 @@ void MainWindow::on_actionExit_triggered() {
 	qApp->exit();
 }
 
-void MainWindow::on_action3D_View_triggered(bool checked) {
-	visualizationContainer->GetVolumeView()->Enable(checked);
+void MainWindow::on_actionBlank_3D_View_triggered(bool checked) {
+	visualizationContainer->GetVolumeView()->Enable(!checked);
+}
+
+void MainWindow::on_actionShow_3D_View_triggered(bool checked) {
+	qvtkWidgetLeft->setVisible(!qvtkWidgetLeft->isVisible());
+
+	actionShow_2D_View->setEnabled(qvtkWidgetLeft->isVisible());
+}
+
+void MainWindow::on_actionShow_2D_View_triggered(bool checked) {
+	qvtkWidgetRight->setVisible(!qvtkWidgetRight->isVisible());
+
+	actionShow_3D_View->setEnabled(qvtkWidgetRight->isVisible());
+}
+
+void MainWindow::on_actionShow_Region_Table_triggered(bool checked) {
+	regionTableContainer->setVisible(!regionTableContainer->isVisible());
 }
 
 void MainWindow::on_actionNavigation() {
