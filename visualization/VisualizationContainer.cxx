@@ -1169,6 +1169,8 @@ void VisualizationContainer::RemoveRegion(unsigned short label) {
 
 	regions->Remove(label);
 
+	qtWindow->updateRegions(regions);
+
 	Render();
 }
 

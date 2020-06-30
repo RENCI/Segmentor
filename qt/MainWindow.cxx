@@ -652,13 +652,13 @@ void MainWindow::updateLabels(RegionCollection* regions) {
 
 	int n = regions->Size();
 
-	total_Label->setText(QString::number(n));
-	modified_Label->setText(QString::number(modifiedCount));
-	done_Label->setText(QString::number(doneCount));
+	total_Label->setText("Total: " + QString::number(n));
+	modified_Label->setText("Modified: " + QString::number(modifiedCount));
+	done_Label->setText("Done: " + QString::number(doneCount));
 
-	min_Label->setText(QString::number(minSize));
-	max_Label->setText(QString::number(maxSize));
-	median_Label->setText(QString::number(n > 0 ? (double)total / n : 0, 'f', 1));
+	min_Label->setText("Minimum: " + QString::number(minSize));
+	max_Label->setText("Maximum: " + QString::number(maxSize));
+	median_Label->setText("Median: " + QString::number(n > 0 ? (double)total / n : 0, 'f', 1));
 }
 
 bool MainWindow::eventFilter(QObject* obj, QEvent* event) {
