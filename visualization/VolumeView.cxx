@@ -117,9 +117,10 @@ void VolumeView::Enable(bool enable) {
 			}
 		}
 	}
-	else {
+	else {		
 		// Hide with dummy renderer
 		vtkSmartPointer<vtkRenderer> dummy = vtkSmartPointer<vtkRenderer>::New();
+		dummy->InteractiveOff();
 		window->AddRenderer(dummy);
 	}
 
