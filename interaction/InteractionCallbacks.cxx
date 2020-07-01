@@ -233,11 +233,10 @@ void InteractionCallbacks::MouseMove(vtkObject* caller, unsigned long eventId, v
 		double p[3];
 		PickPosition(p);
 
-		vis->SetProbePosition(p);
+		vis->MouseMove(p);
 	}
 	else {
-		vis->GetVolumeView()->SetShowProbe(false);
-		vis->GetSliceView()->SetShowProbe(false);
+		vis->MouseMove();
 	}
 
 	vis->Render();

@@ -9,6 +9,8 @@
 #include <vtkPlane.h>
 #include <vtkProperty.h>
 #include <vtkTable.h>
+#include <vtkBillboardTextActor3D.h>
+#include <vtkTextProperty.h>
 #include <vtkThreshold.h>
 
 #include "vtkImageDataCells.h"
@@ -32,6 +34,12 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 	color[0] = regionColor[0];
 	color[1] = regionColor[1];
 	color[2] = regionColor[2];
+
+	// Text
+	text = vtkSmartPointer<vtkBillboardTextActor3D>::New();
+	text->SetInput(std::to_string(label).c_str());
+	text->GetTextProperty()->SetColor(color);
+	text->VisibilityOff();
 
 	voi = vtkSmartPointer<vtkExtractVOI>::New();
 	voi->SetInputDataObject(data);
@@ -122,6 +130,10 @@ RegionHighlight3D* Region::GetHighlight3D() {
 	return highlight3D;
 }
 
+vtkSmartPointer<vtkBillboardTextActor3D> Region::GetText() {
+	return text;
+}
+
 void Region::SetExtent(int newExtent[6]) {
 	for (int i = 0; i < 6; i++) {
 		extent[i] = newExtent[i];
@@ -181,6 +193,21 @@ void Region::UpdateExtent() {
 	padExtent[5] = std::min(dataExtent[5], extent[5] + padding);
 
 	voi->SetVOI(padExtent);
+
+	//text->SetPosition(
+//		(padExtent[1] - padExtent[0]) / 2,
+//		(padExtent[3] - padExtent[2]) / 2
+//	);
+
+	double bounds[6];
+	voi->Update();
+	voi->GetOutput()->GetBounds(bounds);
+
+	text->SetPosition(
+		(bounds[1] - bounds[0]) / 2,
+		(bounds[3] - bounds[2]) / 2,
+		(bounds[5] - bounds[4]) / 2
+	);
 }
 
 void Region::ComputeExtent() {
@@ -273,6 +300,23 @@ void Region::SetDone(bool isDone) {
 	else {
 		outline->GetActor()->GetProperty()->SetColor(color);
 		surface->GetActor()->GetProperty()->SetColor(color);
+	}
+}
+
+void Region::ShowText(bool show) {
+	if (show) {
+		double bounds[6];
+		voi->GetOutput()->GetBounds(bounds);
+		
+		text->SetPosition(
+			bounds[0] + (bounds[1] - bounds[0]) / 2,
+			bounds[3],
+			bounds[4] + (bounds[5] - bounds[4]) / 2
+		);
+		text->VisibilityOn();
+	}
+	else {
+		text->VisibilityOff();
 	}
 }
 

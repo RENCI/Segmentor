@@ -8,6 +8,7 @@ class vtkExtractVOI;
 class vtkImageData;
 class vtkPlane;
 class vtkTable;
+class vtkBillboardTextActor3D;
 class vtkThreshold;
 
 class vtkImageDataCells;
@@ -31,6 +32,7 @@ public:
 	RegionOutline* GetOutline();
 	RegionVoxelOutlines* GetVoxelOutlines();
 	RegionHighlight3D* GetHighlight3D();
+	vtkSmartPointer<vtkBillboardTextActor3D> GetText();
 
 	void SetExtent(int newExtent[6]);
 	void UpdateExtent(int x, int y, int z);
@@ -41,6 +43,8 @@ public:
 	
 	bool GetDone();
 	void SetDone(bool isDone);
+
+	void ShowText(bool show);
 
 	unsigned short GetLabel();
 	const double* GetColor();
@@ -66,7 +70,8 @@ protected:
 	RegionSurface* surface;
 	RegionOutline* outline;
 	RegionVoxelOutlines* voxelOutlines;
-	RegionHighlight3D* highlight3D;	
+	RegionHighlight3D* highlight3D;
+	vtkSmartPointer<vtkBillboardTextActor3D> text;
 
 	void UpdateExtent();
 	void ClearLabels();

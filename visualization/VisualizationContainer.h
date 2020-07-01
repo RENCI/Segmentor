@@ -65,7 +65,8 @@ public:
 	void Paint(int i, int j, int k, bool overwrite = false, bool useBrush = true);
 	void Erase(int i, int j, int k, bool useBrush = true);
 
-	void SetProbePosition(double point[3]);
+	void MouseMove();
+	void MouseMove(double point[3]);
 
 	//void PickPointLabel(double x, double y, double z);
 	//void PaintPoint(double x, double y, double z);
@@ -109,6 +110,7 @@ protected:
 	// Regions
 	RegionCollection* regions;
 	Region* currentRegion;
+	unsigned short hoverLabel;
 
 	vtkSmartPointer<vtkLookupTable> labelColors;
 
@@ -138,8 +140,6 @@ protected:
 	void ExtractRegions();
 
 	void SplitRegion(Region* region, int numRegions);
-
-	void DoDilateErode(bool doDilate);
 
 	// Region metadata
 	void LoadRegionMetadata(std::string fileName);

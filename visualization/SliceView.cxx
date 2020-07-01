@@ -6,6 +6,7 @@
 #include "vtkImageDataCells.h"
 
 #include <vtkActor.h>
+#include <vtkBillboardTextActor3D.h>
 #include <vtkCallbackCommand.h>
 #include <vtkCamera.h>
 #include <vtkCubeSource.h>
@@ -187,6 +188,9 @@ void SliceView::AddRegionActors(Region* region) {
 	RegionVoxelOutlines* voxelOutlines = region->GetVoxelOutlines();
 	voxelOutlines->SetPlane(plane);
 	voxelOutlinesRenderer->AddActor(voxelOutlines->GetActor());
+
+	//renderer->AddActor(region->GetText());
+	regionOutlinesRenderer->AddActor(region->GetText());
 }
 
 void SliceView::SetCurrentRegion(Region* region) {

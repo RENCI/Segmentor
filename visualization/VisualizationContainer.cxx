@@ -5,6 +5,7 @@
 
 #include "MainWindow.h"
 
+#include <vtkBillboardTextActor3D.h>
 #include <vtkCallbackCommand.h>
 #include <vtkCamera.h>
 #include <vtkImageConnectivityFilter.h>
@@ -52,6 +53,7 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	labels = nullptr;
 	regions = new RegionCollection();
 	currentRegion = nullptr;	
+	hoverLabel = 0;
 
 	brushRadius = 1;
 
@@ -676,7 +678,18 @@ void VisualizationContainer::Erase(int i, int j, int k, bool useBrush) {
 	}
 }
 
-void VisualizationContainer::SetProbePosition(double point[3]) {
+void VisualizationContainer::MouseMove() {
+	volumeView->SetShowProbe(false);
+	sliceView->SetShowProbe(false);
+
+	if (hoverLabel > 0) {
+		regions->Get(hoverLabel)->ShowText(false);
+	}
+
+	hoverLabel = 0;
+}
+
+void VisualizationContainer::MouseMove(double point[3]) {
 	int ijk[3];
 	PointToIndex(point, ijk);
 	IndexToPoint(ijk, point);
@@ -686,6 +699,19 @@ void VisualizationContainer::SetProbePosition(double point[3]) {
 	sliceView->SetProbePosition(point[0], point[1], point[2]);
 	volumeView->SetShowProbe(true);
 	sliceView->SetShowProbe(true);
+
+	// Show label for region
+	unsigned short label = GetLabel(ijk[0], ijk[1], ijk[2]);
+
+	if (hoverLabel > 0 && hoverLabel != label) {
+		regions->Get(hoverLabel)->ShowText(false);
+	}
+	
+	if (label > 0) {		
+		regions->Get(label)->ShowText(true);
+	}
+
+	hoverLabel = label;
 }
 
 /*
