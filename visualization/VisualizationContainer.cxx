@@ -1082,64 +1082,6 @@ void VisualizationContainer::GrowCurrentRegion(double point[3]) {
 	Render();
 }
 
-void VisualizationContainer::DilateCurrentRegion() {
-	if (!currentRegion) return;
-
-	DoDilateErode(true);
-}
-
-void VisualizationContainer::ErodeCurrentRegion() {
-	if (!currentRegion) return;
-
-	DoDilateErode(false);
-}
-
-void VisualizationContainer::DoDilateErode(bool doDilate) {
-	int kernelSize = 3;
-
-	unsigned short label = currentRegion->GetLabel();
-
-	vtkSmartPointer<vtkImageDilateErode3D> dilate = vtkSmartPointer<vtkImageDilateErode3D>::New();
-	dilate->SetDilateValue(doDilate ? label : 0);
-	dilate->SetErodeValue(doDilate ? 0 : label);
-	dilate->SetKernelSize(kernelSize, kernelSize, kernelSize);
-	dilate->SetInputDataObject(labels);
-	dilate->Update();
-
-	int dataExtent[6];
-	labels->GetExtent(dataExtent);
-
-	const int* extent = currentRegion->GetExtent();
-
-	int padExtent[6];
-	padExtent[0] = std::max(dataExtent[0], extent[0] - kernelSize);
-	padExtent[1] = std::min(dataExtent[1], extent[1] + kernelSize);
-	padExtent[2] = std::max(dataExtent[2], extent[2] - kernelSize);
-	padExtent[3] = std::min(dataExtent[3], extent[3] + kernelSize);
-	padExtent[4] = std::max(dataExtent[4], extent[4] - kernelSize);
-	padExtent[5] = std::min(dataExtent[5], extent[5] + kernelSize);
-
-	for (int i = padExtent[0]; i <= padExtent[1]; i++) {
-		for (int j = padExtent[2]; j <= padExtent[3]; j++) {
-			for (int k = padExtent[4]; k <= padExtent[5]; k++) {
-				unsigned short* dilateData = static_cast<unsigned short*>(dilate->GetOutput()->GetScalarPointer(i, j, k));
-				unsigned short* labelData = static_cast<unsigned short*>(labels->GetScalarPointer(i, j, k));
-
-				*labelData = *dilateData;
-			}
-		}
-	}
-
-	// Update current region
-	currentRegion->SetModified(true);
-	currentRegion->ComputeExtent();
-
-	qtWindow->updateRegions(regions);
-
-	labels->Modified();
-	Render();
-}
-
 void VisualizationContainer::SetRegionDone(unsigned short label, bool done) {
 	Region* region = regions->Get(label);
 

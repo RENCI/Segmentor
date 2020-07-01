@@ -82,8 +82,6 @@ public:
 	void RelabelCurrentRegion();
 	void MergeWithCurrentRegion(double point[3]);
 	void SplitCurrentRegion(int numRegions);
-	void DilateCurrentRegion();
-	void ErodeCurrentRegion();
 	void GrowCurrentRegion(double point[3]);
 
 	void SetWindowLevel(double window, double level);

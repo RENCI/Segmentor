@@ -543,14 +543,6 @@ void MainWindow::on_actionShowPlane(bool checked) {
 	visualizationContainer->GetVolumeView()->SetShowPlane(checked);
 }
 
-void MainWindow::on_actionDilateRegion(bool) {
-	visualizationContainer->DilateCurrentRegion();
-}
-
-void MainWindow::on_actionErodeRegion(bool) {
-	visualizationContainer->ErodeCurrentRegion();
-}
-
 void MainWindow::on_sliceUp() {
 	visualizationContainer->SliceUp();
 }
@@ -752,10 +744,6 @@ void MainWindow::createToolBar() {
 	toolBar->addAction(actionFilterPlane);
 	toolBar->addAction(actionFilterNeighbors);
 	toolBar->addAction(actionFilterRegion);
-	toolBar->addSeparator();
-	toolBar->addWidget(createLabel("Edit"));
-	toolBar->addAction(createActionIcon(":/icons/icon_dilate.png", "Dilate region (c)", "c", &MainWindow::on_actionDilateRegion));
-	toolBar->addAction(createActionIcon(":/icons/icon_erode.png", "Erode region (v)", "v",&MainWindow::on_actionErodeRegion));
 
 	// Need extra logic for interaction mode
 	QObject::connect(actionNavigation, &QAction::triggered, this, &MainWindow::on_actionNavigation);
