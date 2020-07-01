@@ -5,6 +5,7 @@
 #include "vtkCellPicker.h"
 #include "vtkMath.h"
 #include "vtkObjectFactory.h"
+#include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
 #include "vtkRenderer.h"
 
@@ -45,7 +46,7 @@ void vtkInteractorStyleVolume::StartSelect()
 void vtkInteractorStyleVolume::EndSelect()
 {
 	// Enable select in either mode
-	if (!(this->State == VTKIS_SELECT_VOLUME || this->State == VTKIS_PAN || this->State == VTKIS_SPIN))
+	if (!(this->State == VTKIS_SELECT_VOLUME || this->State == VTKIS_PAN))
 	{
 		return;
 	}
@@ -192,17 +193,8 @@ void vtkInteractorStyleVolume::OnLeftButtonDown()
 	}
 	else
 	{
-		// If ctrl is held down, spin
-		if (this->Interactor->GetControlKey())
-		{
-			this->StartSpin();
-		}
-
-		// Otherwise rotate around focal point
-		else
-		{
-			this->StartRotate();
-		}
+		// Rotate
+		this->StartRotate();
 	}
 }
 
@@ -223,10 +215,6 @@ void vtkInteractorStyleVolume::OnLeftButtonUp()
 		if (this->State == VTKIS_PAINT_VOLUME)
 		{
 			this->InvokeEvent(PaintEvent, nullptr);
-		}
-		else if (this->State == VTKIS_SPIN)
-		{
-			this->EndSelect();
 		}
 	}
 
@@ -457,6 +445,47 @@ void vtkInteractorStyleVolume::OnChar()
 		this->Superclass::OnChar();
 		break;
 	}
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleVolume::Rotate()
+{
+	if (this->CurrentRenderer == nullptr)
+	{
+		return;
+	}
+
+	vtkRenderWindowInteractor *rwi = this->Interactor;
+
+	int dx = this->Interactor->GetControlKey() ? 0 :
+		rwi->GetEventPosition()[0] - rwi->GetLastEventPosition()[0];
+	int dy = this->Interactor->GetAltKey() ? 0 : 
+		rwi->GetEventPosition()[1] - rwi->GetLastEventPosition()[1];
+
+	int *size = this->CurrentRenderer->GetRenderWindow()->GetSize();
+
+	double delta_elevation = -20.0 / size[1];
+	double delta_azimuth = -20.0 / size[0];
+
+	double rxf = dx * delta_azimuth * this->MotionFactor;
+	double ryf = dy * delta_elevation * this->MotionFactor;
+
+	vtkCamera *camera = this->CurrentRenderer->GetActiveCamera();
+	camera->Azimuth(rxf);
+	camera->Elevation(ryf);
+	camera->OrthogonalizeViewUp();
+
+	if (this->AutoAdjustCameraClippingRange)
+	{
+		this->CurrentRenderer->ResetCameraClippingRange();
+	}
+
+	if (rwi->GetLightFollowCamera())
+	{
+		this->CurrentRenderer->UpdateLightsGeometryToFollowCamera();
+	}
+
+	rwi->Render();
 }
 
 //----------------------------------------------------------------------------

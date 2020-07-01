@@ -34,6 +34,8 @@ public:
 	void OnRightButtonUp() override;
 	void OnChar() override;
 
+	void Rotate() override;
+
 	virtual void StartSelect();
 	virtual void EndSelect();
 	virtual void StartPaint();
