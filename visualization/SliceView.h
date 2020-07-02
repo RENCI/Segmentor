@@ -47,10 +47,6 @@ public:
 	bool GetShowLabelSlice();
 	void ShowLabelSlice(bool show);
 	void ToggleLabelSlice();
-	
-	bool GetShowVoxelOutlines();
-	void ShowVoxelOutlines(bool show);
-	void ToggleVoxelOutlines();
 
 	bool GetShowRegionOutlines();
 	void ShowRegionOutlines(bool show);
@@ -89,7 +85,6 @@ protected:
 	// Rendering
 	vtkSmartPointer<vtkRenderer> renderer;
 	vtkSmartPointer<vtkRenderer> labelSliceRenderer;
-	vtkSmartPointer<vtkRenderer> voxelOutlinesRenderer;
 	vtkSmartPointer<vtkRenderer> regionOutlinesRenderer;
 
 	vtkSmartPointer<vtkInteractorStyleSlice> style;

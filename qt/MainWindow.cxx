@@ -507,10 +507,6 @@ void MainWindow::on_actionOverlay(bool checked) {
 	visualizationContainer->GetSliceView()->ShowLabelSlice(checked);
 }
 
-void MainWindow::on_actionVoxels(bool checked) {
-	visualizationContainer->GetSliceView()->ShowVoxelOutlines(checked);
-}
-
 void MainWindow::on_actionOutline(bool checked) {
 	visualizationContainer->GetSliceView()->ShowRegionOutlines(checked);
 }
@@ -730,7 +726,7 @@ void MainWindow::createToolBar() {
 	toolBar->addSeparator();
 	toolBar->addWidget(createLabel("2D"));
 	toolBar->addAction(createActionIcon(":/icons/icon_overlay.png", "Show overlay (q)", "q", visualizationContainer->GetSliceView()->GetShowLabelSlice(), &MainWindow::on_actionOverlay));
-	toolBar->addAction(createActionIcon(":/icons/icon_voxels.png", "Show voxels (w)", "w", visualizationContainer->GetSliceView()->GetShowVoxelOutlines(), &MainWindow::on_actionVoxels));
+	
 	toolBar->addAction(createActionIcon(":/icons/icon_outline.png", "Show outlines (e)", "e", visualizationContainer->GetSliceView()->GetShowRegionOutlines(), &MainWindow::on_actionOutline));
 	toolBar->addAction(createActionIcon(":/icons/icon_rescale_full.png", "Rescale full (=)", "=", &MainWindow::on_actionRescaleFull));
 	toolBar->addAction(createActionIcon(":/icons/icon_rescale_partial.png", "Rescale partial (-)", "-", &MainWindow::on_actionRescalePartial));

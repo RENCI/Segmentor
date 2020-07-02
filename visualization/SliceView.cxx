@@ -30,7 +30,6 @@
 #include "InteractionEnums.h"
 #include "Region.h"
 #include "RegionOutline.h"
-#include "RegionVoxelOutlines.h"
 #include "RegionSurface.h"
 #include "RegionCollection.h"
 #include "SliceLocation.h"
@@ -48,7 +47,6 @@ void SliceView::cameraChange(vtkObject* caller, unsigned long eventId, void* cli
 SliceView::SliceView(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut) {
 	filterMode = FilterNone;
 	showRegionOutlines = true;
-	showVoxelOutlines = false;
 
 	data = nullptr;
 	labels = nullptr;
@@ -71,12 +69,7 @@ SliceView::SliceView(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut)
 	labelSliceRenderer->SetLayer(1);
 	labelSliceRenderer->InteractiveOff();
 	labelSliceRenderer->SetActiveCamera(renderer->GetActiveCamera());
-
-	voxelOutlinesRenderer = vtkSmartPointer<vtkRenderer>::New();
-	voxelOutlinesRenderer->SetLayer(2);
-	voxelOutlinesRenderer->InteractiveOff();
-	voxelOutlinesRenderer->SetActiveCamera(renderer->GetActiveCamera());
-
+	
 	regionOutlinesRenderer = vtkSmartPointer<vtkRenderer>::New();
 	regionOutlinesRenderer->SetLayer(2);
 	regionOutlinesRenderer->InteractiveOff();
@@ -94,7 +87,6 @@ SliceView::SliceView(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut)
 	interactor->GetRenderWindow()->SetNumberOfLayers(4);
 	interactor->GetRenderWindow()->AddRenderer(renderer);
 	interactor->GetRenderWindow()->AddRenderer(labelSliceRenderer);
-	interactor->GetRenderWindow()->AddRenderer(voxelOutlinesRenderer);
 	interactor->GetRenderWindow()->AddRenderer(regionOutlinesRenderer);
 	interactor->GetRenderWindow()->AddRenderer(sliceLocationRenderer);
 	interactor->SetInteractorStyle(style);
@@ -185,10 +177,6 @@ void SliceView::AddRegionActors(Region* region) {
 	outline->SetPlane(plane);
 	regionOutlinesRenderer->AddActor(outline->GetActor());
 
-	RegionVoxelOutlines* voxelOutlines = region->GetVoxelOutlines();
-	voxelOutlines->SetPlane(plane);
-	voxelOutlinesRenderer->AddActor(voxelOutlines->GetActor());
-
 	//renderer->AddActor(region->GetText());
 	regionOutlinesRenderer->AddActor(region->GetText());
 }
@@ -266,20 +254,6 @@ void SliceView::ShowLabelSlice(bool show) {
 
 void SliceView::ToggleLabelSlice() {
 	ShowLabelSlice(!labelSlice->GetVisibility());
-}
-
-bool SliceView::GetShowVoxelOutlines() {
-	return showVoxelOutlines;
-}
-
-void SliceView::ShowVoxelOutlines(bool show) {
-	showVoxelOutlines = show;
-
-	FilterRegions();
-}
-
-void SliceView::ToggleVoxelOutlines() {
-	ShowVoxelOutlines(!showVoxelOutlines);
 }
 
 bool SliceView::GetShowRegionOutlines() {
@@ -519,7 +493,6 @@ void SliceView::FilterRegions() {
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
 		Region* region = regions->Get(it);
 		RegionOutline* outline = region->GetOutline();
-		RegionVoxelOutlines* voxelOutlines = region->GetVoxelOutlines();
 
 		// XXX: Setting based on surface visiblity probably indicates that the logic should be pushed up to visualization container,
 		// with a method in region for turning on and off individual pieces
@@ -527,7 +500,6 @@ void SliceView::FilterRegions() {
 		bool visible = region->GetSurface()->GetActor()->GetVisibility();
 
 		outline->GetActor()->SetVisibility(visible && showRegionOutlines);
-		voxelOutlines->GetActor()->SetVisibility(visible && showVoxelOutlines);
 	}
 
 	renderer->ResetCameraClippingRange();
