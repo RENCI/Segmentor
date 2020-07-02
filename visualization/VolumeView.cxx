@@ -41,7 +41,7 @@ void VolumeView::cameraChange(vtkObject* caller, unsigned long eventId, void* cl
 VolumeView::VolumeView(vtkRenderWindowInteractor* interactor) {
 	filterMode = FilterNone;
 	smoothSurfaces = false;
-	smoothShading = true;
+	smoothShading = false;
 	
 	regions = nullptr;
 	currentRegion = nullptr;
