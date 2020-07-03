@@ -1225,7 +1225,6 @@ void VisualizationContainer::Render() {
 
 void VisualizationContainer::Undo() {
 	history->Undo(labels, regions);
-	//UpdateLabels();
 	volumeView->SetRegions(labels, regions);
 	sliceView->SetSegmentationData(labels, regions);
 	qtWindow->updateRegions(regions);
@@ -1234,7 +1233,6 @@ void VisualizationContainer::Undo() {
 
 void VisualizationContainer::Redo() {
 	history->Redo(labels, regions);
-	//UpdateLabels();
 	volumeView->SetRegions(labels, regions);
 	sliceView->SetSegmentationData(labels, regions);
 	qtWindow->updateRegions(regions);
