@@ -1224,15 +1224,19 @@ void VisualizationContainer::Render() {
 }
 
 void VisualizationContainer::Undo() {
-	history->Undo(labels);
-	UpdateLabels();
+	history->Undo(labels, regions);
+	//UpdateLabels();
+	volumeView->SetRegions(labels, regions);
+	sliceView->SetSegmentationData(labels, regions);
 	qtWindow->updateRegions(regions);
 	Render();
 }
 
 void VisualizationContainer::Redo() {
-	history->Redo(labels);
-	UpdateLabels();
+	history->Redo(labels, regions);
+	//UpdateLabels();
+	volumeView->SetRegions(labels, regions);
+	sliceView->SetSegmentationData(labels, regions);
 	qtWindow->updateRegions(regions);
 	Render();
 }
@@ -1438,5 +1442,5 @@ void VisualizationContainer::IndexToPoint(int ijk[3], double point[3]) {
 }
 
 void VisualizationContainer::PushHistory() {
-	history->Push(labels);
+	history->Push(labels, regions);
 }

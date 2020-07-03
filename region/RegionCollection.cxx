@@ -30,7 +30,6 @@ void RegionCollection::Remove(unsigned short label) {
 
 	Region* region = regions[label];
 
-	region->ClearLabels();
 	delete region;
 
 	regions.erase(label);

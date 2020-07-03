@@ -13,6 +13,7 @@ class vtkThreshold;
 
 class vtkImageDataCells;
 
+class RegionInfo;
 class RegionSurface;
 class RegionOutline;
 class RegionVoxelOutlines;
@@ -21,6 +22,7 @@ class RegionHighlight3D;
 class Region {
 public:
 	Region(unsigned short regionLabel, double regionColor[3], vtkImageData* data);
+	Region(const RegionInfo& info, vtkImageData* data);
 	~Region();
 
 	vtkAlgorithmOutput* GetOutput();
@@ -55,7 +57,7 @@ public:
 
 	double GetXYDistance(int x, int y, int z);
 
-	void ClearLabels();
+	void SetInfo(const RegionInfo& info);
 
 protected:
 	unsigned short label;
@@ -76,6 +78,9 @@ protected:
 	vtkSmartPointer<vtkBillboardTextActor3D> text;
 
 	void UpdateExtent();
+	void ClearLabels();
+
+	friend class RegionInfo;
 };
 
 #endif

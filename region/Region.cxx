@@ -15,6 +15,7 @@
 
 #include "vtkImageDataCells.h"
 
+#include "RegionInfo.h"
 #include "RegionSurface.h"
 #include "RegionOutline.h"
 #include "RegionVoxelOutlines.h"
@@ -61,8 +62,42 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 	voxelOutlines = new RegionVoxelOutlines(this, color);
 	highlight3D = new RegionHighlight3D(this, color);
 }
+
+Region::Region(const RegionInfo& info, vtkImageData* inputData) {
+	SetInfo(info);
+
+	// Input data info
+	data = inputData;
+
+	// Text
+	text = vtkSmartPointer<vtkBillboardTextActor3D>::New();
+	text->SetInput(std::to_string(label).c_str());
+	text->GetTextProperty()->SetColor(color);
+	text->VisibilityOff();
+
+	voi = vtkSmartPointer<vtkExtractVOI>::New();
+	voi->SetInputDataObject(data);
+
+	vtkSmartPointer<vtkImageDataCells> cells = vtkSmartPointer<vtkImageDataCells>::New();
+	cells->SetInputConnection(voi->GetOutputPort());
+
+	threshold = vtkSmartPointer<vtkThreshold>::New();
+	threshold->ThresholdBetween(label, label);
+	threshold->SetInputConnection(cells->GetOutputPort());
+
+	UpdateExtent();
+
+	voi->Update();
+
+	surface = new RegionSurface(this, color);
+	outline = new RegionOutline(this, color);
+	voxelOutlines = new RegionVoxelOutlines(this, color);
+	highlight3D = new RegionHighlight3D(this, color);
+}
 	
 Region::~Region() {
+	ClearLabels();
+
 	delete surface;
 	delete outline;
 	delete voxelOutlines;
@@ -371,6 +406,21 @@ double Region::GetXYDistance(int x, int y, int z) {
 	}
 
 	return sqrt(distance2);
+}
+
+void Region::SetInfo(const RegionInfo& info) {
+	label = info.label;
+
+	for (int i = 0; i < 3; i++) {
+		color[i] = info.color[i];
+	}
+
+	for (int i = 0; i < 6; i++) {
+		extent[i] = info.extent[i];
+	}
+
+	modified = info.modified;
+	done = info.done;
 }
 
 void Region::ClearLabels() {
