@@ -18,6 +18,7 @@ class VolumeView;
 class SliceView;
 class Region;
 class RegionCollection;
+class History;
 
 class VisualizationContainer {
 public:
@@ -96,6 +97,9 @@ public:
 
 	void Render();
 
+	void Undo();
+	void Redo();
+
 	VolumeView* GetVolumeView();
 	SliceView* GetSliceView();
 
@@ -106,6 +110,9 @@ protected:
 	// The data
 	vtkSmartPointer<vtkImageData> data;
 	vtkSmartPointer<vtkImageData> labels;
+
+	// History
+	History* history;
 
 	// Regions
 	RegionCollection* regions;
@@ -155,7 +162,8 @@ protected:
 	void PointToIndex(double point[3], int ijk[3]);
 	void IndexToPoint(int ijk[3], double point[3]);
 
-	//void PointToStructured(double p[3], int s[3]);
+	void PushHistory();
+	void PopHistory();
 };
 
 #endif

@@ -55,6 +55,8 @@ public:
 
 	double GetXYDistance(int x, int y, int z);
 
+	void ClearLabels();
+
 protected:
 	unsigned short label;
 	double color[3];
@@ -74,7 +76,6 @@ protected:
 	vtkSmartPointer<vtkBillboardTextActor3D> text;
 
 	void UpdateExtent();
-	void ClearLabels();
 };
 
 #endif

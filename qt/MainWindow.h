@@ -50,6 +50,9 @@ public slots:
 	virtual void on_actionSave_Segmentation_Data_triggered();
 	virtual void on_actionSave_Segmentation_Data_As_triggered();
 
+	virtual void on_actionUndo_triggered();
+	virtual void on_actionRedo_triggered();
+
 	virtual void on_actionSegment_Volume_triggered();
 
 	virtual void on_actionExit_triggered();

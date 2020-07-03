@@ -28,7 +28,11 @@ Region* RegionCollection::Get(unsigned short label) {
 void RegionCollection::Remove(unsigned short label) {
 	if (!Has(label)) return;
 
-	delete regions[label];
+	Region* region = regions[label];
+
+	region->ClearLabels();
+	delete region;
+
 	regions.erase(label);
 }
 

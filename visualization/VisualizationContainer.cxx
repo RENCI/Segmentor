@@ -35,6 +35,7 @@
 #include <vtkInteractorStyleSlice.h>
 #include <vtkInteractorStyleVolume.h>
 
+#include "History.h"
 #include "InteractionEnums.h"
 #include "InteractionCallbacks.h"
 #include "LabelColors.h"
@@ -51,6 +52,7 @@
 VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volumeInteractor, vtkRenderWindowInteractor* sliceInteractor, MainWindow* mainWindow) {
 	data = nullptr;
 	labels = nullptr;
+	history = new History(10);
 	regions = new RegionCollection();
 	currentRegion = nullptr;	
 	hoverLabel = 0;
@@ -146,6 +148,7 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 VisualizationContainer::~VisualizationContainer() {
 	delete volumeView;
 	delete sliceView;
+	delete history;
 	delete regions;
 }
 
@@ -408,6 +411,9 @@ void VisualizationContainer::InitializeLabelData() {
 
 	UpdateLabels();
 
+	history->Clear();
+	PushHistory();
+
 	qtWindow->updateRegions(regions);
 }
 
@@ -486,6 +492,8 @@ void VisualizationContainer::SegmentVolume() {
 */
 
 	qtWindow->updateRegions(regions);
+
+	PushHistory();
 
 	Render();
 }
@@ -575,6 +583,8 @@ void VisualizationContainer::Paint(double point[3], bool overwrite) {
 	PointToIndex(point, ijk);
 
 	Paint(ijk[0], ijk[1], ijk[2], overwrite);
+
+	PushHistory();
 }
 
 void VisualizationContainer::Paint(int i, int j, int k, bool overwrite, bool useBrush) {
@@ -635,6 +645,8 @@ void VisualizationContainer::Erase(double point[3]) {
 	PointToIndex(point, ijk);
 
 	Erase(ijk[0], ijk[1], ijk[2]);
+
+	PushHistory();
 }
 
 void VisualizationContainer::Erase(int i, int j, int k, bool useBrush) {
@@ -858,6 +870,8 @@ void VisualizationContainer::RelabelCurrentRegion() {
 		labels->Modified();
 		Render();
 	}
+
+	PushHistory();
 }
 
 void VisualizationContainer::MergeWithCurrentRegion(double point[3]) {
@@ -908,12 +922,16 @@ void VisualizationContainer::MergeWithCurrentRegion(double point[3]) {
 
 	// Remove region
 	RemoveRegion(label);
+
+	PushHistory();
 }
 
 void VisualizationContainer::SplitCurrentRegion(int numRegions) {
 	if (!currentRegion) return;
 	
 	SplitRegion(currentRegion, numRegions);
+
+	PushHistory();
 
 	Render();
 }
@@ -1105,6 +1123,8 @@ void VisualizationContainer::GrowCurrentRegion(double point[3]) {
 
 	labels->Modified();
 
+	PushHistory();
+
 	Render();
 }
 
@@ -1140,6 +1160,8 @@ void VisualizationContainer::RemoveRegion(unsigned short label) {
 	qtWindow->updateRegions(regions);
 
 	Render();
+
+	PushHistory();
 }
 
 void VisualizationContainer::HighlightRegion(unsigned short label) {
@@ -1199,6 +1221,20 @@ void VisualizationContainer::SetBrushRadius(int radius) {
 void VisualizationContainer::Render() {
 	volumeView->Render();
 	sliceView->Render();
+}
+
+void VisualizationContainer::Undo() {
+	history->Undo(labels);
+	UpdateLabels();
+	qtWindow->updateRegions(regions);
+	Render();
+}
+
+void VisualizationContainer::Redo() {
+	history->Redo(labels);
+	UpdateLabels();
+	qtWindow->updateRegions(regions);
+	Render();
 }
 
 VolumeView* VisualizationContainer::GetVolumeView() {
@@ -1266,6 +1302,9 @@ bool VisualizationContainer::SetLabelData(vtkImageData* labelData) {
 
 	UpdateLabels();
 
+	history->Clear();
+	PushHistory();
+
 	return true;
 }
 
@@ -1308,13 +1347,15 @@ void VisualizationContainer::ExtractRegions() {
 	int maxLabel = labels->GetScalarRange()[1];
 
 	// Clear current regions
+
+	// XXX: THIS IS CLEARING ALL VOXELS IN THE LABEL DATA
 	regions->RemoveAll();
 
 	for (int label = 1; label <= maxLabel; label++) {
 		Region* region = new Region(label, labelColors->GetTableValue(label), labels);
 
 		if (region->GetNumVoxels() > 0) {
-			regions->Add(new Region(label, labelColors->GetTableValue(label), labels));
+			regions->Add(region);
 		}		
 		else {
 			delete region;
@@ -1396,26 +1437,6 @@ void VisualizationContainer::IndexToPoint(int ijk[3], double point[3]) {
 	data->GetPoint(id, point);
 }
 
-/*
-void VisualizationContainer::PointToStructured(double p[3], int s[3]) {
-	// Find closest non-zero cell
-	vtkSmartPointer<vtkThreshold> threshold = vtkSmartPointer<vtkThreshold>::New();
-	threshold->ThresholdByUpper(1);
-	threshold->SetInputData(labels);
-	threshold->Update();
-
-	vtkSmartPointer<vtkCellLocator> locator = vtkSmartPointer<vtkCellLocator>::New();
-	locator->SetDataSet(threshold->GetOutput());
-	locator->BuildLocator();
-
-	double p2[3];
-	double d2;
-	vtkIdType cellId;
-	int subId;
-	locator->FindClosestPoint(p, p2, cellId, subId, d2);
-
-	// Convert to structured coordinates
-	double pc[3];
-	labels->ComputeStructuredCoordinates(p2, s, pc);
+void VisualizationContainer::PushHistory() {
+	history->Push(labels);
 }
-*/

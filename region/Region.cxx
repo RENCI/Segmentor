@@ -63,8 +63,6 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 }
 	
 Region::~Region() {
-	ClearLabels();
-
 	delete surface;
 	delete outline;
 	delete voxelOutlines;
@@ -252,6 +250,7 @@ void Region::ComputeExtent() {
 		for (int j = dataExtent[2]; j <= dataExtent[3]; j++) {
 			for (int k = dataExtent[4]; k <= dataExtent[5]; k++) {
 				unsigned short* p = static_cast<unsigned short*>(data->GetScalarPointer(i, j, k));
+
 				if (*p == label) {
 					if (i < extent[0]) extent[0] = i;
 					if (i > extent[1]) extent[1] = i;

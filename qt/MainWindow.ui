@@ -561,7 +561,15 @@
     <addaction name="separator"/>
     <addaction name="actionBlank_3D_View"/>
    </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionUndo"/>
+    <addaction name="actionRedo"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
    <addaction name="menuAnalyze"/>
    <addaction name="menuView"/>
   </widget>
@@ -637,7 +645,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show Region Table</string>
+    <string>Region Table</string>
    </property>
   </action>
   <action name="actionShow_3D_View">
@@ -648,7 +656,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show 3D View</string>
+    <string>3D View</string>
    </property>
   </action>
   <action name="actionShow_2D_View">
@@ -659,7 +667,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show 2D View</string>
+    <string>2D View</string>
    </property>
   </action>
   <action name="actionBlank_3D_View">
@@ -668,6 +676,22 @@
    </property>
    <property name="text">
     <string>Blank 3D View</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="text">
+    <string>Undo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="text">
+    <string>Redo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Y</string>
    </property>
   </action>
  </widget>

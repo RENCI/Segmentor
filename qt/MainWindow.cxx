@@ -464,6 +464,14 @@ void MainWindow::on_actionSave_Segmentation_Data_As_triggered() {
 	}
 }
 
+void MainWindow::on_actionUndo_triggered() {
+	visualizationContainer->Undo();
+}
+
+void MainWindow::on_actionRedo_triggered() {
+	visualizationContainer->Redo();
+}
+
 void MainWindow::on_actionSegment_Volume_triggered() {
 	visualizationContainer->SegmentVolume();
 }
