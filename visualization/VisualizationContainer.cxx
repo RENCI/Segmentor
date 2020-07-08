@@ -715,10 +715,14 @@ void VisualizationContainer::MouseMove(double point[3]) {
 	// Show label for region
 	unsigned short label = GetLabel(ijk[0], ijk[1], ijk[2]);
 
+	// Hide current hover label if different
 	if (hoverLabel > 0 && hoverLabel != label) {
-		regions->Get(hoverLabel)->ShowText(false);
+		if (regions->Has(hoverLabel)) {
+			regions->Get(hoverLabel)->ShowText(false);
+		}
 	}
 	
+	// Show label
 	if (label > 0) {		
 		regions->Get(label)->ShowText(true);
 	}
@@ -911,10 +915,11 @@ void VisualizationContainer::MergeWithCurrentRegion(double point[3]) {
 	const int* currentExtent = currentRegion->GetExtent();
 
 	int newExtent[6];
-	for (int i = 0; i < 6; i++) {
-		newExtent[i] = i % 2 == 0 ? 
-			std::min(extent[i], currentExtent[i]) : 
-			std::max(extent[i], currentExtent[i]);
+	for (int i = 0; i < 3; i++) {
+		int i1 = 2 * i;
+		int i2 = i1 + 1;
+		newExtent[i1] = std::min(extent[i1], currentExtent[i1]);
+		newExtent[i2] = std::max(extent[i2], currentExtent[i2]);
 	}
 
 	currentRegion->SetExtent(newExtent);

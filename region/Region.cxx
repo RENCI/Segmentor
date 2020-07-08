@@ -10,6 +10,7 @@
 #include <vtkProperty.h>
 #include <vtkTable.h>
 #include <vtkBillboardTextActor3D.h>
+#include <vtkRenderer.h>
 #include <vtkTextProperty.h>
 #include <vtkThreshold.h>
 
@@ -97,6 +98,10 @@ Region::Region(const RegionInfo& info, vtkImageData* inputData) {
 	
 Region::~Region() {
 	ClearLabels();
+
+	while (text->GetNumberOfConsumers() > 0) {
+		vtkRenderer::SafeDownCast(text->GetConsumer(0))->RemoveActor(text);
+	}
 
 	delete surface;
 	delete outline;
@@ -338,6 +343,8 @@ void Region::SetDone(bool isDone) {
 }
 
 void Region::ShowText(bool show) {
+	if (!text) return;
+
 	if (show) {
 		double bounds[6];
 		voi->GetOutput()->GetBounds(bounds);
