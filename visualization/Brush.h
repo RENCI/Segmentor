@@ -5,8 +5,8 @@
 
 class vtkActor;
 class vtkExtractVOI;
+class vtkImageCast;
 class vtkImageData;
-class vtkImageDataCells;
 
 class Brush {
 public:
@@ -14,6 +14,8 @@ public:
 	~Brush();
 
 	void UpdateData(vtkImageData* data);
+
+	void UpdateBrush();
 
 	void SetRadius(int brushRadius);
 	int GetRadius();
@@ -25,10 +27,8 @@ protected:
 
 	vtkSmartPointer<vtkActor> actor;
 
+	vtkSmartPointer<vtkImageCast> cast;
 	vtkSmartPointer<vtkExtractVOI> voi;
-	vtkSmartPointer<vtkImageDataCells> cells;
-
-	void UpdateBrush();
 };
 
 #endif

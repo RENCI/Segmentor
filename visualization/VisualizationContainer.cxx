@@ -1219,6 +1219,7 @@ void VisualizationContainer::SetFocalPoint(double x, double y, double z) {
 void VisualizationContainer::SetBrushRadius(int radius) {
 	brushRadius = radius;
 	sliceView->SetBrushRadius(radius);
+	volumeView->SetBrushRadius(radius);
 
 	Render();
 }
@@ -1269,6 +1270,7 @@ void VisualizationContainer::SetImageData(vtkImageData* imageData) {
 	volumeView->Reset();
 
 	sliceView->SetImageData(data);	
+	volumeView->SetImageData(data);
 
 	// Update GUI
 	qtWindow->setWindowLevel(sliceView->GetWindow(), sliceView->GetLevel());

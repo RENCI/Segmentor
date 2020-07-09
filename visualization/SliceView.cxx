@@ -31,6 +31,7 @@
 
 #include "Brush.h"
 #include "InteractionEnums.h"
+#include "Probe.h"
 #include "Region.h"
 #include "RegionOutline.h"
 #include "RegionSurface.h"
@@ -103,7 +104,14 @@ SliceView::SliceView(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut)
 	renderer->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, cameraCallback);
 
 	// Probe
-	CreateProbe();
+	probe = new Probe();
+
+	renderer->AddActor(probe->GetActor());
+
+	// Brush
+	brush = new Brush();
+
+	regionOutlinesRenderer->AddActor(brush->GetActor());
 
 	// Slice location
 	sliceLocation = new SliceLocation(sliceLocationRenderer);
@@ -123,9 +131,7 @@ void SliceView::Reset() {
 
 	SetCurrentRegion(nullptr);
 
-	//slice->VisibilityOff();
-	//labelSlice->VisibilityOff();
-	probe->VisibilityOff();
+	probe->GetActor()->VisibilityOff();
 	brush->GetActor()->VisibilityOff();
 	sliceLocation->UpdateData(nullptr);
 	interactionModeLabel->VisibilityOff();
@@ -137,7 +143,10 @@ void SliceView::SetImageData(vtkImageData* imageData) {
 	UpdateSlice();
 
 	// Update probe
-	UpdateProbe(data);
+	probe->UpdateData(data);
+
+	// Update brush
+	brush->UpdateData(data);
 
 	// Update axes
 	sliceLocation->UpdateData(data);
@@ -187,22 +196,25 @@ void SliceView::SetCurrentRegion(Region* region) {
 
 	if (currentRegion) {
 		const double* color = region->GetColor();
-		probe->GetProperty()->SetColor(color[0], color[1], color[2]);
+		probe->GetActor()->GetProperty()->SetColor(color[0], color[1], color[2]);
+		brush->GetActor()->GetProperty()->SetColor(color[0], color[1], color[2]);
 	}
 	else {
-		probe->GetProperty()->SetColor(1, 1, 1);
+		probe->GetActor()->GetProperty()->SetColor(1, 1, 1);
+		brush->GetActor()->GetProperty()->SetColor(1, 1, 1);
 	}
 
 	FilterRegions();
 }
 
 void SliceView::UpdateVoxelSize() {
-	UpdateProbe(data);
+	probe->UpdateData(data);
+	brush->UpdateBrush();
 	sliceLocation->UpdateData(data);
 }
 
 void SliceView::SetShowProbe(bool show) {
-	probe->SetVisibility(show);
+	probe->GetActor()->SetVisibility(show);
 	brush->GetActor()->SetVisibility(show && brush->GetRadius() > 1);
 }
 
@@ -217,14 +229,15 @@ void SliceView::SetProbePosition(double x, double y, double z) {
 	double s = spacing[0];
 	
 	if (sqrt(vtkMath::Distance2BetweenPoints(p1, p2)) < s) {
-		probe->GetProperty()->SetRepresentationToWireframe();
+		probe->GetActor()->GetProperty()->SetRepresentationToWireframe();
+		brush->GetActor()->GetProperty()->SetRepresentationToWireframe();
 	}
 	else {
-		probe->GetProperty()->SetRepresentationToPoints();
-		probe->GetProperty()->SetPointSize(2);
+		probe->GetActor()->GetProperty()->SetRepresentationToPoints();
+		brush->GetActor()->GetProperty()->SetRepresentationToPoints();
 	}	
 
-	probe->SetPosition(p2);
+	probe->GetActor()->SetPosition(p2);
 	brush->GetActor()->SetPosition(p2);
 }
 
@@ -368,37 +381,6 @@ vtkSmartPointer<vtkRenderer> SliceView::GetRenderer() {
 
 vtkSmartPointer<vtkInteractorStyleSlice> SliceView::GetInteractorStyle() {
 	return style;
-}
-
-void SliceView::CreateProbe() {
-	vtkSmartPointer<vtkCubeSource> source = vtkSmartPointer<vtkCubeSource>::New();
-
-	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-	mapper->SetInputConnection(source->GetOutputPort());
-
-	probe = vtkSmartPointer<vtkActor>::New();
-	probe->SetMapper(mapper);	
-	probe->GetProperty()->SetRepresentationToWireframe();
-	probe->GetProperty()->LightingOff();
-	probe->VisibilityOff();
-	probe->PickableOff();
-
-	renderer->AddActor(probe);
-
-	// Brush
-	brush = new Brush();
-
-	regionOutlinesRenderer->AddActor(brush->GetActor());
-} 
-
-void SliceView::UpdateProbe(vtkImageData* data) {
-	probe->SetPosition(data->GetCenter());
-	probe->SetScale(data->GetSpacing());
-	probe->VisibilityOn();
-	
-	brush->UpdateData(data);
-	brush->GetActor()->SetPosition(data->GetCenter());
-	brush->GetActor()->SetVisibility(brush->GetRadius() > 1);
 }
 
 void SliceView::CreateInteractionModeLabel() {

@@ -40,11 +40,6 @@ int vtkImageDataCells::RequestData(
 		vtkErrorMacro(<< "Input data is nullptr.");
 		return 0;
 	}
-	if (input->GetDataDimension() != 3)
-	{
-		vtkErrorMacro(<< "Cannot convert non 3D image data!");
-		return 0;
-	}
 	if (output == nullptr)
 	{
 		vtkErrorMacro(<< "Output data is nullptr.");

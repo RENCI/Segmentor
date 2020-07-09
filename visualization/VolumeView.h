@@ -20,6 +20,8 @@ class vtkTextActor;
 
 class vtkInteractorStyleVolume;
 
+class Brush;
+class Probe;
 class Region;
 class RegionSurface;
 class RegionCollection;
@@ -29,6 +31,7 @@ public:
 	VolumeView(vtkRenderWindowInteractor* interactor);
 	~VolumeView();
 
+	void SetImageData(vtkImageData* data);
 	void SetRegions(vtkImageData* data, RegionCollection* newRegions);
 	void AddRegion(Region* region);
 
@@ -62,6 +65,8 @@ public:
 
 	void SetNeighborOpacity(double opacity);
 
+	void SetBrushRadius(int radius);
+
 	void Render();
 
 	vtkRenderer* GetRenderer();	
@@ -83,9 +88,10 @@ protected:
 	RegionCollection* regions;
 
 	// Probe
-	vtkSmartPointer<vtkActor> probe;
-	void CreateProbe();
-	void UpdateProbe(vtkImageData* data);
+	Probe* probe;
+
+	// Brush
+	Brush* brush;
 
 	// Plane	
 	vtkSmartPointer<vtkPlaneSource> planeSource;

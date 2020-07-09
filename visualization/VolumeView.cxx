@@ -22,7 +22,9 @@
 
 #include "vtkInteractorStyleVolume.h"
 
+#include "Brush.h"
 #include "InteractionEnums.h"
+#include "Probe.h"
 #include "Region.h"
 #include "RegionSurface.h"
 #include "RegionHighlight3D.h"
@@ -65,7 +67,14 @@ VolumeView::VolumeView(vtkRenderWindowInteractor* interactor) {
 	renderer->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, cameraCallback);
 
 	// Probe
-	CreateProbe();
+	probe = new Probe();
+
+	renderer->AddActor(probe->GetActor());
+
+	// Brush
+	brush = new Brush();
+
+	renderer->AddActor(brush->GetActor());
 
 	// Plane
 	CreatePlane();
@@ -98,10 +107,15 @@ void VolumeView::Reset() {
 	SetCurrentRegion(nullptr);
 	HighlightRegion(nullptr);
 
-	probe->VisibilityOff();
+	probe->GetActor()->VisibilityOff();
+	brush->GetActor()->VisibilityOff();
 	plane->VisibilityOff();
 	corners->VisibilityOff();
 	interactionModeLabel->VisibilityOff();
+}
+
+void VolumeView::SetImageData(vtkImageData* data) {
+	brush->UpdateData(data);
 }
 
 void VolumeView::Enable(bool enable) {
@@ -128,7 +142,8 @@ void VolumeView::Enable(bool enable) {
 }
 
 void VolumeView::UpdateVoxelSize(vtkImageData* data) {
-	UpdateProbe(data);
+	probe->UpdateData(data);
+	brush->UpdateBrush();
 	UpdatePlane(data);
 	UpdateAxes(data);
 }
@@ -146,8 +161,10 @@ void VolumeView::SetRegions(vtkImageData* data, RegionCollection* newRegions) {
 	}
 
 	// Update probe
-	UpdateProbe(data);
-	probe->VisibilityOn();
+	probe->UpdateData(data);
+
+	// Update brush
+	//brush->UpdateData(data);
 
 	// Update plane
 	UpdatePlane(data);
@@ -185,10 +202,12 @@ void VolumeView::SetCurrentRegion(Region* region) {
 
 	if (currentRegion) {
 		const double* color = region->GetColor();
-		probe->GetProperty()->SetColor(color[0], color[1], color[2]);
+		probe->GetActor()->GetProperty()->SetColor(color[0], color[1], color[2]);
+		brush->GetActor()->GetProperty()->SetColor(color[0], color[1], color[2]);
 	}
 	else {
-		probe->GetProperty()->SetColor(1, 1, 1);
+		probe->GetActor()->GetProperty()->SetColor(1, 1, 1);
+		brush->GetActor()->GetProperty()->SetColor(1, 1, 1);
 	}
 
 	FilterRegions();
@@ -212,11 +231,15 @@ void VolumeView::HighlightRegion(Region* region) {
 }
 
 void VolumeView::SetShowProbe(bool show) {
-	probe->SetVisibility(show && regions != nullptr);
+	show = show && regions != nullptr;
+
+	probe->GetActor()->SetVisibility(show);
+	brush->GetActor()->SetVisibility(show && brush->GetRadius() > 1);
 }
 
 void VolumeView::SetProbePosition(double x, double y, double z) {
-	probe->SetPosition(x, y, z);
+	probe->GetActor()->SetPosition(x, y, z);
+	brush->GetActor()->SetPosition(x, y, z);
 }
 
 void VolumeView::SetInteractionMode(enum InteractionMode mode) {
@@ -295,6 +318,11 @@ void VolumeView::SetNeighborOpacity(double opacity) {
 	FilterRegions();
 }
 
+void VolumeView::SetBrushRadius(int radius) {
+	brush->SetRadius(radius);
+	brush->GetActor()->SetVisibility(radius > 1);
+}
+
 void VolumeView::Render() {
 	renderer->GetRenderWindow()->Render();
 }
@@ -305,28 +333,6 @@ vtkRenderer* VolumeView::GetRenderer() {
 
 vtkInteractorStyleVolume* VolumeView::GetInteractorStyle() {
 	return style;
-}
-
-void VolumeView::CreateProbe() {
-	vtkSmartPointer<vtkCubeSource> source = vtkSmartPointer<vtkCubeSource>::New();
-
-	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-	mapper->SetInputConnection(source->GetOutputPort());
-
-	probe = vtkSmartPointer<vtkActor>::New();
-	probe->SetMapper(mapper);
-	probe->GetProperty()->SetRepresentationToWireframe();
-	probe->GetProperty()->LightingOff();
-	probe->GetProperty()->SetLineWidth(2);
-	probe->VisibilityOff();
-	probe->PickableOff();
-
-	renderer->AddActor(probe);
-}
-
-void VolumeView::UpdateProbe(vtkImageData* data) {
-	probe->SetPosition(data->GetCenter());
-	probe->SetScale(data->GetSpacing());
 }
 
 void VolumeView::CreateInteractionModeLabel() {

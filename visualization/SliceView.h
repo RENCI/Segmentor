@@ -18,11 +18,12 @@ class vtkTextActor;
 
 class vtkInteractorStyleSlice;
 
+class Brush;
+class Probe;
 class Region;
 class RegionOutline;
 class RegionCollection;
 class SliceLocation;
-class Brush;
 
 class SliceView {
 public:
@@ -102,15 +103,13 @@ protected:
 	vtkSmartPointer<vtkImageSlice> labelSlice;
 
 	// Probe
-	vtkSmartPointer<vtkActor> probe;
-	void CreateProbe();
-	void UpdateProbe(vtkImageData* data);
-
-	// Slice location
-	SliceLocation* sliceLocation;
+	Probe* probe;
 
 	// Brush
 	Brush* brush;
+
+	// Slice location
+	SliceLocation* sliceLocation;
 
 	// Interaction mode label
 	vtkSmartPointer<vtkTextActor> interactionModeLabel;

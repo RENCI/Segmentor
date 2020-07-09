@@ -4,6 +4,8 @@
 #include <vtkCutter.h>
 #include <vtkExtractVOI.h>
 #include <vtkGeometryFilter.h>
+#include <vtkImageCast.h>
+#include <vtkImageChangeInformation.h>
 #include <vtkImageData.h>
 #include <vtkPlane.h>
 #include <vtkPolyDataMapper.h>
@@ -16,13 +18,21 @@
 Brush::Brush() {
 	radius = 1;
 
-	voi = vtkSmartPointer<vtkExtractVOI>::New();
+	cast = vtkSmartPointer<vtkImageCast>::New();
+	cast->SetOutputScalarTypeToUnsignedShort();
 
-	cells = vtkSmartPointer<vtkImageDataCells>::New();
-	cells->SetInputConnection(voi->GetOutputPort());
+	voi = vtkSmartPointer<vtkExtractVOI>::New();
+	voi->SetInputConnection(cast->GetOutputPort());
+
+	vtkSmartPointer<vtkImageChangeInformation> info = vtkSmartPointer<vtkImageChangeInformation>::New();
+	info->CenterImageOn();
+	info->SetInputConnection(voi->GetOutputPort());
+
+	vtkSmartPointer<vtkImageDataCells> cells = vtkSmartPointer<vtkImageDataCells>::New();
+	cells->SetInputConnection(info->GetOutputPort());
 	
 	vtkSmartPointer<vtkThreshold> threshold = vtkSmartPointer<vtkThreshold>::New();
-	threshold->ThresholdBetween(1, 1);
+	threshold->ThresholdByUpper(1);
 	threshold->SetInputConnection(cells->GetOutputPort());
 
 	vtkSmartPointer<vtkGeometryFilter> geometry = vtkSmartPointer<vtkGeometryFilter>::New();
@@ -53,13 +63,13 @@ Brush::~Brush() {
 }
 
 void Brush::UpdateData(vtkImageData* data) {
-	voi->SetInputDataObject(data);
+	cast->SetInputDataObject(data);
 
 	UpdateBrush();
 }
 
-void Brush::SetRadius(int brushRadius) {
-	radius = brushRadius;
+void Brush::SetRadius(int BrushRadius) {
+	radius = BrushRadius;
 	
 	UpdateBrush();
 }
@@ -79,7 +89,7 @@ void Brush::UpdateBrush() {
 	int c = radius - 1;
 	int r2 = c * c;
 	
-	voi->SetVOI(0, w, 0, w, 0, 1);
+	voi->SetVOI(0, w, 0, w, 0, 0);
 	voi->Update();
 
 	vtkImageData* data = voi->GetOutput();
@@ -93,16 +103,8 @@ void Brush::UpdateBrush() {
 			unsigned short* p = static_cast<unsigned short*>(data->GetScalarPointer(x, y, 0));
 
 			*p = d2 <= r2 ? 1 : 0;
-
-			p = static_cast<unsigned short*>(data->GetScalarPointer(x, y, 1));
-
-			*p = 0;
 		}
 	}
-
-	double spacing[3];
-	data->GetSpacing(spacing);
-	data->SetOrigin(-c * spacing[0], -c * spacing[1], -spacing[2] / 2);
-
+	
 	data->Modified();
 }
