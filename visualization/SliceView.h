@@ -22,6 +22,7 @@ class Region;
 class RegionOutline;
 class RegionCollection;
 class SliceLocation;
+class Brush;
 
 class SliceView {
 public:
@@ -102,13 +103,14 @@ protected:
 
 	// Probe
 	vtkSmartPointer<vtkActor> probe;
-	vtkSmartPointer<vtkCylinderSource> brushCylinder;
-	vtkSmartPointer<vtkActor> brush;
 	void CreateProbe();
 	void UpdateProbe(vtkImageData* data);
 
 	// Slice location
 	SliceLocation* sliceLocation;
+
+	// Brush
+	Brush* brush;
 
 	// Interaction mode label
 	vtkSmartPointer<vtkTextActor> interactionModeLabel;
@@ -128,7 +130,6 @@ protected:
 
 	vtkSmartPointer<vtkImageData> GetSlice();
 
-	static void windowLevelChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 	static void cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 };
 
