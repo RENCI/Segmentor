@@ -934,7 +934,7 @@ void VisualizationContainer::MergeWithCurrentRegion(double point[3]) {
 void VisualizationContainer::SplitCurrentRegion(int numRegions) {
 	if (!currentRegion) return;
 	
-	SplitRegion(currentRegion, numRegions);
+	SplitRegion2(currentRegion, numRegions);
 
 	PushHistory();
 
@@ -1000,6 +1000,154 @@ void VisualizationContainer::SplitRegion(Region* region, int numRegions) {
 	qtWindow->updateRegions(regions);
 
 	labels->Modified();
+}
+
+void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
+	// Region label
+	unsigned short label = region->GetLabel();
+
+	// Extract data for region
+	const int* extent = region->GetExtent();
+
+	vtkSmartPointer<vtkExtractVOI> voi = vtkSmartPointer<vtkExtractVOI>::New();
+	voi->SetVOI(extent[0], extent[1], extent[2], extent[3], extent[4], extent[5]);
+	voi->SetInputDataObject(data);
+	voi->Update();
+
+	vtkImageData* regionData = voi->GetOutput();
+
+	// Data range
+	double range[2];
+	regionData->GetScalarRange(range);
+
+	// Stencil for current region
+	vtkSmartPointer<vtkImageToImageStencil> stencil = vtkSmartPointer<vtkImageToImageStencil>::New();
+	stencil->ThresholdBetween(label, label);
+	stencil->SetInputConnection(region->GetOutput());
+
+	// Threshold
+	vtkSmartPointer<vtkImageThreshold> threshold = vtkSmartPointer<vtkImageThreshold>::New();
+	threshold->SetInValue(255);
+	threshold->SetOutValue(0);
+	threshold->ReplaceInOn();
+	threshold->ReplaceOutOn();
+	threshold->SetOutputScalarTypeToUnsignedChar();
+	threshold->SetInputConnection(voi->GetOutputPort());
+
+	// Connectivity
+	vtkSmartPointer<vtkImageConnectivityFilter> connectivity = vtkSmartPointer<vtkImageConnectivityFilter>::New();
+	connectivity->SetLabelScalarTypeToUnsignedShort();
+	connectivity->SetLabelModeToSizeRank();
+	connectivity->GenerateRegionExtentsOn();
+	connectivity->SetScalarRange(255, 255);
+	connectivity->SetSizeRange(5, VTK_ID_MAX);
+	connectivity->SetStencilConnection(stencil->GetOutputPort());
+	connectivity->SetExtractionModeToAllRegions();
+	connectivity->SetInputConnection(threshold->GetOutputPort());
+	
+	// Threshold until we have the right number of regions
+	int n = 100;
+	double step = (range[1] - range[0]) / n;
+	
+	int closestCount = 0;
+	double closestThreshold = 0.0;
+	
+	for (double t = range[0]; t <= range[1]; t += step) {
+		threshold->ThresholdByUpper(t);
+		connectivity->Update();
+
+		int regionCount = connectivity->GetNumberOfExtractedRegions();
+
+		if (regionCount > closestCount) {
+			closestCount = regionCount;
+			closestThreshold = t;
+		}
+		
+		if (regionCount >= numRegions) break;
+	}
+
+	threshold->ThresholdByUpper(closestThreshold);
+	connectivity->Update();
+
+	int numComponents = connectivity->GetNumberOfExtractedRegions();
+	vtkIdTypeArray* componentLabels = connectivity->GetExtractedRegionLabels();
+	vtkIntArray* componentExtents = connectivity->GetExtractedRegionExtents();
+	vtkImageData* connectivityOutput = connectivity->GetOutput();
+
+	if (numComponents == 0) {
+		return;
+	}
+	else {
+		// Use current region for first component
+		unsigned short componentLabel = (unsigned short)componentLabels->GetTuple1(0);
+
+		for (int i = extent[0]; i <= extent[1]; i++) {
+			for (int j = extent[2]; j <= extent[3]; j++) {
+				for (int k = extent[4]; k <= extent[5]; k++) {
+					unsigned short* labelData = static_cast<unsigned short*>(labels->GetScalarPointer(i, j, k));
+					unsigned short* connectivityData = static_cast<unsigned short*>(connectivityOutput->GetScalarPointer(i, j, k));
+
+					if (*labelData == label) {
+						*labelData = *connectivityData == componentLabel ? label : 0;
+					}				
+				}
+			}
+		}
+
+		double* componentExtent = componentExtents->GetTuple(0);
+		int newExtent[6];
+		for (int j = 0; j < 6; j++) {
+			newExtent[j] = (int)componentExtent[j];
+		}
+		currentRegion->SetExtent(newExtent);
+
+		currentRegion->SetModified(true);
+
+		// Create new regions for other components
+		for (int i = 1; i < numComponents; i++) {
+			// Get the extent for this component
+			double* componentExtent = componentExtents->GetTuple(i);
+			int newExtent[6];
+			for (int j = 0; j < 6; j++) {
+				newExtent[j] = (int)componentExtent[j];
+			}
+
+			// Label from the connectivity filter
+			unsigned short componentLabel = (unsigned short)componentLabels->GetTuple1(i);
+
+			// Get label for new region
+			unsigned short newLabel = regions->GetNewLabel();
+
+			// Update label data
+			for (int i = newExtent[0]; i <= newExtent[1]; i++) {
+				for (int j = newExtent[2]; j <= newExtent[3]; j++) {
+					for (int k = newExtent[4]; k <= newExtent[5]; k++) {
+						unsigned short* labelData = static_cast<unsigned short*>(labels->GetScalarPointer(i, j, k));
+						unsigned short* connectivityData = static_cast<unsigned short*>(connectivityOutput->GetScalarPointer(i, j, k));
+
+						if (*connectivityData == componentLabel) *labelData = newLabel;
+					}
+				}
+			}
+
+			UpdateColors(newLabel);
+
+			// Create new region
+			Region* newRegion = new Region(newLabel, labelColors->GetTableValue(newLabel), labels);
+			regions->Add(newRegion);
+			volumeView->AddRegion(newRegion);
+			sliceView->AddRegion(newRegion);
+
+			newRegion->SetModified(true);
+		}
+
+		qtWindow->updateRegions(regions);
+
+		labels->Modified();
+		Render();
+	}
+
+	PushHistory();
 }
 
 void VisualizationContainer::GrowCurrentRegion(double point[3]) {
