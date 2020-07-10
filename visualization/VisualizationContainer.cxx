@@ -1047,6 +1047,7 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 	connectivity->SetInputConnection(threshold->GetOutputPort());
 
 	// Threshold until we have the right number of regions
+	// XXX: TRY ALL THRESHOLDS, KEEP ONE WITH LARGEST REGIONS FOR CORRECT NUMBER
 	double step = 1;
 
 	int closestCount = 0;
@@ -1138,30 +1139,27 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 
 				if (*static_cast<unsigned short*>(labels->GetScalarPointer(i, j, k)) == label &&
 					*static_cast<unsigned short*>(connectivityOutput->GetScalarPointer(i, j, k)) == 0) {
+					// Add voxel
 					SegmentorMath::Voxel v;
 					v.x = i;
 					v.y = j;
 					v.z = k;
-					v.label = 0;
+					v.label = -1;
 
 					voxels.push_back(v);
 				}
 			}
 		}
 	}
-
-	for (int i = 0; i < (int)regionVoxels.size(); i++) {
-		std::cout << regionVoxels[i].size() << std::endl;
-	}
 	
 	// Assign voxels
 	for (int i = 0; i < (int)voxels.size(); i++) {
 		SegmentorMath::Voxel v = voxels[i];
 
-		std::vector<int> closest(regionVoxels.size());
+		std::vector<int> closest(numComponents);
 
 		// Find closest voxel for each region
-		for (int j = 0; j < (int)regionVoxels.size(); j++) {
+		for (int j = 0; j < numComponents; j++) {
 			int distance = VTK_INT_MAX;
 
 			for (int k = 0; k < regionVoxels[j].size(); k++) {
@@ -1177,11 +1175,12 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 		// XXX: REPLACE WITH INTENSITY ALONG LINE
 		int distance = VTK_INT_MAX;
 
-		for (int j = 0; j < (int)closest.size(); j++) {
+		for (int j = 0; j < numComponents; j++) {
 			int d = SegmentorMath::Distance2(v, regionVoxels[j][closest[j]]);
 
 			if (d < distance) {
 				v.label = regionVoxels[j][closest[j]].label;
+				distance = d;
 			}
 		}
 
@@ -1229,9 +1228,7 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 
 		// Get label for new region
 		unsigned short newLabel = regions->GetNewLabel();
-
-		std::cout << extent[0] << ", " << extent[1] << ", " << extent[2] << ", " << extent[3] << ", " << extent[4] << ", " << extent[5] << std::endl;
-
+		
 		// Update label data
 		for (int i = extent[0]; i <= extent[1]; i++) {
 			for (int j = extent[2]; j <= extent[3]; j++) {
