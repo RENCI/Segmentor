@@ -388,6 +388,12 @@ const int* Region::GetExtent() {
 	return extent;
 }
 
+void Region::GetExtent(int outExtent[6]) {
+	for (int i = 0; i < 6; i++) {
+		outExtent[i] = extent[i];
+	}
+}
+
 double* Region::GetCenter() {
 	return voi->GetOutput()->GetCenter();
 }

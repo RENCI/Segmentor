@@ -112,3 +112,11 @@ SegmentorMath::OtsuValues SegmentorMath::OtsuThreshold(vtkImageData* image) {
 
 	return otsuValues;
 }
+
+int SegmentorMath::Distance2(Voxel v1, Voxel v2) {
+	int dx = v1.x - v2.x;
+	int dy = v1.y - v2.y;
+	int dz = v1.z - v2.z;
+
+	return dx * dx + dy * dy + dz * dz;
+}

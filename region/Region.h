@@ -52,6 +52,7 @@ public:
 	const double* GetColor();
 	int GetNumVoxels();
 	const int* GetExtent();
+	void GetExtent(int outExtent[6]);
 	double* GetCenter();
 	double GetLength();
 
