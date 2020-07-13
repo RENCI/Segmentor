@@ -14,6 +14,7 @@
 #include <vtkImageThreshold.h>
 #include <vtkIdTypeArray.h>
 #include <vtkImageCast.h>
+#include <vtkImageChangeInformation.h>
 #include <vtkImageToImageStencil.h>
 #include <vtkIntArray.h>
 #include <vtkKMeansStatistics.h>
@@ -156,31 +157,37 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenImageFile(cons
 	// Get the file extension
 	std::string extension = fileName.substr(fileName.find_last_of(".") + 1);
 
+	// For setting origin
+	vtkSmartPointer<vtkImageChangeInformation> info = vtkSmartPointer<vtkImageChangeInformation>::New();
+	info->SetOutputExtentStart(0, 0, 0);
+	info->SetOutputOrigin(0, 0, 0);
+
 	// Load the data
 	if (extension == "nii") {
 		vtkSmartPointer<vtkNIFTIImageReader> reader = vtkSmartPointer<vtkNIFTIImageReader>::New();
 		reader->SetFileName(fileName.c_str());
-		reader->Update();
 
-		SetImageData(reader->GetOutput());
+		info->SetInputConnection(reader->GetOutputPort());
 	}
 	else if (extension == "tif" || extension == "tiff") {
 		vtkSmartPointer<vtkTIFFReader> reader = vtkSmartPointer<vtkTIFFReader>::New();
 		reader->SetFileName(fileName.c_str());
-		reader->Update();
-
-		SetImageData(reader->GetOutput());
+		
+		info->SetInputConnection(reader->GetOutputPort());
 	}
 	else if (extension == "vti") {
 		vtkSmartPointer<vtkXMLImageDataReader> reader = vtkSmartPointer<vtkXMLImageDataReader>::New();
 		reader->SetFileName(fileName.c_str());
-		reader->Update();
-
-		SetImageData(reader->GetOutput());
+		
+		info->SetInputConnection(reader->GetOutputPort());
 	}
 	else {
 		return WrongFileType;
 	}
+
+	info->Update();
+
+	SetImageData(info->GetOutput());
 	
 	double x, y, z;
 	data->GetSpacing(x, y, z);
@@ -202,17 +209,25 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenImageStack(con
 		names->SetValue(i, fileNames[i].c_str());
 	}
 
+	// For setting origin
+	vtkSmartPointer<vtkImageChangeInformation> info = vtkSmartPointer<vtkImageChangeInformation>::New();
+	info->SetOutputExtentStart(0, 0, 0);
+	info->SetOutputOrigin(0, 0, 0);
+
 	// Load the data
 	if (extension == "tif" || extension == "tiff") {
 		vtkSmartPointer<vtkTIFFReader> reader = vtkSmartPointer<vtkTIFFReader>::New();
 		reader->SetFileNames(names);
-		reader->Update();
 
-		SetImageData(reader->GetOutput());
+		info->SetInputConnection(reader->GetOutputPort());
 	}
 	else {
 		return WrongFileType;
 	}
+
+	info->Update();
+
+	SetImageData(info->GetOutput());
 
 	double x, y, z;
 	data->GetSpacing(x, y, z);
@@ -228,33 +243,38 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationFi
 	// Get the file extension
 	std::string extension = fileName.substr(fileName.find_last_of(".") + 1);
 
-	// For casting images
-	vtkSmartPointer<vtkImageCast> cast = vtkSmartPointer<vtkImageCast>::New();
-	cast->SetOutputScalarTypeToUnsignedShort();
+	// For setting origin
+	vtkSmartPointer<vtkImageChangeInformation> info = vtkSmartPointer<vtkImageChangeInformation>::New();
+	info->SetOutputExtentStart(0, 0, 0);
+	info->SetOutputOrigin(0, 0, 0);
 
 	// Load the data
 	if (extension == "nii") {
 		vtkSmartPointer<vtkNIFTIImageReader> reader = vtkSmartPointer<vtkNIFTIImageReader>::New();
 		reader->SetFileName(fileName.c_str());
 
-		cast->SetInputConnection(reader->GetOutputPort());
+		info->SetInputConnection(reader->GetOutputPort());
 	}
 	else if (extension == "tif" || extension == "tiff") {
 		vtkSmartPointer<vtkTIFFReader> reader = vtkSmartPointer<vtkTIFFReader>::New();
 		reader->SetFileName(fileName.c_str());
 
-		cast->SetInputConnection(reader->GetOutputPort());
+		info->SetInputConnection(reader->GetOutputPort());
 	}
 	else if (extension == "vti") {
 		vtkSmartPointer<vtkXMLImageDataReader> reader = vtkSmartPointer<vtkXMLImageDataReader>::New();
 		reader->SetFileName(fileName.c_str());
 
-		cast->SetInputConnection(reader->GetOutputPort());
+		info->SetInputConnection(reader->GetOutputPort());
 	}
 	else {
 		return WrongFileType;
 	}
 
+	// For casting images
+	vtkSmartPointer<vtkImageCast> cast = vtkSmartPointer<vtkImageCast>::New();
+	cast->SetOutputScalarTypeToUnsignedShort();
+	cast->SetInputConnection(info->GetOutputPort());
 	cast->Update();
 
 	if (SetLabelData(cast->GetOutput())) {
@@ -285,21 +305,26 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationSt
 		names->SetValue(i, fileNames[i].c_str());
 	}
 
-	// For casting images
-	vtkSmartPointer<vtkImageCast> cast = vtkSmartPointer<vtkImageCast>::New();
-	cast->SetOutputScalarTypeToUnsignedShort();
+	// For setting origin
+	vtkSmartPointer<vtkImageChangeInformation> info = vtkSmartPointer<vtkImageChangeInformation>::New();
+	info->SetOutputExtentStart(0, 0, 0);
+	info->SetOutputOrigin(0, 0, 0);
 
 	// Load the data
 	if (extension == "tif" || extension == "tiff") {
 		vtkSmartPointer<vtkTIFFReader> reader = vtkSmartPointer<vtkTIFFReader>::New();
 		reader->SetFileNames(names);
 
-		cast->SetInputConnection(reader->GetOutputPort());
+		info->SetInputConnection(reader->GetOutputPort());
 	}
 	else {
 		return WrongFileType;
 	}
 
+	// For casting images
+	vtkSmartPointer<vtkImageCast> cast = vtkSmartPointer<vtkImageCast>::New();
+	cast->SetOutputScalarTypeToUnsignedShort();
+	cast->SetInputConnection(info->GetOutputPort());
 	cast->Update();
 
 	if (SetLabelData(cast->GetOutput())) {
@@ -1541,6 +1566,9 @@ bool VisualizationContainer::SetLabelData(vtkImageData* labelData) {
 	int* labelDims = labelData->GetDimensions();
 
 	for (int i = 0; i < 3; i++) {
+		std::cout << dataDims[i] << ", " << labelDims[i] << std::endl;
+
+
 		if (dataDims[i] != labelDims[i]) {
 			std::cout << dataDims[i] << " != " << labelDims[i] << std::endl;
 			return false;
@@ -1556,6 +1584,10 @@ bool VisualizationContainer::SetLabelData(vtkImageData* labelData) {
 	double epsilon = 1e-6;
 
 	for (int i = 0; i < 6; i++) {
+
+		std::cout << dataBounds[i] << ", " << labelBounds[i] << std::endl;
+
+
 		if (std::abs(dataBounds[i] - labelBounds[i]) > epsilon) {
 			std::cout << dataBounds[i] << " != " << labelBounds[i] << std::endl;
 			return false;
