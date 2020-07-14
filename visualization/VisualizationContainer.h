@@ -76,7 +76,7 @@ public:
 	void SetCurrentRegion(Region* region);
 
 	void RemoveRegion(unsigned short label);
-	void SetRegionDone(unsigned short label, bool done);
+	Region* SetRegionDone(unsigned short label, bool done);
 	void HighlightRegion(unsigned short label);
 	void SelectRegion(unsigned short label);
 

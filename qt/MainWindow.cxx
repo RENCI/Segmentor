@@ -608,7 +608,16 @@ void MainWindow::on_brushRadiusDown() {
 }
 
 void MainWindow::on_regionDone(int label, bool done) {
-	visualizationContainer->SetRegionDone((unsigned short)label, done);
+	Region* region = visualizationContainer->SetRegionDone((unsigned short)label, done);
+
+	if (done && !region->GetDone()) {
+		regionTable->update(region);
+
+		QMessageBox errorMessage;
+		errorMessage.setIcon(QMessageBox::Warning);
+		errorMessage.setText("Region is not contiguous. Please fix before marking as \"done\"");
+		errorMessage.exec();
+	}
 }
 
 void MainWindow::on_removeRegion(int label) {

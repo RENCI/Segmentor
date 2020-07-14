@@ -1413,10 +1413,22 @@ void VisualizationContainer::GrowCurrentRegion(double point[3]) {
 	Render();
 }
 
-void VisualizationContainer::SetRegionDone(unsigned short label, bool done) {
+Region* VisualizationContainer::SetRegionDone(unsigned short label, bool done) {
 	Region* region = regions->Get(label);
 
-	if (!region) return;
+	if (!region) return nullptr;
+
+	if (done) {
+		// Test to make sure the region is contiguous
+		vtkSmartPointer<vtkImageConnectivityFilter> connectivity = vtkSmartPointer<vtkImageConnectivityFilter>::New();
+		connectivity->SetScalarRange(label, label);
+		connectivity->SetInputDataObject(labels);
+		connectivity->Update();
+
+		if (connectivity->GetNumberOfExtractedRegions() > 1) {
+			return region;
+		}
+	}
 
 	region->SetDone(done);
 
@@ -1433,6 +1445,8 @@ void VisualizationContainer::SetRegionDone(unsigned short label, bool done) {
 	qtWindow->updateRegion(region, regions);
 
 	Render();
+
+	return region;
 }
 
 void VisualizationContainer::RemoveRegion(unsigned short label) {
