@@ -22,7 +22,9 @@ public:
 		unsigned short label;
 	};
 
-	static int Distance2(Voxel v1, Voxel v2);
+	static int Distance2(const Voxel& v1, const Voxel& v2);
+
+	double MinBetween(vtkImageData* data, const Voxel& v1, const Voxel& v2);
 
 private:
 	SegmentorMath();

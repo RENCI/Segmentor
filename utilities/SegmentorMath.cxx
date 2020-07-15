@@ -113,10 +113,74 @@ SegmentorMath::OtsuValues SegmentorMath::OtsuThreshold(vtkImageData* image) {
 	return otsuValues;
 }
 
-int SegmentorMath::Distance2(Voxel v1, Voxel v2) {
+int SegmentorMath::Distance2(const Voxel& v1, const Voxel& v2) {
 	int dx = v1.x - v2.x;
 	int dy = v1.y - v2.y;
 	int dz = v1.z - v2.z;
 
 	return dx * dx + dy * dy + dz * dz;
+}
+
+// Based on code from:
+// https://stackoverflow.com/questions/12367071/how-do-i-initialize-the-t-variables-in-a-fast-voxel-traversal-algorithm-for-ray
+//
+double SegmentorMath::MinBetween(vtkImageData* data, const Voxel& v1, const Voxel& v2) {
+	#define SIGN(x) (x > 0 ? 1 : (x < 0 ? -1 : 0))
+	#define FRAC0(x) (x - floorf(x))
+	#define FRAC1(x) (1 - x + floorf(x))
+
+	float tMaxX, tMaxY, tMaxZ, tDeltaX, tDeltaY, tDeltaZ;
+	Voxel voxel;
+
+	float x1 = v1.x;
+	float y1 = v1.x;
+	float z1 = v1.z;
+
+	float x2 = v2.x;
+	float y2 = v2.y;
+	float z2 = v2.z;   
+
+	int dx = SIGN(x2 - x1);
+	if (dx != 0) tDeltaX = fmin(dx / (x2 - x1), 10000000.0f); else tDeltaX = 10000000.0f;
+	if (dx > 0) tMaxX = tDeltaX * FRAC1(x1); else tMaxX = tDeltaX * FRAC0(x1);
+	voxel.x = (int)x1;
+
+	int dy = SIGN(y2 - y1);
+	if (dy != 0) tDeltaY = fmin(dy / (y2 - y1), 10000000.0f); else tDeltaY = 10000000.0f;
+	if (dy > 0) tMaxY = tDeltaY * FRAC1(y1); else tMaxY = tDeltaY * FRAC0(y1);
+	voxel.y = (int)y1;
+
+	int dz = SIGN(z2 - z1);
+	if (dz != 0) tDeltaZ = fmin(dz / (z2 - z1), 10000000.0f); else tDeltaZ = 10000000.0f;
+	if (dz > 0) tMaxZ = tDeltaZ * FRAC1(z1); else tMaxZ = tDeltaZ * FRAC0(z1);
+	voxel.z = (int)z1;
+
+	double min = VTK_DOUBLE_MAX;
+
+	while (true) {
+		if (tMaxX < tMaxY) {
+			if (tMaxX < tMaxZ) {
+				voxel.x += dx;
+				tMaxX += tDeltaX;
+			}
+			else {
+				voxel.z += dz;
+				tMaxZ += tDeltaZ;
+			}
+		}
+		else {
+			if (tMaxY < tMaxZ) {
+				voxel.y += dy;
+				tMaxY += tDeltaY;
+			}
+			else {
+				voxel.z += dz;
+				tMaxZ += tDeltaZ;
+			}
+		}
+		if (tMaxX > 1 && tMaxY > 1 && tMaxZ > 1) break;
+		// process voxel here
+	}
+
+	return min;
 }
