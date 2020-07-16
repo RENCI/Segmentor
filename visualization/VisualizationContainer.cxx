@@ -16,6 +16,7 @@
 #include <vtkImageCast.h>
 #include <vtkImageChangeInformation.h>
 #include <vtkImageToImageStencil.h>
+#include <vtkImageStencil.h>
 #include <vtkIntArray.h>
 #include <vtkKMeansStatistics.h>
 #include <vtkLookupTable.h>
@@ -1113,7 +1114,26 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 			// Label from the connectivity filter
 			unsigned short componentLabel = (unsigned short)componentLabels->GetTuple1(i);
 
+			// Dilate
+			int kernelSize = 3;
+
+			vtkSmartPointer<vtkImageDilateErode3D> dilate = vtkSmartPointer<vtkImageDilateErode3D>::New();
+			dilate->SetDilateValue(componentLabel);
+			dilate->SetErodeValue(0);
+			dilate->SetKernelSize(kernelSize, kernelSize, kernelSize);
+			dilate->SetInputDataObject(connectivityOutput);
+
+			// Stencil
+			vtkSmartPointer<vtkImageStencil> dilateStencil = vtkSmartPointer<vtkImageStencil>::New();
+			dilateStencil->SetStencilConnection(stencil->GetOutputPort());
+			dilateStencil->SetInputConnection(dilate->GetOutputPort());
+
+			vtkSmartPointer<vtkImageToImageStencil> finalStencil = vtkSmartPointer<vtkImageToImageStencil>::New();
+			finalStencil->ThresholdBetween(componentLabel, componentLabel);
+			finalStencil->SetInputConnection(dilateStencil->GetOutputPort());
+
 			// Threshold this region for seeding
+			/*
 			vtkSmartPointer<vtkImageThreshold> threshold = vtkSmartPointer<vtkImageThreshold>::New();
 			threshold->ThresholdBetween(componentLabel, componentLabel);
 			threshold->ReplaceInOn();
@@ -1122,12 +1142,13 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 			threshold->SetReplaceOut(0);
 			//threshold->SetInputConnection(connectivity->GetOutputPort());
 			threshold->SetInputDataObject(connectivityOutput);
+			*/
 
 			// Grow this region
 			vtkSmartPointer<vtkImageConnectivityFilter> regionGrow = vtkSmartPointer<vtkImageConnectivityFilter>::New();
-			regionGrow->SetExtractionModeToSeededRegions();
+			//regionGrow->SetExtractionModeToSeededRegions();
 			//regionGrow->SetSeedConnection(threshold->GetOutputPort());
-			//regionGrow->SetStencilConnection(stencil->GetOutputPort());
+			regionGrow->SetStencilConnection(finalStencil->GetOutputPort());
 			regionGrow->SetScalarRange(t, range[1]);
 			regionGrow->SetLabelScalarTypeToUnsignedShort();
 			regionGrow->SetLabelModeToConstantValue();
@@ -1163,9 +1184,7 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 						}
 					}
 
-					// XXX: WHY ALWAYS REACHABLE FOR ALL 3?
-
-					if (labels.size() > 0) {
+					if (labels.size() == 1) {
 						*currentLabel = labels[0];
 					}
 				}
@@ -1319,7 +1338,8 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 	for (int j = 0; j < 6; j++) {
 		newExtent[j] = (int)componentExtent[j];
 	}
-	currentRegion->SetExtent(newExtent);
+	// XXX: FIX THIS
+	//currentRegion->SetExtent(newExtent);
 
 	currentRegion->SetModified(true);
 
@@ -1426,9 +1446,9 @@ void VisualizationContainer::GrowCurrentRegion(double point[3]) {
 		}
 
 		// Extract z slice around region with space to dilate
-		vtkSmartPointer<vtkExtractVOI> extract = vtkSmartPointer<vtkExtractVOI>::New();
-		extract->SetVOI(extractExtent[0], extractExtent[1], extractExtent[2], extractExtent[3], extractExtent[4], extractExtent[5]);
-		extract->SetInputDataObject(labels);
+		vtkSmartPointer<vtkExtractVOI> voi = vtkSmartPointer<vtkExtractVOI>::New();
+		voi->SetVOI(extractExtent[0], extractExtent[1], extractExtent[2], extractExtent[3], extractExtent[4], extractExtent[5]);
+		voi->SetInputDataObject(labels);
 
 		// Dilate
 		int kernelSize = distance * 2 + 1;
@@ -1439,7 +1459,7 @@ void VisualizationContainer::GrowCurrentRegion(double point[3]) {
 		dilate->SetDilateValue(label);
 		dilate->SetErodeValue(0);
 		dilate->SetKernelSize(kernelSize, kernelSize, 1);
-		dilate->SetInputConnection(extract->GetOutputPort());
+		dilate->SetInputConnection(voi->GetOutputPort());
 
 		// Stencil
 		stencil = vtkSmartPointer<vtkImageToImageStencil>::New();
