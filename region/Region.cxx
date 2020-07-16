@@ -432,8 +432,12 @@ void Region::SetInfo(const RegionInfo& info) {
 		extent[i] = info.extent[i];
 	}
 
+	UpdateExtent();
+
 	modified = info.modified;
 	done = info.done;
+
+
 }
 
 void Region::ClearLabels() {
