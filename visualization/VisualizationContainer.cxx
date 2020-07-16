@@ -1059,7 +1059,7 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 	threshold->SetInputConnection(voi->GetOutputPort());
 
 	// Connectivity
-	int minSize = 5;
+	int minSize = 3;
 
 	vtkSmartPointer<vtkImageConnectivityFilter> connectivity = vtkSmartPointer<vtkImageConnectivityFilter>::New();
 	connectivity->SetLabelScalarTypeToUnsignedShort();
@@ -1072,7 +1072,6 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 	connectivity->SetInputConnection(threshold->GetOutputPort());
 
 	// Threshold until we have the right number of regions
-	// XXX: TRY ALL THRESHOLDS, KEEP ONE WITH LARGEST REGIONS FOR CORRECT NUMBER?
 	double step = 1;
 
 	int closestCount = 0;
@@ -1091,6 +1090,57 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 
 		if (numComponents >= numRegions) break;
 	}
+
+/*
+	// XXX: TRY ALL THRESHOLDS, KEEP ONE WITH LARGEST REGIONS FOR CORRECT NUMBER?
+	double step = 1;
+
+	int closestCount = 0;
+	double closestThreshold = 0.0;
+	int maxMinSize = VTK_INT_MIN;
+
+	for (double t = range[0]; t <= range[1]; t += step) {
+		threshold->ThresholdByUpper(t);
+		connectivity->Update();
+
+		int numComponents = connectivity->GetNumberOfExtractedRegions();
+
+		if (numComponents > closestCount && numComponents <= numRegions) {
+			// Use this threshold
+			vtkIdTypeArray* sizes = connectivity->GetExtractedRegionSizes();
+
+			vtkIdType minSize = VTK_INT_MAX;
+			for (vtkIdType i = 0; i < sizes->GetSize(); i++) {
+				vtkIdType size = sizes->GetValue(i);
+
+				if (size < minSize) minSize = size;
+			}
+
+			maxMinSize = minSize;
+
+			closestCount = numComponents;
+			closestThreshold = t;
+		}
+		else if (numComponents == closestCount) {
+			// Check min size
+			vtkIdTypeArray* sizes = connectivity->GetExtractedRegionSizes();
+
+			vtkIdType minSize = VTK_INT_MAX;
+			for (vtkIdType i = 0; i < sizes->GetSize(); i++) {
+				vtkIdType size = sizes->GetValue(i);
+
+				if (size < minSize) minSize = size;
+			}
+
+			if (minSize > maxMinSize) {
+				maxMinSize = minSize;
+
+				closestCount = numComponents;
+				closestThreshold = t;
+			}
+		}
+	}
+*/
 
 	threshold->ThresholdByUpper(closestThreshold);
 	connectivity->Update();
