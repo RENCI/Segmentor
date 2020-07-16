@@ -155,7 +155,7 @@ double SegmentorMath::MinBetween(vtkImageData* data, const Voxel& v1, const Voxe
 	if (dz > 0) tMaxZ = tDeltaZ * FRAC1(z1); else tMaxZ = tDeltaZ * FRAC0(z1);
 	voxel.z = (int)z1;
 
-	double min = VTK_DOUBLE_MAX;
+	double minValue = VTK_DOUBLE_MAX;
 
 	while (true) {
 		if (tMaxX < tMaxY) {
@@ -179,8 +179,11 @@ double SegmentorMath::MinBetween(vtkImageData* data, const Voxel& v1, const Voxe
 			}
 		}
 		if (tMaxX > 1 && tMaxY > 1 && tMaxZ > 1) break;
-		// process voxel here
+		
+		double value = data->GetScalarComponentAsDouble(voxel.x, voxel.y, voxel.z, 0);
+
+		if (value < minValue) minValue = value;
 	}
 
-	return min;
+	return minValue;
 }

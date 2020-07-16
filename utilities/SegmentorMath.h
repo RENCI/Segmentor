@@ -24,7 +24,7 @@ public:
 
 	static int Distance2(const Voxel& v1, const Voxel& v2);
 
-	double MinBetween(vtkImageData* data, const Voxel& v1, const Voxel& v2);
+	static double MinBetween(vtkImageData* data, const Voxel& v1, const Voxel& v2);
 
 private:
 	SegmentorMath();
