@@ -1072,6 +1072,7 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 	connectivity->SetInputConnection(threshold->GetOutputPort());
 
 	// Threshold until we have the right number of regions
+/*
 	double step = 1;
 
 	int closestCount = 0;
@@ -1090,8 +1091,7 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 
 		if (numComponents >= numRegions) break;
 	}
-
-/*
+*/
 	// XXX: TRY ALL THRESHOLDS, KEEP ONE WITH LARGEST REGIONS FOR CORRECT NUMBER?
 	double step = 1;
 
@@ -1140,7 +1140,6 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 			}
 		}
 	}
-*/
 
 	threshold->ThresholdByUpper(closestThreshold);
 	connectivity->Update();
