@@ -1083,7 +1083,7 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 
 		int numComponents = connectivity->GetNumberOfExtractedRegions();
 
-		if (numComponents > closestCount) {
+		if (numComponents > closestCount && numComponents <= numRegions) {
 			closestCount = numComponents;
 			closestThreshold = t;
 		}
