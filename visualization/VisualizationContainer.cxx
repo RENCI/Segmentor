@@ -1041,11 +1041,9 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 	voi->SetInputDataObject(data);
 	voi->Update();
 
-	vtkImageData* regionData = voi->GetOutput();
-
 	// Data range
 	double range[2];
-	regionData->GetScalarRange(range);
+	voi->GetOutput()->GetScalarRange(range);
 
 	// Stencil for current region
 	vtkSmartPointer<vtkImageToImageStencil> stencil = vtkSmartPointer<vtkImageToImageStencil>::New();
@@ -1061,18 +1059,20 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 	threshold->SetInputConnection(voi->GetOutputPort());
 
 	// Connectivity
+	int minSize = 5;
+
 	vtkSmartPointer<vtkImageConnectivityFilter> connectivity = vtkSmartPointer<vtkImageConnectivityFilter>::New();
 	connectivity->SetLabelScalarTypeToUnsignedShort();
 	connectivity->SetLabelModeToSizeRank();
-	connectivity->GenerateRegionExtentsOn();
+	connectivity->GenerateRegionExtentsOff();
 	connectivity->SetScalarRange(1, 1);
-	connectivity->SetSizeRange(5, VTK_ID_MAX);
+	connectivity->SetSizeRange(minSize, VTK_ID_MAX);
 	connectivity->SetStencilConnection(stencil->GetOutputPort());
 	connectivity->SetExtractionModeToAllRegions();
 	connectivity->SetInputConnection(threshold->GetOutputPort());
 
 	// Threshold until we have the right number of regions
-	// XXX: TRY ALL THRESHOLDS, KEEP ONE WITH LARGEST REGIONS FOR CORRECT NUMBER
+	// XXX: TRY ALL THRESHOLDS, KEEP ONE WITH LARGEST REGIONS FOR CORRECT NUMBER?
 	double step = 1;
 
 	int closestCount = 0;
@@ -1102,14 +1102,12 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 	}
 
 	vtkIdTypeArray* componentLabels = connectivity->GetExtractedRegionLabels();
-	vtkIntArray* componentExtents = connectivity->GetExtractedRegionExtents();
 	vtkImageData* connectivityOutput = connectivity->GetOutput();	
 
 	for (double t = closestThreshold - 1; t >= range[0]; t -= step) {
-		// Assign voxels by growing each region
+		// Assign voxels by growing each component
 		std::vector<vtkSmartPointer<vtkImageConnectivityFilter>> grow;
 
-		// Grow each component
 		for (int i = 0; i < numComponents; i++) {
 			// Label from the connectivity filter
 			unsigned short componentLabel = (unsigned short)componentLabels->GetTuple1(i);
@@ -1123,7 +1121,7 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 			dilate->SetKernelSize(kernelSize, kernelSize, kernelSize);
 			dilate->SetInputDataObject(connectivityOutput);
 
-			// Stencil
+			// Stencil based on dilated component and original region
 			vtkSmartPointer<vtkImageStencil> dilateStencil = vtkSmartPointer<vtkImageStencil>::New();
 			dilateStencil->SetStencilConnection(stencil->GetOutputPort());
 			dilateStencil->SetInputConnection(dilate->GetOutputPort());
@@ -1132,22 +1130,8 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 			finalStencil->ThresholdBetween(componentLabel, componentLabel);
 			finalStencil->SetInputConnection(dilateStencil->GetOutputPort());
 
-			// Threshold this region for seeding
-			/*
-			vtkSmartPointer<vtkImageThreshold> threshold = vtkSmartPointer<vtkImageThreshold>::New();
-			threshold->ThresholdBetween(componentLabel, componentLabel);
-			threshold->ReplaceInOn();
-			threshold->ReplaceOutOn();
-			threshold->SetReplaceIn(1);
-			threshold->SetReplaceOut(0);
-			//threshold->SetInputConnection(connectivity->GetOutputPort());
-			threshold->SetInputDataObject(connectivityOutput);
-			*/
-
 			// Grow this region
 			vtkSmartPointer<vtkImageConnectivityFilter> regionGrow = vtkSmartPointer<vtkImageConnectivityFilter>::New();
-			//regionGrow->SetExtractionModeToSeededRegions();
-			//regionGrow->SetSeedConnection(threshold->GetOutputPort());
 			regionGrow->SetStencilConnection(finalStencil->GetOutputPort());
 			regionGrow->SetScalarRange(t, range[1]);
 			regionGrow->SetLabelScalarTypeToUnsignedShort();
@@ -1161,7 +1145,7 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 		}
 
 		// Assign voxels
-		// XXX: Could potentially speed things up here by looking at component extents
+		// XXX: Could potentially speed things up here by looking at component extents?
 		for (int i = extent[0]; i <= extent[1]; i++) {
 			for (int j = extent[2]; j <= extent[3]; j++) {
 				for (int k = extent[4]; k <= extent[5]; k++) {
@@ -1194,129 +1178,6 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 		connectivityOutput->Modified();
 	}
 
-
-/*
-	// Set up to assign voxels to regions
-	std::vector<std::vector<SegmentorMath::Voxel>> regionVoxels;
-	std::vector<SegmentorMath::Voxel> voxels;
-
-	// Get border voxels for each region
-	for (int i = 0; i < numComponents; i++) {
-		std::vector<SegmentorMath::Voxel> voxels;
-
-		// Get the extent for this component
-		double* componentExtent = componentExtents->GetTuple(i);
-		int newExtent[6];
-		for (int j = 0; j < 6; j++) {
-			newExtent[j] = (int)componentExtent[j];
-		}
-
-		// Label from the connectivity filter
-		unsigned short componentLabel = (unsigned short)componentLabels->GetTuple1(i);
-
-		for (int i = newExtent[0]; i <= newExtent[1]; i++) {
-			for (int j = newExtent[2]; j <= newExtent[3]; j++) {
-				for (int k = newExtent[4]; k <= newExtent[5]; k++) {
-					// Check in current region
-					if (*static_cast<unsigned short*>(connectivityOutput->GetScalarPointer(i, j, k)) != componentLabel) continue;
-
-					// Check if on border
-					if (i == newExtent[0] || i == newExtent[1] ||
-						*static_cast<unsigned short*>(connectivityOutput->GetScalarPointer(i - 1, j, k)) != componentLabel ||
-						*static_cast<unsigned short*>(connectivityOutput->GetScalarPointer(i + 1, j, k)) != componentLabel ||
-						j == newExtent[2] || j == newExtent[3] ||
-						*static_cast<unsigned short*>(connectivityOutput->GetScalarPointer(i, j - 1, k)) != componentLabel ||
-						*static_cast<unsigned short*>(connectivityOutput->GetScalarPointer(i, j + 1, k)) != componentLabel ||
-						k == newExtent[4] || k == newExtent[5] ||
-						*static_cast<unsigned short*>(connectivityOutput->GetScalarPointer(i, j, k - 1)) != componentLabel ||
-						*static_cast<unsigned short*>(connectivityOutput->GetScalarPointer(i, j, k + 1)) != componentLabel) {
-						// Add voxel
-						SegmentorMath::Voxel v;
-						v.x = i;
-						v.y = j;
-						v.z = k;
-						v.label = componentLabel;
-
-						voxels.push_back(v);
-					}
-				}
-			}
-		}
-
-		regionVoxels.push_back(voxels);
-	}
-
-	// Get free voxels
-	for (int i = extent[0]; i <= extent[1]; i++) {
-		for (int j = extent[2]; j <= extent[3]; j++) {
-			for (int k = extent[4]; k <= extent[5]; k++) {
-				unsigned short* labelData = static_cast<unsigned short*>(labels->GetScalarPointer(i, j, k));
-				unsigned short* connectivityData = static_cast<unsigned short*>(connectivityOutput->GetScalarPointer(i, j, k));
-
-				if (*static_cast<unsigned short*>(labels->GetScalarPointer(i, j, k)) == label &&
-					*static_cast<unsigned short*>(connectivityOutput->GetScalarPointer(i, j, k)) == 0) {
-					// Add voxel
-					SegmentorMath::Voxel v;
-					v.x = i;
-					v.y = j;
-					v.z = k;
-					v.label = -1;
-
-					voxels.push_back(v);
-				}
-			}
-		}
-	}
-	
-	// Assign voxels
-	for (int i = 0; i < (int)voxels.size(); i++) {
-		SegmentorMath::Voxel v = voxels[i];
-
-		std::vector<int> closest(numComponents);
-
-		// Find closest voxel for each region
-		for (int j = 0; j < numComponents; j++) {
-			int distance = VTK_INT_MAX;
-
-			for (int k = 0; k < regionVoxels[j].size(); k++) {
-				int d = SegmentorMath::Distance2(v, regionVoxels[j][k]);
-
-				if (d < distance) {
-					closest[j] = k;
-					distance = d;
-				}
-			}
-		}
-
-		double maxValue = -1;
-
-		for (int j = 0; j < numComponents; j++) {
-			double value = SegmentorMath::MinBetween(data, v, regionVoxels[j][closest[j]]);
-
-			if (value > maxValue) {
-				v.label = regionVoxels[j][closest[j]].label;
-				maxValue = value;
-			}
-		}
-
-		*static_cast<unsigned short*>(connectivityOutput->GetScalarPointer(v.x, v.y, v.z)) = v.label;
-/*		
-		// XXX: REPLACE WITH INTENSITY ALONG LINE
-		int distance = VTK_INT_MAX;
-
-		for (int j = 0; j < numComponents; j++) {
-			int d = SegmentorMath::Distance2(v, regionVoxels[j][closest[j]]);
-
-			if (d < distance) {
-				v.label = regionVoxels[j][closest[j]].label;
-				distance = d;
-			}
-		}
-
-		*static_cast<unsigned short*>(connectivityOutput->GetScalarPointer(v.x, v.y, v.z)) = v.label;
-*/
-//	}
-
 	// Use current region for first component
 	unsigned short componentLabel = (unsigned short)componentLabels->GetTuple1(0);
 
@@ -1333,27 +1194,11 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 		}
 	}
 
-	double* componentExtent = componentExtents->GetTuple(0);
-	int newExtent[6];
-	for (int j = 0; j < 6; j++) {
-		newExtent[j] = (int)componentExtent[j];
-	}
-	// XXX: FIX THIS
-	//currentRegion->SetExtent(newExtent);
-
+	currentRegion->ComputeExtent();
 	currentRegion->SetModified(true);
 
 	// Create new regions for other components
 	for (int i = 1; i < numComponents; i++) {
-		// Get the extent for this component
-		/*
-		double* componentExtent = componentExtents->GetTuple(i);
-		int newExtent[6];
-		for (int j = 0; j < 6; j++) {
-			newExtent[j] = (int)componentExtent[j];
-		}
-		*/
-
 		// Label from the connectivity filter
 		unsigned short componentLabel = (unsigned short)componentLabels->GetTuple1(i);
 
