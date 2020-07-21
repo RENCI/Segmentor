@@ -1092,7 +1092,7 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 		if (numComponents >= numRegions) break;
 	}
 */
-	// XXX: TRY ALL THRESHOLDS, KEEP ONE WITH LARGEST REGIONS FOR CORRECT NUMBER?
+	// XXX: TRY ALL THRESHOLDS, KEEP ONE WITH LARGEST REGIONS FOR CORRECT NUMBER
 	double step = 1;
 
 	int closestCount = 0;
@@ -1523,6 +1523,10 @@ void VisualizationContainer::Render() {
 
 void VisualizationContainer::Undo() {
 	history->Undo(labels, regions);
+
+	// Make sure spacing is correct
+	labels->SetSpacing(data->GetSpacing());
+
 	volumeView->SetRegions(labels, regions);
 	sliceView->SetSegmentationData(labels, regions);
 	qtWindow->updateRegions(regions);
@@ -1531,6 +1535,10 @@ void VisualizationContainer::Undo() {
 
 void VisualizationContainer::Redo() {
 	history->Redo(labels, regions);
+
+	// Make sure spacing is correct
+	labels->SetSpacing(data->GetSpacing());
+
 	volumeView->SetRegions(labels, regions);
 	sliceView->SetSegmentationData(labels, regions);
 	qtWindow->updateRegions(regions);
