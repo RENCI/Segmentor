@@ -1,8 +1,10 @@
 #include "InteractionCallbacks.h"
 
 #include "vtkCamera.h"
+#include "vtkCell.h"
 #include "vtkCellPicker.h"
 #include "vtkInteractorStyle.h"
+#include "vtkPointData.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
 #include "vtkRenderer.h"
@@ -157,7 +159,7 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 	}
 }
 
-void InteractionCallbacks::SelectLabel(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+void InteractionCallbacks::SliceSelectLabel(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
 	vtkRenderWindowInteractor* rwi = static_cast<vtkInteractorStyle*>(caller)->GetInteractor();
 	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
 
@@ -169,6 +171,21 @@ void InteractionCallbacks::SelectLabel(vtkObject* caller, unsigned long eventId,
 		double p[3];
 		PickPosition(p);
 		vis->PickLabel(p);
+		vis->Render();
+	}
+}
+
+void InteractionCallbacks::VolumeSelectLabel(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+	vtkRenderWindowInteractor* rwi = static_cast<vtkInteractorStyle*>(caller)->GetInteractor();
+	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
+
+	// Pick at the mouse location provided by the interactor	
+	int pick = Pick(rwi);
+
+	if (pick) {
+		// Get the label for the pick event
+		unsigned short label = PickLabel();
+		vis->SelectRegion(label);
 		vis->Render();
 	}
 }
@@ -251,6 +268,17 @@ int InteractionCallbacks::Pick(vtkRenderWindowInteractor* rwi) {
 
 void InteractionCallbacks::PickPosition(double p[3]) {
 	picker->GetPickPosition(p);
+}
+
+unsigned short InteractionCallbacks::PickLabel() {
+	vtkDataSet* data = picker->GetDataSet();
+
+	if (!data) return 0;
+
+	vtkCell* cell = data->GetCell(picker->GetCellId());
+	vtkVariant value = data->GetPointData()->GetAbstractArray(0)->GetVariantValue(cell->GetPointId(0));
+
+	return value.ToUnsignedShort();
 }
 
 void InteractionCallbacks::WindowLevel(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {

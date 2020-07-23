@@ -106,11 +106,15 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	sliceInteractor->AddObserver(vtkCommand::CharEvent, onCharCallback);
 
 	// Label select
-	vtkSmartPointer<vtkCallbackCommand> selectLabelCallback = vtkSmartPointer<vtkCallbackCommand>::New();
-	selectLabelCallback->SetCallback(InteractionCallbacks::SelectLabel);
-	selectLabelCallback->SetClientData(this);
-	volumeView->GetInteractorStyle()->AddObserver(vtkInteractorStyleVolume::SelectLabelEvent, selectLabelCallback);
-	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::SelectLabelEvent, selectLabelCallback);
+	vtkSmartPointer<vtkCallbackCommand> volumeSelectLabelCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+	volumeSelectLabelCallback->SetCallback(InteractionCallbacks::VolumeSelectLabel);
+	volumeSelectLabelCallback->SetClientData(this);
+	volumeView->GetInteractorStyle()->AddObserver(vtkInteractorStyleVolume::SelectLabelEvent, volumeSelectLabelCallback);
+
+	vtkSmartPointer<vtkCallbackCommand> sliceSelectLabelCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+	sliceSelectLabelCallback->SetCallback(InteractionCallbacks::SliceSelectLabel);
+	sliceSelectLabelCallback->SetClientData(this);
+	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::SelectLabelEvent, sliceSelectLabelCallback);
 
 	// Paint
 	vtkSmartPointer<vtkCallbackCommand> paintCallback = vtkSmartPointer<vtkCallbackCommand>::New();
@@ -1470,12 +1474,12 @@ void VisualizationContainer::HighlightRegion(unsigned short label) {
 }
 
 
-void VisualizationContainer::SelectRegion(unsigned short label) {
+void VisualizationContainer::SelectRegion(unsigned short label, bool flyTo) {
 	Region* region = regions->Get(label);
 
 	SetCurrentRegion(region);
 
-	volumeView->GetInteractorStyle()->FlyTo(region->GetCenter());
+	if (flyTo) volumeView->GetInteractorStyle()->FlyTo(region->GetCenter());
 }
 
 void VisualizationContainer::SetWindowLevel(double window, double level) {
@@ -1522,6 +1526,8 @@ void VisualizationContainer::Render() {
 }
 
 void VisualizationContainer::Undo() {
+	if (!labels) return;
+
 	history->Undo(labels, regions);
 
 	// Make sure spacing is correct
@@ -1534,6 +1540,8 @@ void VisualizationContainer::Undo() {
 }
 
 void VisualizationContainer::Redo() {
+	if (!labels) return;
+
 	history->Redo(labels, regions);
 
 	// Make sure spacing is correct

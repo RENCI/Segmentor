@@ -17,7 +17,8 @@ public:
 	
 	static void OnChar(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 
-	static void SelectLabel(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
+	static void SliceSelectLabel(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
+	static void VolumeSelectLabel(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 
 	static void Paint(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 	static void Overwrite(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
@@ -39,6 +40,7 @@ private:
 	
 	static int Pick(vtkRenderWindowInteractor* rwi);
 	static void PickPosition(double p[3]);
+	static unsigned short PickLabel();
 
 	InteractionCallbacks();
 	~InteractionCallbacks();
