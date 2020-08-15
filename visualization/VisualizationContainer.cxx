@@ -595,8 +595,10 @@ FilterMode VisualizationContainer::GetFilterMode() {
 void VisualizationContainer::SetFilterMode(FilterMode mode) {
 	filterMode = mode;
 
-	volumeView->SetFilterMode(filterMode);
-	sliceView->SetFilterMode(filterMode);
+	//volumeView->SetFilterMode(filterMode);
+	//sliceView->SetFilterMode(filterMode);
+
+	UpdateVisibility();
 }
 
 void VisualizationContainer::PickLabel(double point[3]) {
@@ -1473,13 +1475,32 @@ void VisualizationContainer::HighlightRegion(unsigned short label) {
 	Render();
 }
 
-
 void VisualizationContainer::SelectRegion(unsigned short label, bool flyTo) {
 	Region* region = regions->Get(label);
 
 	SetCurrentRegion(region);
 
 	if (flyTo) volumeView->GetInteractorStyle()->FlyTo(region->GetCenter());
+}
+
+void VisualizationContainer::ToggleRegionVisibility(double point[3]) {
+	int ijk[3];
+	PointToIndex(point, ijk);
+	int x = ijk[0];
+	int y = ijk[1];
+	int z = ijk[2];
+	
+	ToggleRegionVisibility(GetLabel(x, y, z));
+}
+
+void VisualizationContainer::ToggleRegionVisibility(unsigned short label) {
+	Region* region = regions->Get(label);
+
+	if (!region) return;
+
+	region->SetVisible(!region->GetVisible());
+
+	UpdateVisibility();
 }
 
 void VisualizationContainer::SetWindowLevel(double window, double level) {
@@ -1763,4 +1784,40 @@ void VisualizationContainer::IndexToPoint(int ijk[3], double point[3]) {
 
 void VisualizationContainer::PushHistory() {
 	history->Push(labels, regions);
+}
+
+void VisualizationContainer::UpdateVisibility() {
+	if (!regions) return;
+
+	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+		Region* region = regions->Get(it);
+
+		switch (filterMode) {
+		case FilterNone:
+			volumeView->ShowRegion(region);
+			sliceView->ShowRegion(region);
+			break;
+
+		case FilterPlane:
+		case FilterNeighbors:
+		case FilterRegion:
+			volumeView->ShowRegion(region, region->GetVisible());
+			sliceView->ShowRegion(region, region->GetVisible());
+			break;
+		}
+	}
+
+	if (currentRegion) {
+		volumeView->ShowRegion(currentRegion);
+		sliceView->ShowRegion(currentRegion);
+	}
+
+	//if (highlightRegion) {
+	//	highlightRegion->Show();
+	//}
+
+	volumeView->GetRenderer()->ResetCameraClippingRange();
+	sliceView->GetRenderer()->ResetCameraClippingRange();
+
+	Render();
 }

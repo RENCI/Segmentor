@@ -16,6 +16,7 @@ RegionInfo::RegionInfo(Region* region) {
 		extent[i] = region->extent[i];
 	}
 
+	visible = region->visible;
 	modified = region->modified;
 	done = region->done;
 }

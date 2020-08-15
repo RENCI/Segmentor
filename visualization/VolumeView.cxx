@@ -210,7 +210,7 @@ void VolumeView::SetCurrentRegion(Region* region) {
 		brush->GetActor()->GetProperty()->SetColor(1, 1, 1);
 	}
 
-	FilterRegions();
+	//FilterRegions();
 }
 
 void VolumeView::HighlightRegion(Region* region) {
@@ -227,7 +227,11 @@ void VolumeView::HighlightRegion(Region* region) {
 		highlightRegion->GetHighlight3D()->GetActor()->VisibilityOn();
 	}
 
-	FilterRegions();
+	//FilterRegions();
+}
+
+void VolumeView::ShowRegion(Region* region, bool show) {
+	region->GetSurface()->GetActor()->SetVisibility(show);
 }
 
 void VolumeView::SetShowProbe(bool show) {
@@ -250,9 +254,9 @@ void VolumeView::SetInteractionMode(enum InteractionMode mode) {
 }
 
 void VolumeView::SetFilterMode(enum FilterMode mode) {
-	filterMode = mode;
+	//filterMode = mode;
 
-	FilterRegions();
+	//FilterRegions();
 }
 
 bool VolumeView::GetSmoothSurfaces() {
@@ -313,9 +317,9 @@ void VolumeView::ToggleShowPlane() {
 }
 
 void VolumeView::SetNeighborOpacity(double opacity) {
-	neighborOpacity = opacity;
+	//neighborOpacity = opacity;
 
-	FilterRegions();
+	//FilterRegions();
 }
 
 void VolumeView::SetBrushRadius(int radius) {
@@ -470,6 +474,12 @@ void VolumeView::FilterRegions() {
 
 		// Always show current region
 		if (currentRegion && region == currentRegion) {
+			surface->GetActor()->VisibilityOn();
+			continue;
+		}
+
+		// Always show visible regions
+		if (region->GetVisible()) {
 			surface->GetActor()->VisibilityOn();
 			continue;
 		}

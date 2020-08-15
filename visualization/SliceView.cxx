@@ -168,7 +168,7 @@ void SliceView::SetSegmentationData(vtkImageData* imageLabels, RegionCollection*
 		AddRegionActors(regions->Get(it));
 	}
 		
-	FilterRegions();
+	//FilterRegions();
 
 	// Make sure slices line up
 	vtkCamera* cam = renderer->GetActiveCamera();
@@ -179,7 +179,7 @@ void SliceView::SetSegmentationData(vtkImageData* imageLabels, RegionCollection*
 void SliceView::AddRegion(Region* region) {
 	AddRegionActors(region);
 
-	FilterRegions();
+	//FilterRegions();
 }
 
 void SliceView::AddRegionActors(Region* region) {
@@ -204,8 +204,13 @@ void SliceView::SetCurrentRegion(Region* region) {
 		brush->GetActor()->GetProperty()->SetColor(1, 1, 1);
 	}
 
-	FilterRegions();
+	//FilterRegions();
 }
+
+void SliceView::ShowRegion(Region* region, bool show) {
+	region->GetOutline()->GetActor()->SetVisibility(show && showRegionOutlines);
+}
+
 
 void SliceView::UpdateVoxelSize() {
 	probe->UpdateData(data);
@@ -250,9 +255,9 @@ void SliceView::SetInteractionMode(enum InteractionMode mode) {
 }
 
 void SliceView::SetFilterMode(enum FilterMode mode) {
-	filterMode = mode;
+	//filterMode = mode;
 
-	FilterRegions();
+	//FilterRegions();
 }
 
 
@@ -277,7 +282,7 @@ bool SliceView::GetShowRegionOutlines() {
 void SliceView::ShowRegionOutlines(bool show) {
 	showRegionOutlines = show;
 
-	FilterRegions();
+	//FilterRegions();
 }
 
 void SliceView::ToggleRegionOutlines() {

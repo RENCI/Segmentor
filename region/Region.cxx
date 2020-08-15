@@ -23,6 +23,7 @@
 #include "RegionHighlight3D.h"
 
 Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* inputData) {
+	visible = false;
 	modified = false;
 	done = false;
 
@@ -317,6 +318,14 @@ void Region::ComputeExtent() {
 	UpdateExtent();
 }
 
+bool Region::GetVisible() {
+	return visible;
+}
+
+void Region::SetVisible(bool isVisible) {
+	visible = isVisible;
+}
+
 bool Region::GetModified() {
 	return modified;
 }
@@ -434,6 +443,7 @@ void Region::SetInfo(const RegionInfo& info) {
 
 	UpdateExtent();
 
+	visible = info.visible;
 	modified = info.modified;
 	done = info.done;
 

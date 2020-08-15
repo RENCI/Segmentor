@@ -40,6 +40,9 @@ public:
 	void UpdateExtent(int x, int y, int z);
 	void ComputeExtent();
 
+	bool GetVisible();
+	void SetVisible(bool isVisible);
+
 	bool GetModified();
 	void SetModified(bool isModified);
 	
@@ -65,6 +68,7 @@ protected:
 	double color[3];
 	int extent[6];
 
+	bool visible;
 	bool modified;
 	bool done;
 

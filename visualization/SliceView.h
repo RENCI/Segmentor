@@ -45,6 +45,8 @@ public:
 	void SetFilterMode(enum FilterMode mode);
 
 	void SetCurrentRegion(Region* region);
+
+	void ShowRegion(Region* region, bool show = true);
 	
 	bool GetShowLabelSlice();
 	void ShowLabelSlice(bool show);
@@ -75,7 +77,6 @@ public:
 
 protected:
 	FilterMode filterMode;
-	bool showVoxelOutlines;
 	bool showRegionOutlines;
 
 	Region* currentRegion;

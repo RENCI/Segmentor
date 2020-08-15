@@ -40,6 +40,10 @@ std::vector<RegionMetadataIO::Region> RegionMetadataIO::Read(std::string fileNam
 					continue;
 				}
 
+				if (regionObject.contains("visible") && regionObject["visible"].isBool()) {
+					region.visible = regionObject["visible"].toBool();
+				}
+
 				if (regionObject.contains("modified") && regionObject["modified"].isBool()) {
 					region.modified = regionObject["modified"].toBool();
 				}
@@ -72,6 +76,7 @@ bool RegionMetadataIO::Write(std::string fileName, std::vector<Region> regions) 
 		QJsonObject regionObject;
 
 		regionObject["label"] = regions[i].label;
+		regionObject["visible"] = regions[i].visible;
 		regionObject["modified"] = regions[i].modified;
 		regionObject["done"] = regions[i].done;
 

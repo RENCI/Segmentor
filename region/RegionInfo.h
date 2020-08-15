@@ -16,6 +16,7 @@ protected:
 	double color[3];
 	int extent[6];
 
+	bool visible;
 	bool modified;
 	bool done;
 

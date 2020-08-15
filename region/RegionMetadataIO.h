@@ -9,6 +9,7 @@ public:
 	struct Region {
 		Region() : label(-1), modified(false), done(false) {}
 		unsigned short label;
+		bool visible;
 		bool modified;
 		bool done;
 	};

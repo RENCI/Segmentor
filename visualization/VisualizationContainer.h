@@ -74,6 +74,9 @@ public:
 	//void ErasePoint(double x, double y, double z);
 
 	void SetCurrentRegion(Region* region);
+	
+	void ToggleRegionVisibility(double point[3]);
+	void ToggleRegionVisibility(unsigned short label);
 
 	void RemoveRegion(unsigned short label);
 	Region* SetRegionDone(unsigned short label, bool done);
@@ -165,6 +168,8 @@ protected:
 
 	void PushHistory();
 	void PopHistory();
+
+	void UpdateVisibility();
 };
 
 #endif
