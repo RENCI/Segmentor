@@ -158,8 +158,8 @@ protected:
 
 	void ExtractRegions();
 
-	void SplitRegion(Region* region, int numRegions);
-	void SplitRegion2(Region* region, int numRegions);
+	void SplitRegionKMeans(Region* region, int numRegions);
+	void SplitRegionIntensity(Region* region, int numRegions);
 
 	// Region metadata
 	void LoadRegionMetadata(std::string fileName);

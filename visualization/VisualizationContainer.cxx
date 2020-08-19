@@ -45,6 +45,7 @@
 #include "SliceView.h"
 #include "VolumeView.h"
 #include "Region.h"
+#include "RegionSurface.h"
 #include "RegionCollection.h"
 #include "RegionMetadataIO.h"
 
@@ -801,6 +802,8 @@ void VisualizationContainer::SetCurrentRegion(Region* region) {
 	sliceView->SetCurrentRegion(region);
 
 	qtWindow->selectRegion(region ? region->GetLabel() : 0);
+
+	UpdateVisibility();
 }
 
 bool VisualizationContainer::GetFilterRegions() {
@@ -827,10 +830,13 @@ void VisualizationContainer::ClearRegionVisibilities() {
 void VisualizationContainer::ShowPlaneRegions() {
 	if (!regions) return;
 
+	vtkCamera* cam = volumeView->GetRenderer()->GetActiveCamera();
+
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
 		Region* region = regions->Get(it);
-	
-		//region->SetVisible(surface->IntersectsPlane(cam->GetFocalPoint(), cam->GetDirectionOfProjection()));
+		RegionSurface* surface = region->GetSurface();
+
+		region->SetVisible(surface->IntersectsPlane(cam->GetFocalPoint(), cam->GetDirectionOfProjection()));
 	}
 
 	UpdateVisibility();
@@ -1026,14 +1032,14 @@ void VisualizationContainer::MergeWithCurrentRegion(double point[3]) {
 void VisualizationContainer::SplitCurrentRegion(int numRegions) {
 	if (!currentRegion) return;
 	
-	SplitRegion2(currentRegion, numRegions);
+	SplitRegionIntensity(currentRegion, numRegions);
 
 	PushHistory();
 
 	Render();
 }
 
-void VisualizationContainer::SplitRegion(Region* region, int numRegions) {
+void VisualizationContainer::SplitRegionKMeans(Region* region, int numRegions) {
 	vtkSmartPointer<vtkTable> table = region->GetPointTable();
 
 	vtkSmartPointer<vtkKMeansStatistics> kMeans = vtkSmartPointer<vtkKMeansStatistics>::New();
@@ -1078,6 +1084,7 @@ void VisualizationContainer::SplitRegion(Region* region, int numRegions) {
 
 		// Create new region
 		Region* newRegion = new Region(newLabel, labelColors->GetTableValue(newLabel), labels);
+		newRegion->SetVisible(true);
 		regions->Add(newRegion);
 		volumeView->AddRegion(newRegion);
 		sliceView->AddRegion(newRegion);
@@ -1092,9 +1099,11 @@ void VisualizationContainer::SplitRegion(Region* region, int numRegions) {
 	qtWindow->updateRegions(regions);
 
 	labels->Modified();
+
+	UpdateVisibility();
 }
 
-void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
+void VisualizationContainer::SplitRegionIntensity(Region* region, int numRegions) {
 	// Region label
 	unsigned short label = region->GetLabel();
 
@@ -1311,6 +1320,7 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 
 	currentRegion->ComputeExtent();
 	currentRegion->SetModified(true);
+	currentRegion->SetVisible(true);
 
 	// Create new regions for other components
 	for (int i = 1; i < numComponents; i++) {
@@ -1336,6 +1346,7 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 
 		// Create new region
 		Region* newRegion = new Region(newLabel, labelColors->GetTableValue(newLabel), labels);
+		newRegion->SetVisible(true);
 		regions->Add(newRegion);
 		volumeView->AddRegion(newRegion);
 		sliceView->AddRegion(newRegion);
@@ -1346,6 +1357,8 @@ void VisualizationContainer::SplitRegion2(Region* region, int numRegions) {
 	qtWindow->updateRegions(regions);
 
 	labels->Modified();
+
+	UpdateVisibility();
 }
 
 void VisualizationContainer::GrowCurrentRegion(double point[3]) {

@@ -749,10 +749,10 @@ void MainWindow::createToolBar() {
 	toolBar->addAction(createActionIcon(":/icons/icon_plane.png", "Show plane (o)", "o", visualizationContainer->GetVolumeView()->GetShowPlane(), &MainWindow::on_actionShowPlane));
 	toolBar->addSeparator();
 	toolBar->addWidget(createLabel("Filter"));
+	toolBar->addAction(createActionIcon(":/icons/icon_filter_regions.png", "Filter regions (b)", "b", visualizationContainer->GetFilterRegions(), &MainWindow::on_actionFilterRegions));
 	toolBar->addAction(createActionIcon(":/icons/icon_clear_visibility.png", "Clear visibility (c)", "a", &MainWindow::on_actionClearRegionVisibilities));
 	toolBar->addAction(createActionIcon(":/icons/icon_show_plane_regions.png", "Show plane regions (p)", "p", &MainWindow::on_actionShowPlaneRegions));
 	toolBar->addAction(createActionIcon(":/icons/icon_show_neighbor_regions.png", "Show neighbors (k)", "k", &MainWindow::on_actionShowNeighborRegions));
-	toolBar->addAction(createActionIcon(":/icons/icon_filter_regions.png", "Filter regions (b)", "b", visualizationContainer->GetFilterRegions(), &MainWindow::on_actionFilterRegions));
 
 	// Need extra logic for interaction mode
 	QObject::connect(actionNavigation, &QAction::triggered, this, &MainWindow::on_actionNavigation);
