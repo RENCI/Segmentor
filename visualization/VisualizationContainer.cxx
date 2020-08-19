@@ -923,6 +923,7 @@ void VisualizationContainer::RelabelCurrentRegion() {
 	}
 	else {
 		currentRegion->SetModified(true);
+		currentRegion->SetVisible(true);
 
 		for (int i = 0; i < numComponents; i++) {
 			// Get the extent for this component
@@ -959,6 +960,7 @@ void VisualizationContainer::RelabelCurrentRegion() {
 
 				// Create new region
 				Region* newRegion = new Region(newLabel, labelColors->GetTableValue(newLabel), labels);
+				newRegion->SetVisible(true);
 				regions->Add(newRegion);
 				volumeView->AddRegion(newRegion);
 				sliceView->AddRegion(newRegion);
