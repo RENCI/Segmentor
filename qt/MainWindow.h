@@ -68,11 +68,15 @@ public slots:
 	virtual void on_actionEdit();
 	virtual void on_actionOverlay(bool checked);
 	virtual void on_actionOutline(bool checked);
-	virtual void on_actionRescaleFull(bool checked);
-	virtual void on_actionRescalePartial(bool checked);
+	virtual void on_actionRescaleFull();
+	virtual void on_actionRescalePartial();
 	virtual void on_actionSmoothNormals(bool checked);
 	virtual void on_actionSmoothSurfaces(bool checked);
 	virtual void on_actionShowPlane(bool checked);
+	virtual void on_actionClearRegionVisibilities();
+	virtual void on_actionShowPlaneRegions();
+	virtual void on_actionShowNeighborRegions();
+	virtual void on_actionFilterRegions(bool checked);
 
 	// Widget events
 	virtual void on_sliceUp();
@@ -121,7 +125,7 @@ protected:
 
 	// Toolbar
 	void createToolBar();
-	QAction* createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, void (MainWindow::*slot)(bool));
+	QAction* createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, void (MainWindow::*slot)());
 	QAction* createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, bool checked, void (MainWindow::*slot)(bool));
 	QLabel* createLabel(const QString& text, int topMargin = 10, int bottomMargin = 5);
 };

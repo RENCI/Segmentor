@@ -74,6 +74,13 @@ public:
 	//void ErasePoint(double x, double y, double z);
 
 	void SetCurrentRegion(Region* region);
+
+	bool GetFilterRegions();
+	void SetFilterRegions(bool filter);
+
+	void ClearRegionVisibilities();
+	void ShowPlaneRegions();
+	void ShowNeighborRegions();
 	
 	void ToggleRegionVisibility(double point[3]);
 	void ToggleRegionVisibility(unsigned short label);
@@ -121,6 +128,8 @@ protected:
 	RegionCollection* regions;
 	Region* currentRegion;
 	unsigned short hoverLabel;
+
+	bool filterRegions;
 
 	vtkSmartPointer<vtkLookupTable> labelColors;
 

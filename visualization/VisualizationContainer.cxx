@@ -58,6 +58,7 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	regions = new RegionCollection();
 	currentRegion = nullptr;	
 	hoverLabel = 0;
+	filterRegions = false;
 
 	brushRadius = 1;
 
@@ -800,6 +801,65 @@ void VisualizationContainer::SetCurrentRegion(Region* region) {
 	sliceView->SetCurrentRegion(region);
 
 	qtWindow->selectRegion(region ? region->GetLabel() : 0);
+}
+
+bool VisualizationContainer::GetFilterRegions() {
+	return filterRegions;
+}
+
+void VisualizationContainer::SetFilterRegions(bool filter) {
+	filterRegions = filter;
+
+	UpdateVisibility();
+}
+
+void VisualizationContainer::ClearRegionVisibilities() {
+	if (!regions) return;
+
+	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+		Region* region = regions->Get(it);
+		region->SetVisible(false);
+	}
+
+	UpdateVisibility();
+}
+
+void VisualizationContainer::ShowPlaneRegions() {
+	if (!regions) return;
+
+	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+		Region* region = regions->Get(it);
+	
+		//region->SetVisible(surface->IntersectsPlane(cam->GetFocalPoint(), cam->GetDirectionOfProjection()));
+	}
+
+	UpdateVisibility();
+}
+
+void VisualizationContainer::ShowNeighborRegions() {
+	if (!regions) return;
+
+	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+		Region* region = regions->Get(it);
+
+		if (currentRegion) {
+			double d = sqrt(vtkMath::Distance2BetweenPoints(currentRegion->GetCenter(), region->GetCenter()));
+			double r = (currentRegion->GetLength() + region->GetLength()) / 4;
+
+			if (d <= r * 1.05) {
+				region->SetVisible(true);
+				//surface->GetActor()->GetProperty()->SetOpacity(neighborOpacity);
+			}
+			else {
+				region->SetVisible(false);
+			}
+		}
+		else {
+			region->SetVisible(false);
+		}
+	}
+
+	UpdateVisibility();
 }
 
 void VisualizationContainer::CreateNewRegion(double point[3]) {
@@ -1792,24 +1852,10 @@ void VisualizationContainer::UpdateVisibility() {
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
 		Region* region = regions->Get(it);
 
-		switch (filterMode) {
-		case FilterNone:
-			volumeView->ShowRegion(region);
-			sliceView->ShowRegion(region);
-			break;
+		bool show = !filterRegions || region->GetVisible() || region == currentRegion;
 
-		case FilterPlane:
-		case FilterNeighbors:
-		case FilterRegion:
-			volumeView->ShowRegion(region, region->GetVisible());
-			sliceView->ShowRegion(region, region->GetVisible());
-			break;
-		}
-	}
-
-	if (currentRegion) {
-		volumeView->ShowRegion(currentRegion);
-		sliceView->ShowRegion(currentRegion);
+		volumeView->ShowRegion(region, show);
+		sliceView->ShowRegion(region, show);
 	}
 
 	//if (highlightRegion) {

@@ -519,7 +519,7 @@ void MainWindow::on_actionOutline(bool checked) {
 	visualizationContainer->GetSliceView()->ShowRegionOutlines(checked);
 }
 
-void MainWindow::on_actionRescaleFull(bool checked) {
+void MainWindow::on_actionRescaleFull() {
 	SliceView* sliceView = visualizationContainer->GetSliceView();
 
 	sliceView->RescaleFull();
@@ -527,7 +527,7 @@ void MainWindow::on_actionRescaleFull(bool checked) {
 	setWindowLevel(sliceView->GetWindow(), sliceView->GetLevel());
 }
 
-void MainWindow::on_actionRescalePartial(bool checked) {
+void MainWindow::on_actionRescalePartial() {
 	SliceView* sliceView = visualizationContainer->GetSliceView();
 
 	sliceView->RescalePartial();
@@ -545,6 +545,22 @@ void MainWindow::on_actionSmoothSurfaces(bool checked) {
 
 void MainWindow::on_actionShowPlane(bool checked) {
 	visualizationContainer->GetVolumeView()->SetShowPlane(checked);
+}
+
+void MainWindow::on_actionClearRegionVisibilities() {
+	visualizationContainer->ClearRegionVisibilities();
+}
+
+void MainWindow::on_actionShowPlaneRegions() {
+	visualizationContainer->ShowPlaneRegions();
+}
+
+void MainWindow::on_actionShowNeighborRegions() {
+	visualizationContainer->ShowNeighborRegions();
+}
+
+void MainWindow::on_actionFilterRegions(bool checked) {
+	visualizationContainer->SetFilterRegions(checked);
 }
 
 void MainWindow::on_sliceUp() {
@@ -715,27 +731,7 @@ void MainWindow::createToolBar() {
 	QAction* actionEdit = new QAction("E", interactionModeGroup);
 	actionEdit->setToolTip("Edit mode (space bar)");
 	actionEdit->setCheckable(true);
-
-	// Filter mode toggle
-	// XXX: With Qt 5.14, should be able to set exclusion policy to avoid extra logic below
-	//QActionGroup* filterModeGroup = new QActionGroup(this);
-	//interactionModeGroup->setExclusive(false);
-
-	QAction* actionFilterPlane = new QAction(QIcon(":/icons/icon_filter_plane.png"), "Filter to plane (p)", this);
-	actionFilterPlane->setShortcut(QKeySequence("p"));
-	actionFilterPlane->setCheckable(true);
-	actionFilterPlane->setChecked(visualizationContainer->GetFilterMode() == FilterPlane);
-
-	QAction* actionFilterNeighbors = new QAction(QIcon(":/icons/icon_filter_neighbors.png"), "Filter neighbors (k)", this);
-	actionFilterNeighbors->setShortcut(QKeySequence("k"));
-	actionFilterNeighbors->setCheckable(true);
-	actionFilterNeighbors->setChecked(visualizationContainer->GetFilterMode() == FilterNeighbors);
-
-	QAction* actionFilterRegion = new QAction(QIcon(":/icons/icon_filter_region.png"), "Filter region: l", this);
-	actionFilterRegion->setShortcut(QKeySequence("l"));
-	actionFilterRegion->setCheckable(true);
-	actionFilterRegion->setChecked(visualizationContainer->GetFilterMode() == FilterRegion);
-
+	
 	// Add widgets to tool bar
 	toolBar->addWidget(createLabel("Mode"));
 	toolBar->addAction(actionNavigation);
@@ -743,7 +739,6 @@ void MainWindow::createToolBar() {
 	toolBar->addSeparator();
 	toolBar->addWidget(createLabel("2D"));
 	toolBar->addAction(createActionIcon(":/icons/icon_overlay.png", "Show overlay (q)", "q", visualizationContainer->GetSliceView()->GetShowLabelSlice(), &MainWindow::on_actionOverlay));
-	
 	toolBar->addAction(createActionIcon(":/icons/icon_outline.png", "Show outlines (e)", "e", visualizationContainer->GetSliceView()->GetShowRegionOutlines(), &MainWindow::on_actionOutline));
 	toolBar->addAction(createActionIcon(":/icons/icon_rescale_full.png", "Rescale full (=)", "=", &MainWindow::on_actionRescaleFull));
 	toolBar->addAction(createActionIcon(":/icons/icon_rescale_partial.png", "Rescale partial (-)", "-", &MainWindow::on_actionRescalePartial));
@@ -754,9 +749,10 @@ void MainWindow::createToolBar() {
 	toolBar->addAction(createActionIcon(":/icons/icon_plane.png", "Show plane (o)", "o", visualizationContainer->GetVolumeView()->GetShowPlane(), &MainWindow::on_actionShowPlane));
 	toolBar->addSeparator();
 	toolBar->addWidget(createLabel("Filter"));
-	toolBar->addAction(actionFilterPlane);
-	toolBar->addAction(actionFilterNeighbors);
-	toolBar->addAction(actionFilterRegion);
+	toolBar->addAction(createActionIcon(":/icons/icon_clear_visibility.png", "Clear visibility (c)", "a", &MainWindow::on_actionClearRegionVisibilities));
+	toolBar->addAction(createActionIcon(":/icons/icon_show_plane_regions.png", "Show plane regions (p)", "p", &MainWindow::on_actionShowPlaneRegions));
+	toolBar->addAction(createActionIcon(":/icons/icon_show_neighbor_regions.png", "Show neighbors (k)", "k", &MainWindow::on_actionShowNeighborRegions));
+	toolBar->addAction(createActionIcon(":/icons/icon_filter_regions.png", "Filter regions (b)", "b", visualizationContainer->GetFilterRegions(), &MainWindow::on_actionFilterRegions));
 
 	// Need extra logic for interaction mode
 	QObject::connect(actionNavigation, &QAction::triggered, this, &MainWindow::on_actionNavigation);
@@ -772,30 +768,10 @@ void MainWindow::createToolBar() {
 		}
 	});
 
-	// Need extra logic for filter mode
-	QObject::connect(actionFilterPlane, &QAction::triggered, [actionFilterPlane, actionFilterNeighbors, actionFilterRegion, this]() {
-		actionFilterNeighbors->setChecked(false);
-		actionFilterRegion->setChecked(false);
-
-		this->visualizationContainer->SetFilterMode(actionFilterPlane->isChecked() ? FilterPlane : FilterNone);
-	});
-	QObject::connect(actionFilterNeighbors, &QAction::triggered, [actionFilterPlane, actionFilterNeighbors, actionFilterRegion, this]() {
-		actionFilterPlane->setChecked(false);
-		actionFilterRegion->setChecked(false);
-
-		this->visualizationContainer->SetFilterMode(actionFilterNeighbors->isChecked() ? FilterNeighbors : FilterNone);
-	});
-	QObject::connect(actionFilterRegion, &QAction::triggered, [actionFilterPlane, actionFilterNeighbors, actionFilterRegion, this]() {
-		actionFilterPlane->setChecked(false);
-		actionFilterNeighbors->setChecked(false);
-
-		this->visualizationContainer->SetFilterMode(actionFilterRegion->isChecked() ? FilterRegion : FilterNone);
-	});
-
 	toolBarWidget->layout()->addWidget(toolBar);
 }
 
-QAction* MainWindow::createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, void (MainWindow::*slot)(bool)) {
+QAction* MainWindow::createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, void (MainWindow::*slot)()) {
 	QAction* action = new QAction(QIcon(fileName), text, this);
 	action->setShortcut(QKeySequence(shortcut));
 	action->setCheckable(false);
