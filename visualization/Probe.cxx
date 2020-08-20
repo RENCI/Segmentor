@@ -21,6 +21,7 @@ Probe::Probe(double probeScale, bool probe3D) : scale(probeScale) {
 
 	if (probe3D) {
 		actor->GetProperty()->SetRepresentationToSurface();
+		actor->GetProperty()->SetOpacity(0.8);
 		actor->GetProperty()->EdgeVisibilityOn();
 	}
 	else {
