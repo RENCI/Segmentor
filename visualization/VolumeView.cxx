@@ -66,7 +66,7 @@ VolumeView::VolumeView(vtkRenderWindowInteractor* interactor) {
 	renderer->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, cameraCallback);
 
 	// Probe
-	probe = new Probe();
+	probe = new Probe(1.1, true);
 
 	renderer->AddActor(probe->GetActor());
 
@@ -207,8 +207,6 @@ void VolumeView::SetCurrentRegion(Region* region) {
 		probe->GetActor()->GetProperty()->SetColor(1, 1, 1);
 		brush->GetActor()->GetProperty()->SetColor(1, 1, 1);
 	}
-
-	//FilterRegions();
 }
 
 void VolumeView::HighlightRegion(Region* region) {
@@ -225,7 +223,6 @@ void VolumeView::HighlightRegion(Region* region) {
 		highlightRegion->GetHighlight3D()->GetActor()->VisibilityOn();
 	}
 
-	//FilterRegions();
 	renderer->ResetCameraClippingRange();
 }
 

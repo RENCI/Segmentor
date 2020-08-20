@@ -10,7 +10,7 @@ class vtkImageDataCells;
 
 class Probe {
 public:
-	Probe();
+	Probe(double probeScale = 1.0, bool probe3D = false);
 	~Probe();
 
 	void UpdateData(vtkImageData* data);
@@ -19,6 +19,8 @@ public:
 	
 protected:
 	vtkSmartPointer<vtkActor> actor;
+
+	double scale;
 };
 
 #endif
