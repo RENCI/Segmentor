@@ -105,12 +105,12 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Neighbor opacity</string>
+              <string>Region opacity</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QDoubleSpinBox" name="neighborSpinBox">
+            <widget class="QDoubleSpinBox" name="opacitySpinBox">
              <property name="maximum">
               <double>1.000000000000000</double>
              </property>
@@ -118,7 +118,7 @@
               <double>0.050000000000000</double>
              </property>
              <property name="value">
-              <double>0.250000000000000</double>
+              <double>1.000000000000000</double>
              </property>
             </widget>
            </item>

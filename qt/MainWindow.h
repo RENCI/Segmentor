@@ -89,9 +89,9 @@ public slots:
 	virtual void on_overlayUp();
 	virtual void on_overlayDown();
 
-	virtual void on_neighborSpinBox_valueChanged(double value);
-	virtual void on_neighborUp();
-	virtual void on_neighborDown();
+	virtual void on_opacitySpinBox_valueChanged(double value);
+	virtual void on_opacityUp();
+	virtual void on_opacityDown();
 
 	virtual void on_voxelSizeSpinBox();
 

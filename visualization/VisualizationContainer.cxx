@@ -1578,6 +1578,10 @@ void VisualizationContainer::ToggleRegionVisibility(unsigned short label) {
 	UpdateVisibility();
 }
 
+void VisualizationContainer::SetVisibleOpacity(double opacity) {
+	volumeView->SetVisibleOpacity(opacity, filterRegions);
+}
+
 void VisualizationContainer::SetWindowLevel(double window, double level) {
 	qtWindow->setWindowLevel(window, level);
 }
@@ -1872,6 +1876,8 @@ void VisualizationContainer::UpdateVisibility(Region* highlightRegion) {
 		volumeView->ShowRegion(region, show);
 		sliceView->ShowRegion(region, show);
 	}
+
+	volumeView->UpdateVisibleOpacity(filterRegions);
 
 	volumeView->GetRenderer()->ResetCameraClippingRange();
 	sliceView->GetRenderer()->ResetCameraClippingRange();

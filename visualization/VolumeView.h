@@ -44,7 +44,6 @@ public:
 	void SetProbePosition(double x, double y, double z);
 
 	void SetInteractionMode(enum InteractionMode mode);
-	void SetFilterMode(enum FilterMode mode);
 
 	void SetCurrentRegion(Region* region);
 
@@ -65,7 +64,8 @@ public:
 	void ToggleShowPlane();
 	void UpdatePlane();
 
-	void SetNeighborOpacity(double opacity);
+	void SetVisibleOpacity(double opacity, bool apply);
+	void UpdateVisibleOpacity(bool apply);
 
 	void SetBrushRadius(int radius);
 
@@ -75,7 +75,6 @@ public:
 	vtkInteractorStyleVolume* GetInteractorStyle();
 
 protected:
-	FilterMode filterMode;
 	bool smoothSurfaces;
 	bool smoothShading;
 	
@@ -116,10 +115,8 @@ protected:
 	// Interaction mode label
 	vtkSmartPointer<vtkTextActor> interactionModeLabel;
 	void CreateInteractionModeLabel();
-
-	void FilterRegions();
-
-	double neighborOpacity;
+	
+	double visibleOpacity;
 
 	static void cameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 };

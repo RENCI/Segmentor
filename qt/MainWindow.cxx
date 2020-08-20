@@ -101,14 +101,14 @@ MainWindow::MainWindow() {
 
 	overlaySpinBox->valueChanged(overlaySpinBox->value());
 
-	// Neighbor opacity
-	QShortcut* neighborUp = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Right), this);
-	QShortcut* neighborDown = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Left), this);
+	// Opacity
+	QShortcut* opacityUp = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Right), this);
+	QShortcut* opacityDown = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Left), this);
 
-	QObject::connect(neighborUp, &QShortcut::activated, this, &MainWindow::on_neighborUp);
-	QObject::connect(neighborDown, &QShortcut::activated, this, &MainWindow::on_neighborDown);
+	QObject::connect(opacityUp, &QShortcut::activated, this, &MainWindow::on_opacityUp);
+	QObject::connect(opacityDown, &QShortcut::activated, this, &MainWindow::on_opacityDown);
 
-	neighborSpinBox->valueChanged(neighborSpinBox->value());
+	opacitySpinBox->valueChanged(opacitySpinBox->value());
 
 	// Brush radius
 	QShortcut* brushRadiusUp = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Right), this);
@@ -591,16 +591,16 @@ void MainWindow::on_overlayDown() {
 	overlaySpinBox->stepDown();
 }
 
-void MainWindow::on_neighborSpinBox_valueChanged(double value) {
-	visualizationContainer->GetVolumeView()->SetNeighborOpacity(value);
+void MainWindow::on_opacitySpinBox_valueChanged(double value) {
+	visualizationContainer->SetVisibleOpacity(value);
 }
 
-void MainWindow::on_neighborUp() {
-	neighborSpinBox->stepUp();
+void MainWindow::on_opacityUp() {
+	opacitySpinBox->stepUp();
 }
 
-void MainWindow::on_neighborDown() {
-	neighborSpinBox->stepDown();
+void MainWindow::on_opacityDown() {
+	opacitySpinBox->stepDown();
 }
 
 void MainWindow::on_voxelSizeSpinBox() {
@@ -731,7 +731,7 @@ void MainWindow::createToolBar() {
 	QAction* actionEdit = new QAction("E", interactionModeGroup);
 	actionEdit->setToolTip("Edit mode (space bar)");
 	actionEdit->setCheckable(true);
-	
+
 	// Add widgets to tool bar
 	toolBar->addWidget(createLabel("Mode"));
 	toolBar->addAction(actionNavigation);

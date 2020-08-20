@@ -85,6 +85,8 @@ public:
 	void ToggleRegionVisibility(double point[3]);
 	void ToggleRegionVisibility(unsigned short label);
 
+	void SetVisibleOpacity(double opacity);
+
 	void RemoveRegion(unsigned short label);
 	Region* SetRegionDone(unsigned short label, bool done);
 	void HighlightRegion(unsigned short label);
