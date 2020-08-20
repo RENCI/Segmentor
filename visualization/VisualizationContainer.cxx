@@ -1547,6 +1547,8 @@ void VisualizationContainer::HighlightRegion(unsigned short label) {
 
 	volumeView->HighlightRegion(region);
 	
+	UpdateVisibility(region);
+
 	Render();
 }
 
@@ -1861,21 +1863,17 @@ void VisualizationContainer::PushHistory() {
 	history->Push(labels, regions);
 }
 
-void VisualizationContainer::UpdateVisibility() {
+void VisualizationContainer::UpdateVisibility(Region* highlightRegion) {
 	if (!regions) return;
 
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
 		Region* region = regions->Get(it);
 
-		bool show = !filterRegions || region->GetVisible() || region == currentRegion;
+		bool show = !filterRegions || region->GetVisible() || region == currentRegion || region == highlightRegion;
 
 		volumeView->ShowRegion(region, show);
 		sliceView->ShowRegion(region, show);
 	}
-
-	//if (highlightRegion) {
-	//	highlightRegion->Show();
-	//}
 
 	volumeView->GetRenderer()->ResetCameraClippingRange();
 	sliceView->GetRenderer()->ResetCameraClippingRange();

@@ -228,6 +228,7 @@ void VolumeView::HighlightRegion(Region* region) {
 	}
 
 	//FilterRegions();
+	renderer->ResetCameraClippingRange();
 }
 
 void VolumeView::ShowRegion(Region* region, bool show) {

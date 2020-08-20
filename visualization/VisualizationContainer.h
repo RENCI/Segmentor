@@ -178,7 +178,7 @@ protected:
 	void PushHistory();
 	void PopHistory();
 
-	void UpdateVisibility();
+	void UpdateVisibility(Region* highlightRegion = nullptr);
 };
 
 #endif
