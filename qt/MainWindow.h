@@ -104,6 +104,7 @@ public slots:
 	virtual void on_removeRegion(int label);
 	virtual void on_highlightRegion(int label);
 	virtual void on_selectRegion(int label);
+	virtual void on_regionVisible(int label, bool visible);
 
 protected:
 	// The visualization container

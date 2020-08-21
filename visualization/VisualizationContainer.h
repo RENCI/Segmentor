@@ -91,6 +91,7 @@ public:
 	Region* SetRegionDone(unsigned short label, bool done);
 	void HighlightRegion(unsigned short label);
 	void SelectRegion(unsigned short label, bool flyTo = true);
+	void SetRegionVisibility(unsigned short label, bool visible);
 
 	void CreateNewRegion(double point[3]);
 	void RelabelCurrentRegion();

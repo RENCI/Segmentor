@@ -17,7 +17,7 @@ RegionTable::RegionTable(QWidget* parent)
 	: QTableWidget(parent) 
 {
 	QStringList headers;
-	headers << "Id" << "Color" << "Size" << "Modified" << "Done" << "Remove";
+	headers << "Id" << "Color" << "Size" << "Modified" << "Visible" << "Done" << "Remove";
 	setColumnCount(headers.length());
 	setHorizontalHeaderLabels(headers);
 	verticalHeader()->setVisible(false);
@@ -84,6 +84,17 @@ void RegionTable::update(RegionCollection* regions) {
 		modifiedButton->setEnabled(false);
 		modifiedButton->setStyleSheet("background-color: transparent; border: none;");
 
+		// Visible
+		QTableWidgetItem* visibleItem = new QTableWidgetItem();
+		visibleItem->setFlags(Qt::ItemIsSelectable);
+		visibleItem->setData(0, region->GetVisible());
+		visibleItem->setTextColor(QColor("white"));
+
+		QCheckBox* visibleCheckbox = new QCheckBox();
+		visibleCheckbox->setChecked(region->GetVisible());
+		visibleCheckbox->setStyleSheet("margin-left:10%;margin-right:5%;");
+		visibleCheckbox->setAttribute(Qt::WA_TransparentForMouseEvents);
+
 		// Done
 		QTableWidgetItem* doneItem = new QTableWidgetItem();
 		doneItem->setFlags(Qt::ItemIsSelectable);
@@ -106,18 +117,21 @@ void RegionTable::update(RegionCollection* regions) {
 			removeRegion(label);
 		});
 		
-		setItem(i, 0, idItem);
-		setItem(i, 1, colorItem);
-		setItem(i, 2, sizeItem);
+		setItem(i, Id, idItem);
+		setItem(i, Color, colorItem);
+		setItem(i, Size, sizeItem);
 
-		setItem(i, 3, modifiedItem);
-		setCellWidget(i, 3, modifiedButton);
+		setItem(i, Modified, modifiedItem);
+		setCellWidget(i, Modified, modifiedButton);
 
-		setItem(i, 4, doneItem);
-		setCellWidget(i, 4, doneCheckBox);
+		setItem(i, Visible, visibleItem);
+		setCellWidget(i, Visible, visibleCheckbox);
 
-		setItem(i, 5, removeItem);
-		setCellWidget(i, 5, removeButton);
+		setItem(i, Done, doneItem);
+		setCellWidget(i, Done, doneCheckBox);
+
+		setItem(i, Remove, removeItem);
+		setCellWidget(i, Remove, removeButton);
 	}
 
 	enableSorting();
@@ -138,15 +152,19 @@ void RegionTable::update(Region* region) {
 
 		if (ti->text() == labelString) {
 			// Size
-			item(i, 2)->setData(0, region->GetNumVoxels());
+			item(i, Size)->setData(0, region->GetNumVoxels());
 
 			// Modified
-			item(i, 3)->setData(0, region->GetModified());
-			((QPushButton*)cellWidget(i, 3))->setIcon(region->GetModified() ? modifiedIcon : QIcon());
+			item(i, Modified)->setData(0, region->GetModified());
+			((QPushButton*)cellWidget(i, Modified))->setIcon(region->GetModified() ? modifiedIcon : QIcon());
+
+			// Visible
+			item(i, Visible)->setData(0, region->GetVisible());
+			((QCheckBox*)cellWidget(i, Visible))->setChecked(region->GetVisible());
 
 			// Done
-			item(i, 4)->setData(0, region->GetDone());
-			((QCheckBox*)cellWidget(i, 4))->setChecked(region->GetDone());
+			item(i, Done)->setData(0, region->GetDone());
+			((QCheckBox*)cellWidget(i, Done))->setChecked(region->GetDone());
 
 			break;
 		}
@@ -192,7 +210,7 @@ void RegionTable::on_removeRegion(int label) {
 void RegionTable::on_cellEntered(int row, int column) {
 	QString labelString = QString::number(currentRegionLabel);
 
-	if (column <= 2) {
+	if (column == Id || column == Color || column == Size) {
 		// Highlight
 		for (int i = 0; i < rowCount(); i++) {
 			QTableWidgetItem* ti = item(i, 0);
@@ -226,14 +244,20 @@ void RegionTable::on_cellEntered(int row, int column) {
 void RegionTable::on_cellClicked(int row, int column) {
 	disableSorting();
 
-	if (column <= 2) {
-		emit(selectRegion(rowLabel(row)));
+	if (column == Visible) {
+		QCheckBox* checkBox = (QCheckBox*)cellWidget(row, column);
+		checkBox->toggle();
+
+		emit(regionVisible(rowLabel(row), checkBox->isChecked()));
 	}
-	if (column == 4) {
+	else if (column == Done) {
 		QCheckBox* checkBox = (QCheckBox*)cellWidget(row, column);
 		checkBox->toggle();
 
 		emit(regionDone(rowLabel(row), checkBox->isChecked()));
+	}
+	else {
+		emit(selectRegion(rowLabel(row)));
 	}
 
 	enableSorting();

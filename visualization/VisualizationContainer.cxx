@@ -1558,6 +1558,16 @@ void VisualizationContainer::SelectRegion(unsigned short label, bool flyTo) {
 	if (flyTo) volumeView->GetInteractorStyle()->FlyTo(region->GetCenter());
 }
 
+void VisualizationContainer::SetRegionVisibility(unsigned short label, bool visible) {
+	Region* region = regions->Get(label);
+
+	if (!region) return;
+
+	region->SetVisible(visible);
+
+	UpdateVisibility();
+}
+
 void VisualizationContainer::ToggleRegionVisibility(double point[3]) {
 	int ijk[3];
 	PointToIndex(point, ijk);
@@ -1576,6 +1586,9 @@ void VisualizationContainer::ToggleRegionVisibility(unsigned short label) {
 	region->SetVisible(!region->GetVisible());
 
 	UpdateVisibility();
+
+	qtWindow->updateRegion(region, regions);
+	//qtWindow->updateRegions(regions);
 }
 
 void VisualizationContainer::SetVisibleOpacity(double opacity) {

@@ -25,6 +25,7 @@ signals:
 	void removeRegion(int label);
 	void highlightRegion(int label);
 	void selectRegion(int label);
+	void regionVisible(int label, bool visible);
 
 protected:
 	int currentRegionLabel;
@@ -35,6 +36,16 @@ protected:
 
 	void disableSorting();
 	void enableSorting();
+
+	enum ColumnType {
+		Id = 0,
+		Color,
+		Size,
+		Modified,
+		Visible,
+		Done,
+		Remove
+	};
 };
 
 #endif
