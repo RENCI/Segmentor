@@ -750,6 +750,8 @@ void MainWindow::createToolBar() {
 	toolBar->addSeparator();
 	toolBar->addWidget(createLabel("Filter"));
 	toolBar->addAction(createActionIcon(":/icons/icon_filter_regions.png", "Filter regions (b)", "b", visualizationContainer->GetFilterRegions(), &MainWindow::on_actionFilterRegions));
+	toolBar->addSeparator();
+	toolBar->addWidget(createLabel("Visibility"));
 	toolBar->addAction(createActionIcon(":/icons/icon_clear_visibility.png", "Clear visibility (c)", "a", &MainWindow::on_actionClearRegionVisibilities));
 	toolBar->addAction(createActionIcon(":/icons/icon_show_plane_regions.png", "Show plane regions (p)", "p", &MainWindow::on_actionShowPlaneRegions));
 	toolBar->addAction(createActionIcon(":/icons/icon_show_neighbor_regions.png", "Show neighbors (k)", "k", &MainWindow::on_actionShowNeighborRegions));
