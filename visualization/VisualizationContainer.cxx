@@ -825,6 +825,8 @@ void VisualizationContainer::ClearRegionVisibilities() {
 	}
 
 	UpdateVisibility();
+
+	qtWindow->updateRegions(regions);
 }
 
 void VisualizationContainer::ShowPlaneRegions() {
@@ -840,6 +842,8 @@ void VisualizationContainer::ShowPlaneRegions() {
 	}
 
 	UpdateVisibility();
+
+	qtWindow->updateRegions(regions);
 }
 
 void VisualizationContainer::ShowNeighborRegions() {
@@ -866,6 +870,8 @@ void VisualizationContainer::ShowNeighborRegions() {
 	}
 
 	UpdateVisibility();
+
+	qtWindow->updateRegions(regions);
 }
 
 void VisualizationContainer::CreateNewRegion(double point[3]) {
@@ -1588,7 +1594,6 @@ void VisualizationContainer::ToggleRegionVisibility(unsigned short label) {
 	UpdateVisibility();
 
 	qtWindow->updateRegion(region, regions);
-	//qtWindow->updateRegions(regions);
 }
 
 void VisualizationContainer::SetVisibleOpacity(double opacity) {
