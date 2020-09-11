@@ -70,9 +70,13 @@ Switch between **Navigation** and **Edit** modes by pressing the space bar, or w
 ****
 * Region grow or shrink (based on voxel intensity of current cursor position): `g` (2D slice view only)
 ****
-* Toggle slice plane filtering: `p`
-* Toggle neighbor filtering: `k`
-* Toggle region filtering: `l`
+* Toggle region visiblity filtering: `b`
+****
+* Reset visibility: `c`
+* Set visibility to current plane: `p`
+* Set visiblity to current region neighbors: `k`
+****
+* Adjust brush radius: `Ctrl + right arrow` or `Ctrl + left arrow`
 
 #### 2D Visualization:
 
@@ -91,7 +95,7 @@ Switch between **Navigation** and **Edit** modes by pressing the space bar, or w
 * Toggle surface normals: `n`
 * Toggle slice plane visualization: `o`
 ****
-* Adjust neighbor opacity (in neighbor filter mode): `Shift + right arrow` or `Shift + left arrow`
+* Adjust region opacity: `Shift + right arrow` or `Shift + left arrow`
 
 ## Region Table:
 
