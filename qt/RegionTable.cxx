@@ -112,7 +112,7 @@ void RegionTable::update(RegionCollection* regions) {
 
 		QPushButton* removeButton = new QPushButton();
 		removeButton->setIcon(removeIcon);
-		doneCheckBox->setAttribute(Qt::WA_TransparentForMouseEvents);
+		removeButton->setEnabled(!region->GetDone());
 		QObject::connect(removeButton, &QPushButton::clicked, [this, label]() {
 			removeRegion(label);
 		});
@@ -165,6 +165,9 @@ void RegionTable::update(Region* region) {
 			// Done
 			item(i, Done)->setData(0, region->GetDone());
 			((QCheckBox*)cellWidget(i, Done))->setChecked(region->GetDone());
+
+			// Remove
+			((QPushButton*)cellWidget(i, Remove))->setEnabled(!region->GetDone());
 
 			break;
 		}
@@ -253,6 +256,9 @@ void RegionTable::on_cellClicked(int row, int column) {
 	else if (column == Done) {
 		QCheckBox* checkBox = (QCheckBox*)cellWidget(row, column);
 		checkBox->toggle();
+
+		QPushButton* button = (QPushButton*)cellWidget(row, Remove);
+		button->setEnabled(!checkBox->isChecked());
 
 		emit(regionDone(rowLabel(row), checkBox->isChecked()));
 	}
