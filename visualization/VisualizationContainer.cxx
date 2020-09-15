@@ -797,6 +797,8 @@ void VisualizationContainer::ErasePoint(double x, double y, double z) {
 */
 
 void VisualizationContainer::SetCurrentRegion(Region* region) {
+	if (region && region->GetDone()) return;
+
 	currentRegion = region;
 	volumeView->SetCurrentRegion(region);
 	sliceView->SetCurrentRegion(region);
@@ -1521,6 +1523,8 @@ Region* VisualizationContainer::SetRegionDone(unsigned short label, bool done) {
 		// Set to grey
 		labelColors->SetTableValue(label, 0.5, 0.5, 0.5);
 		labelColors->Build();
+
+		SetCurrentRegion(nullptr);
 	}
 	else {
 		// Set to color map
