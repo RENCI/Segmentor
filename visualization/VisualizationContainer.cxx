@@ -1004,7 +1004,7 @@ void VisualizationContainer::MergeWithCurrentRegion(double point[3]) {
 
 	Region* region = regions->Get(label);
 
-	if (!region) return;
+	if (!region || region->GetDone()) return;
 
 	const int* extent = region->GetExtent();
 
@@ -1842,7 +1842,7 @@ void VisualizationContainer::SaveRegionMetadata(std::string fileName) {
 	RegionMetadataIO::Write(fileName, metadata);
 }
 
-int VisualizationContainer::SetLabel(int x, int y, int z, unsigned short label, bool overwrite) {
+int VisualizationContainer::SetLabel(int x, int y, int z, unsigned short label, bool overwrite) {	
 	unsigned short* p = static_cast<unsigned short*>(labels->GetScalarPointer(x, y, z));
 
 	unsigned short old = *p;
