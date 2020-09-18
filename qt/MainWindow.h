@@ -6,6 +6,7 @@
 #include <QAction>
 #include <QLabel>
 #include <QMainWindow>
+#include <QProgressDialog>
 #include <QSettings>
 
 #include <string>
@@ -30,6 +31,8 @@ public:
 	void setSlicePosition(double x, double y, double z);
 
 	void setVoxelSize(double x, double y, double z);
+
+	void updateProgress(double progress);
 
 public slots:
 
@@ -112,6 +115,9 @@ protected:
 
 	// Region table
 	RegionTable* regionTable;
+
+	// Progress bar
+	QProgressDialog* progressBar;
 
 	void updateLabels(RegionCollection* regions);
 

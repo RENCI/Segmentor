@@ -32,6 +32,13 @@
 
 // Constructor
 MainWindow::MainWindow() {
+	progressBar = new QProgressDialog("Processing segmentation data", "", 0, 100, this);
+	progressBar->setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+	progressBar->setWindowFlag(Qt::WindowCloseButtonHint, false);
+	progressBar->setCancelButton(nullptr);
+	progressBar->setWindowModality(Qt::WindowModal);
+	progressBar->reset();
+
 	// Create the GUI from the Qt Designer file
 	setupUi(this);
 
@@ -167,6 +174,10 @@ void MainWindow::setVoxelSize(double x, double y, double z) {
 	zSizeSpinBox->setValue(z);
 }
 
+void MainWindow::updateProgress(double progress) {
+	progressBar->setValue(progress * 100);
+}
+
 void MainWindow::on_actionOpen_Image_File_triggered() {
 	// Open a file dialog to read the file
 	QString fileName = QFileDialog::getOpenFileName(this,
@@ -272,6 +283,9 @@ void MainWindow::on_actionOpen_Segmentation_File_triggered() {
 	}
 
 	setDefaultDirectory(defaultSegmentationDirectoryKey, fileName);
+
+	// Progress bar
+	
 
 	// Load segmentation data
 	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->OpenSegmentationFile(fileName.toStdString());

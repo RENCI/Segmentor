@@ -285,6 +285,8 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationFi
 	cast->SetInputConnection(info->GetOutputPort());
 	cast->Update();
 
+	std::cout << "OpenSegmentationFile" << std::endl;
+
 	if (SetLabelData(cast->GetOutput())) {
 		LoadRegionMetadata(fileName + ".json");
 
@@ -1744,10 +1746,6 @@ bool VisualizationContainer::SetLabelData(vtkImageData* labelData) {
 	double epsilon = 1e-6;
 
 	for (int i = 0; i < 6; i++) {
-
-		std::cout << dataBounds[i] << ", " << labelBounds[i] << std::endl;
-
-
 		if (std::abs(dataBounds[i] - labelBounds[i]) > epsilon) {
 			std::cout << dataBounds[i] << " != " << labelBounds[i] << std::endl;
 			return false;
@@ -1755,7 +1753,7 @@ bool VisualizationContainer::SetLabelData(vtkImageData* labelData) {
 	}
 
 	labels = labelData;
-
+	
 	UpdateLabels();
 
 	history->Clear();
@@ -1808,7 +1806,7 @@ void VisualizationContainer::ExtractRegions() {
 	// XXX: THIS IS CLEARING ALL VOXELS IN THE LABEL DATA
 	regions->RemoveAll();
 
-	for (int label = 1; label <= maxLabel; label++) {
+	for (int label = 1; label <= maxLabel; label++) {		
 		Region* region = new Region(label, labelColors->GetTableValue(label), labels);
 
 		if (region->GetNumVoxels() > 0) {
@@ -1817,6 +1815,8 @@ void VisualizationContainer::ExtractRegions() {
 		else {
 			delete region;
 		}
+
+		qtWindow->updateProgress((double)label / maxLabel);
 	}
 
 	currentRegion = nullptr;
