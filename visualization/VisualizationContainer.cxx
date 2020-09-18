@@ -56,6 +56,7 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	data = nullptr;
 	labels = nullptr;
 	history = new History(10);
+	numEdits = 0;
 	regions = new RegionCollection();
 	currentRegion = nullptr;	
 	hoverLabel = 0;
@@ -421,6 +422,8 @@ VisualizationContainer::FileErrorCode VisualizationContainer::SaveSegmentationDa
 	SaveRegionMetadata(fileName + ".json");
 
 	segmentationDataFileName = fileName;
+
+	numEdits = 0;
 	
 	return Success;
 }
@@ -445,6 +448,7 @@ void VisualizationContainer::InitializeLabelData() {
 
 	history->Clear();
 	PushHistory();
+	numEdits = 0;
 
 	qtWindow->updateRegions(regions);
 }
@@ -1651,6 +1655,7 @@ void VisualizationContainer::Undo() {
 	if (!labels) return;
 
 	history->Undo(labels, regions);
+	numEdits--;
 
 	// Make sure spacing is correct
 	labels->SetSpacing(data->GetSpacing());
@@ -1665,6 +1670,7 @@ void VisualizationContainer::Redo() {
 	if (!labels) return;
 
 	history->Redo(labels, regions);
+	numEdits++;
 
 	// Make sure spacing is correct
 	labels->SetSpacing(data->GetSpacing());
@@ -1673,6 +1679,10 @@ void VisualizationContainer::Redo() {
 	sliceView->SetSegmentationData(labels, regions);
 	qtWindow->updateRegions(regions);
 	Render();
+}
+
+bool VisualizationContainer::NeedToSave() {
+	return numEdits > 0;
 }
 
 VolumeView* VisualizationContainer::GetVolumeView() {
@@ -1750,6 +1760,7 @@ bool VisualizationContainer::SetLabelData(vtkImageData* labelData) {
 
 	history->Clear();
 	PushHistory();
+	numEdits = 0;
 
 	return true;
 }
@@ -1885,6 +1896,7 @@ void VisualizationContainer::IndexToPoint(int ijk[3], double point[3]) {
 
 void VisualizationContainer::PushHistory() {
 	history->Push(labels, regions);
+	numEdits++;
 }
 
 void VisualizationContainer::UpdateVisibility(Region* highlightRegion) {

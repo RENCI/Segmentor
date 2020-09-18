@@ -113,6 +113,8 @@ public:
 	void Undo();
 	void Redo();
 
+	bool NeedToSave();
+
 	VolumeView* GetVolumeView();
 	SliceView* GetSliceView();
 
@@ -126,6 +128,7 @@ protected:
 
 	// History
 	History* history;
+	int numEdits;
 
 	// Regions
 	RegionCollection* regions;

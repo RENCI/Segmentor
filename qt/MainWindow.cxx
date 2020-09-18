@@ -11,6 +11,7 @@
 #include <QShortcut>
 #include <QPushButton>
 #include <QDoubleSpinBox>
+#include <QCloseEvent>
 
 #include <vtkGenericOpenGLRenderWindow.h>
 
@@ -478,8 +479,7 @@ void MainWindow::on_actionSegment_Volume_triggered() {
 }
 
 void MainWindow::on_actionExit_triggered() {
-	// Exit Qt
-	qApp->exit();
+	close();
 }
 
 void MainWindow::on_actionBlank_3D_View_triggered(bool checked) {
@@ -808,3 +808,38 @@ QLabel* MainWindow::createLabel(const QString& text, int topMargin, int bottomMa
 
 	return label;
 }
+
+void MainWindow::closeEvent(QCloseEvent* event) {
+	if (visualizationContainer->NeedToSave()) {
+		QMessageBox message;
+		message.setIcon(QMessageBox::Warning);
+		message.setText("Unsaved changes.");
+		message.setInformativeText("Do you want to save your changes?");
+		message.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+		message.setDefaultButton(QMessageBox::Save);
+		int ret = message.exec();
+
+		switch (ret) {
+		case QMessageBox::Save:
+			on_actionSave_Segmentation_Data_triggered();
+			event->accept();
+			break;
+
+		case QMessageBox::Discard:
+			event->accept();
+			break;
+
+		case QMessageBox::Cancel:
+			event->ignore();
+			break;
+
+		default:
+			// Should never be reached
+			event->ignore();
+			break;
+		}
+	}
+	else {
+		event->accept();
+	}
+};
