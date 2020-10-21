@@ -557,6 +557,10 @@ void MainWindow::on_actionRescalePartial() {
 	setWindowLevel(sliceView->GetWindow(), sliceView->GetLevel());
 }
 
+void MainWindow::on_actionToggleAutoRescale(bool checked) {
+	visualizationContainer->GetSliceView()->SetAutoRescale(checked);
+}
+
 void MainWindow::on_actionSmoothNormals(bool checked) {
 	visualizationContainer->GetVolumeView()->SetSmoothShading(checked);
 }
@@ -792,6 +796,26 @@ void MainWindow::createToolBar() {
 	actionEdit->setToolTip("Edit mode (space bar)");
 	actionEdit->setCheckable(true);
 
+	QObject::connect(actionNavigation, &QAction::triggered, this, &MainWindow::on_actionNavigation);
+	QObject::connect(actionEdit, &QAction::triggered, this, &MainWindow::on_actionEdit);
+	QObject::connect(new QShortcut(QKeySequence(Qt::Key_Space), this), &QShortcut::activated, [actionNavigation, actionEdit]() {
+		if (actionEdit->isChecked()) {
+			actionNavigation->toggle();
+			emit(actionNavigation->triggered(true));
+		}
+		else {
+			actionEdit->toggle();
+			emit(actionEdit->triggered(true));
+		}
+	});
+
+	// Rescale toggle
+	QAction* actionToggleAutoRescale = new QAction("auto");
+	actionToggleAutoRescale->setCheckable(true);
+	actionToggleAutoRescale->setChecked(false);
+
+	QObject::connect(actionToggleAutoRescale, &QAction::triggered, this, &MainWindow::on_actionToggleAutoRescale);
+
 	// Add widgets to tool bar
 	toolBar->addWidget(createLabel("Mode"));
 	toolBar->addAction(actionNavigation);
@@ -802,6 +826,7 @@ void MainWindow::createToolBar() {
 	toolBar->addAction(createActionIcon(":/icons/icon_outline.png", "Show outlines (e)", "e", visualizationContainer->GetSliceView()->GetShowRegionOutlines(), &MainWindow::on_actionOutline));
 	toolBar->addAction(createActionIcon(":/icons/icon_rescale_full.png", "Rescale full (=)", "=", &MainWindow::on_actionRescaleFull));
 	toolBar->addAction(createActionIcon(":/icons/icon_rescale_partial.png", "Rescale partial (-)", "-", &MainWindow::on_actionRescalePartial));
+	toolBar->addAction(actionToggleAutoRescale);
 	toolBar->addSeparator();
 	toolBar->addWidget(createLabel("3D"));
 	toolBar->addAction(createActionIcon(":/icons/icon_smooth_normals.png", "Smooth normals (n)", "n", visualizationContainer->GetVolumeView()->GetSmoothShading(), &MainWindow::on_actionSmoothNormals));
@@ -817,18 +842,7 @@ void MainWindow::createToolBar() {
 	toolBar->addAction(createActionIcon(":/icons/icon_show_neighbor_regions.png", "Show neighbors (k)", "k", &MainWindow::on_actionShowNeighborRegions));
 
 	// Need extra logic for interaction mode
-	QObject::connect(actionNavigation, &QAction::triggered, this, &MainWindow::on_actionNavigation);
-	QObject::connect(actionEdit, &QAction::triggered, this, &MainWindow::on_actionEdit);
-	QObject::connect(new QShortcut(QKeySequence(32), this), &QShortcut::activated, [actionNavigation, actionEdit]() {
-		if (actionEdit->isChecked()) {
-			actionNavigation->toggle();
-			emit(actionNavigation->triggered(true));
-		}
-		else {
-			actionEdit->toggle();
-			emit(actionEdit->triggered(true));
-		}
-	});
+
 
 	toolBarWidget->layout()->addWidget(toolBar);
 }

@@ -48,6 +48,8 @@ void SliceView::cameraChange(vtkObject* caller, unsigned long eventId, void* cli
 SliceView::SliceView(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut) {
 	filterMode = FilterNone;
 	showRegionOutlines = true;
+	rescaleMode = Full;
+	autoRescale = false;
 
 	data = nullptr;
 	labels = nullptr;
@@ -310,6 +312,8 @@ void SliceView::SetLevel(double level) {
 }
 
 void SliceView::RescaleFull() {
+	rescaleMode = Full;
+
 	vtkSmartPointer<vtkImageData> scaleSlice = GetSlice();
 
 	double minValue = scaleSlice->GetScalarRange()[0];
@@ -324,6 +328,8 @@ void SliceView::RescaleFull() {
 }
 
 void SliceView::RescalePartial() {
+	rescaleMode = Partial;
+
 	vtkSmartPointer<vtkImageData> scaleSlice = GetSlice();
 
 	SegmentorMath::OtsuValues otsu = SegmentorMath::OtsuThreshold(scaleSlice);
@@ -337,6 +343,12 @@ void SliceView::RescalePartial() {
 	slice->GetProperty()->SetColorLevel(minValue + range / 2);
 
 	Render();
+}
+
+void SliceView::SetAutoRescale(bool rescale) {
+	autoRescale = rescale;
+
+	DoAutoRescale();
 }
 
 vtkSmartPointer<vtkImageData> SliceView::GetSlice() {
@@ -369,6 +381,8 @@ void SliceView::UpdatePlane() {
 	plane->SetNormal(cam->GetDirectionOfProjection());
 
 	sliceLocation->UpdateView(cam, plane);
+
+	DoAutoRescale();
 }
 
 void SliceView::SetBrushRadius(int radius) {
@@ -486,4 +500,21 @@ void SliceView::ResetCamera() {
 	renderer->GetActiveCamera()->SetViewUp(0, 1, 0);
 	renderer->ResetCamera();
 	renderer->ResetCameraClippingRange();
+}
+
+void SliceView::DoAutoRescale() {
+	if (autoRescale) {
+		switch (rescaleMode) {
+		case Full:
+			RescaleFull();
+			break;
+
+		case Partial:
+			RescalePartial();
+			break;
+
+		default:
+			std::cout << "Unknown rescale mode" << std::endl;
+		}
+	}
 }

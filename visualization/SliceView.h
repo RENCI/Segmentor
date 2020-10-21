@@ -63,6 +63,7 @@ public:
 
 	void RescaleFull();
 	void RescalePartial();
+	void SetAutoRescale(bool rescale);
 
 	void SetOverlayOpacity(double opacity);
 
@@ -78,6 +79,14 @@ public:
 protected:
 	FilterMode filterMode;
 	bool showRegionOutlines;
+
+	enum RescaleMode {
+		Full,
+		Partial
+	};
+
+	RescaleMode rescaleMode;
+	bool autoRescale;
 
 	Region* currentRegion;
 
@@ -127,6 +136,8 @@ protected:
 	void FilterRegions();
 
 	void ResetCamera();
+
+	void DoAutoRescale();
 
 	vtkSmartPointer<vtkImageData> GetSlice();
 
