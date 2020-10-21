@@ -128,6 +128,13 @@ MainWindow::MainWindow() {
 
 	brushRadiusSpinBox->valueChanged(brushRadiusSpinBox->value());
 
+	// 2D/3D toggle
+	QShortcut* toggleView = new QShortcut(QKeySequence("t"), this);
+	QShortcut* showBothViews = new QShortcut(QKeySequence("r"), this);
+
+	QObject::connect(toggleView, &QShortcut::activated, this, &MainWindow::on_toggleView);
+	QObject::connect(showBothViews, &QShortcut::activated, this, &MainWindow::on_showBothViews);
+
 	qApp->installEventFilter(this);
 }
 
@@ -501,17 +508,17 @@ void MainWindow::on_actionBlank_3D_View_triggered(bool checked) {
 }
 
 void MainWindow::on_actionShow_3D_View_triggered(bool checked) {
-	qvtkWidgetLeft->setVisible(!qvtkWidgetLeft->isVisible());
+	qvtkWidgetLeft->setVisible(checked);
 	visualizationContainer->GetVolumeView()->GetRenderer()->SetDraw(checked);
-
-	actionShow_2D_View->setEnabled(qvtkWidgetLeft->isVisible());
+	
+	actionShow_2D_View->setEnabled(checked);
 }
 
 void MainWindow::on_actionShow_2D_View_triggered(bool checked) {
-	qvtkWidgetRight->setVisible(!qvtkWidgetRight->isVisible());
+	qvtkWidgetRight->setVisible(checked);
 	visualizationContainer->GetSliceView()->GetRenderer()->SetDraw(checked);
 
-	actionShow_3D_View->setEnabled(qvtkWidgetRight->isVisible());
+	actionShow_3D_View->setEnabled(checked);
 }
 
 void MainWindow::on_actionShow_Region_Table_triggered(bool checked) {
@@ -636,6 +643,40 @@ void MainWindow::on_brushRadiusUp() {
 
 void MainWindow::on_brushRadiusDown() {
 	brushRadiusSpinBox->stepDown();
+}
+
+void MainWindow::on_toggleView() {
+	if (qvtkWidgetLeft->isVisible()) {
+		qvtkWidgetLeft->setVisible(false);
+		qvtkWidgetRight->setVisible(true);
+
+		visualizationContainer->GetVolumeView()->GetRenderer()->SetDraw(false);
+		visualizationContainer->GetSliceView()->GetRenderer()->SetDraw(true);
+
+		actionShow_3D_View->setEnabled(true);
+		actionShow_2D_View->setEnabled(false);
+	}
+	else {
+		qvtkWidgetLeft->setVisible(true);
+		qvtkWidgetRight->setVisible(false);
+
+		visualizationContainer->GetVolumeView()->GetRenderer()->SetDraw(true);
+		visualizationContainer->GetSliceView()->GetRenderer()->SetDraw(false);
+
+		actionShow_3D_View->setEnabled(false);
+		actionShow_2D_View->setEnabled(true);
+	}
+}
+
+void MainWindow::on_showBothViews() {
+	qvtkWidgetLeft->setVisible(true);
+	qvtkWidgetRight->setVisible(true);
+
+	visualizationContainer->GetVolumeView()->GetRenderer()->SetDraw(true);
+	visualizationContainer->GetSliceView()->GetRenderer()->SetDraw(true);
+
+	actionShow_3D_View->setEnabled(true);
+	actionShow_2D_View->setEnabled(true);
 }
 
 void MainWindow::on_regionDone(int label, bool done) {

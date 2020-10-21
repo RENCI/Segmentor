@@ -102,6 +102,9 @@ public slots:
 	virtual void on_brushRadiusUp();
 	virtual void on_brushRadiusDown();
 
+	virtual void on_toggleView();
+	virtual void on_showBothViews();
+
 	// Region table events
 	virtual void on_regionDone(int label, bool done);
 	virtual void on_removeRegion(int label);
