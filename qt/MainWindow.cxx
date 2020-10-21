@@ -185,6 +185,13 @@ void MainWindow::updateProgress(double progress) {
 	progressBar->setValue(progress * 100);
 }
 
+void MainWindow::showMessage(QString message) {
+	QMessageBox errorMessage;
+	errorMessage.setIcon(QMessageBox::Warning);
+	errorMessage.setText(message);
+	errorMessage.exec();
+}
+
 void MainWindow::on_actionOpen_Image_File_triggered() {
 	// Open a file dialog to read the file
 	QString fileName = QFileDialog::getOpenFileName(this,
@@ -688,11 +695,6 @@ void MainWindow::on_regionDone(int label, bool done) {
 
 	if (done && !region->GetDone()) {
 		regionTable->update(region);
-
-		QMessageBox errorMessage;
-		errorMessage.setIcon(QMessageBox::Warning);
-		errorMessage.setText("Region is not contiguous. Please fix before marking as \"done\"");
-		errorMessage.exec();
 	}
 }
 

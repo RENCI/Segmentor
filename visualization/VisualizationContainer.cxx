@@ -1517,6 +1517,8 @@ Region* VisualizationContainer::SetRegionDone(unsigned short label, bool done) {
 		connectivity->Update();
 
 		if (connectivity->GetNumberOfExtractedRegions() > 1) {
+			qtWindow->showMessage("Region is not contiguous. Please fix before marking as \"done\"");
+
 			return region;
 		}
 	}

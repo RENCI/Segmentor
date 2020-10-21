@@ -34,6 +34,8 @@ public:
 
 	void updateProgress(double progress);
 
+	void showMessage(QString message);
+
 public slots:
 
 	// Menu events
