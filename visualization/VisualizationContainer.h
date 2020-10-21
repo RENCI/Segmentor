@@ -89,6 +89,7 @@ public:
 
 	void RemoveRegion(unsigned short label);
 	Region* SetRegionDone(unsigned short label, bool done);
+	void ToggleRegionDone(double point[3]);
 	void HighlightRegion(unsigned short label);
 	void SelectRegion(unsigned short label, bool flyTo = true);
 	void SetRegionVisibility(unsigned short label, bool visible);

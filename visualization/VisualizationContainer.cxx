@@ -628,7 +628,7 @@ void VisualizationContainer::Paint(double point[3], bool overwrite) {
 }
 
 void VisualizationContainer::Paint(int i, int j, int k, bool overwrite, bool useBrush) {
-	if (!labels || !currentRegion) return;
+	if (!labels || !currentRegion || currentRegion->GetDone()) return;
 
 	int extent[6];
 	data->GetExtent(extent);
@@ -690,7 +690,7 @@ void VisualizationContainer::Erase(double point[3]) {
 }
 
 void VisualizationContainer::Erase(int i, int j, int k, bool useBrush) {
-	if (!labels || !currentRegion) return;
+	if (!labels || !currentRegion || currentRegion->GetDone()) return;
 
 	int extent[6];
 	data->GetExtent(extent);
@@ -803,8 +803,6 @@ void VisualizationContainer::ErasePoint(double x, double y, double z) {
 */
 
 void VisualizationContainer::SetCurrentRegion(Region* region) {
-	if (region && region->GetDone()) return;
-
 	currentRegion = region;
 	volumeView->SetCurrentRegion(region);
 	sliceView->SetCurrentRegion(region);
@@ -915,7 +913,7 @@ void VisualizationContainer::CreateNewRegion(double point[3]) {
 }
 
 void VisualizationContainer::RelabelCurrentRegion() {
-	if (!currentRegion) return;
+	if (!currentRegion || currentRegion->GetDone()) return;
 
 	unsigned short label = currentRegion->GetLabel();
 
@@ -993,7 +991,7 @@ void VisualizationContainer::RelabelCurrentRegion() {
 }
 
 void VisualizationContainer::MergeWithCurrentRegion(double point[3]) {
-	if (!currentRegion) return;
+	if (!currentRegion || currentRegion->GetDone()) return;
 
 	int ijk[3];
 	PointToIndex(point, ijk);
@@ -1046,7 +1044,7 @@ void VisualizationContainer::MergeWithCurrentRegion(double point[3]) {
 }
 
 void VisualizationContainer::SplitCurrentRegion(int numRegions) {
-	if (!currentRegion) return;
+	if (!currentRegion || currentRegion->GetDone()) return;
 	
 	SplitRegionIntensity(currentRegion, numRegions);
 
@@ -1378,7 +1376,7 @@ void VisualizationContainer::SplitRegionIntensity(Region* region, int numRegions
 }
 
 void VisualizationContainer::GrowCurrentRegion(double point[3]) {
-	if (!currentRegion) return;
+	if (!currentRegion || currentRegion->GetDone()) return;
 
 	int ijk[3];
 	PointToIndex(point, ijk);
@@ -1529,8 +1527,6 @@ Region* VisualizationContainer::SetRegionDone(unsigned short label, bool done) {
 		// Set to grey
 		labelColors->SetTableValue(label, 0.5, 0.5, 0.5);
 		labelColors->Build();
-
-		SetCurrentRegion(nullptr);
 	}
 	else {
 		// Set to color map
@@ -1542,8 +1538,29 @@ Region* VisualizationContainer::SetRegionDone(unsigned short label, bool done) {
 	return region;
 }
 
+void VisualizationContainer::ToggleRegionDone(double point[3]) {
+	int ijk[3];
+	PointToIndex(point, ijk);
+	int x = ijk[0];
+	int y = ijk[1];
+	int z = ijk[2];
+
+	// Get the region at the point
+	unsigned short label = GetLabel(x, y, z);
+
+	Region* region = regions->Get(label);
+
+	if (!region) return;
+
+	SetRegionDone(label, !region->GetDone());
+
+	qtWindow->updateRegion(region, regions);
+}
+
 void VisualizationContainer::RemoveRegion(unsigned short label) {
 	Region* region = regions->Get(label);
+
+	if (region->GetDone()) return;
 
 	if (region == currentRegion) SetCurrentRegion(nullptr);
 
