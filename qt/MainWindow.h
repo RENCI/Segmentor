@@ -114,6 +114,7 @@ public slots:
 	virtual void on_highlightRegion(int label);
 	virtual void on_selectRegion(int label);
 	virtual void on_regionVisible(int label, bool visible);
+	virtual void on_regionColor(int label, QColor color);
 
 protected:
 	// The visualization container

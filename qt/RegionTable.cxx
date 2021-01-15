@@ -9,6 +9,7 @@
 #include <QPushButton>
 #include <QSignalMapper>
 #include <QCheckBox>
+#include <QColorDialog>
 
 #include "Region.h"
 #include "RegionCollection.h"
@@ -247,7 +248,18 @@ void RegionTable::on_cellEntered(int row, int column) {
 void RegionTable::on_cellClicked(int row, int column) {
 	disableSorting();
 
-	if (column == Visible) {
+	if (column == Color) {
+		QTableWidgetItem* colorItem = (QTableWidgetItem*)item(row, column);
+
+		QColor color = QColorDialog::getColor(colorItem->backgroundColor());
+
+		if (color.isValid()) {
+			colorItem->setBackgroundColor(color);
+
+			emit(regionColor(rowLabel(row), color));
+		}
+	}
+	else if (column == Visible) {
 		QCheckBox* checkBox = (QCheckBox*)cellWidget(row, column);
 		checkBox->toggle();
 

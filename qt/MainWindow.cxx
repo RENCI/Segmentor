@@ -69,6 +69,7 @@ MainWindow::MainWindow() {
 	QObject::connect(regionTable, &RegionTable::highlightRegion, this, &MainWindow::on_highlightRegion);
 	QObject::connect(regionTable, &RegionTable::selectRegion, this, &MainWindow::on_selectRegion);
 	QObject::connect(regionTable, &RegionTable::regionVisible, this, &MainWindow::on_regionVisible);
+	QObject::connect(regionTable, &RegionTable::regionColor, this, &MainWindow::on_regionColor);
 
 	// Slice up and down
 	QAction* sliceUpAction = new QAction("+", this);
@@ -713,6 +714,11 @@ void MainWindow::on_selectRegion(int label) {
 void MainWindow::on_regionVisible(int label, bool visible) {
 	visualizationContainer->SetRegionVisibility((unsigned short)label, visible);
 }
+
+void MainWindow::on_regionColor(int label, QColor color) {
+	visualizationContainer->SetRegionColor((unsigned short)label, color.redF(), color.greenF(), color.blueF());
+}
+
 
 void MainWindow::updateLabels(RegionCollection* regions) {
 	int modifiedCount = 0, doneCount = 0;

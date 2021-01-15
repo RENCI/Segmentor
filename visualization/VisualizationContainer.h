@@ -93,6 +93,7 @@ public:
 	void HighlightRegion(unsigned short label);
 	void SelectRegion(unsigned short label, bool flyTo = true);
 	void SetRegionVisibility(unsigned short label, bool visible);
+	void SetRegionColor(unsigned short label, double r, double g, double b);
 
 	void CreateNewRegion(double point[3]);
 	void RelabelCurrentRegion();

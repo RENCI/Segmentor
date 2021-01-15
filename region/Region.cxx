@@ -351,6 +351,17 @@ void Region::SetDone(bool isDone) {
 	}
 }
 
+void Region::SetColor(double r, double g, double b) {
+	color[0] = r;
+	color[1] = g;
+	color[2] = b;
+	
+	surface->GetActor()->GetProperty()->SetColor(color);
+	outline->GetActor()->GetProperty()->SetColor(color);
+	voxelOutlines->GetActor()->GetProperty()->SetColor(color);
+	highlight3D->GetActor()->GetProperty()->SetColor(color);	
+}
+
 void Region::ShowText(bool show) {
 	if (!text) return;
 

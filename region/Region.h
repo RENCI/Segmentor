@@ -49,10 +49,12 @@ public:
 	bool GetDone();
 	void SetDone(bool isDone);
 
+	void SetColor(double r, double g, double b);
+	const double* GetColor();
+
 	void ShowText(bool show);
 
 	unsigned short GetLabel();
-	const double* GetColor();
 	int GetNumVoxels();
 	const int* GetExtent();
 	void GetExtent(int outExtent[6]);

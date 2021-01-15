@@ -1625,6 +1625,17 @@ void VisualizationContainer::ToggleRegionVisibility(unsigned short label) {
 	qtWindow->updateRegion(region, regions);
 }
 
+void VisualizationContainer::SetRegionColor(unsigned short label, double r, double g, double b) {
+	Region* region = regions->Get(label);
+
+	if (!region) return;
+
+	labelColors->SetTableValue(label, r, g, b);
+	region->SetColor(r, g, b);
+
+	Render();
+}
+
 void VisualizationContainer::SetVisibleOpacity(double opacity) {
 	volumeView->SetVisibleOpacity(opacity, filterRegions);
 }

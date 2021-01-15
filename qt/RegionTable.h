@@ -2,6 +2,7 @@
 #define RegionTable_H
 
 #include <QTableWidget>
+#include <QColor>
 
 class Region;
 class RegionCollection;
@@ -26,6 +27,7 @@ signals:
 	void highlightRegion(int label);
 	void selectRegion(int label);
 	void regionVisible(int label, bool visible);
+	void regionColor(int label, QColor color);
 
 protected:
 	int currentRegionLabel;
