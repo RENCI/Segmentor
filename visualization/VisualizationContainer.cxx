@@ -1535,6 +1535,8 @@ Region* VisualizationContainer::SetRegionDone(unsigned short label, bool done) {
 		UpdateColors(label);
 	}
 
+	qtWindow->updateRegion(region, regions);
+
 	Render();
 
 	return region;
@@ -1555,8 +1557,6 @@ void VisualizationContainer::ToggleRegionDone(double point[3]) {
 	if (!region) return;
 
 	SetRegionDone(label, !region->GetDone());
-
-	qtWindow->updateRegion(region, regions);
 }
 
 void VisualizationContainer::RemoveRegion(unsigned short label) {

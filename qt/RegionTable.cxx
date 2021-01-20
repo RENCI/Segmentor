@@ -18,7 +18,7 @@ RegionTable::RegionTable(QWidget* parent)
 	: QTableWidget(parent) 
 {
 	QStringList headers;
-	headers << "Id" << "Color" << "Size" << "Modified" << "Visible" << "Done" << "Remove";
+	headers << "Id" << "Color" << "Size" << "Refining" << "Visible" << "Done" << "Remove";
 	setColumnCount(headers.length());
 	setHorizontalHeaderLabels(headers);
 	verticalHeader()->setVisible(false);
@@ -42,7 +42,7 @@ void RegionTable::update(RegionCollection* regions) {
 	// Icon for remove
 	QStyle* style = QApplication::style();
 	QIcon removeIcon = style->standardIcon(QStyle::SP_DialogCloseButton);
-	QIcon modifiedIcon = style->standardIcon(QStyle::SP_MessageBoxWarning);
+	QIcon refiningIcon = style->standardIcon(QStyle::SP_MessageBoxWarning);
 
 	// Grey color
 	double grey[3] = { 0.5, 0.5, 0.5 };
@@ -73,17 +73,18 @@ void RegionTable::update(RegionCollection* regions) {
 		sizeItem->setFlags(Qt::ItemIsSelectable);
 		sizeItem->setTextColor(QColor("black"));
 
-		// Modified
-		QTableWidgetItem* modifiedItem = new QTableWidgetItem();
-		modifiedItem->setFlags(Qt::ItemIsSelectable);
-		modifiedItem->setData(0, region->GetModified());
-		modifiedItem->setTextColor(QColor("white"));
+		// Refining
+		bool refining = region->GetModified() && !region->GetDone();
+		QTableWidgetItem* refiningItem = new QTableWidgetItem();
+		refiningItem->setFlags(Qt::ItemIsSelectable);
+		refiningItem->setData(0, refining);
+		refiningItem->setTextColor(QColor("white"));
 
 		// Using a button for the icon container sizes the icon correctly...
-		QPushButton* modifiedButton = new QPushButton();
-		if (region->GetModified()) modifiedButton->setIcon(modifiedIcon);
-		modifiedButton->setEnabled(false);
-		modifiedButton->setStyleSheet("background-color: transparent; border: none;");
+		QPushButton* refiningButton = new QPushButton();
+		if (refining) refiningButton->setIcon(refiningIcon);
+		refiningButton->setEnabled(false);
+		refiningButton->setStyleSheet("background-color: transparent; border: none;");
 
 		// Visible
 		QTableWidgetItem* visibleItem = new QTableWidgetItem();
@@ -122,8 +123,8 @@ void RegionTable::update(RegionCollection* regions) {
 		setItem(i, Color, colorItem);
 		setItem(i, Size, sizeItem);
 
-		setItem(i, Modified, modifiedItem);
-		setCellWidget(i, Modified, modifiedButton);
+		setItem(i, Refining, refiningItem);
+		setCellWidget(i, Refining, refiningButton);
 
 		setItem(i, Visible, visibleItem);
 		setCellWidget(i, Visible, visibleCheckbox);
@@ -144,7 +145,7 @@ void RegionTable::update(Region* region) {
 	disableSorting();
 
 	QStyle* style = QApplication::style();
-	QIcon modifiedIcon = style->standardIcon(QStyle::SP_MessageBoxWarning);
+	QIcon refiningIcon = style->standardIcon(QStyle::SP_MessageBoxWarning);
 
 	QString labelString = QString::number(region->GetLabel());
 
@@ -155,9 +156,10 @@ void RegionTable::update(Region* region) {
 			// Size
 			item(i, Size)->setData(0, region->GetNumVoxels());
 
-			// Modified
-			item(i, Modified)->setData(0, region->GetModified());
-			((QPushButton*)cellWidget(i, Modified))->setIcon(region->GetModified() ? modifiedIcon : QIcon());
+			// Refining
+			bool refining = region->GetModified() && !region->GetDone();
+			item(i, Refining)->setData(0, refining);
+			((QPushButton*)cellWidget(i, Refining))->setIcon(refining ? refiningIcon : QIcon());
 
 			// Visible
 			item(i, Visible)->setData(0, region->GetVisible());

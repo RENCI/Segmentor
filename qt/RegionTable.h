@@ -43,7 +43,7 @@ protected:
 		Id = 0,
 		Color,
 		Size,
-		Modified,
+		Refining,
 		Visible,
 		Done,
 		Remove

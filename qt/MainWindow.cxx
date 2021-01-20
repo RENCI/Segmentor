@@ -721,7 +721,7 @@ void MainWindow::on_regionColor(int label, QColor color) {
 
 
 void MainWindow::updateLabels(RegionCollection* regions) {
-	int modifiedCount = 0, doneCount = 0;
+	int refiningCount = 0, doneCount = 0;
 	int minSize = 0, maxSize = 0, total = 0;
 
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
@@ -739,14 +739,14 @@ void MainWindow::updateLabels(RegionCollection* regions) {
 
 		total += size;
 
-		if (region->GetModified()) modifiedCount++;
+		if (region->GetModified() && !region->GetDone()) refiningCount++;
 		if (region->GetDone()) doneCount++;
 	}
 
 	int n = regions->Size();
 
 	total_Label->setText("Total: " + QString::number(n));
-	modified_Label->setText("Modified: " + QString::number(modifiedCount));
+	refining_Label->setText("Refining: " + QString::number(refiningCount));
 	done_Label->setText("Done: " + QString::number(doneCount));
 
 	min_Label->setText("Minimum: " + QString::number(minSize));

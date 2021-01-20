@@ -520,9 +520,9 @@
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="modified_Label">
+              <widget class="QLabel" name="refining_Label">
                <property name="text">
-                <string>Modified: 0</string>
+                <string>Refining: 0</string>
                </property>
               </widget>
              </item>
