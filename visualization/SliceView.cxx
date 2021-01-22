@@ -284,7 +284,7 @@ bool SliceView::GetShowRegionOutlines() {
 void SliceView::ShowRegionOutlines(bool show) {
 	showRegionOutlines = show;
 
-	//FilterRegions();
+	FilterRegions();
 }
 
 void SliceView::ToggleRegionOutlines() {
