@@ -529,6 +529,16 @@ void vtkInteractorStyleSlice::OnChar()
 	}
 	break;
 
+	case 'i':
+	case 'I':
+	{
+		if (this->CurrentRenderer != nullptr)
+		{
+			this->CurrentRenderer->ResetCamera();
+		}
+	}
+	break;
+
 	// Ignore defaults
 	case 'e':
 	case 'E':

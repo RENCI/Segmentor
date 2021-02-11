@@ -425,6 +425,17 @@ void vtkInteractorStyleVolume::OnChar()
 	}
 	break;
 
+	case 'i':
+	case 'I':
+	{
+		if (this->CurrentRenderer != nullptr)
+		{
+			this->CurrentRenderer->ResetCamera();
+			this->Interactor->Render();
+		}
+	}
+	break;
+
 	// Ignore defaults
 	case 'e':
 	case 'E':
