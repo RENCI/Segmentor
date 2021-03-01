@@ -13,8 +13,6 @@
 #include <QDoubleSpinBox>
 #include <QCloseEvent>
 
-#include <vtkGenericOpenGLRenderWindow.h>
-
 #include "VisualizationContainer.h"
 #include "Region.h"
 #include "RegionCollection.h"
@@ -23,12 +21,14 @@
 #include "InteractionEnums.h"
 #include "SliceView.h"
 #include "VolumeView.h"
+#include "CameraViewDialog.h"
 
-#include "vtkCallbackCommand.h"
-#include "vtkSmartPointer.h"
-#include "vtkRenderWindowInteractor.h"
-
+#include <vtkCallbackCommand.h>
+#include <vtkCamera.h>
+#include <vtkGenericOpenGLRenderWindow.h>
 #include <vtkRenderer.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkSmartPointer.h>
 
 // Constructor
 MainWindow::MainWindow() {
@@ -513,6 +513,26 @@ void MainWindow::on_actionExit_triggered() {
 
 void MainWindow::on_actionBlank_3D_View_triggered(bool checked) {
 	visualizationContainer->GetVolumeView()->Enable(!checked);
+}
+
+void MainWindow::on_actionSet_Camera_triggered() {
+	double cameraPos[3];
+	double slicePos[3];
+
+	vtkRenderer* renderer = visualizationContainer->GetSliceView()->GetRenderer();
+	vtkCamera* camera = renderer->GetActiveCamera();
+
+	camera->GetPosition(cameraPos);
+	camera->GetFocalPoint(slicePos);
+
+	CameraViewDialog dialog(this, renderer);
+	
+	if (!dialog.exec()) {
+		camera->SetPosition(cameraPos);
+		camera->SetFocalPoint(slicePos);
+
+		visualizationContainer->Render();
+	}
 }
 
 void MainWindow::on_actionShow_3D_View_triggered(bool checked) {
