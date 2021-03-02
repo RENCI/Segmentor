@@ -183,6 +183,8 @@ protected:
 	void PointToIndex(double point[3], int ijk[3]);
 	void IndexToPoint(int ijk[3], double point[3]);
 
+	bool InBounds(int ijk[3]);
+
 	void PushHistory();
 	void PopHistory();
 

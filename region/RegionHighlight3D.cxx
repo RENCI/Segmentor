@@ -27,6 +27,7 @@ RegionHighlight3D::RegionHighlight3D(Region* inputRegion, double color[3]) {
 	actor->GetProperty()->SetAmbient(1.0);
 	actor->GetProperty()->SetSpecular(0.0);
 	actor->GetProperty()->SetOpacity(0.5);
+	actor->PickableOff();
 
 	Update();
 }
