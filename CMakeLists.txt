@@ -96,6 +96,13 @@ elseif(APPLE)
   set(PLUGIN_DEST_DIR Segmentor.app/Contents/PlugIns)
   set(APPS \${CMAKE_INSTALL_PREFIX}/Segmentor.app)
 
+  # Adjust Info.plist
+  add_custom_command(
+    TARGET Segmentor
+    POST_BUILD
+    COMMAND plutil -replace NSRequiresAquaSystemAppearance -bool true Segmentor.app/Contents/Info.plist
+  )
+
   install(FILES ${VTK_DIR}/lib/libQVTKWidgetPlugin.dylib DESTINATION ${PLUGIN_DEST_DIR} COMPONENT Segmentor)
 
   get_target_property(QMAKE_EXECUTABLE Qt5::qmake IMPORTED_LOCATION)
