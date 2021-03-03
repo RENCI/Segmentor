@@ -744,6 +744,13 @@ void VisualizationContainer::MouseMove() {
 void VisualizationContainer::MouseMove(double point[3]) {
 	int ijk[3];
 	PointToIndex(point, ijk);
+	
+	if (!InBounds(ijk)) {
+		MouseMove();
+
+		return;
+	}
+
 	IndexToPoint(ijk, point);
 
 	// Update probes
@@ -1922,6 +1929,16 @@ void VisualizationContainer::IndexToPoint(int ijk[3], double point[3]) {
 	vtkIdType id = data->ComputePointId(ijk);
 
 	data->GetPoint(id, point);
+}
+
+bool VisualizationContainer::InBounds(int ijk[3]) {
+	int extent[6];
+	data->GetExtent(extent);
+
+	return 
+		ijk[0] >= extent[0] && ijk[0] <= extent[1] &&
+		ijk[1] >= extent[2] && ijk[1] <= extent[3] &&
+		ijk[2] >= extent[4] && ijk[2] <= extent[5];
 }
 
 void VisualizationContainer::PushHistory() {
