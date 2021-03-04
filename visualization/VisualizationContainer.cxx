@@ -1343,6 +1343,9 @@ void VisualizationContainer::SplitRegionIntensity(Region* region, int numRegions
 	currentRegion->SetModified(true);
 	currentRegion->SetVisible(true);
 
+	const double* currentColor = currentRegion->GetColor();
+	int colorOffset = 0;
+
 	// Create new regions for other components
 	for (int i = 1; i < numComponents; i++) {
 		// Label from the connectivity filter
@@ -1371,6 +1374,21 @@ void VisualizationContainer::SplitRegionIntensity(Region* region, int numRegions
 		regions->Add(newRegion);
 		volumeView->AddRegion(newRegion);
 		sliceView->AddRegion(newRegion);
+
+		// Check color conflicts
+		const double* color = newRegion->GetColor();
+
+		double epsilon = 0.1;
+		if (abs(color[0] - currentColor[0]) < epsilon &&
+			abs(color[1] - currentColor[1]) < epsilon &&
+			abs(color[2] - currentColor[2]) < epsilon) {
+			colorOffset++;
+		}
+
+		if (colorOffset > 0) {
+			double* color = LabelColors::GetColor(newLabel + colorOffset);
+			newRegion->SetColor(color[0], color[1], color[2]);
+		}
 
 		newRegion->SetModified(true);
 	}
