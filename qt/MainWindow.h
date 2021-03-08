@@ -69,6 +69,12 @@ public slots:
 	virtual void on_actionShow_2D_View_triggered(bool checked);
 	virtual void on_actionShow_Region_Table_triggered(bool checked);
 
+	virtual void on_actionData_Loading_triggered();
+	virtual void on_actionControls_triggered();
+	virtual void on_actionGithub_Repo_triggered();
+
+	virtual void on_actionProject_Website_triggered();
+
 	// Tool bar events
 	virtual void on_actionNavigation();
 	virtual void on_actionEdit();

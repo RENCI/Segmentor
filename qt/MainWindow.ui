@@ -628,10 +628,27 @@
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionData_Loading"/>
+    <addaction name="actionControls"/>
+    <addaction name="separator"/>
+    <addaction name="actionGithub_Repo"/>
+   </widget>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>About</string>
+    </property>
+    <addaction name="actionProject_Website"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuAnalyze"/>
    <addaction name="menuView"/>
+   <addaction name="menuHelp"/>
+   <addaction name="menuAbout"/>
   </widget>
   <action name="actionOpen_Image_File">
    <property name="text">
@@ -757,6 +774,26 @@
   <action name="actionSet_Camera">
    <property name="text">
     <string>Set Camera</string>
+   </property>
+  </action>
+  <action name="actionData_Loading">
+   <property name="text">
+    <string>Data Loading</string>
+   </property>
+  </action>
+  <action name="actionControls">
+   <property name="text">
+    <string>Controls</string>
+   </property>
+  </action>
+  <action name="actionGithub_Repo">
+   <property name="text">
+    <string>Github Repo</string>
+   </property>
+  </action>
+  <action name="actionProject_Website">
+   <property name="text">
+    <string>Project Website</string>
    </property>
   </action>
  </widget>

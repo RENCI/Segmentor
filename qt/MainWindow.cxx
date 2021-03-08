@@ -12,6 +12,7 @@
 #include <QPushButton>
 #include <QDoubleSpinBox>
 #include <QCloseEvent>
+#include <QDesktopServices>
 
 #include "VisualizationContainer.h"
 #include "Region.h"
@@ -551,6 +552,21 @@ void MainWindow::on_actionShow_2D_View_triggered(bool checked) {
 
 void MainWindow::on_actionShow_Region_Table_triggered(bool checked) {
 	regionTableContainer->setVisible(!regionTableContainer->isVisible());
+}
+
+void MainWindow::on_actionData_Loading_triggered() {
+	QDesktopServices::openUrl(QUrl("https://github.com/RENCI/Segmentor/wiki/Data-Loading-and-Saving"));
+}
+
+void MainWindow::on_actionControls_triggered() {
+	QDesktopServices::openUrl(QUrl("https://github.com/RENCI/Segmentor/wiki/Controls"));
+}
+void MainWindow::on_actionGithub_Repo_triggered() {
+	QDesktopServices::openUrl(QUrl("https://github.com/RENCI/Segmentor"));
+}
+
+void MainWindow::on_actionProject_Website_triggered() {
+	QDesktopServices::openUrl(QUrl("https://www.nucleininja.org/"));
 }
 
 void MainWindow::on_actionNavigation() {
