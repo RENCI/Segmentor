@@ -227,6 +227,9 @@ void MainWindow::on_actionOpen_Image_File_triggered() {
 			errorMessage.exec();
 		}
 	}
+	else {
+		updateImage();
+	}
 }
 
 void MainWindow::on_actionOpen_Image_Stack_triggered() {
@@ -283,6 +286,9 @@ void MainWindow::on_actionOpen_Image_Stack_triggered() {
 			errorMessage.setInformativeText("Unknown error.");
 			errorMessage.exec();
 		}
+	}
+	else {
+		updateImage();
 	}
 }
 
@@ -788,6 +794,15 @@ void MainWindow::updateLabels(RegionCollection* regions) {
 	min_Label->setText("Minimum: " + QString::number(minSize));
 	max_Label->setText("Maximum: " + QString::number(maxSize));
 	median_Label->setText("Median: " + QString::number(n > 0 ? (double)total / n : 0, 'f', 1));
+}
+
+void MainWindow::updateImage() {
+	const double* range = visualizationContainer->GetDataRange();
+	
+	double step = (range[1] - range[0]) / 25;
+
+	windowSpinBox->setSingleStep(step);
+	levelSpinBox->setSingleStep(step);
 }
 
 bool MainWindow::eventFilter(QObject* obj, QEvent* event) {

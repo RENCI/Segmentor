@@ -135,6 +135,8 @@ protected:
 
 	void updateLabels(RegionCollection* regions);
 
+	void updateImage();
+
 	bool eventFilter(QObject* obj, QEvent* event);
 
 	// Default directories

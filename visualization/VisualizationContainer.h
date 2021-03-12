@@ -120,6 +120,8 @@ public:
 	VolumeView* GetVolumeView();
 	SliceView* GetSliceView();
 
+	const double* GetDataRange();
+
 protected:
 	// Qt main window
 	MainWindow* qtWindow;

@@ -1750,6 +1750,10 @@ SliceView* VisualizationContainer::GetSliceView() {
 	return sliceView;
 }
 
+const double* VisualizationContainer::GetDataRange() {
+	return data->GetScalarRange();
+}
+
 void VisualizationContainer::SetImageData(vtkImageData* imageData) {	
 /*
 	vtkSmartPointer<vtkImageGradientMagnitude> gradient = vtkSmartPointer<vtkImageGradientMagnitude>::New();

@@ -634,14 +634,13 @@
     </property>
     <addaction name="actionData_Loading"/>
     <addaction name="actionControls"/>
-    <addaction name="separator"/>
-    <addaction name="actionGithub_Repo"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
      <string>About</string>
     </property>
     <addaction name="actionProject_Website"/>
+    <addaction name="actionGithub_Repo"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
