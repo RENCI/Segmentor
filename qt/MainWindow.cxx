@@ -23,6 +23,7 @@
 #include "SliceView.h"
 #include "VolumeView.h"
 #include "CameraViewDialog.h"
+#include "SettingsDialog.h"
 
 #include <vtkCallbackCommand.h>
 #include <vtkCamera.h>
@@ -57,6 +58,9 @@ MainWindow::MainWindow() {
 	// Create visualization container
 	visualizationContainer = new VisualizationContainer(qvtkWidgetLeft->GetInteractor(), qvtkWidgetRight->GetInteractor(), this);
 
+	// Create mode bar
+	createModeBar();
+
 	// Create tool bar
 	createToolBar();
 
@@ -86,7 +90,7 @@ MainWindow::MainWindow() {
 	QObject::connect(sliceDownAction, &QAction::triggered, this, &MainWindow::on_sliceDown);
 
 	sliceDownButton->setDefaultAction(sliceDownAction);
-
+/*
 	// Voxel size
 	QObject::connect(xSizeSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::on_voxelSizeSpinBox);
 	QObject::connect(ySizeSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::on_voxelSizeSpinBox);
@@ -129,7 +133,7 @@ MainWindow::MainWindow() {
 	QObject::connect(brushRadiusDown, &QShortcut::activated, this, &MainWindow::on_brushRadiusDown);
 
 	brushRadiusSpinBox->valueChanged(brushRadiusSpinBox->value());
-
+*/
 	// 2D/3D toggle
 	QShortcut* toggleView = new QShortcut(QKeySequence("t"), this);
 	QShortcut* showBothViews = new QShortcut(QKeySequence("r"), this);
@@ -162,12 +166,12 @@ void MainWindow::updateRegion(Region* region, RegionCollection* regions) {
 void MainWindow::selectRegion(unsigned short label) {
 	regionTable->selectRegionLabel(label);
 }
-
+/*
 void MainWindow::setWindowLevel(double window, double level) {
 	windowSpinBox->setValue(window);
 	levelSpinBox->setValue(level);
 }
-
+*/
 void MainWindow::setSlicePosition(double x, double y, double z) {
 	QString s = "Slice Position: (" + 
 		QString::number(x, 'f', 1) + ", " + 
@@ -176,13 +180,13 @@ void MainWindow::setSlicePosition(double x, double y, double z) {
 
 	slicePositionLabel->setText(s);
 }
-
+/*
 void MainWindow::setVoxelSize(double x, double y, double z) {
 	xSizeSpinBox->setValue(x);
 	ySizeSpinBox->setValue(y);
 	zSizeSpinBox->setValue(z);
 }
-
+*/
 void MainWindow::updateProgress(double progress) {
 	progressBar->setValue(progress * 100);
 }
@@ -227,9 +231,11 @@ void MainWindow::on_actionOpen_Image_File_triggered() {
 			errorMessage.exec();
 		}
 	}
+/*
 	else {
 		updateImage();
 	}
+*/
 }
 
 void MainWindow::on_actionOpen_Image_Stack_triggered() {
@@ -287,9 +293,11 @@ void MainWindow::on_actionOpen_Image_Stack_triggered() {
 			errorMessage.exec();
 		}
 	}
+/*
 	else {
 		updateImage();
 	}
+*/
 }
 
 void MainWindow::on_actionOpen_Segmentation_File_triggered() {
@@ -560,6 +568,14 @@ void MainWindow::on_actionShow_Region_Table_triggered(bool checked) {
 	regionTableContainer->setVisible(!regionTableContainer->isVisible());
 }
 
+void MainWindow::on_actionChange_Settings_triggered() {
+	SettingsDialog dialog(this, visualizationContainer);
+
+	if (!dialog.exec()) {
+
+	}
+}
+
 void MainWindow::on_actionData_Loading_triggered() {
 	QDesktopServices::openUrl(QUrl("https://github.com/RENCI/Segmentor/wiki/Data-Loading-and-Saving"));
 }
@@ -596,7 +612,7 @@ void MainWindow::on_actionRescaleFull() {
 
 	sliceView->RescaleFull();
 
-	setWindowLevel(sliceView->GetWindow(), sliceView->GetLevel());
+//	setWindowLevel(sliceView->GetWindow(), sliceView->GetLevel());
 }
 
 void MainWindow::on_actionRescalePartial() {
@@ -604,7 +620,7 @@ void MainWindow::on_actionRescalePartial() {
 
 	sliceView->RescalePartial();
 
-	setWindowLevel(sliceView->GetWindow(), sliceView->GetLevel());
+//	setWindowLevel(sliceView->GetWindow(), sliceView->GetLevel());
 }
 
 void MainWindow::on_actionToggleAutoRescale(bool checked) {
@@ -645,58 +661,6 @@ void MainWindow::on_sliceUp() {
 
 void MainWindow::on_sliceDown() {
 	visualizationContainer->SliceDown();
-}
-
-void MainWindow::on_windowSpinBox_valueChanged(double value) {
-	visualizationContainer->GetSliceView()->SetWindow(value);
-}
-
-void MainWindow::on_levelSpinBox_valueChanged(double value) {
-	visualizationContainer->GetSliceView()->SetLevel(value);
-}
-
-void MainWindow::on_overlaySpinBox_valueChanged(double value) {
-	visualizationContainer->GetSliceView()->SetOverlayOpacity(value);
-}
-
-void MainWindow::on_overlayUp() {
-	overlaySpinBox->stepUp();
-}
-
-void MainWindow::on_overlayDown() {
-	overlaySpinBox->stepDown();
-}
-
-void MainWindow::on_opacitySpinBox_valueChanged(double value) {
-	visualizationContainer->SetVisibleOpacity(value);
-}
-
-void MainWindow::on_opacityUp() {
-	opacitySpinBox->stepUp();
-}
-
-void MainWindow::on_opacityDown() {
-	opacitySpinBox->stepDown();
-}
-
-void MainWindow::on_voxelSizeSpinBox() {
-	visualizationContainer->SetVoxelSize(
-		xSizeSpinBox->value(),
-		ySizeSpinBox->value(),
-		zSizeSpinBox->value()
-	);
-}
-
-void MainWindow::on_brushRadiusSpinBox_valueChanged(int value) {
-	visualizationContainer->SetBrushRadius(value);
-}
-
-void MainWindow::on_brushRadiusUp() {
-	brushRadiusSpinBox->stepUp();
-}
-
-void MainWindow::on_brushRadiusDown() {
-	brushRadiusSpinBox->stepDown();
 }
 
 void MainWindow::on_toggleView() {
@@ -796,6 +760,7 @@ void MainWindow::updateLabels(RegionCollection* regions) {
 	median_Label->setText("Median: " + QString::number(n > 0 ? (double)total / n : 0, 'f', 1));
 }
 
+/*
 void MainWindow::updateImage() {
 	const double* range = visualizationContainer->GetDataRange();
 	
@@ -804,6 +769,7 @@ void MainWindow::updateImage() {
 	windowSpinBox->setSingleStep(step);
 	levelSpinBox->setSingleStep(step);
 }
+*/
 
 bool MainWindow::eventFilter(QObject* obj, QEvent* event) {
 	if (event->type() == QEvent::Enter) {
@@ -835,12 +801,12 @@ void MainWindow::setDefaultDirectory(QString key, QString fileName) {
 	settings.setValue(key, fileInfo.absoluteDir().absolutePath());
 }
 
-void MainWindow::createToolBar() {
+void MainWindow::createModeBar() {
 	// Create tool bar
 	QToolBar* toolBar = new QToolBar();
 	toolBar->setFloatable(true);
 	toolBar->setMovable(true);
-	toolBar->setOrientation(Qt::Vertical);
+	toolBar->setOrientation(Qt::Horizontal);
 
 	// Interaction toggle
 	QActionGroup* interactionModeGroup = new QActionGroup(this);
@@ -868,6 +834,22 @@ void MainWindow::createToolBar() {
 		}
 	});
 
+	// Add widgets to tool bar
+	toolBar->addWidget(createLabel("Mode"));
+	toolBar->addAction(actionNavigation);
+	toolBar->addAction(actionEdit);
+	toolBar->addSeparator();
+
+	modeBarWidget->layout()->addWidget(toolBar);
+}
+
+void MainWindow::createToolBar() {
+	// Create tool bar
+	QToolBar* toolBar = new QToolBar();
+	toolBar->setFloatable(true);
+	toolBar->setMovable(true);
+	toolBar->setOrientation(Qt::Vertical);
+
 	// Rescale toggle
 	QAction* actionToggleAutoRescale = new QAction("auto");
 	actionToggleAutoRescale->setCheckable(true);
@@ -876,10 +858,6 @@ void MainWindow::createToolBar() {
 	QObject::connect(actionToggleAutoRescale, &QAction::triggered, this, &MainWindow::on_actionToggleAutoRescale);
 
 	// Add widgets to tool bar
-	toolBar->addWidget(createLabel("Mode"));
-	toolBar->addAction(actionNavigation);
-	toolBar->addAction(actionEdit);
-	toolBar->addSeparator();
 	toolBar->addWidget(createLabel("2D"));
 	toolBar->addAction(createActionIcon(":/icons/icon_overlay.png", "Show overlay (q)", "q", visualizationContainer->GetSliceView()->GetShowLabelSlice(), &MainWindow::on_actionOverlay));
 	toolBar->addAction(createActionIcon(":/icons/icon_outline.png", "Show outlines (e)", "e", visualizationContainer->GetSliceView()->GetShowRegionOutlines(), &MainWindow::on_actionOutline));
@@ -899,9 +877,6 @@ void MainWindow::createToolBar() {
 	toolBar->addAction(createActionIcon(":/icons/icon_clear_visibility.png", "Clear visibility (c)", "c", &MainWindow::on_actionClearRegionVisibilities));
 	toolBar->addAction(createActionIcon(":/icons/icon_show_plane_regions.png", "Show plane regions (p)", "p", &MainWindow::on_actionShowPlaneRegions));
 	toolBar->addAction(createActionIcon(":/icons/icon_show_neighbor_regions.png", "Show neighbors (k)", "k", &MainWindow::on_actionShowNeighborRegions));
-
-	// Need extra logic for interaction mode
-
 
 	toolBarWidget->layout()->addWidget(toolBar);
 }

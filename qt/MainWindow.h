@@ -69,6 +69,8 @@ public slots:
 	virtual void on_actionShow_2D_View_triggered(bool checked);
 	virtual void on_actionShow_Region_Table_triggered(bool checked);
 
+	virtual void on_actionChange_Settings_triggered();
+
 	virtual void on_actionData_Loading_triggered();
 	virtual void on_actionControls_triggered();
 	virtual void on_actionGithub_Repo_triggered();
@@ -94,23 +96,6 @@ public slots:
 	// Widget events
 	virtual void on_sliceUp();
 	virtual void on_sliceDown();
-
-	virtual void on_windowSpinBox_valueChanged(double value);
-	virtual void on_levelSpinBox_valueChanged(double value);
-
-	virtual void on_overlaySpinBox_valueChanged(double value);
-	virtual void on_overlayUp();
-	virtual void on_overlayDown();
-
-	virtual void on_opacitySpinBox_valueChanged(double value);
-	virtual void on_opacityUp();
-	virtual void on_opacityDown();
-
-	virtual void on_voxelSizeSpinBox();
-
-	virtual void on_brushRadiusSpinBox_valueChanged(int value);
-	virtual void on_brushRadiusUp();
-	virtual void on_brushRadiusDown();
 
 	virtual void on_toggleView();
 	virtual void on_showBothViews();
@@ -147,6 +132,7 @@ protected:
 	void setDefaultDirectory(QString key, QString fileName);
 
 	// Toolbar
+	void createModeBar();
 	void createToolBar();
 	QAction* createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, void (MainWindow::*slot)());
 	QAction* createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, bool checked, void (MainWindow::*slot)(bool));

@@ -3,7 +3,7 @@
 
 #include "ui_CameraViewDialog.h"
 
-#include <vtkRenderer.h>
+class vtkRenderer;
 
 class CameraViewDialog : public QDialog, private Ui::CameraViewDialog {
 	Q_OBJECT

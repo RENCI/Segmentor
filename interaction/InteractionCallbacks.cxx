@@ -325,5 +325,5 @@ void InteractionCallbacks::WindowLevel(vtkObject* caller, unsigned long eventId,
 	vtkInteractorStyleSlice* style = static_cast<vtkInteractorStyleSlice*>(caller);
 	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
 
-	vis->SetWindowLevel(style->GetWindow(), style->GetLevel());
+//	vis->SetWindowLevel(style->GetWindow(), style->GetLevel());
 }

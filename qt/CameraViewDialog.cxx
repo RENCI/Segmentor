@@ -4,8 +4,6 @@
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 
-#include <iostream>
-
 // Constructor
 CameraViewDialog::CameraViewDialog(QWidget* parent, vtkRenderer* renderer)
 : QDialog(parent), renderer(renderer) {
