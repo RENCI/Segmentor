@@ -188,7 +188,6 @@ protected:
 	bool InBounds(int ijk[3]);
 
 	void PushHistory();
-	void PopHistory();
 
 	void UpdateVisibility(Region* highlightRegion = nullptr);
 };

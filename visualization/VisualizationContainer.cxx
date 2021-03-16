@@ -199,9 +199,7 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenImageFile(cons
 	
 	double x, y, z;
 	data->GetSpacing(x, y, z);
-
-//	qtWindow->setVoxelSize(x, y, z);
-
+	
 	return Success;
 }
 
@@ -239,8 +237,6 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenImageStack(con
 
 	double x, y, z;
 	data->GetSpacing(x, y, z);
-
-//	qtWindow->setVoxelSize(x, y, z);
 
 	return Success;
 }
@@ -1669,12 +1665,6 @@ void VisualizationContainer::SetVisibleOpacity(double opacity) {
 	volumeView->SetVisibleOpacity(opacity, filterRegions);
 }
 
-/*
-void VisualizationContainer::SetWindowLevel(double window, double level) {
-	qtWindow->setWindowLevel(window, level);
-}
-*/
-
 void VisualizationContainer::SliceUp() {
 	double* spacing = data->GetSpacing();
 	SliceStep(spacing[2]);
@@ -1782,9 +1772,6 @@ void VisualizationContainer::SetImageData(vtkImageData* imageData) {
 
 	sliceView->SetImageData(data);	
 	volumeView->SetImageData(data);
-
-	// Update GUI
-//	qtWindow->setWindowLevel(sliceView->GetWindow(), sliceView->GetLevel());
 
 	InitializeLabelData();
 
