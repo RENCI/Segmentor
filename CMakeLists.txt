@@ -14,6 +14,10 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/Install)
 
 if(APPLE)
   set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)	
+elseif(LINUX)
+  # This doesn't appear to be working for make package, perhaps because of fixup_bundle?
+  set(CMAKE_INSTALL_RPATH "./")
+  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
 endif()
 
 find_package(VTK REQUIRED)
@@ -116,6 +120,20 @@ elseif(APPLE)
   set(CPACK_GENERATOR DragNDrop)
   set(CPACK_BUNDLE_PLIST \$CMAKE_INSTALL_PREFIX}/Segmentor.app/Contents/Info.plist) 
   set(CPACK_BUNDLE_ICON ${CMAKE_CURRENT_SOURCE_DIR}/icons/Segmentor.icns)
+elseif(UNIX) 
+  set(APPS \${CMAKE_INSTALL_PREFIX}/bin/Segmentor)
+
+  #install(FILES ${VTK_DIR}/lib/libQVTKWidgetPlugin.so DESTINATION bin COMPONENT Segmentor)
+
+  install(CODE "
+    include(BundleUtilities) 
+    fixup_bundle(${APPS} \"\" ${VTK_DIR}/lib)
+  " COMPONENT Segmentor)
+
+  # Set rpath, which isn't working or is getting over-written by fixup_bundle
+  install(CODE "
+    execute_process(COMMAND patchelf --force-rpath --set-rpath ./ ${APPS})
+  " COMPONENT Segmentor)
 endif()
 
 # CPack
