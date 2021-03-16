@@ -77,9 +77,12 @@ public slots:
 
 	virtual void on_actionProject_Website_triggered();
 
-	// Tool bar events
+	// Mode events
 	virtual void on_actionNavigation();
 	virtual void on_actionEdit();
+	virtual void on_actionAdd();
+
+	// Tool bar events
 	virtual void on_actionOverlay(bool checked);
 	virtual void on_actionOutline(bool checked);
 	virtual void on_actionRescaleFull();

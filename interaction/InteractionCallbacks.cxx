@@ -81,6 +81,7 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
 
 	switch (rwi->GetKeyCode()) {	
+/*
 	case 'a':
 	case 'A': {
 		// Pick at the mouse location provided by the interactor	
@@ -100,6 +101,7 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 		}
 		break;
 	}
+*/
 
 	case 'd':
 	case 'D': {

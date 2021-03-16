@@ -577,6 +577,10 @@ void MainWindow::on_actionEdit() {
 	visualizationContainer->SetInteractionMode(EditMode);
 }
 
+void MainWindow::on_actionAdd() {
+	visualizationContainer->SetInteractionMode(AddMode);
+}
+
 void MainWindow::on_actionOverlay(bool checked) {
 	visualizationContainer->GetSliceView()->ShowLabelSlice(checked);
 }
@@ -824,8 +828,15 @@ void MainWindow::createModeBar() {
 	actionEdit->setToolTip("Edit mode (space bar)");
 	actionEdit->setCheckable(true);
 
+	QAction* actionAdd = new QAction("A", interactionModeGroup);
+	actionAdd->setToolTip("Add region mode (a)");
+	actionAdd->setShortcut(QKeySequence("a"));
+	actionAdd->setCheckable(true);
+
 	QObject::connect(actionNavigation, &QAction::triggered, this, &MainWindow::on_actionNavigation);
 	QObject::connect(actionEdit, &QAction::triggered, this, &MainWindow::on_actionEdit);
+	QObject::connect(actionAdd, &QAction::triggered, this, &MainWindow::on_actionAdd);
+	
 	QObject::connect(new QShortcut(QKeySequence(Qt::Key_Space), this), &QShortcut::activated, [actionNavigation, actionEdit]() {
 		if (actionEdit->isChecked()) {
 			actionNavigation->toggle();
@@ -841,7 +852,7 @@ void MainWindow::createModeBar() {
 	toolBar->addWidget(createLabel("Mode"));
 	toolBar->addAction(actionNavigation);
 	toolBar->addAction(actionEdit);
-	toolBar->addSeparator();
+	toolBar->addAction(actionAdd);
 
 	modeBarWidget->layout()->addWidget(toolBar);
 }

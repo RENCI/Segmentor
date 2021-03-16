@@ -243,7 +243,11 @@ void VolumeView::SetProbePosition(double x, double y, double z) {
 }
 
 void VolumeView::SetInteractionMode(enum InteractionMode mode) {
-	std::string s = mode == NavigationMode ? "Navigation mode" : "Edit mode";
+	std::string s =
+		mode == NavigationMode ? "Navigation mode" :
+		mode == AddMode ? "Add region" :
+		"Edit mode";
+
 	interactionModeLabel->SetInput(s.c_str());
 
 	style->SetMode(mode);

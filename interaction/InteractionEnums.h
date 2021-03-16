@@ -3,7 +3,8 @@
 
 enum InteractionMode {
 	NavigationMode,
-	EditMode
+	EditMode,
+	AddMode
 };
 
 enum FilterMode {
