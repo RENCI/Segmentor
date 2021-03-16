@@ -536,6 +536,10 @@ void VisualizationContainer::SegmentVolume() {
 	Render();
 }
 
+const double* VisualizationContainer::GetVoxelSize() {
+	return data->GetSpacing();
+}
+
 void VisualizationContainer::SetVoxelSize(double x, double y, double z) {
 	// Get current bounds
 	double bounds[6];
@@ -1695,6 +1699,10 @@ void VisualizationContainer::SliceStep(double amount) {
 
 void VisualizationContainer::SetFocalPoint(double x, double y, double z) {
 	qtWindow->setSlicePosition(x, y, z);
+}
+
+int VisualizationContainer::GetBrushRadius() {
+	return brushRadius;
 }
 
 void VisualizationContainer::SetBrushRadius(int radius) {

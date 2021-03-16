@@ -50,6 +50,7 @@ public:
 	FileErrorCode SaveSegmentationData();
 	FileErrorCode SaveSegmentationData(const std::string& fileName);
 
+	const double* GetVoxelSize();
 	void SetVoxelSize(double x, double y, double z);
 
 	enum InteractionMode GetInteractionMode();
@@ -106,6 +107,7 @@ public:
 
 	void SetFocalPoint(double x, double y, double z);
 
+	int GetBrushRadius();
 	void SetBrushRadius(int radius);
 
 	void Render();

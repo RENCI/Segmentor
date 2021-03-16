@@ -65,6 +65,7 @@ public:
 	void RescalePartial();
 	void SetAutoRescale(bool rescale);
 
+	double GetOverlayOpacity();
 	void SetOverlayOpacity(double opacity);
 
 	void UpdatePlane();

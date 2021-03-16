@@ -64,6 +64,7 @@ public:
 	void ToggleShowPlane();
 	void UpdatePlane();
 
+	double GetVisibleOpacity();
 	void SetVisibleOpacity(double opacity, bool apply);
 	void UpdateVisibleOpacity(bool apply);
 

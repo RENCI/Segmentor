@@ -48,7 +48,7 @@ VolumeView::VolumeView(vtkRenderWindowInteractor* interactor) {
 	currentRegion = nullptr;
 	highlightRegion = nullptr;
 
-	visibleOpacity = 0.25;
+	visibleOpacity = 1.0;
 
 	// Rendering
 	renderer = vtkSmartPointer<vtkRenderer>::New();
@@ -304,6 +304,10 @@ void VolumeView::SetShowPlane(bool show) {
 
 void VolumeView::ToggleShowPlane() {
 	SetShowPlane(!plane->GetVisibility());
+}
+
+double VolumeView::GetVisibleOpacity() {
+	return visibleOpacity;
 }
 
 void VolumeView::SetVisibleOpacity(double opacity, bool apply) {

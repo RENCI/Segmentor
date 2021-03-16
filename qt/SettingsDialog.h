@@ -35,7 +35,21 @@ public slots:
 	virtual void on_brushRadiusUp();
 	virtual void on_brushRadiusDown();	
 
+	virtual void on_reject();
+
 protected:
+	// Saved values for cancelling
+	double xSize;
+	double ySize;
+	double zSize;
+
+	double window;
+	double level;
+
+	double overlayOpacity;
+	double regionOpacity;
+	double brushRadius;
+
 	VisualizationContainer* visualizationContainer;
 };
 

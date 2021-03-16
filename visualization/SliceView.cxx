@@ -368,6 +368,10 @@ vtkSmartPointer<vtkImageData> SliceView::GetSlice() {
 	return reslice->GetOutput();
 }
 
+double SliceView::GetOverlayOpacity() {
+	return labelSlice->GetProperty()->GetOpacity();
+}
+
 void SliceView::SetOverlayOpacity(double opacity) {
 	labelSlice->GetProperty()->SetOpacity(opacity);
 
