@@ -108,6 +108,14 @@ public slots:
 	virtual void on_regionVisible(int label, bool visible);
 	virtual void on_regionColor(int label, QColor color);
 
+	// Shortcuts for settings
+	virtual void on_overlayDown();
+	virtual void on_overlayUp();
+	virtual void on_opacityDown();
+	virtual void on_opacityUp();
+	virtual void on_brushRadiusDown();
+	virtual void on_brushRadiusUp();
+
 protected:
 	// The visualization container
 	VisualizationContainer* visualizationContainer;

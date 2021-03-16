@@ -91,6 +91,27 @@ MainWindow::MainWindow() {
 
 	sliceDownButton->setDefaultAction(sliceDownAction);
 
+	// Overlay opacity shortcut
+	QShortcut* overlayUp = new QShortcut(QKeySequence(Qt::Key_Right), this);
+	QShortcut* overlayDown = new QShortcut(QKeySequence(Qt::Key_Left), this);
+
+	QObject::connect(overlayUp, &QShortcut::activated, this, &MainWindow::on_overlayUp);
+	QObject::connect(overlayDown, &QShortcut::activated, this, &MainWindow::on_overlayDown);
+
+	// Overlay opacity shortcut
+	QShortcut* opacityUp = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Right), this);
+	QShortcut* opacityDown = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Left), this);
+
+	QObject::connect(opacityUp, &QShortcut::activated, this, &MainWindow::on_opacityUp);
+	QObject::connect(opacityDown, &QShortcut::activated, this, &MainWindow::on_opacityDown);
+
+	// Overlay opacity shortcut
+	QShortcut* brushRadiusUp = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Right), this);
+	QShortcut* brushRadiusDown = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Left), this);
+
+	QObject::connect(brushRadiusUp, &QShortcut::activated, this, &MainWindow::on_brushRadiusUp);
+	QObject::connect(brushRadiusDown, &QShortcut::activated, this, &MainWindow::on_brushRadiusDown);
+
 	// 2D/3D toggle
 	QShortcut* toggleView = new QShortcut(QKeySequence("t"), this);
 	QShortcut* showBothViews = new QShortcut(QKeySequence("r"), this);
@@ -123,7 +144,12 @@ void MainWindow::updateRegion(Region* region, RegionCollection* regions) {
 void MainWindow::selectRegion(unsigned short label) {
 	regionTable->selectRegionLabel(label);
 }
-
+/*
+void MainWindow::setWindowLevel(double window, double level) {
+	windowSpinBox->setValue(window);
+	levelSpinBox->setValue(level);
+}
+*/
 void MainWindow::setSlicePosition(double x, double y, double z) {
 	QString s = "Slice Position: (" + 
 		QString::number(x, 'f', 1) + ", " + 
@@ -132,7 +158,13 @@ void MainWindow::setSlicePosition(double x, double y, double z) {
 
 	slicePositionLabel->setText(s);
 }
-
+/*
+void MainWindow::setVoxelSize(double x, double y, double z) {
+	xSizeSpinBox->setValue(x);
+	ySizeSpinBox->setValue(y);
+	zSizeSpinBox->setValue(z);
+}
+*/
 void MainWindow::updateProgress(double progress) {
 	progressBar->setValue(progress * 100);
 }
@@ -177,6 +209,11 @@ void MainWindow::on_actionOpen_Image_File_triggered() {
 			errorMessage.exec();
 		}
 	}
+/*
+	else {
+		updateImage();
+	}
+*/
 }
 
 void MainWindow::on_actionOpen_Image_Stack_triggered() {
@@ -234,6 +271,11 @@ void MainWindow::on_actionOpen_Image_Stack_triggered() {
 			errorMessage.exec();
 		}
 	}
+/*
+	else {
+		updateImage();
+	}
+*/
 }
 
 void MainWindow::on_actionOpen_Segmentation_File_triggered() {
@@ -547,12 +589,16 @@ void MainWindow::on_actionRescaleFull() {
 	SliceView* sliceView = visualizationContainer->GetSliceView();
 
 	sliceView->RescaleFull();
+
+//	setWindowLevel(sliceView->GetWindow(), sliceView->GetLevel());
 }
 
 void MainWindow::on_actionRescalePartial() {
 	SliceView* sliceView = visualizationContainer->GetSliceView();
 
 	sliceView->RescalePartial();
+
+//	setWindowLevel(sliceView->GetWindow(), sliceView->GetLevel());
 }
 
 void MainWindow::on_actionToggleAutoRescale(bool checked) {
@@ -657,6 +703,31 @@ void MainWindow::on_regionColor(int label, QColor color) {
 	visualizationContainer->SetRegionColor((unsigned short)label, color.redF(), color.greenF(), color.blueF());
 }
 
+void MainWindow::on_overlayDown() {
+	SliceView* sliceView = visualizationContainer->GetSliceView();
+	sliceView->SetOverlayOpacity(qMax(sliceView->GetOverlayOpacity() - 0.1, 0.0));
+}
+
+void MainWindow::on_overlayUp() {
+	SliceView* sliceView = visualizationContainer->GetSliceView();
+	sliceView->SetOverlayOpacity(qMin(sliceView->GetOverlayOpacity() + 0.1, 1.0));
+}
+
+void MainWindow::on_opacityDown() {
+	visualizationContainer->SetVisibleOpacity(qMax(visualizationContainer->GetVolumeView()->GetVisibleOpacity() - 0.1, 0.0));
+}
+
+void MainWindow::on_opacityUp() {
+	visualizationContainer->SetVisibleOpacity(qMin(visualizationContainer->GetVolumeView()->GetVisibleOpacity() + 0.1, 1.0));
+}
+
+void MainWindow::on_brushRadiusDown() {
+	visualizationContainer->SetBrushRadius(qMax(visualizationContainer->GetBrushRadius() - 1, 1));
+}
+
+void MainWindow::on_brushRadiusUp() {
+	visualizationContainer->SetBrushRadius(qMin(visualizationContainer->GetBrushRadius() + 1, 5));
+}
 
 void MainWindow::updateLabels(RegionCollection* regions) {
 	int refiningCount = 0, doneCount = 0;
@@ -691,6 +762,17 @@ void MainWindow::updateLabels(RegionCollection* regions) {
 	max_Label->setText("Maximum: " + QString::number(maxSize));
 	median_Label->setText("Median: " + QString::number(n > 0 ? (double)total / n : 0, 'f', 1));
 }
+
+/*
+void MainWindow::updateImage() {
+	const double* range = visualizationContainer->GetDataRange();
+	
+	double step = (range[1] - range[0]) / 25;
+
+	windowSpinBox->setSingleStep(step);
+	levelSpinBox->setSingleStep(step);
+}
+*/
 
 bool MainWindow::eventFilter(QObject* obj, QEvent* event) {
 	if (event->type() == QEvent::Enter) {
