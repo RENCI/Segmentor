@@ -119,8 +119,9 @@ elseif(APPLE)
 elseif(UNIX) 
   set(APPS \${CMAKE_INSTALL_PREFIX}/bin/Segmentor)
 
+  # Force rpath
   set_target_properties(Segmentor PROPERTIES INSTALL_RPATH $ORIGIN)
-  set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--disable-new-dtags" )
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--disable-new-dtags")
 
   install(CODE "
     include(BundleUtilities) 
