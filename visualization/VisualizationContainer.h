@@ -100,9 +100,7 @@ public:
 	void MergeWithCurrentRegion(double point[3]);
 	void SplitCurrentRegion(int numRegions);
 	void GrowCurrentRegion(double point[3]);
-
-	void SetWindowLevel(double window, double level);
-
+	
 	void SliceUp();
 	void SliceDown();
 

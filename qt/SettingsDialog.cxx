@@ -10,6 +10,35 @@ SettingsDialog::SettingsDialog(QWidget* parent, VisualizationContainer* visualiz
 	setupUi(this);
 
 	setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+
+	// Voxel size callbacks
+	QObject::connect(xSizeSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SettingsDialog::on_voxelSizeSpinBox);
+	QObject::connect(ySizeSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SettingsDialog::on_voxelSizeSpinBox);
+	QObject::connect(zSizeSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SettingsDialog::on_voxelSizeSpinBox);
+
+	SliceView* sliceView = visualizationContainer->GetSliceView();
+
+	// Window/level
+	const double* range = visualizationContainer->GetDataRange();
+
+	double step = (range[1] - range[0]) / 25;
+
+	double window = sliceView->GetWindow();
+	double level = sliceView->GetLevel();
+
+	double max = std::numeric_limits<double>::max();
+
+	windowSpinBox->setMinimum(-max);
+	windowSpinBox->setMaximum(max);
+	windowSpinBox->setSingleStep(step);
+	windowSpinBox->setDecimals(1);
+	windowSpinBox->setValue(window);
+
+	levelSpinBox->setMinimum(-max);
+	levelSpinBox->setMaximum(max);
+	levelSpinBox->setSingleStep(step);
+	levelSpinBox->setDecimals(1);
+	levelSpinBox->setValue(level);
 }
 
 SettingsDialog::~SettingsDialog() {
