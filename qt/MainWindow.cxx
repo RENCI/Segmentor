@@ -842,16 +842,6 @@ void MainWindow::createModeBar() {
 	actionEdit->setCheckable(true);
 	actionEdit->setChecked(visualizationContainer->GetInteractionMode() == EditMode);
 
-	QAction* actionAdd = new QAction("A", interactionModeGroup);
-	actionAdd->setToolTip("Add region mode (a)");
-	actionAdd->setShortcut(QKeySequence("a"));
-	actionAdd->setCheckable(true);
-
-	QAction* actionMerge = new QAction("M", interactionModeGroup);
-	actionMerge->setToolTip("Merge region mode (u)");
-	actionMerge->setShortcut(QKeySequence("m"));
-	actionMerge->setCheckable(true);
-
 	QAction* actionGrow = new QAction("G", interactionModeGroup);
 	actionGrow->setToolTip("Grow/shrink region mode (g)");
 	actionGrow->setShortcut(QKeySequence("g"));
@@ -863,8 +853,6 @@ void MainWindow::createModeBar() {
 
 	QObject::connect(actionNavigation, &QAction::triggered, this, &MainWindow::on_actionNavigation);
 	QObject::connect(actionEdit, &QAction::triggered, this, &MainWindow::on_actionEdit);
-	QObject::connect(actionAdd, &QAction::triggered, this, &MainWindow::on_actionAdd);
-	QObject::connect(actionMerge, &QAction::triggered, this, &MainWindow::on_actionMerge);
 	QObject::connect(actionGrow, &QAction::triggered, this, &MainWindow::on_actionGrow);
 	QObject::connect(actionSplit, &QAction::triggered, this, &MainWindow::on_actionSplit);
 	
@@ -883,8 +871,8 @@ void MainWindow::createModeBar() {
 	toolBar->addWidget(createLabel("Mode", 0, 0));
 	toolBar->addAction(actionNavigation);
 	toolBar->addAction(actionEdit);
-	toolBar->addAction(actionAdd);
-	toolBar->addAction(actionMerge);
+	toolBar->addAction(createActionIcon(":/icons/icon_add.png", "Add region (a)", "a", interactionModeGroup, visualizationContainer->GetInteractionMode() == AddMode, &MainWindow::on_actionAdd));
+	toolBar->addAction(createActionIcon(":/icons/icon_merge.png", "Merge with current region (m)", "m", interactionModeGroup, visualizationContainer->GetInteractionMode() == MergeMode, &MainWindow::on_actionMerge));
 	toolBar->addAction(actionGrow);
 	toolBar->addAction(createActionIcon(":/icons/icon_done.png", "Toggle region done (d)", "d", interactionModeGroup, visualizationContainer->GetInteractionMode() == DoneMode, &MainWindow::on_actionDone));
 	toolBar->addAction(createActionIcon(":/icons/icon_visible.png", "Toggle region visibility (v)", "v", interactionModeGroup, visualizationContainer->GetInteractionMode() == VisibleMode, &MainWindow::on_actionVisible));
