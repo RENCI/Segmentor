@@ -842,19 +842,8 @@ void MainWindow::createModeBar() {
 	actionEdit->setCheckable(true);
 	actionEdit->setChecked(visualizationContainer->GetInteractionMode() == EditMode);
 
-	QAction* actionGrow = new QAction("G", interactionModeGroup);
-	actionGrow->setToolTip("Grow/shrink region mode (g)");
-	actionGrow->setShortcut(QKeySequence("g"));
-	actionGrow->setCheckable(true);
-
-	QAction* actionSplit = new QAction("Split");
-	actionSplit->setToolTip("Split current region (/)");
-	actionSplit->setShortcut(QKeySequence("/"));
-
 	QObject::connect(actionNavigation, &QAction::triggered, this, &MainWindow::on_actionNavigation);
-	QObject::connect(actionEdit, &QAction::triggered, this, &MainWindow::on_actionEdit);
-	QObject::connect(actionGrow, &QAction::triggered, this, &MainWindow::on_actionGrow);
-	QObject::connect(actionSplit, &QAction::triggered, this, &MainWindow::on_actionSplit);
+	QObject::connect(actionEdit, &QAction::triggered, this, &MainWindow::on_actionEdit);;
 	
 	QObject::connect(new QShortcut(QKeySequence(Qt::Key_Space), this), &QShortcut::activated, [actionNavigation, actionEdit]() {
 		if (actionEdit->isChecked()) {
@@ -868,18 +857,18 @@ void MainWindow::createModeBar() {
 	});
 
 	// Add widgets to tool bar
-	toolBar->addWidget(createLabel("Mode", 0, 0));
+	toolBar->addWidget(createLabel("Mode", 0, 0, 0, 5));
 	toolBar->addAction(actionNavigation);
 	toolBar->addAction(actionEdit);
 	toolBar->addAction(createActionIcon(":/icons/icon_add.png", "Add region (a)", "a", interactionModeGroup, visualizationContainer->GetInteractionMode() == AddMode, &MainWindow::on_actionAdd));
 	toolBar->addAction(createActionIcon(":/icons/icon_merge.png", "Merge with current region (m)", "m", interactionModeGroup, visualizationContainer->GetInteractionMode() == MergeMode, &MainWindow::on_actionMerge));
-	toolBar->addAction(actionGrow);
+	toolBar->addAction(createActionIcon(":/icons/icon_grow.png", "Grow / shrink region (g)", "g", interactionModeGroup, visualizationContainer->GetInteractionMode() == GrowMode, &MainWindow::on_actionGrow));
 	toolBar->addAction(createActionIcon(":/icons/icon_done.png", "Toggle region done (d)", "d", interactionModeGroup, visualizationContainer->GetInteractionMode() == DoneMode, &MainWindow::on_actionDone));
 	toolBar->addAction(createActionIcon(":/icons/icon_visible.png", "Toggle region visibility (v)", "v", interactionModeGroup, visualizationContainer->GetInteractionMode() == VisibleMode, &MainWindow::on_actionVisible));
 	toolBar->addSeparator();
-	toolBar->addWidget(createLabel("Actions", 0, 0));
+	toolBar->addWidget(createLabel("Actions", 0, 0, 5, 5));
 	toolBar->addAction(createActionIcon(":/icons/icon_update.png", "Update current region (u)", "u", &MainWindow::on_actionUpdate));
-	toolBar->addAction(actionSplit);
+	toolBar->addAction(createActionIcon(":/icons/icon_split.png", "Split current region (/)", "/", &MainWindow::on_actionSplit));
 
 	modeBarWidget->layout()->addWidget(toolBar);
 }
@@ -954,8 +943,9 @@ QAction* MainWindow::createActionIcon(const QString& fileName, const QString& te
 	return action;
 }
 
-QLabel* MainWindow::createLabel(const QString& text, int topMargin, int bottomMargin) {
-	QString style = QStringLiteral("color:#999;margin-top:%1px;margin-bottom:%2px").arg(topMargin).arg(bottomMargin);
+QLabel* MainWindow::createLabel(const QString& text, int topMargin, int bottomMargin, int leftMargin, int rightMargin) {
+	QString style = QStringLiteral("color:#999;margin-top:%1px;margin-bottom:%2px;margin-left:%3px;margin-right:%4px")
+		.arg(topMargin).arg(bottomMargin).arg(leftMargin).arg(rightMargin);
 
 	QLabel* label = new QLabel(text);
 	label->setAlignment(Qt::AlignCenter);
