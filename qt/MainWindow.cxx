@@ -593,6 +593,10 @@ void MainWindow::on_actionUpdate() {
 	visualizationContainer->RelabelCurrentRegion();
 }
 
+void MainWindow::on_actionClean() {
+	visualizationContainer->CleanCurrentRegion();
+}
+
 void MainWindow::on_actionSplit() {
 	// Split in half for now, add interface for selecting number in future
 	visualizationContainer->SplitCurrentRegion(2);
@@ -883,11 +887,13 @@ void MainWindow::createModeBar() {
 	toolBar->addAction(createActionIcon(":/icons/icon_add.png", "Add region (a)", "a", interactionModeGroup, currentMode == AddMode, &MainWindow::on_actionAdd));
 	toolBar->addAction(createActionIcon(":/icons/icon_merge.png", "Merge with current region (m)", "m", interactionModeGroup, currentMode == MergeMode, &MainWindow::on_actionMerge));
 	toolBar->addAction(createActionIcon(":/icons/icon_grow.png", "Grow / shrink region (g)", "g", interactionModeGroup, currentMode == GrowMode, &MainWindow::on_actionGrow));
-	toolBar->addAction(createActionIcon(":/icons/icon_done.png", "Toggle region done (d)", "d", interactionModeGroup, currentMode == DoneMode, &MainWindow::on_actionDone));
 	toolBar->addAction(createActionIcon(":/icons/icon_visible.png", "Toggle region visibility (v)", "v", interactionModeGroup, currentMode == VisibleMode, &MainWindow::on_actionVisible));
+	toolBar->addAction(createActionIcon(":/icons/icon_done.png", "Toggle region done (d)", "d", interactionModeGroup, currentMode == DoneMode, &MainWindow::on_actionDone));
+	
 	toolBar->addSeparator();
 	toolBar->addWidget(createLabel("Actions", 0, 0, 5, 5));
 	toolBar->addAction(createActionIcon(":/icons/icon_update.png", "Update current region (u)", "u", &MainWindow::on_actionUpdate));
+	toolBar->addAction(createActionIcon(":/icons/icon_clean.png", "Clean up current region (0)", "0", &MainWindow::on_actionClean));
 	toolBar->addAction(createActionIcon(":/icons/icon_split.png", "Split current region (/)", "/", &MainWindow::on_actionSplit));
 
 	modeBarWidget->layout()->addWidget(toolBar);

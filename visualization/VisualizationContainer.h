@@ -98,6 +98,7 @@ public:
 
 	void CreateNewRegion(double point[3]);
 	void RelabelCurrentRegion();
+	void CleanCurrentRegion();
 	void MergeWithCurrentRegion(double point[3]);
 	void SplitCurrentRegion(int numRegions);
 	void GrowCurrentRegion(double point[3]);

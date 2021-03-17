@@ -1023,6 +1023,68 @@ void VisualizationContainer::RelabelCurrentRegion() {
 	PushHistory();
 }
 
+void VisualizationContainer::CleanCurrentRegion() {
+	if (!currentRegion || currentRegion->GetDone()) return;
+
+	unsigned short label = currentRegion->GetLabel();
+
+	vtkSmartPointer<vtkImageConnectivityFilter> connectivity = vtkSmartPointer<vtkImageConnectivityFilter>::New();
+	connectivity->SetScalarRange(label, label);
+	connectivity->SetLabelScalarTypeToUnsignedShort();
+	connectivity->SetLabelModeToSizeRank();
+	connectivity->GenerateRegionExtentsOn();
+	connectivity->SetInputDataObject(labels);
+	connectivity->Update();
+
+	int numComponents = connectivity->GetNumberOfExtractedRegions();
+	vtkIdTypeArray* componentLabels = connectivity->GetExtractedRegionLabels();
+	vtkIntArray* componentExtents = connectivity->GetExtractedRegionExtents();
+	vtkImageData* connectivityOutput = connectivity->GetOutput();
+
+	if (numComponents > 1) {
+		currentRegion->SetModified(true);
+		currentRegion->SetVisible(true);
+
+		for (int i = 0; i < numComponents; i++) {
+			// Get the extent for this component
+			double* componentExtent = componentExtents->GetTuple(i);
+			int extent[6];
+			for (int j = 0; j < 6; j++) {
+				extent[j] = (int)componentExtent[j];
+			}
+
+			if (i == 0) {
+				// Use current region
+				currentRegion->SetExtent(extent);
+			}
+			else {
+				// Label from the connectivity filter
+				unsigned short componentLabel = (unsigned short)componentLabels->GetTuple1(i);
+
+				// Update label data
+				for (int i = extent[0]; i <= extent[1]; i++) {
+					for (int j = extent[2]; j <= extent[3]; j++) {
+						for (int k = extent[4]; k <= extent[5]; k++) {
+							unsigned short* labelData = static_cast<unsigned short*>(labels->GetScalarPointer(i, j, k));
+							unsigned short* connectivityData = static_cast<unsigned short*>(connectivityOutput->GetScalarPointer(i, j, k));
+
+							if (*connectivityData == componentLabel) *labelData = 0;
+						}
+					}
+				}
+			}
+		}
+
+		qtWindow->updateRegions(regions);
+
+		labels->Modified();
+		Render();
+	}
+
+	PushHistory();
+}
+
+
 void VisualizationContainer::MergeWithCurrentRegion(double point[3]) {
 	if (!currentRegion || currentRegion->GetDone()) return;
 

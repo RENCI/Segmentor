@@ -86,6 +86,7 @@ public slots:
 
 	// Action events
 	virtual void on_actionUpdate();
+	virtual void on_actionClean();
 	virtual void on_actionSplit();
 
 	// Tool bar events
