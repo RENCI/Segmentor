@@ -23,6 +23,7 @@
 #include "VolumeView.h"
 #include "CameraViewDialog.h"
 #include "SettingsDialog.h"
+#include "SegmentVolumeDialog.h"
 
 #include <vtkCallbackCommand.h>
 #include <vtkCamera.h>
@@ -485,7 +486,10 @@ void MainWindow::on_actionRedo_triggered() {
 }
 
 void MainWindow::on_actionSegment_Volume_triggered() {
-	visualizationContainer->SegmentVolume();
+	//visualizationContainer->SegmentVolume();
+
+	SegmentVolumeDialog dialog(this, visualizationContainer);
+	dialog.exec();
 }
 
 void MainWindow::on_actionExit_triggered() {
@@ -536,10 +540,7 @@ void MainWindow::on_actionShow_Region_Table_triggered(bool checked) {
 
 void MainWindow::on_actionChange_Settings_triggered() {
 	SettingsDialog dialog(this, visualizationContainer);
-
-	if (!dialog.exec()) {
-
-	}
+	dialog.exec();
 }
 
 void MainWindow::on_actionData_Loading_triggered() {

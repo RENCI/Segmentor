@@ -477,15 +477,12 @@ void VisualizationContainer::InitializeLabelData() {
 	qtWindow->updateRegions(regions);
 }
 
-void VisualizationContainer::SegmentVolume() {
+void VisualizationContainer::SegmentVolume(double thresholdValue) {
 	if (!data) return;
-
-	// Get Otsu threshold
-	SegmentorMath::OtsuValues otsu = SegmentorMath::OtsuThreshold(data);
 
 	// Filter
 	vtkSmartPointer<vtkImageThreshold> threshold = vtkSmartPointer<vtkImageThreshold>::New();
-	threshold->ThresholdByUpper(otsu.threshold);
+	threshold->ThresholdByUpper(thresholdValue);
 	threshold->SetInValue(255);
 	threshold->SetOutValue(0);
 	threshold->ReplaceInOn();
@@ -1840,6 +1837,12 @@ SliceView* VisualizationContainer::GetSliceView() {
 
 const double* VisualizationContainer::GetDataRange() {
 	return data->GetScalarRange();
+}
+
+double VisualizationContainer::GetOtsuThreshold() {
+	SegmentorMath::OtsuValues otsu = SegmentorMath::OtsuThreshold(data);
+
+	return otsu.threshold;
 }
 
 void VisualizationContainer::SetImageData(vtkImageData* imageData) {	

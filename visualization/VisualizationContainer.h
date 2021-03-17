@@ -46,7 +46,7 @@ public:
 
 	void InitializeLabelData();
 
-	void SegmentVolume();
+	void SegmentVolume(double threshold);
 	FileErrorCode SaveSegmentationData();
 	FileErrorCode SaveSegmentationData(const std::string& fileName);
 
@@ -122,6 +122,7 @@ public:
 	SliceView* GetSliceView();
 
 	const double* GetDataRange();
+	double GetOtsuThreshold();
 
 protected:
 	// Qt main window
