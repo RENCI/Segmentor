@@ -79,7 +79,7 @@ void InteractionCallbacks::CameraChange(vtkObject* caller, unsigned long eventId
 void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
 	vtkRenderWindowInteractor* rwi = static_cast<vtkRenderWindowInteractor*>(caller);
 	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
-
+/*
 	switch (rwi->GetKeyCode()) {	
 
 	case 'd':
@@ -175,9 +175,10 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 	case '7':
 	case '8':
 	case '9':
-		vis->SplitCurrentRegion(rwi->GetKeyCode() - '0');
+		//vis->SplitCurrentRegion(rwi->GetKeyCode() - '0');
 		break;
 	}
+*/
 }
 
 void InteractionCallbacks::SliceSelectLabel(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {

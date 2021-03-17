@@ -144,7 +144,7 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	vtkSmartPointer<vtkCallbackCommand> addRegionCallback = vtkSmartPointer<vtkCallbackCommand>::New();
 	addRegionCallback->SetCallback(InteractionCallbacks::AddRegion);
 	addRegionCallback->SetClientData(this);
-	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::AddRegionEvent, addRegionCallback);
+	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::AddEvent, addRegionCallback);
 
 	// Mouse move
 	vtkSmartPointer<vtkCallbackCommand> mouseMoveCallback = vtkSmartPointer<vtkCallbackCommand>::New();

@@ -4,7 +4,12 @@
 enum InteractionMode {
 	NavigationMode,
 	EditMode,
-	AddMode
+	AddMode,
+	UpdateMode,
+	MergeMode,
+	SplitMode,
+	GrowMode,
+	DoneMode
 };
 
 enum FilterMode {

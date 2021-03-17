@@ -570,6 +570,27 @@ void MainWindow::on_actionAdd() {
 	visualizationContainer->SetInteractionMode(AddMode);
 }
 
+void MainWindow::on_actionMerge() {
+	visualizationContainer->SetInteractionMode(MergeMode);
+}
+
+void MainWindow::on_actionGrow() {
+	visualizationContainer->SetInteractionMode(GrowMode);
+}
+
+void MainWindow::on_actionDone() {
+	visualizationContainer->SetInteractionMode(DoneMode);
+}
+
+void MainWindow::on_actionSplit() {
+	// Split in half for now, add interface for selecting number in future
+	visualizationContainer->SplitCurrentRegion(2);
+}
+
+void MainWindow::on_actionUpdate() {
+	visualizationContainer->RelabelCurrentRegion();
+}
+
 void MainWindow::on_actionOverlay(bool checked) {
 	visualizationContainer->GetSliceView()->ShowLabelSlice(checked);
 }
@@ -822,9 +843,37 @@ void MainWindow::createModeBar() {
 	actionAdd->setShortcut(QKeySequence("a"));
 	actionAdd->setCheckable(true);
 
+	QAction* actionMerge = new QAction("M", interactionModeGroup);
+	actionMerge->setToolTip("Merge region mode (u)");
+	actionMerge->setShortcut(QKeySequence("m"));
+	actionMerge->setCheckable(true);
+
+	QAction* actionGrow = new QAction("G", interactionModeGroup);
+	actionGrow->setToolTip("Grow/shrink region mode (g)");
+	actionGrow->setShortcut(QKeySequence("g"));
+	actionGrow->setCheckable(true);
+
+	QAction* actionDone = new QAction("D", interactionModeGroup);
+	actionDone->setToolTip("Mark current region done (d)");
+	actionDone->setShortcut(QKeySequence("d"));
+	actionDone->setCheckable(true);
+
+	QAction* actionUpdate = new QAction("Update");
+	actionUpdate->setToolTip("Update current region (u)");
+	actionUpdate->setShortcut(QKeySequence("u"));
+
+	QAction* actionSplit = new QAction("Split");
+	actionSplit->setToolTip("Split current region (/)");
+	actionSplit->setShortcut(QKeySequence("/"));
+
 	QObject::connect(actionNavigation, &QAction::triggered, this, &MainWindow::on_actionNavigation);
 	QObject::connect(actionEdit, &QAction::triggered, this, &MainWindow::on_actionEdit);
 	QObject::connect(actionAdd, &QAction::triggered, this, &MainWindow::on_actionAdd);
+	QObject::connect(actionMerge, &QAction::triggered, this, &MainWindow::on_actionMerge);
+	QObject::connect(actionGrow, &QAction::triggered, this, &MainWindow::on_actionGrow);
+	QObject::connect(actionDone, &QAction::triggered, this, &MainWindow::on_actionDone);
+	QObject::connect(actionUpdate, &QAction::triggered, this, &MainWindow::on_actionUpdate);
+	QObject::connect(actionSplit, &QAction::triggered, this, &MainWindow::on_actionSplit);
 	
 	QObject::connect(new QShortcut(QKeySequence(Qt::Key_Space), this), &QShortcut::activated, [actionNavigation, actionEdit]() {
 		if (actionEdit->isChecked()) {
@@ -838,10 +887,17 @@ void MainWindow::createModeBar() {
 	});
 
 	// Add widgets to tool bar
-	toolBar->addWidget(createLabel("Mode"));
+	toolBar->addWidget(createLabel("Mode", 0, 0));
 	toolBar->addAction(actionNavigation);
 	toolBar->addAction(actionEdit);
 	toolBar->addAction(actionAdd);
+	toolBar->addAction(actionMerge);
+	toolBar->addAction(actionGrow);
+	toolBar->addAction(actionDone);
+	toolBar->addSeparator();
+	toolBar->addWidget(createLabel("Actions", 0, 0));
+	toolBar->addAction(actionUpdate);
+	toolBar->addAction(actionSplit);
 
 	modeBarWidget->layout()->addWidget(toolBar);
 }

@@ -147,25 +147,97 @@ void vtkInteractorStyleSlice::EndErase()
 }
 
 //----------------------------------------------------------------------------
-void vtkInteractorStyleSlice::StartAddRegion()
+void vtkInteractorStyleSlice::StartAdd()
 {
 	if (this->State != VTKIS_NONE)
 	{
 		return;
 	}
-	this->StartState(VTKIS_ADD_REGION_SLICE);
+	this->StartState(VTKIS_ADD_SLICE);
 }
 
 //----------------------------------------------------------------------------
-void vtkInteractorStyleSlice::EndAddRegion()
+void vtkInteractorStyleSlice::EndAdd()
 {
-	if (this->State != VTKIS_ADD_REGION_SLICE)
+	if (this->State != VTKIS_ADD_SLICE)
 	{
 		return;
 	}
 	if (this->HandleObservers)
 	{
-		this->InvokeEvent(AddRegionEvent, nullptr);
+		this->InvokeEvent(AddEvent, nullptr);
+	}
+	this->StopState();
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::StartMerge()
+{
+	if (this->State != VTKIS_NONE)
+	{
+		return;
+	}
+	this->StartState(VTKIS_MERGE_SLICE);
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::EndMerge()
+{
+	if (this->State != VTKIS_MERGE_SLICE)
+	{
+		return;
+	}
+	if (this->HandleObservers)
+	{
+		this->InvokeEvent(MergeEvent, nullptr);
+	}
+	this->StopState();
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::StartGrow()
+{
+	if (this->State != VTKIS_NONE)
+	{
+		return;
+	}
+	this->StartState(VTKIS_GROW_SLICE);
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::EndGrow()
+{
+	if (this->State != VTKIS_GROW_SLICE)
+	{
+		return;
+	}
+	if (this->HandleObservers)
+	{
+		this->InvokeEvent(GrowEvent, nullptr);
+	}
+	this->StopState();
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::StartDone()
+{
+	if (this->State != VTKIS_NONE)
+	{
+		return;
+	}
+	this->StartState(VTKIS_DONE_SLICE);
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::EndDone()
+{
+	if (this->State != VTKIS_DONE_SLICE)
+	{
+		return;
+	}
+	if (this->HandleObservers)
+	{
+		this->InvokeEvent(DoneEvent, nullptr);
 	}
 	this->StopState();
 }
@@ -328,7 +400,19 @@ void vtkInteractorStyleSlice::OnLeftButtonDown()
 		}
 		else if (this->Mode == AddMode)
 		{
-			this->StartAddRegion();
+			this->StartAdd();
+		}
+		else if (this->Mode == MergeMode)
+		{
+			this->StartMerge();
+		}
+		else if (this->Mode == GrowMode)
+		{
+			this->StartGrow();
+		}
+		else if (this->Mode == DoneMode)
+		{
+			this->StartDone();
 		}
 		else
 		{
@@ -375,8 +459,20 @@ void vtkInteractorStyleSlice::OnLeftButtonUp() {
 		this->EndOverwrite();
 		break;
 
-	case VTKIS_ADD_REGION_SLICE:
-		this->EndAddRegion();
+	case VTKIS_ADD_SLICE:
+		this->EndAdd();
+		break;
+
+	case VTKIS_MERGE_SLICE:
+		this->EndMerge();
+		break;
+
+	case VTKIS_GROW_SLICE:
+		this->EndGrow();
+		break;
+
+	case VTKIS_DONE_SLICE:
+		this->EndDone();
 		break;
 	}
 

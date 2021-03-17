@@ -246,6 +246,11 @@ void VolumeView::SetInteractionMode(enum InteractionMode mode) {
 	std::string s =
 		mode == NavigationMode ? "Navigation mode" :
 		mode == AddMode ? "Add region" :
+		mode == UpdateMode ? "Update region" :
+		mode == MergeMode ? "Merge region" :
+		mode == SplitMode ? "Split region" :
+		mode == GrowMode ? "Grow/shrink region" :
+		mode == DoneMode ? "Mark region done" :
 		"Edit mode";
 
 	interactionModeLabel->SetInput(s.c_str());

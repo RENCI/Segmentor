@@ -77,6 +77,13 @@ public slots:
 	virtual void on_actionNavigation();
 	virtual void on_actionEdit();
 	virtual void on_actionAdd();
+	virtual void on_actionMerge();
+	virtual void on_actionGrow();
+	virtual void on_actionDone();
+
+	// Action events
+	virtual void on_actionUpdate();
+	virtual void on_actionSplit();
 
 	// Tool bar events
 	virtual void on_actionOverlay(bool checked);

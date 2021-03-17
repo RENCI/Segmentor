@@ -16,7 +16,10 @@ class vtkCellPicker;
 #define VTKIS_OVERWRITE_SLICE 2049
 #define VTKIS_ERASE_SLICE 2050
 #define VTKIS_SELECT_SLICE 2051
-#define VTKIS_ADD_REGION_SLICE 2052
+#define VTKIS_ADD_SLICE 2052
+#define VTKIS_MERGE_SLICE 2053
+#define VTKIS_GROW_SLICE 2054
+#define VTKIS_DONE_SLICE 2055
 
 class vtkInteractorStyleSlice : public vtkInteractorStyleImage {
 public:
@@ -45,8 +48,14 @@ public:
 	virtual void EndOverwrite();
 	virtual void StartErase();
 	virtual void EndErase();
-	virtual void StartAddRegion();
-	virtual void EndAddRegion();
+	virtual void StartAdd();
+	virtual void EndAdd();
+	virtual void StartMerge();
+	virtual void EndMerge();
+	virtual void StartGrow();
+	virtual void EndGrow();
+	virtual void StartDone();
+	virtual void EndDone();
 
 	virtual void WindowLevel() override;
 	double GetWindow();
@@ -63,7 +72,10 @@ public:
 		StartEraseEvent,
 		EraseEvent,
 		EndEraseEvent,
-		AddRegionEvent
+		AddEvent,
+		MergeEvent,
+		GrowEvent,
+		DoneEvent
 	};
 
 protected:
