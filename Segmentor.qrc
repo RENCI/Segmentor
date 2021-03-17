@@ -1,5 +1,10 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
+  <file>icons/icon_navigation.png</file>
+  <file>icons/icon_edit.png</file>
+  <file>icons/icon_done.png</file>
+  <file>icons/icon_visible.png</file>
+  <file>icons/icon_update.png</file>
   <file>icons/icon_overlay.png</file>
   <file>icons/icon_outline.png</file>
   <file>icons/icon_rescale_full.png</file>

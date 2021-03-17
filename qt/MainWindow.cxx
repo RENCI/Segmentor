@@ -834,14 +834,13 @@ void MainWindow::createModeBar() {
 	QActionGroup* interactionModeGroup = new QActionGroup(this);
 	interactionModeGroup->setExclusive(true);
 
-	QAction* actionNavigation = new QAction("N", interactionModeGroup);
-	actionNavigation->setToolTip("Navigation mode (space bar)");
+	QAction* actionNavigation = new QAction(QIcon(":/icons/icon_navigation.png"), "Navigation mode (space bar)", interactionModeGroup);
 	actionNavigation->setCheckable(true);
 	actionNavigation->setChecked(visualizationContainer->GetInteractionMode() == NavigationMode);
 
-	QAction* actionEdit = new QAction("E", interactionModeGroup);
-	actionEdit->setToolTip("Edit mode (space bar)");
+	QAction* actionEdit = new QAction(QIcon(":/icons/icon_edit.png"), "Edit mode (space bar)", interactionModeGroup);
 	actionEdit->setCheckable(true);
+	actionEdit->setChecked(visualizationContainer->GetInteractionMode() == EditMode);
 
 	QAction* actionAdd = new QAction("A", interactionModeGroup);
 	actionAdd->setToolTip("Add region mode (a)");
@@ -858,20 +857,6 @@ void MainWindow::createModeBar() {
 	actionGrow->setShortcut(QKeySequence("g"));
 	actionGrow->setCheckable(true);
 
-	QAction* actionDone = new QAction("D", interactionModeGroup);
-	actionDone->setToolTip("Toggle region done (d)");
-	actionDone->setShortcut(QKeySequence("d"));
-	actionDone->setCheckable(true);
-
-	QAction* actionVisible = new QAction("V", interactionModeGroup);
-	actionVisible->setToolTip("Toggle region visibility (v)");
-	actionVisible->setShortcut(QKeySequence("v"));
-	actionVisible->setCheckable(true);
-
-	QAction* actionUpdate = new QAction("Update");
-	actionUpdate->setToolTip("Update current region (u)");
-	actionUpdate->setShortcut(QKeySequence("u"));
-
 	QAction* actionSplit = new QAction("Split");
 	actionSplit->setToolTip("Split current region (/)");
 	actionSplit->setShortcut(QKeySequence("/"));
@@ -881,9 +866,6 @@ void MainWindow::createModeBar() {
 	QObject::connect(actionAdd, &QAction::triggered, this, &MainWindow::on_actionAdd);
 	QObject::connect(actionMerge, &QAction::triggered, this, &MainWindow::on_actionMerge);
 	QObject::connect(actionGrow, &QAction::triggered, this, &MainWindow::on_actionGrow);
-	QObject::connect(actionDone, &QAction::triggered, this, &MainWindow::on_actionDone);
-	QObject::connect(actionVisible, &QAction::triggered, this, &MainWindow::on_actionVisible);
-	QObject::connect(actionUpdate, &QAction::triggered, this, &MainWindow::on_actionUpdate);
 	QObject::connect(actionSplit, &QAction::triggered, this, &MainWindow::on_actionSplit);
 	
 	QObject::connect(new QShortcut(QKeySequence(Qt::Key_Space), this), &QShortcut::activated, [actionNavigation, actionEdit]() {
@@ -904,11 +886,11 @@ void MainWindow::createModeBar() {
 	toolBar->addAction(actionAdd);
 	toolBar->addAction(actionMerge);
 	toolBar->addAction(actionGrow);
-	toolBar->addAction(actionDone);
-	toolBar->addAction(actionVisible);
+	toolBar->addAction(createActionIcon(":/icons/icon_done.png", "Toggle region done (d)", "d", interactionModeGroup, visualizationContainer->GetInteractionMode() == DoneMode, &MainWindow::on_actionDone));
+	toolBar->addAction(createActionIcon(":/icons/icon_visible.png", "Toggle region visibility (v)", "v", interactionModeGroup, visualizationContainer->GetInteractionMode() == VisibleMode, &MainWindow::on_actionVisible));
 	toolBar->addSeparator();
 	toolBar->addWidget(createLabel("Actions", 0, 0));
-	toolBar->addAction(actionUpdate);
+	toolBar->addAction(createActionIcon(":/icons/icon_update.png", "Update current region (u)", "u", &MainWindow::on_actionUpdate));
 	toolBar->addAction(actionSplit);
 
 	modeBarWidget->layout()->addWidget(toolBar);
@@ -964,6 +946,17 @@ QAction* MainWindow::createActionIcon(const QString& fileName, const QString& te
 
 QAction* MainWindow::createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, bool checked, void (MainWindow::*slot)(bool)) {
 	QAction* action = new QAction(QIcon(fileName), text, this);
+	action->setShortcut(QKeySequence(shortcut));
+	action->setCheckable(true);
+	action->setChecked(checked);
+
+	QObject::connect(action, &QAction::triggered, this, slot);
+
+	return action;
+}
+
+QAction* MainWindow::createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, QActionGroup* group, bool checked, void (MainWindow::*slot)()) {
+	QAction* action = new QAction(QIcon(fileName), text, group);
 	action->setShortcut(QKeySequence(shortcut));
 	action->setCheckable(true);
 	action->setChecked(checked);
