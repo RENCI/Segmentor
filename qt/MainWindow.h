@@ -26,11 +26,7 @@ public:
 	void updateRegion(Region* region, RegionCollection* regions);
 	void selectRegion(unsigned short label);
 
-	void setWindowLevel(double window, double level);
-
 	void setSlicePosition(double x, double y, double z);
-
-	void setVoxelSize(double x, double y, double z);
 
 	void updateProgress(double progress);
 

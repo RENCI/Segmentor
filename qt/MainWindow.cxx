@@ -144,12 +144,7 @@ void MainWindow::updateRegion(Region* region, RegionCollection* regions) {
 void MainWindow::selectRegion(unsigned short label) {
 	regionTable->selectRegionLabel(label);
 }
-/*
-void MainWindow::setWindowLevel(double window, double level) {
-	windowSpinBox->setValue(window);
-	levelSpinBox->setValue(level);
-}
-*/
+
 void MainWindow::setSlicePosition(double x, double y, double z) {
 	QString s = "Slice Position: (" + 
 		QString::number(x, 'f', 1) + ", " + 
@@ -158,13 +153,7 @@ void MainWindow::setSlicePosition(double x, double y, double z) {
 
 	slicePositionLabel->setText(s);
 }
-/*
-void MainWindow::setVoxelSize(double x, double y, double z) {
-	xSizeSpinBox->setValue(x);
-	ySizeSpinBox->setValue(y);
-	zSizeSpinBox->setValue(z);
-}
-*/
+
 void MainWindow::updateProgress(double progress) {
 	progressBar->setValue(progress * 100);
 }
