@@ -19,7 +19,6 @@
 #include "RegionCollection.h"
 #include "RegionTable.h"
 #include "RegionMetadataIO.h"
-#include "InteractionEnums.h"
 #include "SliceView.h"
 #include "VolumeView.h"
 #include "CameraViewDialog.h"
@@ -559,11 +558,15 @@ void MainWindow::on_actionProject_Website_triggered() {
 }
 
 void MainWindow::on_actionNavigation() {
-	visualizationContainer->SetInteractionMode(NavigationMode);	
+	visualizationContainer->SetInteractionMode(NavigationMode);
+
+	navEditMode = NavigationMode;
 }
 
 void MainWindow::on_actionEdit() {
 	visualizationContainer->SetInteractionMode(EditMode);
+
+	navEditMode = EditMode;
 }
 
 void MainWindow::on_actionAdd() {
@@ -830,29 +833,46 @@ void MainWindow::createModeBar() {
 	toolBar->setMovable(true);
 	toolBar->setOrientation(Qt::Horizontal);
 
+	InteractionMode currentMode = visualizationContainer->GetInteractionMode();
+
+	// Save navigation / edit for switching back to them from other modes
+	navEditMode = currentMode == EditMode ? EditMode : NavigationMode;
+
 	// Interaction toggle
 	QActionGroup* interactionModeGroup = new QActionGroup(this);
 	interactionModeGroup->setExclusive(true);
 
 	QAction* actionNavigation = new QAction(QIcon(":/icons/icon_navigation.png"), "Navigation mode (space bar)", interactionModeGroup);
 	actionNavigation->setCheckable(true);
-	actionNavigation->setChecked(visualizationContainer->GetInteractionMode() == NavigationMode);
+	actionNavigation->setChecked(currentMode == NavigationMode);
 
 	QAction* actionEdit = new QAction(QIcon(":/icons/icon_edit.png"), "Edit mode (space bar)", interactionModeGroup);
 	actionEdit->setCheckable(true);
-	actionEdit->setChecked(visualizationContainer->GetInteractionMode() == EditMode);
+	actionEdit->setChecked(currentMode == EditMode);
 
 	QObject::connect(actionNavigation, &QAction::triggered, this, &MainWindow::on_actionNavigation);
-	QObject::connect(actionEdit, &QAction::triggered, this, &MainWindow::on_actionEdit);;
+	QObject::connect(actionEdit, &QAction::triggered, this, &MainWindow::on_actionEdit);
 	
-	QObject::connect(new QShortcut(QKeySequence(Qt::Key_Space), this), &QShortcut::activated, [actionNavigation, actionEdit]() {
-		if (actionEdit->isChecked()) {
+	QObject::connect(new QShortcut(QKeySequence(Qt::Key_Space), this), &QShortcut::activated, [actionNavigation, actionEdit, this]() {
+		if (actionNavigation->isChecked()) {
+			actionEdit->toggle();
+			emit(actionEdit->triggered(true));
+		}
+		else if (actionEdit->isChecked()) {
 			actionNavigation->toggle();
 			emit(actionNavigation->triggered(true));
 		}
-		else {
+		else if (navEditMode == NavigationMode) {
+			actionNavigation->toggle();
+			emit(actionNavigation->triggered(true));
+		}
+		else if (navEditMode == EditMode) {
 			actionEdit->toggle();
 			emit(actionEdit->triggered(true));
+		}
+		else {
+			actionNavigation->toggle();
+			emit(actionNavigation->triggered(true));
 		}
 	});
 
@@ -860,11 +880,11 @@ void MainWindow::createModeBar() {
 	toolBar->addWidget(createLabel("Mode", 0, 0, 0, 5));
 	toolBar->addAction(actionNavigation);
 	toolBar->addAction(actionEdit);
-	toolBar->addAction(createActionIcon(":/icons/icon_add.png", "Add region (a)", "a", interactionModeGroup, visualizationContainer->GetInteractionMode() == AddMode, &MainWindow::on_actionAdd));
-	toolBar->addAction(createActionIcon(":/icons/icon_merge.png", "Merge with current region (m)", "m", interactionModeGroup, visualizationContainer->GetInteractionMode() == MergeMode, &MainWindow::on_actionMerge));
-	toolBar->addAction(createActionIcon(":/icons/icon_grow.png", "Grow / shrink region (g)", "g", interactionModeGroup, visualizationContainer->GetInteractionMode() == GrowMode, &MainWindow::on_actionGrow));
-	toolBar->addAction(createActionIcon(":/icons/icon_done.png", "Toggle region done (d)", "d", interactionModeGroup, visualizationContainer->GetInteractionMode() == DoneMode, &MainWindow::on_actionDone));
-	toolBar->addAction(createActionIcon(":/icons/icon_visible.png", "Toggle region visibility (v)", "v", interactionModeGroup, visualizationContainer->GetInteractionMode() == VisibleMode, &MainWindow::on_actionVisible));
+	toolBar->addAction(createActionIcon(":/icons/icon_add.png", "Add region (a)", "a", interactionModeGroup, currentMode == AddMode, &MainWindow::on_actionAdd));
+	toolBar->addAction(createActionIcon(":/icons/icon_merge.png", "Merge with current region (m)", "m", interactionModeGroup, currentMode == MergeMode, &MainWindow::on_actionMerge));
+	toolBar->addAction(createActionIcon(":/icons/icon_grow.png", "Grow / shrink region (g)", "g", interactionModeGroup, currentMode == GrowMode, &MainWindow::on_actionGrow));
+	toolBar->addAction(createActionIcon(":/icons/icon_done.png", "Toggle region done (d)", "d", interactionModeGroup, currentMode == DoneMode, &MainWindow::on_actionDone));
+	toolBar->addAction(createActionIcon(":/icons/icon_visible.png", "Toggle region visibility (v)", "v", interactionModeGroup, currentMode == VisibleMode, &MainWindow::on_actionVisible));
 	toolBar->addSeparator();
 	toolBar->addWidget(createLabel("Actions", 0, 0, 5, 5));
 	toolBar->addAction(createActionIcon(":/icons/icon_update.png", "Update current region (u)", "u", &MainWindow::on_actionUpdate));

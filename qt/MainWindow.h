@@ -11,6 +11,8 @@
 
 #include <string>
 
+#include "InteractionEnums.h"
+
 class VisualizationContainer;
 class Region;
 class RegionCollection;
@@ -135,8 +137,6 @@ protected:
 
 	void updateLabels(RegionCollection* regions);
 
-	void updateImage();
-
 	bool eventFilter(QObject* obj, QEvent* event);
 
 	// Default directories
@@ -153,6 +153,8 @@ protected:
 	QAction* createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, bool checked, void (MainWindow::*slot)(bool));
 	QAction* createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, QActionGroup* group, bool checked, void (MainWindow::*slot)());
 	QLabel* createLabel(const QString& text, int topMargin = 10, int bottomMargin = 5, int leftMargin = 0, int rightMargin = 0);
+
+	InteractionMode navEditMode;
 
 	void closeEvent(QCloseEvent* event);
 };
