@@ -16,6 +16,9 @@ class vtkCellPicker;
 #define VTKIS_ERASE_VOLUME 2049
 #define VTKIS_SELECT_VOLUME 2050
 #define VTKIS_SLICE_VOLUME 2051
+#define VTKIS_MERGE_VOLUME 2052
+#define VTKIS_DONE_VOLUME 2053
+#define VTKIS_VISIBLE_VOLUME 2054
 
 class vtkInteractorStyleVolume : public vtkInteractorStyleTrackballCamera {
 public:
@@ -47,6 +50,12 @@ public:
 	virtual void StartSlice();
 	virtual void EndSlice();
 	virtual void Slice();
+	virtual void StartMerge();
+	virtual void EndMerge();
+	virtual void StartDone();
+	virtual void EndDone();
+	virtual void StartVisible();
+	virtual void EndVisible();
 
 	enum VolumeEventIds {
 		SelectLabelEvent = vtkCommand::UserEvent + 1,
@@ -55,7 +64,10 @@ public:
 		EndPaintEvent, 
 		StartEraseEvent,
 		EraseEvent,
-		EndEraseEvent
+		EndEraseEvent,
+		MergeEvent,
+		DoneEvent,
+		VisibleEvent
 	};
 
 protected:

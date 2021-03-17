@@ -247,10 +247,10 @@ void VolumeView::SetInteractionMode(enum InteractionMode mode) {
 		mode == NavigationMode ? "Navigation mode" :
 		mode == EditMode ? "Edit mode" :
 		mode == AddMode ? "" :
-		mode == MergeMode ? "" :
+		mode == MergeMode ? "Merge mode" :
 		mode == GrowMode ? "" :
-		mode == DoneMode ? "" :
-		mode == VisibleMode ? "" :
+		mode == DoneMode ? "Toggle region done" :
+		mode == VisibleMode ? "Toggle region visibility" :
 		"";
 
 	interactionModeLabel->SetInput(s.c_str());

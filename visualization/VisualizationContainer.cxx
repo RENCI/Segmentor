@@ -143,6 +143,7 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	vtkSmartPointer<vtkCallbackCommand> mergeCallback = vtkSmartPointer<vtkCallbackCommand>::New();
 	mergeCallback->SetCallback(InteractionCallbacks::Merge);
 	mergeCallback->SetClientData(this);
+	volumeView->GetInteractorStyle()->AddObserver(vtkInteractorStyleVolume::MergeEvent, mergeCallback);
 	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::MergeEvent, mergeCallback);
 
 	// Grow region
@@ -155,12 +156,14 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	vtkSmartPointer<vtkCallbackCommand> doneCallback = vtkSmartPointer<vtkCallbackCommand>::New();
 	doneCallback->SetCallback(InteractionCallbacks::Done);
 	doneCallback->SetClientData(this);
+	volumeView->GetInteractorStyle()->AddObserver(vtkInteractorStyleVolume::DoneEvent, doneCallback);
 	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::DoneEvent, doneCallback);
 
 	// Region visibility
 	vtkSmartPointer<vtkCallbackCommand> visibleCallback = vtkSmartPointer<vtkCallbackCommand>::New();
 	visibleCallback->SetCallback(InteractionCallbacks::Visible);
 	visibleCallback->SetClientData(this);
+	volumeView->GetInteractorStyle()->AddObserver(vtkInteractorStyleVolume::VisibleEvent, visibleCallback);
 	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::VisibleEvent, visibleCallback);
 
 	// Mouse move

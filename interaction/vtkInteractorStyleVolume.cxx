@@ -136,6 +136,78 @@ void vtkInteractorStyleVolume::EndSlice()
 }
 
 //----------------------------------------------------------------------------
+void vtkInteractorStyleVolume::StartMerge()
+{
+	if (this->State != VTKIS_NONE)
+	{
+		return;
+	}
+	this->StartState(VTKIS_MERGE_VOLUME);
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleVolume::EndMerge()
+{
+	if (this->State != VTKIS_MERGE_VOLUME)
+	{
+		return;
+	}
+	if (this->HandleObservers)
+	{
+		this->InvokeEvent(MergeEvent, nullptr);
+	}
+	this->StopState();
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleVolume::StartDone()
+{
+	if (this->State != VTKIS_NONE)
+	{
+		return;
+	}
+	this->StartState(VTKIS_DONE_VOLUME);
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleVolume::EndDone()
+{
+	if (this->State != VTKIS_DONE_VOLUME)
+	{
+		return;
+	}
+	if (this->HandleObservers)
+	{
+		this->InvokeEvent(DoneEvent, nullptr);
+	}
+	this->StopState();
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleVolume::StartVisible()
+{
+	if (this->State != VTKIS_NONE)
+	{
+		return;
+	}
+	this->StartState(VTKIS_VISIBLE_VOLUME);
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleVolume::EndVisible()
+{
+	if (this->State != VTKIS_VISIBLE_VOLUME)
+	{
+		return;
+	}
+	if (this->HandleObservers)
+	{
+		this->InvokeEvent(VisibleEvent, nullptr);
+	}
+	this->StopState();
+}
+
+//----------------------------------------------------------------------------
 void vtkInteractorStyleVolume::OnMouseMove() 
 {
 	this->MouseMoved = true;
@@ -191,6 +263,18 @@ void vtkInteractorStyleVolume::OnLeftButtonDown()
 			this->StartPaint();
 		}
 	}
+	else if (this->Mode == MergeMode)
+	{
+		this->StartMerge();
+	}
+	else if (this->Mode == DoneMode)
+	{
+		this->StartDone();
+	}
+	else if (this->Mode == VisibleMode)
+	{
+		this->StartVisible();
+	}
 	else
 	{
 		// Rotate
@@ -226,6 +310,18 @@ void vtkInteractorStyleVolume::OnLeftButtonUp()
 
 	case VTKIS_PAINT_VOLUME:
 		this->EndPaint();
+		break;
+
+	case VTKIS_MERGE_VOLUME:
+		this->EndMerge();
+		break;
+
+	case VTKIS_DONE_VOLUME:
+		this->EndDone();
+		break;
+
+	case VTKIS_VISIBLE_VOLUME:
+		this->EndVisible();
 		break;
 	}
 
