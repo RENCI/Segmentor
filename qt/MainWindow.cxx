@@ -582,14 +582,19 @@ void MainWindow::on_actionDone() {
 	visualizationContainer->SetInteractionMode(DoneMode);
 }
 
-void MainWindow::on_actionSplit() {
-	// Split in half for now, add interface for selecting number in future
-	visualizationContainer->SplitCurrentRegion(2);
+void MainWindow::on_actionVisible() {
+	visualizationContainer->SetInteractionMode(VisibleMode);
 }
 
 void MainWindow::on_actionUpdate() {
 	visualizationContainer->RelabelCurrentRegion();
 }
+
+void MainWindow::on_actionSplit() {
+	// Split in half for now, add interface for selecting number in future
+	visualizationContainer->SplitCurrentRegion(2);
+}
+
 
 void MainWindow::on_actionOverlay(bool checked) {
 	visualizationContainer->GetSliceView()->ShowLabelSlice(checked);
@@ -854,9 +859,14 @@ void MainWindow::createModeBar() {
 	actionGrow->setCheckable(true);
 
 	QAction* actionDone = new QAction("D", interactionModeGroup);
-	actionDone->setToolTip("Mark current region done (d)");
+	actionDone->setToolTip("Toggle region done (d)");
 	actionDone->setShortcut(QKeySequence("d"));
 	actionDone->setCheckable(true);
+
+	QAction* actionVisible = new QAction("V", interactionModeGroup);
+	actionVisible->setToolTip("Toggle region visibility (v)");
+	actionVisible->setShortcut(QKeySequence("v"));
+	actionVisible->setCheckable(true);
 
 	QAction* actionUpdate = new QAction("Update");
 	actionUpdate->setToolTip("Update current region (u)");
@@ -872,6 +882,7 @@ void MainWindow::createModeBar() {
 	QObject::connect(actionMerge, &QAction::triggered, this, &MainWindow::on_actionMerge);
 	QObject::connect(actionGrow, &QAction::triggered, this, &MainWindow::on_actionGrow);
 	QObject::connect(actionDone, &QAction::triggered, this, &MainWindow::on_actionDone);
+	QObject::connect(actionVisible, &QAction::triggered, this, &MainWindow::on_actionVisible);
 	QObject::connect(actionUpdate, &QAction::triggered, this, &MainWindow::on_actionUpdate);
 	QObject::connect(actionSplit, &QAction::triggered, this, &MainWindow::on_actionSplit);
 	
@@ -894,6 +905,7 @@ void MainWindow::createModeBar() {
 	toolBar->addAction(actionMerge);
 	toolBar->addAction(actionGrow);
 	toolBar->addAction(actionDone);
+	toolBar->addAction(actionVisible);
 	toolBar->addSeparator();
 	toolBar->addWidget(createLabel("Actions", 0, 0));
 	toolBar->addAction(actionUpdate);

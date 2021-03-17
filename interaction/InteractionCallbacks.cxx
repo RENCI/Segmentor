@@ -76,111 +76,6 @@ void InteractionCallbacks::CameraChange(vtkObject* caller, unsigned long eventId
 	vis->SetFocalPoint(fp[0], fp[1], fp[2]);
 }
 
-void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
-	vtkRenderWindowInteractor* rwi = static_cast<vtkRenderWindowInteractor*>(caller);
-	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
-/*
-	switch (rwi->GetKeyCode()) {	
-
-	case 'd':
-	case 'D': {
-		// Pick at the mouse location provided by the interactor	
-		int pick = Pick(rwi);
-
-		if (pick) {
-			// Get the position for the pick event		
-			double p[3];
-			PickPosition(p);
-
-			// XXX: HACK TO GUARD AGAINST INVALID VOLUME PICK
-			//		NEED TO FIX VOLUME PICKING AND DIFFERENTIATE BETWEEN THEM FOR KEYSTROKE CALLBACK
-
-			if (p[0] == 0 && p[1] == 0 && p[2] == 0) break;
-
-			vis->ToggleRegionDone(p);
-		}
-		break;
-	}
-
-	case 'g':
-	case 'G': {
-		// Pick at the mouse location provided by the interactor	
-		int pick = Pick(rwi);
-
-		if (pick) {
-			// Get the position for the pick event		
-			double p[3];
-			PickPosition(p);
-
-			// XXX: HACK TO GUARD AGAINST INVALID VOLUME PICK
-			//		NEED TO FIX VOLUME PICKING AND DIFFERENTIATE BETWEEN THEM FOR KEYSTROKE CALLBACK
-
-			if (p[0] == 0 && p[1] == 0 && p[2] == 0) break;
-				
-			vis->GrowCurrentRegion(p);
-		}
-		break;
-	}
-
-	case 'u':
-	case 'U':
-		vis->RelabelCurrentRegion();
-		break;
-
-	case 'm':
-	case 'M': {
-		// Pick at the mouse location provided by the interactor	
-		int pick = Pick(rwi);
-
-		if (pick) {
-			// Get the position for the pick event		
-			double p[3];
-			PickPosition(p);
-
-			// XXX: HACK TO GUARD AGAINST INVALID VOLUME PICK
-			//		NEED TO FIX VOLUME PICKING AND DIFFERENTIATE BETWEEN THEM FOR KEYSTROKE CALLBACK
-
-			if (p[0] == 0 && p[1] == 0 && p[2] == 0) break;
-
-			vis->MergeWithCurrentRegion(p);
-		}
-		break;
-	}
-
-	case 'v':
-	case 'V': {
-		// Pick at the mouse location provided by the interactor	
-		int pick = Pick(rwi);
-
-		if (pick) {
-			// Get the position for the pick event		
-			double p[3];
-			PickPosition(p);
-
-			// XXX: HACK TO GUARD AGAINST INVALID VOLUME PICK
-			//		NEED TO FIX VOLUME PICKING AND DIFFERENTIATE BETWEEN THEM FOR KEYSTROKE CALLBACK
-
-			if (p[0] == 0 && p[1] == 0 && p[2] == 0) break;
-
-			vis->ToggleRegionVisibility(p);
-		}
-		break;
-	}
-
-	case '2':
-	case '3':
-	case '4':
-	case '5':
-	case '6':
-	case '7':
-	case '8':
-	case '9':
-		//vis->SplitCurrentRegion(rwi->GetKeyCode() - '0');
-		break;
-	}
-*/
-}
-
 void InteractionCallbacks::SliceSelectLabel(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
 	vtkRenderWindowInteractor* rwi = static_cast<vtkInteractorStyle*>(caller)->GetInteractor();
 	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
@@ -260,7 +155,7 @@ void InteractionCallbacks::Erase(vtkObject* caller, unsigned long eventId, void*
 	}
 }
 
-void InteractionCallbacks::AddRegion(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+void InteractionCallbacks::Add(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
 	vtkRenderWindowInteractor* rwi = static_cast<vtkInteractorStyle*>(caller)->GetInteractor();
 	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
 
@@ -272,6 +167,66 @@ void InteractionCallbacks::AddRegion(vtkObject* caller, unsigned long eventId, v
 		double p[3];
 		PickPosition(p);
 		vis->CreateNewRegion(p);
+	}
+}
+
+void InteractionCallbacks::Merge(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+	vtkRenderWindowInteractor* rwi = static_cast<vtkInteractorStyle*>(caller)->GetInteractor();
+	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
+
+	// Pick at the mouse location provided by the interactor	
+	int pick = Pick(rwi);
+
+	if (pick) {
+		// Get the position for the pick event		
+		double p[3];
+		PickPosition(p);
+		vis->MergeWithCurrentRegion(p);
+	}
+}
+
+void InteractionCallbacks::Grow(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+	vtkRenderWindowInteractor* rwi = static_cast<vtkInteractorStyle*>(caller)->GetInteractor();
+	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
+
+	// Pick at the mouse location provided by the interactor	
+	int pick = Pick(rwi);
+
+	if (pick) {
+		// Get the position for the pick event		
+		double p[3];
+		PickPosition(p);
+		vis->GrowCurrentRegion(p);
+	}
+}
+
+void InteractionCallbacks::Done(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+	vtkRenderWindowInteractor* rwi = static_cast<vtkInteractorStyle*>(caller)->GetInteractor();
+	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
+
+	// Pick at the mouse location provided by the interactor	
+	int pick = Pick(rwi);
+
+	if (pick) {
+		// Get the position for the pick event		
+		double p[3];
+		PickPosition(p);
+		vis->ToggleRegionDone(p);
+	}
+}
+
+void InteractionCallbacks::Visible(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+	vtkRenderWindowInteractor* rwi = static_cast<vtkInteractorStyle*>(caller)->GetInteractor();
+	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
+
+	// Pick at the mouse location provided by the interactor	
+	int pick = Pick(rwi);
+
+	if (pick) {
+		// Get the position for the pick event		
+		double p[3];
+		PickPosition(p);
+		vis->ToggleRegionVisibility(p);
 	}
 }
 

@@ -80,6 +80,7 @@ public slots:
 	virtual void on_actionMerge();
 	virtual void on_actionGrow();
 	virtual void on_actionDone();
+	virtual void on_actionVisible();
 
 	// Action events
 	virtual void on_actionUpdate();

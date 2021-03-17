@@ -245,13 +245,13 @@ void VolumeView::SetProbePosition(double x, double y, double z) {
 void VolumeView::SetInteractionMode(enum InteractionMode mode) {
 	std::string s =
 		mode == NavigationMode ? "Navigation mode" :
-		mode == AddMode ? "Add region" :
-		mode == UpdateMode ? "Update region" :
-		mode == MergeMode ? "Merge region" :
-		mode == SplitMode ? "Split region" :
-		mode == GrowMode ? "Grow/shrink region" :
-		mode == DoneMode ? "Mark region done" :
-		"Edit mode";
+		mode == EditMode ? "Edit mode" :
+		mode == AddMode ? "" :
+		mode == MergeMode ? "" :
+		mode == GrowMode ? "" :
+		mode == DoneMode ? "" :
+		mode == VisibleMode ? "" :
+		"";
 
 	interactionModeLabel->SetInput(s.c_str());
 

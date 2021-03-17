@@ -101,13 +101,6 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	cameraCallback->SetClientData(this);
 	sliceView->GetRenderer()->GetActiveCamera()->AddObserver(vtkCommand::ModifiedEvent, cameraCallback);
 
-	// Char
-	vtkSmartPointer<vtkCallbackCommand> onCharCallback = vtkSmartPointer<vtkCallbackCommand>::New(); 
-	onCharCallback->SetCallback(InteractionCallbacks::OnChar);
-	onCharCallback->SetClientData(this);
-	volumeInteractor->AddObserver(vtkCommand::CharEvent, onCharCallback);
-	sliceInteractor->AddObserver(vtkCommand::CharEvent, onCharCallback);
-
 	// Label select
 	vtkSmartPointer<vtkCallbackCommand> volumeSelectLabelCallback = vtkSmartPointer<vtkCallbackCommand>::New();
 	volumeSelectLabelCallback->SetCallback(InteractionCallbacks::VolumeSelectLabel);
@@ -141,10 +134,34 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::EraseEvent, eraseCallback);
 
 	// Add region
-	vtkSmartPointer<vtkCallbackCommand> addRegionCallback = vtkSmartPointer<vtkCallbackCommand>::New();
-	addRegionCallback->SetCallback(InteractionCallbacks::AddRegion);
-	addRegionCallback->SetClientData(this);
-	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::AddEvent, addRegionCallback);
+	vtkSmartPointer<vtkCallbackCommand> addCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+	addCallback->SetCallback(InteractionCallbacks::Add);
+	addCallback->SetClientData(this);
+	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::AddEvent, addCallback);
+
+	// Merge region
+	vtkSmartPointer<vtkCallbackCommand> mergeCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+	mergeCallback->SetCallback(InteractionCallbacks::Merge);
+	mergeCallback->SetClientData(this);
+	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::MergeEvent, mergeCallback);
+
+	// Grow region
+	vtkSmartPointer<vtkCallbackCommand> growCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+	growCallback->SetCallback(InteractionCallbacks::Grow);
+	growCallback->SetClientData(this);
+	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::GrowEvent, growCallback);
+
+	// Region done
+	vtkSmartPointer<vtkCallbackCommand> doneCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+	doneCallback->SetCallback(InteractionCallbacks::Done);
+	doneCallback->SetClientData(this);
+	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::DoneEvent, doneCallback);
+
+	// Region visibility
+	vtkSmartPointer<vtkCallbackCommand> visibleCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+	visibleCallback->SetCallback(InteractionCallbacks::Visible);
+	visibleCallback->SetClientData(this);
+	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::VisibleEvent, visibleCallback);
 
 	// Mouse move
 	vtkSmartPointer<vtkCallbackCommand> mouseMoveCallback = vtkSmartPointer<vtkCallbackCommand>::New();

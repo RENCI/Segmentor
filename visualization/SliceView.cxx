@@ -251,13 +251,13 @@ void SliceView::SetProbePosition(double x, double y, double z) {
 void SliceView::SetInteractionMode(enum InteractionMode mode) {
 	std::string s =
 		mode == NavigationMode ? "Navigation mode" :
+		mode == EditMode ? "Edit mode" :
 		mode == AddMode ? "Add region" :
-		mode == UpdateMode ? "Update region" :
 		mode == MergeMode ? "Merge region" :
-		mode == SplitMode ? "Split region" :
 		mode == GrowMode ? "Grow/shrink region" :
-		mode == DoneMode ? "Mark region done" :
-		"Edit mode";
+		mode == DoneMode ? "Toggle region done" :
+		mode == VisibleMode ? "Toggle region visibility" :
+		"";
 
 	interactionModeLabel->SetInput(s.c_str());
 
