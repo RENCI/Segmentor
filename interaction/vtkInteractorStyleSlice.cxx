@@ -147,6 +147,30 @@ void vtkInteractorStyleSlice::EndErase()
 }
 
 //----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::StartAddRegion()
+{
+	if (this->State != VTKIS_NONE)
+	{
+		return;
+	}
+	this->StartState(VTKIS_ADD_REGION_SLICE);
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::EndAddRegion()
+{
+	if (this->State != VTKIS_ADD_REGION_SLICE)
+	{
+		return;
+	}
+	if (this->HandleObservers)
+	{
+		this->InvokeEvent(AddRegionEvent, nullptr);
+	}
+	this->StopState();
+}
+
+//----------------------------------------------------------------------------
 void vtkInteractorStyleSlice::WindowLevel()
 {
 	vtkRenderWindowInteractor *rwi = this->Interactor;
@@ -302,6 +326,10 @@ void vtkInteractorStyleSlice::OnLeftButtonDown()
 				this->StartPaint();
 			}
 		}
+		else if (this->Mode == AddMode)
+		{
+			this->StartAddRegion();
+		}
 		else
 		{
 			// Rotate
@@ -345,6 +373,10 @@ void vtkInteractorStyleSlice::OnLeftButtonUp() {
 
 	case VTKIS_OVERWRITE_SLICE:
 		this->EndOverwrite();
+		break;
+
+	case VTKIS_ADD_REGION_SLICE:
+		this->EndAddRegion();
 		break;
 	}
 

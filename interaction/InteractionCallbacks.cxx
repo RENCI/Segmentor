@@ -81,27 +81,6 @@ void InteractionCallbacks::OnChar(vtkObject* caller, unsigned long eventId, void
 	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
 
 	switch (rwi->GetKeyCode()) {	
-/*
-	case 'a':
-	case 'A': {
-		// Pick at the mouse location provided by the interactor	
-		int pick = Pick(rwi);
-
-		if (pick) {
-			// Get the position for the pick event		
-			double p[3];
-			PickPosition(p);
-
-			// XXX: HACK TO GUARD AGAINST INVALID VOLUME PICK
-			//		NEED TO FIX VOLUME PICKING AND DIFFERENTIATE BETWEEN THEM FOR KEYSTROKE CALLBACK
-
-			if (p[0] == 0 && p[1] == 0 && p[2] == 0) break;
-
-			vis->CreateNewRegion(p);
-		}
-		break;
-	}
-*/
 
 	case 'd':
 	case 'D': {
@@ -277,6 +256,21 @@ void InteractionCallbacks::Erase(vtkObject* caller, unsigned long eventId, void*
 		PickPosition(p);
 		vis->Erase(p);
 		vis->Render();
+	}
+}
+
+void InteractionCallbacks::AddRegion(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+	vtkRenderWindowInteractor* rwi = static_cast<vtkInteractorStyle*>(caller)->GetInteractor();
+	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
+
+	// Pick at the mouse location provided by the interactor	
+	int pick = Pick(rwi);
+
+	if (pick) {
+		// Get the position for the pick event		
+		double p[3];
+		PickPosition(p);
+		vis->CreateNewRegion(p);
 	}
 }
 
