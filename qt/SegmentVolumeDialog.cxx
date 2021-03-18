@@ -46,11 +46,20 @@ SegmentVolumeDialog::SegmentVolumeDialog(QWidget* parent, VisualizationContainer
 		thresholdSlider->setValue(v);
 		thresholdSlider->blockSignals(false);
 	});
+
+	// Smoothing
+	int maxSmoothing = 5;
+
+	smoothingSlider->setMaximum(maxSmoothing);
+	smoothingSpinBox->setMaximum(maxSmoothing);
+
+	QObject::connect(smoothingSlider, &QSlider::valueChanged, smoothingSpinBox, &QSpinBox::setValue);
+	QObject::connect(smoothingSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), smoothingSlider, &QSlider::setValue);
 }
 
 SegmentVolumeDialog::~SegmentVolumeDialog() {
 }
 
 void SegmentVolumeDialog::on_updateButton_clicked() {
-	visualizationContainer->SegmentVolume(thresholdSpinBox->value());
+	visualizationContainer->SegmentVolume(thresholdSpinBox->value(), smoothingSpinBox->value());
 }

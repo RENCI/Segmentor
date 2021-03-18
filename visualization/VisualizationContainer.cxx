@@ -8,8 +8,10 @@
 #include <vtkBillboardTextActor3D.h>
 #include <vtkCallbackCommand.h>
 #include <vtkCamera.h>
+#include <vtkExtractVOI.h>
 #include <vtkImageConnectivityFilter.h>
 #include <vtkImageDilateErode3D.h>
+#include <vtkImageGaussianSmooth.h>
 #include <vtkImageOpenClose3D.h>
 #include <vtkImageThreshold.h>
 #include <vtkIdTypeArray.h>
@@ -34,8 +36,8 @@
 #include <vtkXMLImageDataReader.h>
 #include <vtkXMLImageDataWriter.h>
 
-#include <vtkInteractorStyleSlice.h>
-#include <vtkInteractorStyleVolume.h>
+#include "vtkInteractorStyleSlice.h"
+#include "vtkInteractorStyleVolume.h"
 
 #include "History.h"
 #include "InteractionEnums.h"
@@ -48,9 +50,6 @@
 #include "RegionSurface.h"
 #include "RegionCollection.h"
 #include "RegionMetadataIO.h"
-
-#include <vtkExtractVOI.h>
-#include <vtkImageGradientMagnitude.h>
 
 VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volumeInteractor, vtkRenderWindowInteractor* sliceInteractor, MainWindow* mainWindow) {
 	data = nullptr;
@@ -479,8 +478,16 @@ void VisualizationContainer::InitializeLabelData() {
 	qtWindow->updateRegions(regions);
 }
 
-void VisualizationContainer::SegmentVolume(double thresholdValue) {
+void VisualizationContainer::SegmentVolume(double thresholdValue, int smoothing) {
 	if (!data) return;
+
+	// Smoothing
+	double sigma = smoothing / 2;
+
+	vtkSmartPointer<vtkImageGaussianSmooth> smooth = vtkSmartPointer<vtkImageGaussianSmooth>::New();
+	smooth->SetStandardDeviation(sigma);
+	smooth->SetRadiusFactor(smoothing);
+	smooth->SetInputDataObject(data);
 
 	// Filter
 	vtkSmartPointer<vtkImageThreshold> threshold = vtkSmartPointer<vtkImageThreshold>::New();
@@ -490,7 +497,7 @@ void VisualizationContainer::SegmentVolume(double thresholdValue) {
 	threshold->ReplaceInOn();
 	threshold->ReplaceOutOn();
 	threshold->SetOutputScalarTypeToUnsignedChar();
-	threshold->SetInputDataObject(data);
+	threshold->SetInputConnection(smooth->GetOutputPort());
 
 /*	
 	vtkSmartPointer<vtkImageOpenClose3D> openClose = vtkSmartPointer<vtkImageOpenClose3D>::New();
@@ -1212,6 +1219,8 @@ void VisualizationContainer::SplitRegionKMeans(Region* region, int numRegions) {
 }
 
 void VisualizationContainer::SplitRegionIntensity(Region* region, int numRegions) {
+	qtWindow->initProgress("Splitting region");
+
 	// Region label
 	unsigned short label = region->GetLabel();
 
@@ -1322,6 +1331,8 @@ void VisualizationContainer::SplitRegionIntensity(Region* region, int numRegions
 				closestThreshold = t;
 			}
 		}
+
+		qtWindow->updateProgress((t - range[0]) / (range[1] - range[0]) * 0.33);
 	}
 
 	threshold->ThresholdByUpper(closestThreshold);
@@ -1408,6 +1419,8 @@ void VisualizationContainer::SplitRegionIntensity(Region* region, int numRegions
 		}
 
 		connectivityOutput->Modified();
+
+		qtWindow->updateProgress(0.33 + (closestThreshold - t) / (closestThreshold - range[0]) * 0.33);
 	}
 
 	// Use current region for first component
@@ -1478,6 +1491,8 @@ void VisualizationContainer::SplitRegionIntensity(Region* region, int numRegions
 		}
 
 		newRegion->SetModified(true);
+
+		qtWindow->updateProgress(0.66 + (double)i / numComponents * 0.33);
 	}
 
 	qtWindow->updateRegions(regions);
@@ -1485,6 +1500,8 @@ void VisualizationContainer::SplitRegionIntensity(Region* region, int numRegions
 	labels->Modified();
 
 	UpdateVisibility();
+
+	qtWindow->updateProgress(1.0);
 }
 
 void VisualizationContainer::GrowCurrentRegion(double point[3]) {
@@ -1966,6 +1983,8 @@ void VisualizationContainer::UpdateColors() {
 }
 
 void VisualizationContainer::ExtractRegions() {
+	qtWindow->initProgress("Processing segmentation data");
+
 	// Get label info
 	int maxLabel = labels->GetScalarRange()[1];
 

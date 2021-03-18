@@ -46,7 +46,7 @@ public:
 
 	void InitializeLabelData();
 
-	void SegmentVolume(double threshold);
+	void SegmentVolume(double threshold, int smoothing);
 	FileErrorCode SaveSegmentationData();
 	FileErrorCode SaveSegmentationData(const std::string& fileName);
 

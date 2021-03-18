@@ -30,6 +30,7 @@ public:
 
 	void setSlicePosition(double x, double y, double z);
 
+	void initProgress(QString text);
 	void updateProgress(double progress);
 
 	void showMessage(QString message);

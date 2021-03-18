@@ -34,11 +34,14 @@
 
 // Constructor
 MainWindow::MainWindow() {
-	progressBar = new QProgressDialog("Processing segmentation data", "", 0, 100, this);
+	progressBar = new QProgressDialog(this);
 	progressBar->setWindowFlag(Qt::WindowContextHelpButtonHint, false);
 	progressBar->setWindowFlag(Qt::WindowCloseButtonHint, false);
 	progressBar->setCancelButton(nullptr);
 	progressBar->setWindowModality(Qt::WindowModal);
+	progressBar->setMinimum(0);
+	progressBar->setMaximum(100);
+	progressBar->setMinimumDuration(1000);
 	progressBar->reset();
 
 	// Create the GUI from the Qt Designer file
@@ -152,6 +155,10 @@ void MainWindow::setSlicePosition(double x, double y, double z) {
 		QString::number(z, 'f' , 1) + ")";
 
 	slicePositionLabel->setText(s);
+}
+
+void MainWindow::initProgress(QString text) {
+	progressBar->setLabelText(text);
 }
 
 void MainWindow::updateProgress(double progress) {
