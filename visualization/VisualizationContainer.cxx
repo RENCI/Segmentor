@@ -1285,7 +1285,8 @@ void VisualizationContainer::SplitRegionIntensity(Region* region, int numRegions
 	}
 */
 	// XXX: TRY ALL THRESHOLDS, KEEP ONE WITH LARGEST REGIONS FOR CORRECT NUMBER
-	double step = 1;
+	int numSteps = 100;
+	double step = (range[1] - range[0]) / numSteps;
 
 	int closestCount = 0;
 	double closestThreshold = 0.0;
@@ -1341,13 +1342,17 @@ void VisualizationContainer::SplitRegionIntensity(Region* region, int numRegions
 	int numComponents = connectivity->GetNumberOfExtractedRegions();
 
 	if (numComponents <= 1) {
+		qtWindow->updateProgress(1.0);
+
+		qtWindow->showMessage("Region split unsuccessful");
+
 		return;
 	}
 
 	vtkIdTypeArray* componentLabels = connectivity->GetExtractedRegionLabels();
 	vtkImageData* connectivityOutput = connectivity->GetOutput();	
 
-	for (double t = closestThreshold - 1; t >= range[0]; t -= step) {
+	for (double t = closestThreshold - step; t >= range[0]; t -= step) {
 		// Assign voxels by growing each component
 		std::vector<vtkSmartPointer<vtkImageConnectivityFilter>> grow;
 
