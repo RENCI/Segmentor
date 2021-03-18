@@ -20,16 +20,37 @@ SegmentVolumeDialog::SegmentVolumeDialog(QWidget* parent, VisualizationContainer
 	// Get Otsu threshold
 	otsuThreshold = visualizationContainer->GetOtsuThreshold();
 
-	thresholdSlider->setMinimum(range[0]);
-	thresholdSlider->setMaximum(range[1]);
-	thresholdSlider->setSingleStep(step);
-	thresholdSlider->setPageStep(step * 10);
-	thresholdSlider->setValue(otsuThreshold);
+	thresholdSpinBox->setMinimum(range[0]);
+	thresholdSpinBox->setMaximum(range[1]);
+	thresholdSpinBox->setSingleStep(step);
+	thresholdSpinBox->setValue(otsuThreshold);
+
+	thresholdSlider->setMinimum(0);
+	thresholdSlider->setMaximum(99);
+	thresholdSlider->setSingleStep(1);
+	thresholdSlider->setPageStep(10);
+	thresholdSlider->setValue(otsuThreshold / step);
+
+	QObject::connect(thresholdSlider, &QSlider::valueChanged, [this, range](int value) {
+		double v = ((double)value / thresholdSlider->maximum()) * (range[1] - range[0]) + range[0];
+
+		thresholdSpinBox->blockSignals(true);
+		thresholdSpinBox->setValue(v);
+		thresholdSpinBox->blockSignals(false);
+	});
+
+	QObject::connect(thresholdSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [this, range](int value) {
+		int v = (value - range[0]) / (range[1] - range[0]) * thresholdSlider->maximum();
+
+		thresholdSlider->blockSignals(true);
+		thresholdSlider->setValue(v);
+		thresholdSlider->blockSignals(false);
+	});
 }
 
 SegmentVolumeDialog::~SegmentVolumeDialog() {
 }
 
 void SegmentVolumeDialog::on_updateButton_clicked() {
-	visualizationContainer->SegmentVolume(thresholdSlider->value());
+	visualizationContainer->SegmentVolume(thresholdSpinBox->value());
 }
