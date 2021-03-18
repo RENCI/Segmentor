@@ -124,6 +124,9 @@ public:
 	const double* GetDataRange();
 	double GetOtsuThreshold();
 
+	void PushTempHistory();
+	void PopTempHistory();
+
 protected:
 	// Qt main window
 	MainWindow* qtWindow;
@@ -135,6 +138,9 @@ protected:
 	// History
 	History* history;
 	int numEdits;
+
+	// Separate history for segmentation interface
+	History* tempHistory;
 
 	// Regions
 	RegionCollection* regions;

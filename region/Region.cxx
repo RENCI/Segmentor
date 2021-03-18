@@ -66,10 +66,11 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 }
 
 Region::Region(const RegionInfo& info, vtkImageData* inputData) {
-	SetInfo(info);
-
 	// Input data info
 	data = inputData;
+
+	voi = vtkSmartPointer<vtkExtractVOI>::New();
+	voi->SetInputDataObject(data);
 
 	// Text
 	text = vtkSmartPointer<vtkBillboardTextActor3D>::New();
@@ -77,8 +78,7 @@ Region::Region(const RegionInfo& info, vtkImageData* inputData) {
 	text->GetTextProperty()->SetColor(color);
 	text->VisibilityOff();
 
-	voi = vtkSmartPointer<vtkExtractVOI>::New();
-	voi->SetInputDataObject(data);
+	SetInfo(info);
 
 	vtkSmartPointer<vtkImageDataCells> cells = vtkSmartPointer<vtkImageDataCells>::New();
 	cells->SetInputConnection(voi->GetOutputPort());
@@ -457,8 +457,6 @@ void Region::SetInfo(const RegionInfo& info) {
 	visible = info.visible;
 	modified = info.modified;
 	done = info.done;
-
-
 }
 
 void Region::ClearLabels() {

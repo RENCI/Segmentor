@@ -486,10 +486,13 @@ void MainWindow::on_actionRedo_triggered() {
 }
 
 void MainWindow::on_actionSegment_Volume_triggered() {
-	//visualizationContainer->SegmentVolume();
+	visualizationContainer->PushTempHistory();
 
 	SegmentVolumeDialog dialog(this, visualizationContainer);
-	dialog.exec();
+
+	if (!dialog.exec()) {
+		visualizationContainer->PopTempHistory();
+	}
 }
 
 void MainWindow::on_actionExit_triggered() {

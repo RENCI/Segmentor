@@ -39,6 +39,13 @@ void History::Push(vtkImageData* labels, RegionCollection* regions) {
 	index = (int)labelHistory.size() - 1;
 }
 
+void History::Head(vtkImageData* labels, RegionCollection* regions) {
+	if (labelHistory.size() == 0) return;
+
+	labels->DeepCopy(labelHistory[index]);
+	RestoreInfo(regions, regionHistory[index], labels);
+}
+
 void History::Undo(vtkImageData* labels, RegionCollection* regions) {
 	if (labelHistory.size() == 0 || index == 0) return;
 
@@ -75,6 +82,7 @@ void History::RestoreInfo(RegionCollection* regions, RegionInfoCollection& info,
 	// Copy info for regions
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End();) {
 		Region* region = regions->Get(it++);
+
 		unsigned short label = region->GetLabel();
 
 		if (info.count(label) == 1) {

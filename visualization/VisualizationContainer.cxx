@@ -57,6 +57,7 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	labels = nullptr;
 	history = new History(10);
 	numEdits = 0;
+	tempHistory = new History(1);
 	regions = new RegionCollection();
 	currentRegion = nullptr;	
 	hoverLabel = 0;
@@ -184,6 +185,7 @@ VisualizationContainer::~VisualizationContainer() {
 	delete volumeView;
 	delete sliceView;
 	delete history;
+	delete tempHistory;
 	delete regions;
 }
 
@@ -1843,6 +1845,25 @@ double VisualizationContainer::GetOtsuThreshold() {
 	SegmentorMath::OtsuValues otsu = SegmentorMath::OtsuThreshold(data);
 
 	return otsu.threshold;
+}
+
+void VisualizationContainer::PushTempHistory() {
+	tempHistory->Clear();
+	tempHistory->Push(labels, regions);
+}
+
+void VisualizationContainer::PopTempHistory() {
+	if (!labels) return;
+
+	tempHistory->Head(labels, regions);
+
+	// Make sure spacing is correct
+	labels->SetSpacing(data->GetSpacing());
+
+	volumeView->SetRegions(labels, regions);
+	sliceView->SetSegmentationData(labels, regions);
+	qtWindow->updateRegions(regions);
+	Render();
 }
 
 void VisualizationContainer::SetImageData(vtkImageData* imageData) {	

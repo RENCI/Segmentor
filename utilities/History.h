@@ -17,6 +17,7 @@ public:
 	~History();
 
 	void Push(vtkImageData* labels, RegionCollection* regions);
+	void Head(vtkImageData* labels, RegionCollection* regions);
 	void Undo(vtkImageData* labels, RegionCollection* regions);
 	void Redo(vtkImageData* labels, RegionCollection* regions);
 	void Clear();
