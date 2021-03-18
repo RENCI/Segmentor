@@ -1285,7 +1285,7 @@ void VisualizationContainer::SplitRegionIntensity(Region* region, int numRegions
 	}
 */
 	// XXX: TRY ALL THRESHOLDS, KEEP ONE WITH LARGEST REGIONS FOR CORRECT NUMBER
-	int numSteps = 100;
+	int numSteps = 200;
 	double step = (range[1] - range[0]) / numSteps;
 
 	int closestCount = 0;
