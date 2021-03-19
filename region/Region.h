@@ -64,6 +64,8 @@ public:
 
 	double GetXYDistance(int x, int y, int z);
 
+	void GetSeed(int ijk[3]);
+
 	void SetInfo(const RegionInfo& info);
 
 protected:

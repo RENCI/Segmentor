@@ -1080,8 +1080,21 @@ void VisualizationContainer::CleanCurrentRegion() {
 	}
 
 	// Fill holes
+	// XXX: Need seed points?
+
+	// XXX: Probably need to implement myself. Per-slice scan line algorithm should work.
+
+	int seed[3];
+	currentRegion->GetSeed(seed);
+
+	// XXX: Convert to point?
+	vtkSmartPointer<vtkPoints> seedPoints = vtkSmartPointer<vtkPoints>::New();
+	seedPoints->SetNumberOfPoints(1);
+	seedPoints->SetPoint(0, seed[0], seed[1], seed[2]);
+
 	vtkSmartPointer<vtkImageThresholdConnectivity> floodFill = vtkSmartPointer<vtkImageThresholdConnectivity>::New();
-	floodFill->ThresholdBetween(label, label);
+	floodFill->SetSeedPoints(seedPoints);
+	floodFill->ThresholdByLower(label);
 	floodFill->ReplaceInOn();
 	floodFill->SetInValue(label);
 	floodFill->ReplaceOutOn();
@@ -1105,6 +1118,7 @@ void VisualizationContainer::CleanCurrentRegion() {
 				unsigned short* floodFillData = static_cast<unsigned short*>(floodFillOutput->GetScalarPointer(i, j, k));
 
 				if (*floodFillData == label) *labelData = label;
+				else *labelData = 0;
 			}
 		}
 	}	
