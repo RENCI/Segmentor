@@ -930,7 +930,8 @@ void VisualizationContainer::CreateNewRegion(double point[3]) {
 	*labelData = newLabel;
 
 	// Create new region
-	Region* newRegion = new Region(newLabel, labelColors->GetTableValue(newLabel), labels);
+	int extent[6] = { x, x, y, y, z, z };
+	Region* newRegion = new Region(newLabel, labelColors->GetTableValue(newLabel), labels, extent);
 	regions->Add(newRegion);
 	volumeView->AddRegion(newRegion);
 	sliceView->AddRegion(newRegion);
@@ -1004,7 +1005,7 @@ void VisualizationContainer::RelabelCurrentRegion() {
 				UpdateColors(newLabel);
 
 				// Create new region
-				Region* newRegion = new Region(newLabel, labelColors->GetTableValue(newLabel), labels);
+				Region* newRegion = new Region(newLabel, labelColors->GetTableValue(newLabel), labels, extent);
 				newRegion->SetVisible(true);
 				regions->Add(newRegion);
 				volumeView->AddRegion(newRegion);
@@ -1425,6 +1426,15 @@ void VisualizationContainer::SplitRegionIntensity(Region* region, int numRegions
 	// Use current region for first component
 	unsigned short componentLabel = (unsigned short)componentLabels->GetTuple1(0);
 
+	// Initialize region extent
+	int regionExtent[6];
+	regionExtent[0] = extent[1];
+	regionExtent[1] = extent[0];
+	regionExtent[2] = extent[3];
+	regionExtent[3] = extent[2];
+	regionExtent[4] = extent[5];
+	regionExtent[5] = extent[4];
+
 	for (int i = extent[0]; i <= extent[1]; i++) {
 		for (int j = extent[2]; j <= extent[3]; j++) {
 			for (int k = extent[4]; k <= extent[5]; k++) {
@@ -1432,13 +1442,25 @@ void VisualizationContainer::SplitRegionIntensity(Region* region, int numRegions
 				unsigned short* connectivityData = static_cast<unsigned short*>(connectivityOutput->GetScalarPointer(i, j, k));
 
 				if (*labelData == label) {
-					*labelData = *connectivityData == componentLabel ? label : 0;
+					if (*connectivityData == componentLabel) {
+						*labelData = label;
+
+						if (i < regionExtent[0]) regionExtent[0] = i;
+						if (i > regionExtent[1]) regionExtent[1] = i; 
+						if (j < regionExtent[2]) regionExtent[2] = j;
+						if (j > regionExtent[3]) regionExtent[3] = j;
+						if (k < regionExtent[4]) regionExtent[4] = k;
+						if (k > regionExtent[5]) regionExtent[5] = k;
+					}
+					else {
+						*labelData = 0;
+					}					
 				}				
 			}
 		}
 	}
 
-	currentRegion->ComputeExtent();
+	currentRegion->SetExtent(regionExtent);
 	currentRegion->SetModified(true);
 	currentRegion->SetVisible(true);
 
@@ -1452,6 +1474,15 @@ void VisualizationContainer::SplitRegionIntensity(Region* region, int numRegions
 
 		// Get label for new region
 		unsigned short newLabel = regions->GetNewLabel();
+
+		// Initialize region extent
+		int regionExtent[6];
+		regionExtent[0] = extent[1];
+		regionExtent[1] = extent[0];
+		regionExtent[2] = extent[3];
+		regionExtent[3] = extent[2];
+		regionExtent[4] = extent[5];
+		regionExtent[5] = extent[4];
 		
 		// Update label data
 		for (int i = extent[0]; i <= extent[1]; i++) {
@@ -1460,7 +1491,16 @@ void VisualizationContainer::SplitRegionIntensity(Region* region, int numRegions
 					unsigned short* labelData = static_cast<unsigned short*>(labels->GetScalarPointer(i, j, k));
 					unsigned short* connectivityData = static_cast<unsigned short*>(connectivityOutput->GetScalarPointer(i, j, k));
 
-					if (*connectivityData == componentLabel) *labelData = newLabel;
+					if (*connectivityData == componentLabel) {
+						*labelData = newLabel;
+
+						if (i < regionExtent[0]) regionExtent[0] = i;
+						if (i > regionExtent[1]) regionExtent[1] = i;
+						if (j < regionExtent[2]) regionExtent[2] = j;
+						if (j > regionExtent[3]) regionExtent[3] = j;
+						if (k < regionExtent[4]) regionExtent[4] = k;
+						if (k > regionExtent[5]) regionExtent[5] = k;
+					}
 				}
 			}
 		}
@@ -1468,7 +1508,7 @@ void VisualizationContainer::SplitRegionIntensity(Region* region, int numRegions
 		UpdateColors(newLabel);
 
 		// Create new region
-		Region* newRegion = new Region(newLabel, labelColors->GetTableValue(newLabel), labels);
+		Region* newRegion = new Region(newLabel, labelColors->GetTableValue(newLabel), labels, regionExtent);
 		newRegion->SetVisible(true);
 		regions->Add(newRegion);
 		volumeView->AddRegion(newRegion);
@@ -1999,8 +2039,21 @@ void VisualizationContainer::ExtractRegions(vtkIntArray* extents) {
 	regions->RemoveAll();
 	
 	for (int label = 1; label <= maxLabel; label++) {
-		double* extent = extents ? extents->GetTuple(label - 1) : nullptr;
-		Region* region = new Region(label, labelColors->GetTableValue(label), labels, extent);
+		Region* region;
+
+		if (extents) {
+			double* regionExtent = extents->GetTuple(label - 1);
+
+			int extent[6];
+			for (int i = 0; i < 6; i++) {
+				extent[i] = (int)regionExtent[i];
+			}
+
+			region = new Region(label, labelColors->GetTableValue(label), labels, extent);
+		}
+		else {
+			region = new Region(label, labelColors->GetTableValue(label), labels);
+		}
 
 		if (region->GetNumVoxels() > 0) {
 			regions->Add(region);

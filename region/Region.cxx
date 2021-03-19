@@ -22,7 +22,7 @@
 #include "RegionVoxelOutlines.h"
 #include "RegionHighlight3D.h"
 
-Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* inputData, double* regionExtent) {
+Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* inputData, int* regionExtent) {
 	visible = false;
 	modified = false;
 	done = false;
@@ -254,7 +254,7 @@ void Region::UpdateExtent() {
 	);
 }
 
-void Region::InitializeExtent(double* regionExtent) {
+void Region::InitializeExtent(int* regionExtent) {
 	// Initialize extent for this region
 	extent[0] = regionExtent[0];
 	extent[1] = regionExtent[1];
