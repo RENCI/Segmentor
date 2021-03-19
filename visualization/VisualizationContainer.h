@@ -11,6 +11,7 @@
 class MainWindow;
 
 class vtkImageData;
+class vtkIntArray;
 class vtkLookupTable;
 class vtkRenderWindowInteractor;
 
@@ -171,11 +172,11 @@ protected:
 	void SetImageData(vtkImageData* imageData);
 	bool SetLabelData(vtkImageData* labelData);
 
-	void UpdateLabels();
+	void UpdateLabels(vtkIntArray* extents = nullptr);
 	void UpdateColors();
 	void UpdateColors(unsigned short label);
 
-	void ExtractRegions();
+	void ExtractRegions(vtkIntArray* extents = nullptr);
 
 	void SplitRegionKMeans(Region* region, int numRegions);
 	void SplitRegionIntensity(Region* region, int numRegions);

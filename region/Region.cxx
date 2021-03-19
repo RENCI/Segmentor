@@ -22,7 +22,7 @@
 #include "RegionVoxelOutlines.h"
 #include "RegionHighlight3D.h"
 
-Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* inputData) {
+Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* inputData, double* regionExtent) {
 	visible = false;
 	modified = false;
 	done = false;
@@ -55,7 +55,12 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 	threshold->SetInputConnection(cells->GetOutputPort());
 
 	// Initialize the extent for this region
-	ComputeExtent();
+	if (regionExtent) {
+		InitializeExtent(regionExtent);
+	}
+	else {
+		ComputeExtent();
+	}
 
 	voi->Update();
 
@@ -249,6 +254,32 @@ void Region::UpdateExtent() {
 	);
 }
 
+void Region::InitializeExtent(double* regionExtent) {
+	// Initialize extent for this region
+	extent[0] = regionExtent[0];
+	extent[1] = regionExtent[1];
+	extent[2] = regionExtent[2];
+	extent[3] = regionExtent[3];
+	extent[4] = regionExtent[4];
+	extent[5] = regionExtent[5];
+
+	int numVoxels = 0;
+
+	for (int i = extent[0]; i <= extent[1]; i++) {
+		for (int j = extent[2]; j <= extent[3]; j++) {
+			for (int k = extent[4]; k <= extent[5]; k++) {
+				unsigned short* p = static_cast<unsigned short*>(data->GetScalarPointer(i, j, k));
+
+				if (*p == label) {
+					numVoxels++;
+				}
+			}
+		}
+	}
+
+	UpdateExtent();
+}
+
 void Region::ComputeExtent() {
 	unsigned short* scalars = static_cast<unsigned short*>(data->GetScalarPointer());
 	int numPoints = data->GetNumberOfPoints();
@@ -280,10 +311,6 @@ void Region::ComputeExtent() {
 
 
 //	data->GetScalarPointer(bounds[1], bounds[3], bounds[5]);
-
-
-	// XXX: USE GENERATE REGION EXTENTS FROM vktImageConnectivityFilter AND PASS THIS IN
-	//		ALSO REGION SIZE FROM FILTER
 
 	int numVoxels = 0;
 

@@ -505,13 +505,14 @@ void VisualizationContainer::SegmentVolume(double thresholdValue, int smoothing)
 	connectivity->SetScalarRange(255, 255);
 	connectivity->SetLabelScalarTypeToUnsignedShort();
 	connectivity->SetSizeRange(5, VTK_ID_MAX);
+	connectivity->GenerateRegionExtentsOn();
 	//connectivity->SetInputConnection(openClose->GetOutputPort());
 	connectivity->SetInputConnection(threshold->GetOutputPort());
 	connectivity->Update();
 
 	labels = connectivity->GetOutput();
 	
-	UpdateLabels();
+	UpdateLabels(connectivity->GetExtractedRegionExtents());
 
 /*
 	std::vector<int> sizes;
@@ -1952,9 +1953,9 @@ bool VisualizationContainer::SetLabelData(vtkImageData* labelData) {
 	return true;
 }
 
-void VisualizationContainer::UpdateLabels() {
+void VisualizationContainer::UpdateLabels(vtkIntArray* extents) {
 	UpdateColors();
-	ExtractRegions();
+	ExtractRegions(extents);
 
 	volumeView->SetRegions(labels, regions);
 	sliceView->SetSegmentationData(labels, regions);
@@ -1986,7 +1987,7 @@ void VisualizationContainer::UpdateColors() {
 	labelColors->Build();
 }
 
-void VisualizationContainer::ExtractRegions() {
+void VisualizationContainer::ExtractRegions(vtkIntArray* extents) {
 	qtWindow->initProgress("Processing segmentation data");
 
 	// Get label info
@@ -1996,9 +1997,10 @@ void VisualizationContainer::ExtractRegions() {
 
 	// XXX: THIS IS CLEARING ALL VOXELS IN THE LABEL DATA
 	regions->RemoveAll();
-
-	for (int label = 1; label <= maxLabel; label++) {		
-		Region* region = new Region(label, labelColors->GetTableValue(label), labels);
+	
+	for (int label = 1; label <= maxLabel; label++) {
+		double* extent = extents ? extents->GetTuple(label - 1) : nullptr;
+		Region* region = new Region(label, labelColors->GetTableValue(label), labels, extent);
 
 		if (region->GetNumVoxels() > 0) {
 			regions->Add(region);
