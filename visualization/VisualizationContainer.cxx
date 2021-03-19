@@ -17,6 +17,7 @@
 #include <vtkIdTypeArray.h>
 #include <vtkImageCast.h>
 #include <vtkImageChangeInformation.h>
+#include <vtkImageThresholdConnectivity.h>
 #include <vtkImageToImageStencil.h>
 #include <vtkImageStencil.h>
 #include <vtkIntArray.h>
@@ -1028,6 +1029,7 @@ void VisualizationContainer::CleanCurrentRegion() {
 
 	unsigned short label = currentRegion->GetLabel();
 
+	// Remove unconnected voxels
 	vtkSmartPointer<vtkImageConnectivityFilter> connectivity = vtkSmartPointer<vtkImageConnectivityFilter>::New();
 	connectivity->SetScalarRange(label, label);
 	connectivity->SetLabelScalarTypeToUnsignedShort();
@@ -1075,11 +1077,42 @@ void VisualizationContainer::CleanCurrentRegion() {
 			}
 		}
 
-		qtWindow->updateRegions(regions);
-
-		labels->Modified();
-		Render();
 	}
+
+	// Fill holes
+	vtkSmartPointer<vtkImageThresholdConnectivity> floodFill = vtkSmartPointer<vtkImageThresholdConnectivity>::New();
+	floodFill->ThresholdBetween(label, label);
+	floodFill->ReplaceInOn();
+	floodFill->SetInValue(label);
+	floodFill->ReplaceOutOn();
+	//floodFill->SetInputConnection(currentRegion->GetOutput());
+	floodFill->SetInputDataObject(labels);
+	floodFill->Update();
+	
+	vtkImageData* floodFillOutput = floodFill->GetOutput();
+
+	floodFillOutput->Print(std::cout);
+
+	//const int* extent = currentRegion->GetExtent();
+	int extent[6];
+	labels->GetExtent(extent);
+
+	// Update label data
+	for (int i = extent[0]; i <= extent[1]; i++) {
+		for (int j = extent[2]; j <= extent[3]; j++) {
+			for (int k = extent[4]; k <= extent[5]; k++) {
+				unsigned short* labelData = static_cast<unsigned short*>(labels->GetScalarPointer(i, j, k));
+				unsigned short* floodFillData = static_cast<unsigned short*>(floodFillOutput->GetScalarPointer(i, j, k));
+
+				if (*floodFillData == label) *labelData = label;
+			}
+		}
+	}	
+	
+	qtWindow->updateRegions(regions);
+
+	labels->Modified();
+	Render();
 
 	PushHistory();
 }
