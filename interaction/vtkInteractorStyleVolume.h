@@ -17,8 +17,7 @@ class vtkCellPicker;
 #define VTKIS_SELECT_VOLUME 2050
 #define VTKIS_SLICE_VOLUME 2051
 #define VTKIS_MERGE_VOLUME 2052
-#define VTKIS_DONE_VOLUME 2053
-#define VTKIS_VISIBLE_VOLUME 2054
+#define VTKIS_VISIBLE_VOLUME 2053
 
 class vtkInteractorStyleVolume : public vtkInteractorStyleTrackballCamera {
 public:
@@ -52,8 +51,6 @@ public:
 	virtual void Slice();
 	virtual void StartMerge();
 	virtual void EndMerge();
-	virtual void StartDone();
-	virtual void EndDone();
 	virtual void StartVisible();
 	virtual void EndVisible();
 
@@ -66,7 +63,6 @@ public:
 		EraseEvent,
 		EndEraseEvent,
 		MergeEvent,
-		DoneEvent,
 		VisibleEvent
 	};
 

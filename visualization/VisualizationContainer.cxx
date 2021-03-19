@@ -152,13 +152,6 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	growCallback->SetClientData(this);
 	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::GrowEvent, growCallback);
 
-	// Region done
-	vtkSmartPointer<vtkCallbackCommand> doneCallback = vtkSmartPointer<vtkCallbackCommand>::New();
-	doneCallback->SetCallback(InteractionCallbacks::Done);
-	doneCallback->SetClientData(this);
-	volumeView->GetInteractorStyle()->AddObserver(vtkInteractorStyleVolume::DoneEvent, doneCallback);
-	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::DoneEvent, doneCallback);
-
 	// Region visibility
 	vtkSmartPointer<vtkCallbackCommand> visibleCallback = vtkSmartPointer<vtkCallbackCommand>::New();
 	visibleCallback->SetCallback(InteractionCallbacks::Visible);
@@ -1636,6 +1629,12 @@ void VisualizationContainer::GrowCurrentRegion(double point[3]) {
 	PushHistory();
 
 	Render();
+}
+
+void VisualizationContainer::ToggleCurrentRegionDone() {
+	if (!currentRegion) return;
+
+	SetRegionDone(currentRegion->GetLabel(), !currentRegion->GetDone());
 }
 
 Region* VisualizationContainer::SetRegionDone(unsigned short label, bool done) {

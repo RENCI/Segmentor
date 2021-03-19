@@ -592,10 +592,6 @@ void MainWindow::on_actionGrow() {
 	visualizationContainer->SetInteractionMode(GrowMode);
 }
 
-void MainWindow::on_actionDone() {
-	visualizationContainer->SetInteractionMode(DoneMode);
-}
-
 void MainWindow::on_actionVisible() {
 	visualizationContainer->SetInteractionMode(VisibleMode);
 }
@@ -609,8 +605,12 @@ void MainWindow::on_actionClean() {
 }
 
 void MainWindow::on_actionSplit() {
-	// Split in half for now, add interface for selecting number in future
+	// Split in half for now, add interface for selecting number in future?
 	visualizationContainer->SplitCurrentRegion(2);
+}
+
+void MainWindow::on_actionDone() {
+	visualizationContainer->ToggleCurrentRegionDone();
 }
 
 
@@ -899,13 +899,13 @@ void MainWindow::createModeBar() {
 	toolBar->addAction(createActionIcon(":/icons/icon_merge.png", "Merge with current region (m)", "m", interactionModeGroup, currentMode == MergeMode, &MainWindow::on_actionMerge));
 	toolBar->addAction(createActionIcon(":/icons/icon_grow.png", "Grow / shrink region (g)", "g", interactionModeGroup, currentMode == GrowMode, &MainWindow::on_actionGrow));
 	toolBar->addAction(createActionIcon(":/icons/icon_visible.png", "Toggle region visibility (v)", "v", interactionModeGroup, currentMode == VisibleMode, &MainWindow::on_actionVisible));
-	toolBar->addAction(createActionIcon(":/icons/icon_done.png", "Toggle region done (d)", "d", interactionModeGroup, currentMode == DoneMode, &MainWindow::on_actionDone));
 	
 	toolBar->addSeparator();
 	toolBar->addWidget(createLabel("Actions", 0, 0, 5, 5));
 	toolBar->addAction(createActionIcon(":/icons/icon_update.png", "Update current region (u)", "u", &MainWindow::on_actionUpdate));
 	toolBar->addAction(createActionIcon(":/icons/icon_clean.png", "Clean up current region (0)", "0", &MainWindow::on_actionClean));
 	toolBar->addAction(createActionIcon(":/icons/icon_split.png", "Split current region (/)", "/", &MainWindow::on_actionSplit));
+	toolBar->addAction(createActionIcon(":/icons/icon_done.png", "Toggle current region done (d)", "d", &MainWindow::on_actionDone));
 
 	modeBarWidget->layout()->addWidget(toolBar);
 }

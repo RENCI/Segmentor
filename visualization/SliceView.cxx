@@ -255,7 +255,6 @@ void SliceView::SetInteractionMode(enum InteractionMode mode) {
 		mode == AddMode ? "Add region" :
 		mode == MergeMode ? "Merge region" :
 		mode == GrowMode ? "Grow/shrink region" :
-		mode == DoneMode ? "Toggle region done" :
 		mode == VisibleMode ? "Toggle region visibility" :
 		"";
 

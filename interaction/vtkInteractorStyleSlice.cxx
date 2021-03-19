@@ -219,30 +219,6 @@ void vtkInteractorStyleSlice::EndGrow()
 }
 
 //----------------------------------------------------------------------------
-void vtkInteractorStyleSlice::StartDone()
-{
-	if (this->State != VTKIS_NONE)
-	{
-		return;
-	}
-	this->StartState(VTKIS_DONE_SLICE);
-}
-
-//----------------------------------------------------------------------------
-void vtkInteractorStyleSlice::EndDone()
-{
-	if (this->State != VTKIS_DONE_SLICE)
-	{
-		return;
-	}
-	if (this->HandleObservers)
-	{
-		this->InvokeEvent(DoneEvent, nullptr);
-	}
-	this->StopState();
-}
-
-//----------------------------------------------------------------------------
 void vtkInteractorStyleSlice::StartVisible()
 {
 	if (this->State != VTKIS_NONE)
@@ -434,10 +410,6 @@ void vtkInteractorStyleSlice::OnLeftButtonDown()
 		{
 			this->StartGrow();
 		}
-		else if (this->Mode == DoneMode)
-		{
-			this->StartDone();
-		}
 		else if (this->Mode == VisibleMode)
 		{
 			this->StartVisible();
@@ -497,10 +469,6 @@ void vtkInteractorStyleSlice::OnLeftButtonUp() {
 
 	case VTKIS_GROW_SLICE:
 		this->EndGrow();
-		break;
-
-	case VTKIS_DONE_SLICE:
-		this->EndDone();
 		break;
 
 	case VTKIS_VISIBLE_SLICE:

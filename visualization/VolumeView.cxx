@@ -249,7 +249,6 @@ void VolumeView::SetInteractionMode(enum InteractionMode mode) {
 		mode == AddMode ? "" :
 		mode == MergeMode ? "Merge mode" :
 		mode == GrowMode ? "" :
-		mode == DoneMode ? "Toggle region done" :
 		mode == VisibleMode ? "Toggle region visibility" :
 		"";
 

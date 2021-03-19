@@ -160,30 +160,6 @@ void vtkInteractorStyleVolume::EndMerge()
 }
 
 //----------------------------------------------------------------------------
-void vtkInteractorStyleVolume::StartDone()
-{
-	if (this->State != VTKIS_NONE)
-	{
-		return;
-	}
-	this->StartState(VTKIS_DONE_VOLUME);
-}
-
-//----------------------------------------------------------------------------
-void vtkInteractorStyleVolume::EndDone()
-{
-	if (this->State != VTKIS_DONE_VOLUME)
-	{
-		return;
-	}
-	if (this->HandleObservers)
-	{
-		this->InvokeEvent(DoneEvent, nullptr);
-	}
-	this->StopState();
-}
-
-//----------------------------------------------------------------------------
 void vtkInteractorStyleVolume::StartVisible()
 {
 	if (this->State != VTKIS_NONE)
@@ -267,10 +243,6 @@ void vtkInteractorStyleVolume::OnLeftButtonDown()
 	{
 		this->StartMerge();
 	}
-	else if (this->Mode == DoneMode)
-	{
-		this->StartDone();
-	}
 	else if (this->Mode == VisibleMode)
 	{
 		this->StartVisible();
@@ -315,11 +287,7 @@ void vtkInteractorStyleVolume::OnLeftButtonUp()
 	case VTKIS_MERGE_VOLUME:
 		this->EndMerge();
 		break;
-
-	case VTKIS_DONE_VOLUME:
-		this->EndDone();
-		break;
-
+		
 	case VTKIS_VISIBLE_VOLUME:
 		this->EndVisible();
 		break;
