@@ -52,6 +52,14 @@ std::vector<RegionMetadataIO::Region> RegionMetadataIO::Read(std::string fileNam
 					region.done = regionObject["done"].toBool();
 				}
 
+				if (regionObject.contains("extent") && regionObject["extent"].isArray()) {
+					QJsonArray extent = regionObject["extent"].toArray();
+
+					for (int i = 0; i < extent.size() && i < 6; i++) {
+						region.extent[i] = extent[i].toInt();
+					}
+				}
+
 				regionData.push_back(region);
 			}
 		}
@@ -79,6 +87,12 @@ bool RegionMetadataIO::Write(std::string fileName, std::vector<Region> regions) 
 		regionObject["visible"] = regions[i].visible;
 		regionObject["modified"] = regions[i].modified;
 		regionObject["done"] = regions[i].done;
+
+		QJsonArray extent;
+		for (int j = 0; j < 6; j++) {
+			extent.append(regions[i].extent[j]);
+		}
+		regionObject["extent"] = extent;
 
 		regionObjects.append(regionObject);
 	}

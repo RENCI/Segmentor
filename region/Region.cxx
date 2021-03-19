@@ -22,7 +22,7 @@
 #include "RegionVoxelOutlines.h"
 #include "RegionHighlight3D.h"
 
-Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* inputData, int* regionExtent) {
+Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* inputData, const int* regionExtent) {
 	visible = false;
 	modified = false;
 	done = false;
@@ -91,8 +91,6 @@ Region::Region(const RegionInfo& info, vtkImageData* inputData) {
 	threshold = vtkSmartPointer<vtkThreshold>::New();
 	threshold->ThresholdBetween(label, label);
 	threshold->SetInputConnection(cells->GetOutputPort());
-
-	UpdateExtent();
 
 	voi->Update();
 
@@ -254,7 +252,7 @@ void Region::UpdateExtent() {
 	);
 }
 
-void Region::InitializeExtent(int* regionExtent) {
+void Region::InitializeExtent(const int* regionExtent) {
 	// Initialize extent for this region
 	extent[0] = regionExtent[0];
 	extent[1] = regionExtent[1];
@@ -475,11 +473,7 @@ void Region::SetInfo(const RegionInfo& info) {
 		color[i] = info.color[i];
 	}
 
-	for (int i = 0; i < 6; i++) {
-		extent[i] = info.extent[i];
-	}
-
-	UpdateExtent();
+	InitializeExtent(info.extent);
 
 	visible = info.visible;
 	modified = info.modified;

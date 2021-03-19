@@ -21,7 +21,7 @@ class RegionHighlight3D;
 
 class Region {
 public:
-	Region(unsigned short regionLabel, double regionColor[3], vtkImageData* data, int* regionExtent = nullptr);
+	Region(unsigned short regionLabel, double regionColor[3], vtkImageData* data, const int* regionExtent = nullptr);
 	Region(const RegionInfo& info, vtkImageData* data);
 	~Region();
 
@@ -38,7 +38,7 @@ public:
 
 	void SetExtent(int newExtent[6]);
 	void UpdateExtent(int x, int y, int z);
-	void InitializeExtent(int* regionExtent);
+	void InitializeExtent(const int* regionExtent);
 	void ComputeExtent();
 
 	bool GetVisible();

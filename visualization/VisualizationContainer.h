@@ -7,6 +7,7 @@
 #include <vtkSmartPointer.h>
 
 #include "InteractionEnums.h"
+#include "RegionMetadataIO.h"
 
 class MainWindow;
 
@@ -47,7 +48,7 @@ public:
 
 	void InitializeLabelData();
 
-	void SegmentVolume(double threshold, int smoothing);
+	void SegmentVolume(double threshold, int smoothing, int openCloseSize);
 	FileErrorCode SaveSegmentationData();
 	FileErrorCode SaveSegmentationData(const std::string& fileName);
 
@@ -170,13 +171,17 @@ protected:
 	int brushRadius;
 
 	void SetImageData(vtkImageData* imageData);
-	bool SetLabelData(vtkImageData* labelData);
+	bool SetLabelData(vtkImageData* labelData, const std::vector<RegionMetadataIO::Region>& metadata);
 
-	void UpdateLabels(vtkIntArray* extents = nullptr);
+	void UpdateLabels();
+	void UpdateLabels(vtkIntArray* extents);
+	void UpdateLabels(const std::vector<RegionMetadataIO::Region>& metadata);
 	void UpdateColors();
 	void UpdateColors(unsigned short label);
 
-	void ExtractRegions(vtkIntArray* extents = nullptr);
+	void ExtractRegions();
+	void ExtractRegions(vtkIntArray* extents);
+	void ExtractRegions(const std::vector<RegionMetadataIO::Region>& metadata);
 
 	void SplitRegionKMeans(Region* region, int numRegions);
 	void SplitRegionIntensity(Region* region, int numRegions);

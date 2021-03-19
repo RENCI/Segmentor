@@ -55,11 +55,20 @@ SegmentVolumeDialog::SegmentVolumeDialog(QWidget* parent, VisualizationContainer
 
 	QObject::connect(smoothingSlider, &QSlider::valueChanged, smoothingSpinBox, &QSpinBox::setValue);
 	QObject::connect(smoothingSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), smoothingSlider, &QSlider::setValue);
+
+	// Open/close
+	int maxOpenClose = 10;
+
+	openCloseSlider->setMaximum(maxOpenClose);
+	openCloseSpinBox->setMaximum(maxOpenClose);
+
+	QObject::connect(openCloseSlider, &QSlider::valueChanged, openCloseSpinBox, &QSpinBox::setValue);
+	QObject::connect(openCloseSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), openCloseSlider, &QSlider::setValue);
 }
 
 SegmentVolumeDialog::~SegmentVolumeDialog() {
 }
 
 void SegmentVolumeDialog::on_updateButton_clicked() {
-	visualizationContainer->SegmentVolume(thresholdSpinBox->value(), smoothingSpinBox->value());
+	visualizationContainer->SegmentVolume(thresholdSpinBox->value(), smoothingSpinBox->value(), openCloseSpinBox->value());
 }
