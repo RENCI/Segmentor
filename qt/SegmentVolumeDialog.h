@@ -24,6 +24,8 @@ protected:
 	double otsuThreshold;
 	
 	VisualizationContainer* visualizationContainer;
+
+	void SegmentVolume();
 };
 
 #endif
