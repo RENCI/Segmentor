@@ -1080,9 +1080,10 @@ void VisualizationContainer::CleanCurrentRegion() {
 	}
 
 	// Fill holes
-	// XXX: Need seed points?
+	
+	// XXX: Make sure we have a good seed point outside the region
 
-	// XXX: Probably need to implement myself. Per-slice scan line algorithm should work.
+	// XXX: Should be able to apply only to region output
 
 	int seed[3];
 	currentRegion->GetSeed(seed);
@@ -1090,16 +1091,26 @@ void VisualizationContainer::CleanCurrentRegion() {
 	// XXX: Convert to point?
 	vtkSmartPointer<vtkPoints> seedPoints = vtkSmartPointer<vtkPoints>::New();
 	seedPoints->SetNumberOfPoints(1);
-	seedPoints->SetPoint(0, seed[0], seed[1], seed[2]);
+	//seedPoints->SetPoint(0, seed[0], seed[1], seed[2]);
+	seedPoints->SetPoint(0, 0, 0, 0);
+
+	vtkSmartPointer<vtkImageThreshold> threshold = vtkSmartPointer<vtkImageThreshold>::New();
+	threshold->ThresholdBetween(label, label);
+	threshold->ReplaceInOff();
+	threshold->ReplaceOutOn();
+	threshold->SetOutValue(0);
+	threshold->SetInputDataObject(labels);
 
 	vtkSmartPointer<vtkImageThresholdConnectivity> floodFill = vtkSmartPointer<vtkImageThresholdConnectivity>::New();
 	floodFill->SetSeedPoints(seedPoints);
-	floodFill->ThresholdByLower(label);
+	floodFill->ThresholdBetween(0, 0);
 	floodFill->ReplaceInOn();
-	floodFill->SetInValue(label);
+	floodFill->SetInValue(0);
 	floodFill->ReplaceOutOn();
+	floodFill->SetOutValue(label);
 	//floodFill->SetInputConnection(currentRegion->GetOutput());
-	floodFill->SetInputDataObject(labels);
+	//floodFill->SetInputDataObject(labels);
+	floodFill->SetInputConnection(threshold->GetOutputPort());
 	floodFill->Update();
 	
 	vtkImageData* floodFillOutput = floodFill->GetOutput();
@@ -1117,8 +1128,7 @@ void VisualizationContainer::CleanCurrentRegion() {
 				unsigned short* labelData = static_cast<unsigned short*>(labels->GetScalarPointer(i, j, k));
 				unsigned short* floodFillData = static_cast<unsigned short*>(floodFillOutput->GetScalarPointer(i, j, k));
 
-				if (*floodFillData == label) *labelData = label;
-				else *labelData = 0;
+				if (*floodFillData == label ) *labelData = label;
 			}
 		}
 	}	
