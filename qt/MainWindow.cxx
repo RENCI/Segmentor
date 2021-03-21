@@ -47,6 +47,10 @@ MainWindow::MainWindow() {
 	// Create the GUI from the Qt Designer file
 	setupUi(this);
 
+	// Set filenames
+	setImageNameLabel("");
+	setSegmentationNameLabel("");
+
 	// Default directory keys
 	defaultImageDirectoryKey = "default_image_directory";
 	defaultSegmentationDirectoryKey = "default_segmentation_directory";
@@ -174,22 +178,29 @@ void MainWindow::showMessage(QString message) {
 
 void MainWindow::on_actionOpen_Image_File_triggered() {
 	// Open a file dialog to read the file
-	QString fileName = QFileDialog::getOpenFileName(this,
+	QString file = QFileDialog::getOpenFileName(this,
 		"Open Volume",
 		getDefaultDirectory(defaultImageDirectoryKey),
 		"All files (*.*);;NIfTI (*.nii);;TIFF (*.tif *.tiff);;VTK XML ImageData (*.vti)");
 
-	// Check for file name
-	if (fileName == "") {
+	// Check for file
+	if (file == "") {
 		return;
 	}
 
-	setDefaultDirectory(defaultImageDirectoryKey, fileName);
+	setDefaultDirectory(defaultImageDirectoryKey, file);
+
+	// Get just the file name
+	QString fileName = QFileInfo(file).fileName();
 
 	// Load data
-	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->OpenImageFile(fileName.toStdString());
+	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->OpenImageFile(file.toStdString());
 
-	if (errorCode != VisualizationContainer::Success) {
+	if (errorCode == VisualizationContainer::Success) {
+		setImageNameLabel(fileName);
+		setSegmentationNameLabel("");
+	}
+	else {
 		QMessageBox errorMessage;
 		errorMessage.setIcon(QMessageBox::Warning);
 		errorMessage.setText("Could not open file.");
@@ -205,31 +216,29 @@ void MainWindow::on_actionOpen_Image_File_triggered() {
 			errorMessage.exec();
 		}
 	}
-/*
-	else {
-		updateImage();
-	}
-*/
 }
 
 void MainWindow::on_actionOpen_Image_Stack_triggered() {
 	// Open a file dialog to read the file
-	QString fileName = QFileDialog::getOpenFileName(this,
+	QString file = QFileDialog::getOpenFileName(this,
 		"Open Volume",
 		getDefaultDirectory(defaultImageDirectoryKey),
 		"All files (*.*);;TIFF (*.tif *.tiff)");
 
-	// Check for file name
-	if (fileName == "") {
+	// Check for file
+	if (file == "") {
 		return;
 	}
 
-	setDefaultDirectory(defaultImageDirectoryKey, fileName);
+	setDefaultDirectory(defaultImageDirectoryKey, file);
 
 	// Get all files in directory
-	QFileInfo fileInfo(fileName);
+	QFileInfo fileInfo(file);
 	QDir directory = fileInfo.absoluteDir();
 	QFileInfoList fileInfoList = fileInfo.absoluteDir().entryInfoList(QDir::Files, QDir::Name);
+
+	// Get just the directory name
+	QString directoryName = directory.dirName();
 
 	// Check for files
 	if (fileInfoList.length() == 0) {
@@ -251,7 +260,11 @@ void MainWindow::on_actionOpen_Image_Stack_triggered() {
 	// Load data
 	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->OpenImageStack(fileNames);
 
-	if (errorCode != VisualizationContainer::Success) {
+	if (errorCode == VisualizationContainer::Success) {
+		setImageNameLabel(directoryName);
+		setSegmentationNameLabel("");
+	}
+	else {
 		QMessageBox errorMessage;
 		errorMessage.setIcon(QMessageBox::Warning);
 		errorMessage.setText("Could not open files.");
@@ -267,34 +280,32 @@ void MainWindow::on_actionOpen_Image_Stack_triggered() {
 			errorMessage.exec();
 		}
 	}
-/*
-	else {
-		updateImage();
-	}
-*/
 }
 
 void MainWindow::on_actionOpen_Segmentation_File_triggered() {
 	// Open a file dialog to read the file
-	QString fileName = QFileDialog::getOpenFileName(this,
+	QString file = QFileDialog::getOpenFileName(this,
 		"Open Segmentation Data",
 		getDefaultDirectory(defaultSegmentationDirectoryKey),
 		"All files (*.*);;NIfTI (*.nii);;TIFF (*.tif *.tiff);;VTK XML ImageData (*.vti)");
 
-	// Check for file name
-	if (fileName == "") {
+	// Check for file
+	if (file == "") {
 		return;
 	}
 
-	setDefaultDirectory(defaultSegmentationDirectoryKey, fileName);
+	setDefaultDirectory(defaultSegmentationDirectoryKey, file);
 
-	// Progress bar
-	
+	// Get just the file name
+	QString fileName = QFileInfo(file).fileName();	
 
 	// Load segmentation data
-	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->OpenSegmentationFile(fileName.toStdString());
+	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->OpenSegmentationFile(file.toStdString());
 
-	if (errorCode != VisualizationContainer::Success) {
+	if (errorCode == VisualizationContainer::Success) {
+		setSegmentationNameLabel(fileName);
+	}
+	else {
 		QMessageBox errorMessage;
 		errorMessage.setIcon(QMessageBox::Warning);
 		errorMessage.setText("Could not open file.");
@@ -324,22 +335,25 @@ void MainWindow::on_actionOpen_Segmentation_File_triggered() {
 
 void MainWindow::on_actionOpen_Segmentation_Stack_triggered() {
 	// Open a file dialog to read the file
-	QString fileName = QFileDialog::getOpenFileName(this,
+	QString file = QFileDialog::getOpenFileName(this,
 		"Open Segmentation Data",
 		getDefaultDirectory(defaultSegmentationDirectoryKey),
 		"All files (*.*);;TIFF (*.tif *.tiff)");
 
-	// Check for file name
-	if (fileName == "") {
+	// Check for file
+	if (file == "") {
 		return;
 	}
 
-	setDefaultDirectory(defaultSegmentationDirectoryKey, fileName);
+	setDefaultDirectory(defaultSegmentationDirectoryKey, file);
 
 	// Get all files in directory
-	QFileInfo fileInfo(fileName);
+	QFileInfo fileInfo(file);
 	QDir directory = fileInfo.absoluteDir();
 	QFileInfoList fileInfoList = fileInfo.absoluteDir().entryInfoList(QDir::Files, QDir::Name);
+
+	// Get just the directory name
+	QString directoryName = directory.dirName();
 
 	// Check for files
 	if (fileInfoList.length() == 0) {
@@ -361,7 +375,10 @@ void MainWindow::on_actionOpen_Segmentation_Stack_triggered() {
 	// Load segmentation data
 	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->OpenSegmentationStack(fileNames);
 
-	if (errorCode != VisualizationContainer::Success) {
+	if (errorCode == VisualizationContainer::Success) {
+		setSegmentationNameLabel(directoryName);
+	}
+	else {
 		QMessageBox errorMessage;
 		errorMessage.setIcon(QMessageBox::Warning);
 		errorMessage.setText("Could not open files.");
@@ -497,7 +514,10 @@ void MainWindow::on_actionSegment_Volume_triggered() {
 
 	SegmentVolumeDialog dialog(this, visualizationContainer);
 
-	if (!dialog.exec()) {
+	if (dialog.exec()) {
+		setSegmentationNameLabel("Generated");
+	}
+	else {
 		visualizationContainer->PopTempHistory();
 	}
 }
@@ -839,6 +859,14 @@ void MainWindow::setDefaultDirectory(QString key, QString fileName) {
 
 	QSettings settings;
 	settings.setValue(key, fileInfo.absoluteDir().absolutePath());
+}
+
+void MainWindow::setImageNameLabel(QString name) {
+	imageNameLabel->setText("Image: " + name);
+}
+
+void MainWindow::setSegmentationNameLabel(QString name) {
+	segmentationNameLabel->setText("Segmentation: " + name);
 }
 
 void MainWindow::createModeBar() {

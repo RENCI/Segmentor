@@ -148,6 +148,10 @@ protected:
 	QString getDefaultDirectory(QString key);
 	void setDefaultDirectory(QString key, QString fileName);
 
+	// Filename labels
+	void setImageNameLabel(QString name);
+	void setSegmentationNameLabel(QString name);
+
 	// Toolbar
 	void createModeBar();
 	void createToolBar();
