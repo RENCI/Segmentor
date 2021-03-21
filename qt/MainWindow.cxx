@@ -408,22 +408,28 @@ void MainWindow::on_actionOpen_Segmentation_Stack_triggered() {
 
 void MainWindow::on_actionSave_Image_Data_As_triggered() {
 	// Open a file dialog to save the file
-	QString fileName = QFileDialog::getSaveFileName(this,
+	QString file = QFileDialog::getSaveFileName(this,
 		"Save Image Data",
 		getDefaultDirectory(defaultImageDirectoryKey),
 		"All files (*.*);;TIFF (*.tif);;NIfTI (*.nii);;VTK XML ImageData (*.vti)");
 
-	// Check for file name
-	if (fileName == "") {
+	// Check for file
+	if (file == "") {
 		return;
 	}
 
-	setDefaultDirectory(defaultImageDirectoryKey, fileName);
+	setDefaultDirectory(defaultImageDirectoryKey, file);
+
+	// Get just the file name
+	QString fileName = QFileInfo(file).fileName();
 
 	// Save image data
-	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->SaveImageData(fileName.toStdString());
+	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->SaveImageData(file.toStdString());
 
-	if (errorCode != VisualizationContainer::Success) {
+	if (errorCode == VisualizationContainer::Success) {
+		setImageNameLabel(fileName);
+	}
+	else {
 		QMessageBox errorMessage;
 		errorMessage.setIcon(QMessageBox::Warning);
 		errorMessage.setText("Could not save data.");
@@ -468,22 +474,28 @@ void MainWindow::on_actionSave_Segmentation_Data_triggered() {
 
 void MainWindow::on_actionSave_Segmentation_Data_As_triggered() {
 	// Open a file dialog to save the file
-	QString fileName = QFileDialog::getSaveFileName(this,
+	QString file = QFileDialog::getSaveFileName(this,
 		"Save Segmentation Data",
 		getDefaultDirectory(defaultSegmentationDirectoryKey),
 		"All files (*.*);;TIFF (*.tif);;NIfTI (*.nii);;VTK XML ImageData (*.vti)");
 
-	// Check for file name
-	if (fileName == "") {
+	// Check for file
+	if (file == "") {
 		return;
 	}
 
-	setDefaultDirectory(defaultSegmentationDirectoryKey, fileName);
+	setDefaultDirectory(defaultSegmentationDirectoryKey, file);
+
+	// Get just the file name
+	QString fileName = QFileInfo(file).fileName();
 
 	// Save segmentation data
-	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->SaveSegmentationData(fileName.toStdString());
+	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->SaveSegmentationData(file.toStdString());
 
-	if (errorCode != VisualizationContainer::Success) {
+	if (errorCode == VisualizationContainer::Success) {
+		setSegmentationNameLabel(fileName);
+	}
+	else {
 		QMessageBox errorMessage;
 		errorMessage.setIcon(QMessageBox::Warning);
 		errorMessage.setText("Could not save data.");
