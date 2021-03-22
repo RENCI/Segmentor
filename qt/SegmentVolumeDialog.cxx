@@ -64,9 +64,6 @@ SegmentVolumeDialog::SegmentVolumeDialog(QWidget* parent, VisualizationContainer
 
 	QObject::connect(openCloseSlider, &QSlider::valueChanged, openCloseSpinBox, &QSpinBox::setValue);
 	QObject::connect(openCloseSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), openCloseSlider, &QSlider::setValue);
-
-	// Perform initial segmentation
-	SegmentVolume();
 }
 
 SegmentVolumeDialog::~SegmentVolumeDialog() {
