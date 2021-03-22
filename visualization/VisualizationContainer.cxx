@@ -1079,59 +1079,52 @@ void VisualizationContainer::CleanCurrentRegion() {
 
 	}
 
+	// XXX: Shrink extent when removing voxels
+
 	// Fill holes
-	
-	// XXX: Make sure we have a good seed point outside the region
-
-	// XXX: Should be able to apply only to region output
-
 	int seed[3];
-	currentRegion->GetSeed(seed);
+	if (currentRegion->GetSeed(seed)) {
+		// XXX: Convert to point from index?
+		vtkSmartPointer<vtkPoints> seedPoints = vtkSmartPointer<vtkPoints>::New();
+		seedPoints->SetNumberOfPoints(1);
+		seedPoints->SetPoint(0, seed[0], seed[1], seed[2]);
 
-	// XXX: Convert to point?
-	vtkSmartPointer<vtkPoints> seedPoints = vtkSmartPointer<vtkPoints>::New();
-	seedPoints->SetNumberOfPoints(1);
-	//seedPoints->SetPoint(0, seed[0], seed[1], seed[2]);
-	seedPoints->SetPoint(0, 0, 0, 0);
+		vtkSmartPointer<vtkImageThreshold> threshold = vtkSmartPointer<vtkImageThreshold>::New();
+		threshold->ThresholdBetween(label, label);
+		threshold->ReplaceInOff();
+		threshold->ReplaceOutOn();
+		threshold->SetOutValue(0);
+		threshold->SetInputConnection(currentRegion->GetOutput());
 
-	vtkSmartPointer<vtkImageThreshold> threshold = vtkSmartPointer<vtkImageThreshold>::New();
-	threshold->ThresholdBetween(label, label);
-	threshold->ReplaceInOff();
-	threshold->ReplaceOutOn();
-	threshold->SetOutValue(0);
-	threshold->SetInputDataObject(labels);
+		vtkSmartPointer<vtkImageThresholdConnectivity> floodFill = vtkSmartPointer<vtkImageThresholdConnectivity>::New();
+		floodFill->SetSeedPoints(seedPoints);
+		floodFill->ThresholdBetween(0, 0);
+		floodFill->ReplaceInOff();
+		floodFill->ReplaceOutOn();
+		floodFill->SetOutValue(label);
+		//floodFill->SetInputConnection(currentRegion->GetOutput());
+		//floodFill->SetInputDataObject(labels);
+		floodFill->SetInputConnection(threshold->GetOutputPort());
+		floodFill->Update();
 
-	vtkSmartPointer<vtkImageThresholdConnectivity> floodFill = vtkSmartPointer<vtkImageThresholdConnectivity>::New();
-	floodFill->SetSeedPoints(seedPoints);
-	floodFill->ThresholdBetween(0, 0);
-	floodFill->ReplaceInOn();
-	floodFill->SetInValue(0);
-	floodFill->ReplaceOutOn();
-	floodFill->SetOutValue(label);
-	//floodFill->SetInputConnection(currentRegion->GetOutput());
-	//floodFill->SetInputDataObject(labels);
-	floodFill->SetInputConnection(threshold->GetOutputPort());
-	floodFill->Update();
-	
-	vtkImageData* floodFillOutput = floodFill->GetOutput();
+		vtkImageData* floodFillOutput = floodFill->GetOutput();
 
-	floodFillOutput->Print(std::cout);
+		//const int* extent = currentRegion->GetExtent();
+		int extent[6];
+		floodFill->GetOutput()->GetExtent(extent);
 
-	//const int* extent = currentRegion->GetExtent();
-	int extent[6];
-	labels->GetExtent(extent);
+		// Update label data
+		for (int i = extent[0]; i <= extent[1]; i++) {
+			for (int j = extent[2]; j <= extent[3]; j++) {
+				for (int k = extent[4]; k <= extent[5]; k++) {
+					unsigned short* labelData = static_cast<unsigned short*>(labels->GetScalarPointer(i, j, k));
+					unsigned short* floodFillData = static_cast<unsigned short*>(floodFillOutput->GetScalarPointer(i, j, k));
 
-	// Update label data
-	for (int i = extent[0]; i <= extent[1]; i++) {
-		for (int j = extent[2]; j <= extent[3]; j++) {
-			for (int k = extent[4]; k <= extent[5]; k++) {
-				unsigned short* labelData = static_cast<unsigned short*>(labels->GetScalarPointer(i, j, k));
-				unsigned short* floodFillData = static_cast<unsigned short*>(floodFillOutput->GetScalarPointer(i, j, k));
-
-				if (*floodFillData == label ) *labelData = label;
+					if (*floodFillData == label) *labelData = label;
+				}
 			}
 		}
-	}	
+	}
 	
 	qtWindow->updateRegions(regions);
 

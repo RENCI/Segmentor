@@ -466,21 +466,23 @@ double Region::GetXYDistance(int x, int y, int z) {
 	return sqrt(distance2);
 }
 
-void Region::GetSeed(int ijk[3]) {
+bool Region::GetSeed(int ijk[3]) {
 	for (int i = extent[0]; i <= extent[1]; i++) {
 		for (int j = extent[2]; j <= extent[3]; j++) {
 			for (int k = extent[4]; k <= extent[5]; k++) {
 				unsigned short* p = static_cast<unsigned short*>(data->GetScalarPointer(i, j, k));
-				if (*p == label) {
+				if (*p != label) {
 					ijk[0] = i;
 					ijk[1] = j;
 					ijk[2] = k;
 
-					return;
+					return true;
 				}
 			}
 		}
 	}
+
+	return false;
 }
 
 void Region::SetInfo(const RegionInfo& info) {
