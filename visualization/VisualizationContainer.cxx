@@ -121,6 +121,12 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	volumeView->GetInteractorStyle()->AddObserver(vtkInteractorStyleVolume::PaintEvent, paintCallback);
 	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::PaintEvent, paintCallback);
 
+	vtkSmartPointer<vtkCallbackCommand> endPaintCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+	endPaintCallback->SetCallback(InteractionCallbacks::EndPaint);
+	endPaintCallback->SetClientData(this);
+	volumeView->GetInteractorStyle()->AddObserver(vtkInteractorStyleVolume::EndPaintEvent, endPaintCallback);
+	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::EndPaintEvent, endPaintCallback);
+
 	// Overwrite
 	vtkSmartPointer<vtkCallbackCommand> overwriteCallback = vtkSmartPointer<vtkCallbackCommand>::New();
 	overwriteCallback->SetCallback(InteractionCallbacks::Overwrite);
@@ -128,12 +134,24 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 //	volumeView->GetInteractorStyle()->AddObserver(vtkInteractorStyleVolume::OverwriteEvent, overwriteCallback);
 	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::OverwriteEvent, overwriteCallback);
 
+	vtkSmartPointer<vtkCallbackCommand> endOverwriteCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+	endOverwriteCallback->SetCallback(InteractionCallbacks::EndOverwrite);
+	endOverwriteCallback->SetClientData(this);
+//	volumeView->GetInteractorStyle()->AddObserver(vtkInteractorStyleVolume::EndOverwriteEvent, endOverwriteCallback);
+	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::EndOverwriteEvent, endOverwriteCallback);
+
 	// Erase
 	vtkSmartPointer<vtkCallbackCommand> eraseCallback = vtkSmartPointer<vtkCallbackCommand>::New();
 	eraseCallback->SetCallback(InteractionCallbacks::Erase);
 	eraseCallback->SetClientData(this);
 	volumeView->GetInteractorStyle()->AddObserver(vtkInteractorStyleVolume::EraseEvent, eraseCallback);
 	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::EraseEvent, eraseCallback);
+
+	vtkSmartPointer<vtkCallbackCommand> endEraseCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+	endEraseCallback->SetCallback(InteractionCallbacks::EndErase);
+	endEraseCallback->SetClientData(this);
+	volumeView->GetInteractorStyle()->AddObserver(vtkInteractorStyleVolume::EndEraseEvent, endEraseCallback);
+	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::EndEraseEvent, endEraseCallback);
 
 	// Add region
 	vtkSmartPointer<vtkCallbackCommand> addCallback = vtkSmartPointer<vtkCallbackCommand>::New();
@@ -703,7 +721,11 @@ void VisualizationContainer::Paint(int i, int j, int k, bool overwrite, bool use
 
 	for (auto region : update) {
 		region->SetModified(true);
-		qtWindow->updateRegion(region, regions);
+
+		// TODO: Handle overwritten in end event
+		if (region != currentRegion) {
+			qtWindow->updateRegion(region, regions);
+		}
 	}
 }
 
@@ -753,6 +775,23 @@ void VisualizationContainer::Erase(int i, int j, int k, bool useBrush) {
 
 	if (update) {
 		currentRegion->SetModified(true);
+	}
+}
+
+void VisualizationContainer::EndPaint() {
+	if (currentRegion) {
+		qtWindow->updateRegion(currentRegion, regions);
+	}
+}
+
+void VisualizationContainer::EndErase() {
+	if (currentRegion) {
+		qtWindow->updateRegion(currentRegion, regions);
+	}
+}
+
+void VisualizationContainer::EndOverwrite() {
+	if (currentRegion) {
 		qtWindow->updateRegion(currentRegion, regions);
 	}
 }

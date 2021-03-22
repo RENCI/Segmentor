@@ -312,49 +312,10 @@ void Region::InitializeExtent(const int* regionExtent) {
 }
 
 void Region::ComputeExtent() {
-	unsigned short* scalars = static_cast<unsigned short*>(data->GetScalarPointer());
-	int numPoints = data->GetNumberOfPoints();
-
 	int dataExtent[6];
 	data->GetExtent(dataExtent);
 
-	// Initialize extent for this region
-	extent[0] = dataExtent[1];
-	extent[1] = dataExtent[0];
-	extent[2] = dataExtent[3];
-	extent[3] = dataExtent[2];
-	extent[4] = dataExtent[5];
-	extent[5] = dataExtent[4];
-	
-	int numVoxels = 0;
-
-	for (int i = dataExtent[0]; i <= dataExtent[1]; i++) {
-		for (int j = dataExtent[2]; j <= dataExtent[3]; j++) {
-			for (int k = dataExtent[4]; k <= dataExtent[5]; k++) {
-				unsigned short* p = static_cast<unsigned short*>(data->GetScalarPointer(i, j, k));
-
-				if (*p == label) {
-					if (i < extent[0]) extent[0] = i;
-					if (i > extent[1]) extent[1] = i;
-					if (j < extent[2]) extent[2] = j;
-					if (j > extent[3]) extent[3] = j;
-					if (k < extent[4]) extent[4] = k;
-					if (k > extent[5]) extent[5] = k;
-
-					numVoxels++;
-				}
-			}
-		}
-	}
-	
-	// Fix extent if no voxels with this label
-	if (numVoxels == 0) {
-		extent[0] = extent[1] = dataExtent[0];
-		extent[2] = extent[3] = dataExtent[2];
-		extent[4] = extent[5] = dataExtent[4];
-	}
-
-	UpdateExtent();
+	ShrinkExtent(dataExtent);
 }
 
 bool Region::GetVisible() {

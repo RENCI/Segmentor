@@ -14,15 +14,17 @@ public:
 	static void VolumeCameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 	static void SliceCameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 	static void CameraChange(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
-	
-	static void OnChar(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 
 	static void SliceSelectLabel(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 	static void VolumeSelectLabel(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 
 	static void Paint(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
+	static void EndPaint(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 	static void Overwrite(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
+	static void EndOverwrite(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 	static void Erase(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
+	static void EndErase(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
+
 	static void Add(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 	static void Merge(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 	static void Grow(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);

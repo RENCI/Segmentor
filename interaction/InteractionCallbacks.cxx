@@ -123,6 +123,11 @@ void InteractionCallbacks::Paint(vtkObject* caller, unsigned long eventId, void*
 	}
 }
 
+void InteractionCallbacks::EndPaint(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
+	vis->EndPaint();
+}
+
 void InteractionCallbacks::Overwrite(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
 	vtkRenderWindowInteractor* rwi = static_cast<vtkInteractorStyle*>(caller)->GetInteractor();
 	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
@@ -139,6 +144,11 @@ void InteractionCallbacks::Overwrite(vtkObject* caller, unsigned long eventId, v
 	}
 }
 
+void InteractionCallbacks::EndOverwrite(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
+	vis->EndOverwrite();
+}
+
 void InteractionCallbacks::Erase(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
 	vtkRenderWindowInteractor* rwi = static_cast<vtkInteractorStyle*>(caller)->GetInteractor();
 	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
@@ -153,6 +163,11 @@ void InteractionCallbacks::Erase(vtkObject* caller, unsigned long eventId, void*
 		vis->Erase(p);
 		vis->Render();
 	}
+}
+
+void InteractionCallbacks::EndErase(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
+	vis->EndErase();
 }
 
 void InteractionCallbacks::Add(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {

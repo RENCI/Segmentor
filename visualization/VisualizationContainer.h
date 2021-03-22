@@ -70,6 +70,10 @@ public:
 	void Paint(int i, int j, int k, bool overwrite = false, bool useBrush = true);
 	void Erase(int i, int j, int k, bool useBrush = true);
 
+	void EndPaint();
+	void EndErase();
+	void EndOverwrite();
+
 	void MouseMove();
 	void MouseMove(double point[3]);
 
