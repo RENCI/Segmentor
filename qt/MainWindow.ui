@@ -549,6 +549,9 @@
    <property name="text">
     <string>Change Settings</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
+   </property>
   </action>
  </widget>
  <customwidgets>
