@@ -49,7 +49,7 @@ SliceView::SliceView(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut)
 	filterMode = FilterNone;
 	showRegionOutlines = true;
 	rescaleMode = Full;
-	autoRescale = false;
+	autoRescale = true;
 
 	data = nullptr;
 	labels = nullptr;
@@ -350,6 +350,10 @@ void SliceView::RescalePartial() {
 	slice->GetProperty()->SetColorLevel(minValue + range / 2);
 
 	Render();
+}
+
+bool SliceView::GetAutoRescale() {
+	return autoRescale;
 }
 
 void SliceView::SetAutoRescale(bool rescale) {

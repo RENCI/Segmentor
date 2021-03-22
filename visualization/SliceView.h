@@ -63,6 +63,7 @@ public:
 
 	void RescaleFull();
 	void RescalePartial();
+	bool GetAutoRescale();
 	void SetAutoRescale(bool rescale);
 
 	double GetOverlayOpacity();

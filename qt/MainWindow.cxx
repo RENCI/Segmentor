@@ -960,7 +960,7 @@ void MainWindow::createToolBar() {
 	// Rescale toggle
 	QAction* actionToggleAutoRescale = new QAction("auto");
 	actionToggleAutoRescale->setCheckable(true);
-	actionToggleAutoRescale->setChecked(false);
+	actionToggleAutoRescale->setChecked(visualizationContainer->GetSliceView()->GetAutoRescale());
 
 	QObject::connect(actionToggleAutoRescale, &QAction::triggered, this, &MainWindow::on_actionToggleAutoRescale);
 
