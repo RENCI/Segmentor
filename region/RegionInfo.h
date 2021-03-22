@@ -4,6 +4,7 @@
 #include <vtkSmartPointer.h>
 
 class Region;
+class RegionMetadataIO;
 
 class RegionInfo {
 public:
@@ -21,6 +22,7 @@ protected:
 	bool done;
 
 	friend class Region;
+	friend class RegionMetadataIO;
 };
 
 #endif

@@ -19,6 +19,7 @@ class vtkRenderWindowInteractor;
 class VolumeView;
 class SliceView;
 class Region;
+class RegionInfo;
 class RegionCollection;
 class History;
 
@@ -171,17 +172,17 @@ protected:
 	int brushRadius;
 
 	void SetImageData(vtkImageData* imageData);
-	bool SetLabelData(vtkImageData* labelData, const std::vector<RegionMetadataIO::Region>& metadata);
+	bool SetLabelData(vtkImageData* labelData, const std::vector<RegionInfo>& metadata);
 
-	void UpdateLabels();
+	void InitializeLabels();
 	void UpdateLabels(vtkIntArray* extents);
-	void UpdateLabels(const std::vector<RegionMetadataIO::Region>& metadata);
+	void UpdateLabels(const std::vector<RegionInfo>& metadata);
 	void UpdateColors();
 	void UpdateColors(unsigned short label);
 
 	void ExtractRegions();
 	void ExtractRegions(vtkIntArray* extents);
-	void ExtractRegions(const std::vector<RegionMetadataIO::Region>& metadata);
+	void ExtractRegions(const std::vector<RegionInfo>& metadata);
 
 	void SplitRegionKMeans(Region* region, int numRegions);
 	void SplitRegionIntensity(Region* region, int numRegions);

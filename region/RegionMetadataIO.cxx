@@ -8,15 +8,17 @@
 #include <iostream>
 #include <string>
 
+#include "RegionInfo.h"
+
 RegionMetadataIO::RegionMetadataIO() {
 }
 
 RegionMetadataIO::~RegionMetadataIO() {
 }
 
-std::vector<RegionMetadataIO::Region> RegionMetadataIO::Read(std::string fileName) {
+std::vector<RegionInfo> RegionMetadataIO::Read(std::string fileName) {
 	// Return vector
-	std::vector<Region> regionData;
+	std::vector<RegionInfo> regionData;
 
 	QFile file(fileName.c_str());
 
@@ -30,7 +32,7 @@ std::vector<RegionMetadataIO::Region> RegionMetadataIO::Read(std::string fileNam
 			for (int i = 0; i < regionObjects.size(); i++) {
 				QJsonObject regionObject = regionObjects[i].toObject();
 
-				Region region;
+				RegionInfo region;
 
 				if (regionObject.contains("label") && regionObject["label"].isDouble()) {
 					region.label = (unsigned short)regionObject["label"].toDouble();
@@ -52,6 +54,14 @@ std::vector<RegionMetadataIO::Region> RegionMetadataIO::Read(std::string fileNam
 					region.done = regionObject["done"].toBool();
 				}
 
+				if (regionObject.contains("color") && regionObject["color"].isArray()) {
+					QJsonArray color = regionObject["color"].toArray();
+
+					for (int i = 0; i < color.size() && i < 3; i++) {
+						region.color[i] = color[i].toDouble();
+					}
+				}
+
 				if (regionObject.contains("extent") && regionObject["extent"].isArray()) {
 					QJsonArray extent = regionObject["extent"].toArray();
 
@@ -71,7 +81,7 @@ std::vector<RegionMetadataIO::Region> RegionMetadataIO::Read(std::string fileNam
 	return regionData;
 }
 
-bool RegionMetadataIO::Write(std::string fileName, std::vector<Region> regions) {
+bool RegionMetadataIO::Write(std::string fileName, std::vector<RegionInfo> regions) {
 	QFile file(fileName.c_str());
 
 	if (!file.open(QIODevice::WriteOnly)) {
@@ -87,6 +97,12 @@ bool RegionMetadataIO::Write(std::string fileName, std::vector<Region> regions) 
 		regionObject["visible"] = regions[i].visible;
 		regionObject["modified"] = regions[i].modified;
 		regionObject["done"] = regions[i].done;
+
+		QJsonArray color;
+		for (int j = 0; j < 3; j++) {
+			color.append(regions[i].color[j]);
+		}
+		regionObject["color"] = color;
 
 		QJsonArray extent;
 		for (int j = 0; j < 6; j++) {

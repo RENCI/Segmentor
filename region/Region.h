@@ -3,6 +3,8 @@
 
 #include <vtkSmartPointer.h>
 
+#include "RegionMetadataIO.h"
+
 class vtkAlgorithmOutput;
 class vtkExtractVOI;
 class vtkImageData;
@@ -36,10 +38,10 @@ public:
 	RegionHighlight3D* GetHighlight3D();
 	vtkSmartPointer<vtkBillboardTextActor3D> GetText();
 
+	void InitializeExtent(const int* regionExtent);
 	void SetExtent(int newExtent[6]);
 	void UpdateExtent(int x, int y, int z);
-	void InitializeExtent(const int* regionExtent);
-	void ComputeExtent();
+	void ShrinkExtent();
 
 	bool GetVisible();
 	void SetVisible(bool isVisible);
@@ -87,7 +89,10 @@ protected:
 	RegionHighlight3D* highlight3D;
 	vtkSmartPointer<vtkBillboardTextActor3D> text;
 
+	void ComputeExtent();
+	void ShrinkExtent(const int startExtent[6]);
 	void UpdateExtent();
+
 	void ClearLabels();
 
 	friend class RegionInfo;

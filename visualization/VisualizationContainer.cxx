@@ -48,6 +48,7 @@
 #include "SliceView.h"
 #include "VolumeView.h"
 #include "Region.h"
+#include "RegionInfo.h"
 #include "RegionSurface.h"
 #include "RegionCollection.h"
 #include "RegionMetadataIO.h"
@@ -303,7 +304,7 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationFi
 	cast->Update();
 
 	// Load metadata
-	std::vector<RegionMetadataIO::Region> metadata = RegionMetadataIO::Read(fileName + ".json");
+	std::vector<RegionInfo> metadata = RegionMetadataIO::Read(fileName + ".json");
 	
 	if (SetLabelData(cast->GetOutput(), metadata)) {
 		qtWindow->updateRegions(regions);
@@ -354,7 +355,7 @@ VisualizationContainer::FileErrorCode VisualizationContainer::OpenSegmentationSt
 	cast->Update();
 
 	// Load metadata
-	std::vector<RegionMetadataIO::Region> metadata = RegionMetadataIO::Read(fileNames[0] + ".json");
+	std::vector<RegionInfo> metadata = RegionMetadataIO::Read(fileNames[0] + ".json");
 
 	if (SetLabelData(cast->GetOutput(), metadata)) {
 		qtWindow->updateRegions(regions);
@@ -463,7 +464,7 @@ void VisualizationContainer::InitializeLabelData() {
 
 	labels = threshold->GetOutput();
 
-	UpdateLabels();
+	InitializeLabels();
 
 	history->Clear();
 	PushHistory();
@@ -1253,7 +1254,7 @@ void VisualizationContainer::SplitRegionKMeans(Region* region, int numRegions) {
 
 	// Update current region
 	region->SetModified(true);
-	region->ComputeExtent();
+	region->ShrinkExtent();
 
 	qtWindow->updateRegions(regions);
 
@@ -2001,7 +2002,7 @@ void VisualizationContainer::SetImageData(vtkImageData* imageData) {
 	Render();
 }
 
-bool VisualizationContainer::SetLabelData(vtkImageData* labelData, const std::vector<RegionMetadataIO::Region>& metadata) {
+bool VisualizationContainer::SetLabelData(vtkImageData* labelData, const std::vector<RegionInfo>& metadata) {
 	// Check that volumes match
 	int* dataDims = data->GetDimensions();
 	int* labelDims = labelData->GetDimensions();
@@ -2039,10 +2040,11 @@ bool VisualizationContainer::SetLabelData(vtkImageData* labelData, const std::ve
 	return true;
 }
 
-void VisualizationContainer::UpdateLabels() {
+void VisualizationContainer::InitializeLabels() {
 	UpdateColors();
 
-	ExtractRegions();
+	regions->RemoveAll();
+	currentRegion = nullptr;
 
 	volumeView->SetRegions(labels, regions);
 	sliceView->SetSegmentationData(labels, regions);
@@ -2057,7 +2059,7 @@ void VisualizationContainer::UpdateLabels(vtkIntArray* extents) {
 	sliceView->SetSegmentationData(labels, regions);
 }
 
-void VisualizationContainer::UpdateLabels(const std::vector<RegionMetadataIO::Region>& metadata) {
+void VisualizationContainer::UpdateLabels(const std::vector<RegionInfo>& metadata) {
 	UpdateColors();
 
 	ExtractRegions(metadata);
@@ -2090,33 +2092,6 @@ void VisualizationContainer::UpdateColors() {
 		labelColors->SetTableValue(i, c[0], c[1], c[2]);
 	}
 	labelColors->Build();
-}
-
-void VisualizationContainer::ExtractRegions() {
-	qtWindow->initProgress("Processing segmentation data");
-
-	// Get label info
-	int maxLabel = labels->GetScalarRange()[1];
-
-	// Clear current regions
-
-	// XXX: THIS IS CLEARING ALL VOXELS IN THE LABEL DATA
-	regions->RemoveAll();
-
-	for (int label = 1; label <= maxLabel; label++) {
-		Region* region = new Region(label, labelColors->GetTableValue(label), labels);
-
-		if (region->GetNumVoxels() > 0) {
-			regions->Add(region);
-		}
-		else {
-			delete region;
-		}
-
-		qtWindow->updateProgress((double)label / maxLabel);
-	}
-
-	currentRegion = nullptr;
 }
 
 void VisualizationContainer::ExtractRegions(vtkIntArray* extents) {
@@ -2154,7 +2129,7 @@ void VisualizationContainer::ExtractRegions(vtkIntArray* extents) {
 	currentRegion = nullptr;
 }
 
-void VisualizationContainer::ExtractRegions(const std::vector<RegionMetadataIO::Region>& metadata) {
+void VisualizationContainer::ExtractRegions(const std::vector<RegionInfo>& metadata) {
 	qtWindow->initProgress("Processing segmentation data");
 
 	// Get label info
@@ -2167,13 +2142,17 @@ void VisualizationContainer::ExtractRegions(const std::vector<RegionMetadataIO::
 
 	// First try metadata
 	for (int i = 0; i < (int)metadata.size(); i++) {
-		int label = metadata[i].label;
+		Region* region = new Region(metadata[i], labels);	
 
-		Region* region = new Region(label, labelColors->GetTableValue(label), labels, metadata[i].extent);
+		const double* color = region->GetColor();
 
-		region->SetVisible(metadata[i].visible);
-		region->SetModified(metadata[i].modified);
-		region->SetDone(metadata[i].done);
+		if (color[0] >= 0) {
+			labelColors->SetTableValue(region->GetLabel(), color[0], color[1], color[2]);
+		}
+		else {
+			const double* newColor = labelColors->GetTableValue(region->GetLabel());
+			region->SetColor(newColor[0], newColor[1], newColor[2]);
+		}
 
 		if (region->GetNumVoxels() > 0) {
 			regions->Add(region);
@@ -2205,21 +2184,12 @@ void VisualizationContainer::ExtractRegions(const std::vector<RegionMetadataIO::
 }
 
 void VisualizationContainer::SaveRegionMetadata(std::string fileName) {
-	std::vector<RegionMetadataIO::Region> metadata;
+	std::vector<RegionInfo> metadata;
 
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
-		RegionMetadataIO::Region regionMetadata;
-
 		Region* region = regions->Get(it);
 
-		regionMetadata.label = region->GetLabel();
-		regionMetadata.visible = region->GetVisible();
-		regionMetadata.modified = region->GetModified();
-		regionMetadata.done = region->GetDone();
-		
-		for (int j = 0; j < 6; j++) {
-			regionMetadata.extent[j] = region->GetExtent()[j];
-		}
+		RegionInfo regionMetadata(region);
 
 		metadata.push_back(regionMetadata);
 	}

@@ -219,6 +219,53 @@ void Region::UpdateExtent(int x, int y, int z) {
 	}
 }
 
+void Region::ShrinkExtent() {
+	ShrinkExtent(extent);
+}
+
+void Region::ShrinkExtent(const int startExtent[6]) {
+	bool update = false;
+
+	int newExtent[6];
+	newExtent[0] = startExtent[1];
+	newExtent[1] = startExtent[0];
+	newExtent[2] = startExtent[3];
+	newExtent[3] = startExtent[2];
+	newExtent[4] = startExtent[5];
+	newExtent[5] = startExtent[4];
+
+	bool hasVoxel = false;
+
+	for (int i = extent[0]; i <= extent[1]; i++) {
+		for (int j = extent[2]; j <= extent[3]; j++) {
+			for (int k = extent[4]; k <= extent[5]; k++) {
+				unsigned short* p = static_cast<unsigned short*>(data->GetScalarPointer(i, j, k));
+
+				if (*p == label) {
+					if (i < newExtent[0]) newExtent[0] = i;
+					if (i > newExtent[1]) newExtent[1] = i;
+					if (j < newExtent[2]) newExtent[2] = j;
+					if (j > newExtent[3]) newExtent[3] = j;
+					if (k < newExtent[4]) newExtent[4] = k;
+					if (k > newExtent[5]) newExtent[5] = k;
+
+					hasVoxel = true;
+				}
+			}
+		}
+	}
+
+	// Fix extent if no voxels with this label
+	if (!hasVoxel) {
+		extent[0] = extent[1] = startExtent[0];
+		extent[2] = extent[3] = startExtent[2];
+		extent[4] = extent[5] = startExtent[4];
+	}
+
+	UpdateExtent();
+}
+
+
 void Region::UpdateExtent() {
 	int dataExtent[6];
 	data->GetExtent(dataExtent);
@@ -261,20 +308,6 @@ void Region::InitializeExtent(const int* regionExtent) {
 	extent[4] = regionExtent[4];
 	extent[5] = regionExtent[5];
 
-	int numVoxels = 0;
-
-	for (int i = extent[0]; i <= extent[1]; i++) {
-		for (int j = extent[2]; j <= extent[3]; j++) {
-			for (int k = extent[4]; k <= extent[5]; k++) {
-				unsigned short* p = static_cast<unsigned short*>(data->GetScalarPointer(i, j, k));
-
-				if (*p == label) {
-					numVoxels++;
-				}
-			}
-		}
-	}
-
 	UpdateExtent();
 }
 
@@ -285,20 +318,6 @@ void Region::ComputeExtent() {
 	int dataExtent[6];
 	data->GetExtent(dataExtent);
 
-/*
-	for (int i = 0; i < 6; i++) {
-		std::cout << dataExtent[i] << std::endl;
-	}
-	cout << "***" << std::endl;
-
-	double bounds[6];
-	data->GetBounds(bounds);
-	for (int i = 0; i < 6; i++) {
-		std::cout << bounds[i] << std::endl;
-	}
-	cout << "***" << std::endl;
-*/
-	
 	// Initialize extent for this region
 	extent[0] = dataExtent[1];
 	extent[1] = dataExtent[0];
@@ -306,10 +325,7 @@ void Region::ComputeExtent() {
 	extent[3] = dataExtent[2];
 	extent[4] = dataExtent[5];
 	extent[5] = dataExtent[4];
-
-
-//	data->GetScalarPointer(bounds[1], bounds[3], bounds[5]);
-
+	
 	int numVoxels = 0;
 
 	for (int i = dataExtent[0]; i <= dataExtent[1]; i++) {
@@ -330,9 +346,7 @@ void Region::ComputeExtent() {
 			}
 		}
 	}
-
-//	cout << "***" << std::endl;
-
+	
 	// Fix extent if no voxels with this label
 	if (numVoxels == 0) {
 		extent[0] = extent[1] = dataExtent[0];
@@ -492,7 +506,12 @@ void Region::SetInfo(const RegionInfo& info) {
 		color[i] = info.color[i];
 	}
 
-	InitializeExtent(info.extent);
+	if (info.extent[0] >= 0) {
+		InitializeExtent(info.extent);
+	}
+	else {
+		ComputeExtent();
+	}
 
 	visible = info.visible;
 	modified = info.modified;
