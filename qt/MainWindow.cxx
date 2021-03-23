@@ -641,10 +641,13 @@ void MainWindow::on_actionSplit() {
 	visualizationContainer->SplitCurrentRegion(2);
 }
 
+void MainWindow::on_actionFill() {
+	visualizationContainer->FillCurrentRegionSlice();
+}
+
 void MainWindow::on_actionDone() {
 	visualizationContainer->ToggleCurrentRegionDone();
 }
-
 
 void MainWindow::on_actionOverlay(bool checked) {
 	visualizationContainer->GetSliceView()->ShowLabelSlice(checked);
@@ -942,6 +945,7 @@ void MainWindow::createModeBar() {
 	
 	toolBar->addSeparator();
 	toolBar->addWidget(createLabel("Actions", 0, 0, 5, 5));
+	toolBar->addAction(createActionIcon(":/icons/icon_fill.png", "Fill current region slice (l)", "l", &MainWindow::on_actionFill));
 	toolBar->addAction(createActionIcon(":/icons/icon_update.png", "Update current region (u)", "u", &MainWindow::on_actionUpdate));
 	toolBar->addAction(createActionIcon(":/icons/icon_clean.png", "Clean up current region (0)", "0", &MainWindow::on_actionClean));
 	toolBar->addAction(createActionIcon(":/icons/icon_split.png", "Split current region (/)", "/", &MainWindow::on_actionSplit));

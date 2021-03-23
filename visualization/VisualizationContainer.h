@@ -109,6 +109,7 @@ public:
 	void CleanCurrentRegion();
 	void MergeWithCurrentRegion(double point[3]);
 	void SplitCurrentRegion(int numRegions);
+	void FillCurrentRegionSlice();
 	void GrowCurrentRegion(double point[3]);
 	void ToggleCurrentRegionDone();
 	

@@ -201,6 +201,19 @@ vtkSmartPointer<vtkBillboardTextActor3D> Region::GetText() {
 	return text;
 }
 
+vtkSmartPointer<vtkImageData> Region::GetZSlice(int z) {
+	int extent[6];
+	voi->GetOutput()->GetExtent(extent);
+	extent[4] = extent[5] = z;
+
+	vtkSmartPointer<vtkExtractVOI> slice = vtkSmartPointer<vtkExtractVOI>::New();
+	slice->SetVOI(extent);
+	slice->SetInputConnection(voi->GetOutputPort());
+	slice->Update();
+
+	return slice->GetOutput();
+}
+
 #ifdef SHOW_REGION_BOX
 vtkSmartPointer<vtkActor> Region::GetBox() {
 	return box;
@@ -486,17 +499,40 @@ double Region::GetXYDistance(int x, int y, int z) {
 }
 
 bool Region::GetSeed(int ijk[3]) {
+	int extent[6];
+	voi->GetOutput()->GetExtent(extent);
+
 	for (int i = extent[0]; i <= extent[1]; i++) {
 		for (int j = extent[2]; j <= extent[3]; j++) {
 			for (int k = extent[4]; k <= extent[5]; k++) {
 				unsigned short* p = static_cast<unsigned short*>(data->GetScalarPointer(i, j, k));
-				if (*p != label) {
+				if (*p == 0) {
 					ijk[0] = i;
 					ijk[1] = j;
 					ijk[2] = k;
 
 					return true;
 				}
+			}
+		}
+	}
+
+	return false;
+}
+
+bool Region::GetSeed(int ijk[3], int z) {
+	int extent[6];
+	voi->GetOutput()->GetExtent(extent);
+
+	for (int i = extent[0]; i <= extent[1]; i++) {
+		for (int j = extent[2]; j <= extent[3]; j++) {
+			unsigned short* p = static_cast<unsigned short*>(data->GetScalarPointer(i, j, z));
+			if (*p == 0) {
+				ijk[0] = i;
+				ijk[1] = j;
+				ijk[2] = z;
+
+				return true;
 			}
 		}
 	}

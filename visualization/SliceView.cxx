@@ -143,8 +143,10 @@ void SliceView::SetImageData(vtkImageData* imageData) {
 	// Update slice
 	data = imageData;
 
+	// Turn off rendering to get rid of flicker
 	renderer->DrawOff();
 
+	// Update slice
 	UpdateSlice();
 
 	// Update probe
@@ -162,6 +164,7 @@ void SliceView::SetImageData(vtkImageData* imageData) {
 	// Reset camera
 	ResetCamera();
 
+	// Turn rendering back on
 	renderer->DrawOn();
 }
 

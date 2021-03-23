@@ -1138,16 +1138,13 @@ void VisualizationContainer::CleanCurrentRegion() {
 		floodFill->ReplaceInOff();
 		floodFill->ReplaceOutOn();
 		floodFill->SetOutValue(label);
-		//floodFill->SetInputConnection(currentRegion->GetOutput());
-		//floodFill->SetInputDataObject(labels);
 		floodFill->SetInputConnection(threshold->GetOutputPort());
 		floodFill->Update();
 
 		vtkImageData* floodFillOutput = floodFill->GetOutput();
 
-		//const int* extent = currentRegion->GetExtent();
 		int extent[6];
-		floodFill->GetOutput()->GetExtent(extent);
+		floodFillOutput->GetExtent(extent);
 
 		// Update label data
 		for (int i = extent[0]; i <= extent[1]; i++) {
@@ -1169,7 +1166,6 @@ void VisualizationContainer::CleanCurrentRegion() {
 
 	PushHistory();
 }
-
 
 void VisualizationContainer::MergeWithCurrentRegion(double point[3]) {
 	if (!currentRegion || currentRegion->GetDone()) return;
@@ -1626,6 +1622,65 @@ void VisualizationContainer::SplitRegionIntensity(Region* region, int numRegions
 	UpdateVisibility();
 
 	qtWindow->updateProgress(1.0);
+}
+
+void VisualizationContainer::FillCurrentRegionSlice() {
+	if (!currentRegion || currentRegion->GetDone()) return;
+
+	unsigned short label = currentRegion->GetLabel();
+
+	// Get z slice
+	int ijk[3];
+	PointToIndex(sliceView->GetRenderer()->GetActiveCamera()->GetFocalPoint(), ijk);
+	int z = ijk[2];
+
+	// Fill holes
+	int seed[3];
+	if (currentRegion->GetSeed(seed, z)) {
+		// XXX: Convert to point from index?
+		vtkSmartPointer<vtkPoints> seedPoints = vtkSmartPointer<vtkPoints>::New();
+		seedPoints->SetNumberOfPoints(1);
+		seedPoints->SetPoint(0, seed[0], seed[1], seed[2]);
+		
+		vtkSmartPointer<vtkImageThreshold> threshold = vtkSmartPointer<vtkImageThreshold>::New();
+		threshold->ThresholdBetween(label, label);
+		threshold->ReplaceInOff();
+		threshold->ReplaceOutOn();
+		threshold->SetOutValue(0);
+		//threshold->SetInputConnection(slice->GetOutputPort());
+		threshold->SetInputDataObject(currentRegion->GetZSlice(z));
+				
+		vtkSmartPointer<vtkImageThresholdConnectivity> floodFill = vtkSmartPointer<vtkImageThresholdConnectivity>::New();
+		floodFill->SetSeedPoints(seedPoints);
+		floodFill->SetSliceRangeZ(z, z);
+		floodFill->ThresholdBetween(0, 0);
+		floodFill->ReplaceInOff();
+		floodFill->ReplaceOutOn();
+		floodFill->SetOutValue(label);
+		floodFill->SetInputConnection(threshold->GetOutputPort());
+		floodFill->Update();
+		
+		vtkImageData* floodFillOutput = floodFill->GetOutput();
+		int extent[6];
+		floodFillOutput->GetExtent(extent);
+
+		// Update label data
+		for (int i = extent[0]; i <= extent[1]; i++) {
+			for (int j = extent[2]; j <= extent[3]; j++) {
+				unsigned short* labelData = static_cast<unsigned short*>(labels->GetScalarPointer(i, j, z));
+				unsigned short* floodFillData = static_cast<unsigned short*>(floodFillOutput->GetScalarPointer(i, j, z));
+
+				if (*floodFillData == label) *labelData = label;
+			}
+		}
+	}
+
+	qtWindow->updateRegions(regions);
+
+	labels->Modified();
+	Render();
+
+	PushHistory();
 }
 
 void VisualizationContainer::GrowCurrentRegion(double point[3]) {

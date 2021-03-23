@@ -89,6 +89,7 @@ public slots:
 	virtual void on_actionUpdate();
 	virtual void on_actionClean();
 	virtual void on_actionSplit();
+	virtual void on_actionFill();
 
 	// Tool bar events
 	virtual void on_actionOverlay(bool checked);

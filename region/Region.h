@@ -1,7 +1,7 @@
 #ifndef Region_H
 #define Region_H
 
-#define SHOW_REGION_BOX
+//#define SHOW_REGION_BOX
 
 #include <vtkSmartPointer.h>
 
@@ -40,6 +40,7 @@ public:
 	RegionVoxelOutlines* GetVoxelOutlines();
 	RegionHighlight3D* GetHighlight3D();
 	vtkSmartPointer<vtkBillboardTextActor3D> GetText();
+	vtkSmartPointer<vtkImageData> GetZSlice(int z);
 
 #ifdef SHOW_REGION_BOX
 	vtkSmartPointer<vtkActor> GetBox();
@@ -74,6 +75,7 @@ public:
 	double GetXYDistance(int x, int y, int z);
 
 	bool GetSeed(int ijk[3]);
+	bool GetSeed(int ijk[3], int z);
 
 	void SetInfo(const RegionInfo& info);
 
