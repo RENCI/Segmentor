@@ -142,6 +142,9 @@ void SliceView::Reset() {
 void SliceView::SetImageData(vtkImageData* imageData) {
 	// Update slice
 	data = imageData;
+
+	renderer->DrawOff();
+
 	UpdateSlice();
 
 	// Update probe
@@ -158,6 +161,8 @@ void SliceView::SetImageData(vtkImageData* imageData) {
 
 	// Reset camera
 	ResetCamera();
+
+	renderer->DrawOn();
 }
 
 void SliceView::SetSegmentationData(vtkImageData* imageLabels, RegionCollection* newRegions) {
