@@ -755,9 +755,7 @@ void VisualizationContainer::Erase(int i, int j, int k, bool useBrush) {
 
 			int value = SetLabel(m, n, k, 0);
 
-			if (value != -1) {				
-				// TODO: SHRINK EXTENT
-
+			if (value != -1) {			
 				update = true;
 			}
 		}
@@ -776,6 +774,8 @@ void VisualizationContainer::EndPaint() {
 
 void VisualizationContainer::EndErase() {
 	if (currentRegion) {
+		currentRegion->ShrinkExtent();
+
 		qtWindow->updateRegion(currentRegion, regions);
 	}
 }
@@ -1116,8 +1116,6 @@ void VisualizationContainer::CleanCurrentRegion() {
 		}
 
 	}
-
-	// XXX: Shrink extent when removing voxels
 
 	// Fill holes
 	int seed[3];
@@ -1750,6 +1748,10 @@ void VisualizationContainer::GrowCurrentRegion(double point[3]) {
 				}
 			}
 		}
+	}
+
+	if (!grow) {
+		currentRegion->ShrinkExtent();
 	}
 
 	labels->Modified();
