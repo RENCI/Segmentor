@@ -61,6 +61,10 @@ public:
 	double GetWindow();
 	double GetLevel();
 
+	void SetOrientationX();
+	void SetOrientationY();
+	void SetOrientationZ();
+
 	enum SliceEventIds {
 		SelectLabelEvent = vtkCommand::UserEvent + 1,
 		StartPaintEvent,

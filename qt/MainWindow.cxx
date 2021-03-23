@@ -24,6 +24,7 @@
 #include "CameraViewDialog.h"
 #include "SettingsDialog.h"
 #include "SegmentVolumeDialog.h"
+#include "vtkInteractorStyleSlice.h"
 
 #include <vtkCallbackCommand.h>
 #include <vtkCamera.h>
@@ -705,6 +706,18 @@ void MainWindow::on_actionFilterRegions(bool checked) {
 	visualizationContainer->SetFilterRegions(checked);
 }
 
+void MainWindow::on_actionViewX() {
+	visualizationContainer->GetSliceView()->GetInteractorStyle()->SetOrientationX();
+}
+
+void MainWindow::on_actionViewY() {
+	visualizationContainer->GetSliceView()->GetInteractorStyle()->SetOrientationY();
+}
+
+void MainWindow::on_actionViewZ() {
+	visualizationContainer->GetSliceView()->GetInteractorStyle()->SetOrientationZ();
+}
+
 void MainWindow::on_sliceUp() {
 	visualizationContainer->SliceUp();
 }
@@ -988,8 +1001,23 @@ void MainWindow::createToolBar() {
 	toolBar->addAction(createActionIcon(":/icons/icon_clear_visibility.png", "Clear visibility (c)", "c", &MainWindow::on_actionClearRegionVisibilities));
 	toolBar->addAction(createActionIcon(":/icons/icon_show_plane_regions.png", "Show plane regions (p)", "p", &MainWindow::on_actionShowPlaneRegions));
 	toolBar->addAction(createActionIcon(":/icons/icon_show_neighbor_regions.png", "Show neighbors (k)", "k", &MainWindow::on_actionShowNeighborRegions));
+	toolBar->addSeparator();
+	toolBar->addWidget(createLabel("View"));
+	toolBar->addAction(createAction("X", "x", &MainWindow::on_actionViewX));
+	toolBar->addAction(createAction("Y", "y", &MainWindow::on_actionViewY));
+	toolBar->addAction(createAction("Z", "z", &MainWindow::on_actionViewZ));
 
 	toolBarWidget->layout()->addWidget(toolBar);
+}
+
+QAction* MainWindow::createAction(const QString& text, const QString& shortcut, void (MainWindow::*slot)()) {
+	QAction* action = new QAction(text, this);
+	action->setShortcut(QKeySequence(shortcut));
+	action->setCheckable(false);
+
+	QObject::connect(action, &QAction::triggered, this, slot);
+
+	return action;
 }
 
 QAction* MainWindow::createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, void (MainWindow::*slot)()) {

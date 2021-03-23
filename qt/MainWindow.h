@@ -104,6 +104,9 @@ public slots:
 	virtual void on_actionShowPlaneRegions();
 	virtual void on_actionShowNeighborRegions();
 	virtual void on_actionFilterRegions(bool checked);
+	virtual void on_actionViewX();
+	virtual void on_actionViewY();
+	virtual void on_actionViewZ();
 
 	// Widget events
 	virtual void on_sliceUp();
@@ -156,6 +159,7 @@ protected:
 	// Toolbar
 	void createModeBar();
 	void createToolBar();
+	QAction* createAction(const QString& text, const QString& shortcut, void (MainWindow::*slot)());
 	QAction* createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, void (MainWindow::*slot)());
 	QAction* createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, bool checked, void (MainWindow::*slot)(bool));
 	QAction* createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, QActionGroup* group, bool checked, void (MainWindow::*slot)());

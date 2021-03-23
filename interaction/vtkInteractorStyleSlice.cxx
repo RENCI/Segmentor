@@ -328,6 +328,36 @@ double vtkInteractorStyleSlice::GetLevel() {
 }
 
 //----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::SetOrientationX() {
+	const double right[3] = { 0, 0, 1 };
+	const double up[3] = { 0, 1, 0 };
+
+	this->SetOrientation(right, up);
+	this->CurrentRenderer->ResetCameraClippingRange();
+	this->Interactor->Render();
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::SetOrientationY() {
+	const double right[3] = { 1, 0, 0 };
+	const double up[3] = { 0, 0, 1 };
+
+	this->SetOrientation(right, up);
+	this->CurrentRenderer->ResetCameraClippingRange();
+	this->Interactor->Render();
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::SetOrientationZ() {
+	const double right[3] = { 1, 0, 0 };
+	const double up[3] = { 0, 1, 0 };
+
+	this->SetOrientation(right, up);
+	this->CurrentRenderer->ResetCameraClippingRange();
+	this->Interactor->Render();
+}
+
+//----------------------------------------------------------------------------
 void vtkInteractorStyleSlice::OnMouseMove()
 {
 	this->MouseMoved = true;
@@ -621,42 +651,6 @@ void vtkInteractorStyleSlice::OnChar()
 		}
 		break;
 
-	case 'x':
-	case 'X':
-	{
-		const double right[3] = { 0, 0, 1 };
-		const double up[3] = { 0, 1, 0 };
-
-		this->SetOrientation(right, up);
-		this->CurrentRenderer->ResetCameraClippingRange();
-		this->Interactor->Render();
-	}
-	break;
-
-	case 'y':
-	case 'Y':
-	{
-		const double right[3] = { 1, 0, 0 };
-		const double up[3] = { 0, 0, 1 };
-
-		this->SetOrientation(right, up);
-		this->CurrentRenderer->ResetCameraClippingRange();
-		this->Interactor->Render();
-	}
-	break;
-
-	case 'z':
-	case 'Z':
-	{
-		const double right[3] = { 1, 0, 0 };
-		const double up[3] = { 0, 1, 0 };
-
-		this->SetOrientation(right, up);
-		this->CurrentRenderer->ResetCameraClippingRange();
-		this->Interactor->Render();
-	}
-	break;
-
 	case 'i':
 	case 'I':
 	{
@@ -680,6 +674,12 @@ void vtkInteractorStyleSlice::OnChar()
 	case 'U':
 	case 'w':
 	case 'W':
+	case 'x':
+	case 'X':
+	case 'y':
+	case 'Y':
+	case 'z':
+	case 'Z':
 	case '3':
 		break;
 
