@@ -14,6 +14,9 @@
 #include <vtkTextProperty.h>
 #include <vtkThreshold.h>
 
+#include <vtkOutlineFilter.h>
+#include <vtkPolyDataMapper.h>
+
 #include "vtkImageDataCells.h"
 
 #include "RegionInfo.h"
@@ -21,6 +24,8 @@
 #include "RegionOutline.h"
 #include "RegionVoxelOutlines.h"
 #include "RegionHighlight3D.h"
+
+//define SHOW_BOX
 
 Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* inputData, const int* regionExtent) {
 	visible = false;
@@ -68,6 +73,20 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 	outline = new RegionOutline(this, color);
 	voxelOutlines = new RegionVoxelOutlines(this, color);
 	highlight3D = new RegionHighlight3D(this, color);
+
+	// Outline for testing bounding box
+	vtkSmartPointer<vtkOutlineFilter> boxFilter = vtkSmartPointer<vtkOutlineFilter>::New();
+	boxFilter->SetInputConnection(voi->GetOutputPort());
+
+	vtkSmartPointer<vtkPolyDataMapper> boxMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	boxMapper->SetInputConnection(boxFilter->GetOutputPort());
+
+	box = vtkSmartPointer<vtkActor>::New();
+	box->GetProperty()->SetColor(0.5, 0.5, 0.5);
+	box->GetProperty()->LightingOff();
+	box->SetMapper(boxMapper);
+	box->PickableOff();
+	box->VisibilityOff();
 }
 
 Region::Region(const RegionInfo& info, vtkImageData* inputData) {
@@ -105,6 +124,10 @@ Region::~Region() {
 
 	while (text->GetNumberOfConsumers() > 0) {
 		vtkRenderer::SafeDownCast(text->GetConsumer(0))->RemoveActor(text);
+	}
+
+	while (box->GetNumberOfConsumers() > 0) {
+		vtkRenderer::SafeDownCast(box->GetConsumer(0))->RemoveActor(box);
 	}
 
 	delete surface;
@@ -174,6 +197,10 @@ RegionHighlight3D* Region::GetHighlight3D() {
 
 vtkSmartPointer<vtkBillboardTextActor3D> Region::GetText() {
 	return text;
+}
+
+vtkSmartPointer<vtkActor> Region::GetBox() {
+	return box;
 }
 
 void Region::SetExtent(int newExtent[6]) {
@@ -375,9 +402,17 @@ void Region::ShowText(bool show) {
 			bounds[4] + (bounds[5] - bounds[4]) / 2
 		);
 		text->VisibilityOn();
+
+#ifdef SHOW_BOX
+		box->VisibilityOn();
+#endif
 	}
 	else {
 		text->VisibilityOff();
+
+#ifdef SHOW_BOX
+		box->VisibilityOff();
+#endif
 	}
 }
 

@@ -646,10 +646,7 @@ FilterMode VisualizationContainer::GetFilterMode() {
 
 void VisualizationContainer::SetFilterMode(FilterMode mode) {
 	filterMode = mode;
-
-	//volumeView->SetFilterMode(filterMode);
-	//sliceView->SetFilterMode(filterMode);
-
+	
 	UpdateVisibility();
 }
 
@@ -790,6 +787,8 @@ void VisualizationContainer::EndOverwrite() {
 		qtWindow->updateRegion(currentRegion, regions);
 
 		for (auto region : overwriteRegions) {
+			region->ShrinkExtent();
+
 			qtWindow->updateRegion(region, regions);
 		}
 	}
