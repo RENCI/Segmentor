@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 
 #include <vtkSmartPointer.h>
 
@@ -156,6 +157,9 @@ protected:
 	unsigned short hoverLabel;
 
 	bool filterRegions;
+
+	// Keep track of regions when over-writing
+	std::set<Region*> overwriteRegions;
 
 	vtkSmartPointer<vtkLookupTable> labelColors;
 

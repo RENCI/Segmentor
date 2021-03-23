@@ -1,7 +1,6 @@
 #include "VisualizationContainer.h"
 
 #include <algorithm>
-#include <set>
 
 #include "MainWindow.h"
 
@@ -701,7 +700,7 @@ void VisualizationContainer::Paint(int i, int j, int k, bool overwrite, bool use
 
 			if (value != -1) {
 				currentRegion->UpdateExtent(m, n, k);
-
+								
 				update.insert(currentRegion);
 
 				if (value != 0 && value != currentRegion->GetLabel()) {
@@ -713,6 +712,7 @@ void VisualizationContainer::Paint(int i, int j, int k, bool overwrite, bool use
 						previous->UpdateExtent(m, n, k);
 
 						update.insert(previous);
+						overwriteRegions.insert(previous);
 					}
 				}
 			}
@@ -721,11 +721,6 @@ void VisualizationContainer::Paint(int i, int j, int k, bool overwrite, bool use
 
 	for (auto region : update) {
 		region->SetModified(true);
-
-		// TODO: Handle overwritten in end event
-		if (region != currentRegion) {
-			qtWindow->updateRegion(region, regions);
-		}
 	}
 }
 
@@ -793,7 +788,13 @@ void VisualizationContainer::EndErase() {
 void VisualizationContainer::EndOverwrite() {
 	if (currentRegion) {
 		qtWindow->updateRegion(currentRegion, regions);
+
+		for (auto region : overwriteRegions) {
+			qtWindow->updateRegion(region, regions);
+		}
 	}
+
+	overwriteRegions.clear();
 }
 
 void VisualizationContainer::MouseMove() {
