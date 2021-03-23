@@ -25,8 +25,6 @@
 #include "RegionVoxelOutlines.h"
 #include "RegionHighlight3D.h"
 
-//define SHOW_BOX
-
 Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* inputData, const int* regionExtent) {
 	visible = false;
 	modified = false;
@@ -74,6 +72,7 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 	voxelOutlines = new RegionVoxelOutlines(this, color);
 	highlight3D = new RegionHighlight3D(this, color);
 
+#ifdef SHOW_REGION_BOX
 	// Outline for testing bounding box
 	vtkSmartPointer<vtkOutlineFilter> boxFilter = vtkSmartPointer<vtkOutlineFilter>::New();
 	boxFilter->SetInputConnection(voi->GetOutputPort());
@@ -87,6 +86,7 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 	box->SetMapper(boxMapper);
 	box->PickableOff();
 	box->VisibilityOff();
+#endif
 }
 
 Region::Region(const RegionInfo& info, vtkImageData* inputData) {
@@ -126,9 +126,11 @@ Region::~Region() {
 		vtkRenderer::SafeDownCast(text->GetConsumer(0))->RemoveActor(text);
 	}
 
+#ifdef SHOW_REGION_BOX
 	while (box->GetNumberOfConsumers() > 0) {
 		vtkRenderer::SafeDownCast(box->GetConsumer(0))->RemoveActor(box);
 	}
+#endif
 
 	delete surface;
 	delete outline;
@@ -199,9 +201,11 @@ vtkSmartPointer<vtkBillboardTextActor3D> Region::GetText() {
 	return text;
 }
 
+#ifdef SHOW_REGION_BOX
 vtkSmartPointer<vtkActor> Region::GetBox() {
 	return box;
 }
+#endif
 
 void Region::SetExtent(int newExtent[6]) {
 	for (int i = 0; i < 6; i++) {
@@ -403,14 +407,14 @@ void Region::ShowText(bool show) {
 		);
 		text->VisibilityOn();
 
-#ifdef SHOW_BOX
+#ifdef SHOW_REGION_BOX
 		box->VisibilityOn();
 #endif
 	}
 	else {
 		text->VisibilityOff();
 
-#ifdef SHOW_BOX
+#ifdef SHOW_REGION_BOX
 		box->VisibilityOff();
 #endif
 	}

@@ -193,6 +193,10 @@ void VolumeView::AddRegion(Region* region) {
 
 	renderer->AddActor(surface->GetActor());
 	renderer->AddActor(highlight->GetActor());
+
+#ifdef SHOW_REGION_BOX
+	renderer->AddActor(region->GetBox());
+#endif
 }
 
 void VolumeView::SetCurrentRegion(Region* region) {

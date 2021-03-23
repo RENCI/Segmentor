@@ -1,6 +1,8 @@
 #ifndef Region_H
 #define Region_H
 
+#define SHOW_REGION_BOX
+
 #include <vtkSmartPointer.h>
 
 #include "RegionMetadataIO.h"
@@ -38,7 +40,10 @@ public:
 	RegionVoxelOutlines* GetVoxelOutlines();
 	RegionHighlight3D* GetHighlight3D();
 	vtkSmartPointer<vtkBillboardTextActor3D> GetText();
+
+#ifdef SHOW_REGION_BOX
 	vtkSmartPointer<vtkActor> GetBox();
+#endif
 
 	void InitializeExtent(const int* regionExtent);
 	void SetExtent(int newExtent[6]);
@@ -90,7 +95,10 @@ protected:
 	RegionVoxelOutlines* voxelOutlines;
 	RegionHighlight3D* highlight3D;
 	vtkSmartPointer<vtkBillboardTextActor3D> text;
+
+#ifdef SHOW_REGION_BOX
 	vtkSmartPointer<vtkActor> box;
+#endif
 
 	void ComputeExtent();
 	void ShrinkExtent(const int startExtent[6]);

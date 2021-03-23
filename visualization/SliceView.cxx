@@ -191,7 +191,10 @@ void SliceView::AddRegionActors(Region* region) {
 
 	//renderer->AddActor(region->GetText());
 	regionOutlinesRenderer->AddActor(region->GetText());
-	regionOutlinesRenderer->AddActor(region->GetBox());
+
+#ifdef SHOW_REGION_BOX
+	//regionOutlinesRenderer->AddActor(region->GetBox());
+#endif
 }
 
 void SliceView::SetCurrentRegion(Region* region) {
