@@ -718,6 +718,10 @@ void MainWindow::on_actionViewZ() {
 	visualizationContainer->GetSliceView()->GetInteractorStyle()->SetOrientationZ();
 }
 
+void MainWindow::on_actionResetView() {
+	visualizationContainer->GetSliceView()->GetRenderer()->ResetCamera();
+}
+
 void MainWindow::on_sliceUp() {
 	visualizationContainer->SliceUp();
 }
@@ -1006,6 +1010,7 @@ void MainWindow::createToolBar() {
 	toolBar->addAction(createAction("X", "x", &MainWindow::on_actionViewX));
 	toolBar->addAction(createAction("Y", "y", &MainWindow::on_actionViewY));
 	toolBar->addAction(createAction("Z", "z", &MainWindow::on_actionViewZ));
+	toolBar->addAction(createActionIcon(":/icons/icon_reset_view.png", "Reset view (i)", "i", &MainWindow::on_actionResetView));
 
 	toolBarWidget->layout()->addWidget(toolBar);
 }

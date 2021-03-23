@@ -107,6 +107,7 @@ public slots:
 	virtual void on_actionViewX();
 	virtual void on_actionViewY();
 	virtual void on_actionViewZ();
+	virtual void on_actionResetView();
 
 	// Widget events
 	virtual void on_sliceUp();

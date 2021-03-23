@@ -22,5 +22,6 @@
   <file>icons/icon_show_plane_regions.png</file>
   <file>icons/icon_show_neighbor_regions.png</file>
   <file>icons/icon_filter_regions.png</file>
+  <file>icons/icon_reset_view.png</file>
 </qresource>
 </RCC>
