@@ -404,12 +404,16 @@ void SliceView::SetOverlayOpacity(double opacity) {
 void SliceView::UpdatePlane() {
 	vtkCamera* cam = renderer->GetActiveCamera();
 
+	double oldZ = plane->GetOrigin()[2];
+
 	plane->SetOrigin(cam->GetFocalPoint());
 	plane->SetNormal(cam->GetDirectionOfProjection());
 
 	sliceLocation->UpdateView(cam, plane);
 
-	DoAutoRescale();
+	if (plane->GetOrigin()[2] != oldZ) {
+		DoAutoRescale();
+	}
 }
 
 void SliceView::SetBrushRadius(int radius) {

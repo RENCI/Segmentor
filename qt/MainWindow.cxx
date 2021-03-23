@@ -720,6 +720,7 @@ void MainWindow::on_actionViewZ() {
 
 void MainWindow::on_actionResetView() {
 	visualizationContainer->GetSliceView()->GetRenderer()->ResetCamera();
+	visualizationContainer->Render();
 }
 
 void MainWindow::on_sliceUp() {
