@@ -251,34 +251,39 @@ void Region::UpdateExtent(int x, int y, int z) {
 }
 
 void Region::ShrinkExtent() {
-	ShrinkExtent(extent);
+	// Copy extent before passing in
+	int tempExtent[6];
+	for (int i = 0; i < 6; i++) {
+		tempExtent[i] = extent[i];
+	}
+
+	ShrinkExtent(tempExtent);
 }
 
 void Region::ShrinkExtent(const int startExtent[6]) {
 	bool update = false;
 
-	int newExtent[6];
-	newExtent[0] = startExtent[1];
-	newExtent[1] = startExtent[0];
-	newExtent[2] = startExtent[3];
-	newExtent[3] = startExtent[2];
-	newExtent[4] = startExtent[5];
-	newExtent[5] = startExtent[4];
+	extent[0] = startExtent[1];
+	extent[1] = startExtent[0];
+	extent[2] = startExtent[3];
+	extent[3] = startExtent[2];
+	extent[4] = startExtent[5];
+	extent[5] = startExtent[4];
 
 	bool hasVoxel = false;
 
-	for (int i = extent[0]; i <= extent[1]; i++) {
-		for (int j = extent[2]; j <= extent[3]; j++) {
-			for (int k = extent[4]; k <= extent[5]; k++) {
+	for (int i = startExtent[0]; i <= startExtent[1]; i++) {
+		for (int j = startExtent[2]; j <= startExtent[3]; j++) {
+			for (int k = startExtent[4]; k <= startExtent[5]; k++) {
 				unsigned short* p = static_cast<unsigned short*>(data->GetScalarPointer(i, j, k));
 
 				if (*p == label) {
-					if (i < newExtent[0]) newExtent[0] = i;
-					if (i > newExtent[1]) newExtent[1] = i;
-					if (j < newExtent[2]) newExtent[2] = j;
-					if (j > newExtent[3]) newExtent[3] = j;
-					if (k < newExtent[4]) newExtent[4] = k;
-					if (k > newExtent[5]) newExtent[5] = k;
+					if (i < extent[0]) extent[0] = i;
+					if (i > extent[1]) extent[1] = i;
+					if (j < extent[2]) extent[2] = j;
+					if (j > extent[3]) extent[3] = j;
+					if (k < extent[4]) extent[4] = k;
+					if (k > extent[5]) extent[5] = k;
 
 					hasVoxel = true;
 				}

@@ -704,8 +704,6 @@ void VisualizationContainer::Paint(int i, int j, int k, bool overwrite, bool use
 					Region* previous = regions->Get(value);
 
 					if (previous) {
-						// TODO: SHRINK EXTENT
-
 						previous->UpdateExtent(m, n, k);
 
 						update.insert(previous);
