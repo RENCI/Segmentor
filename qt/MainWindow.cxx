@@ -965,7 +965,7 @@ void MainWindow::createModeBar() {
 	toolBar->addWidget(createLabel("Actions", 0, 0, 5, 5));
 	toolBar->addAction(createActionIcon(":/icons/icon_fill.png", "Fill current region slice (l)", "l", &MainWindow::on_actionFill));
 	toolBar->addAction(createActionIcon(":/icons/icon_update.png", "Update current region (u)", "u", &MainWindow::on_actionUpdate));
-	toolBar->addAction(createActionIcon(":/icons/icon_clean.png", "Clean up current region (0)", "0", &MainWindow::on_actionClean));
+	toolBar->addAction(createActionIcon(":/icons/icon_clean.png", "Clean current region (0)", "0", &MainWindow::on_actionClean));
 	toolBar->addAction(createActionIcon(":/icons/icon_split.png", "Split current region (/)", "/", &MainWindow::on_actionSplit));
 	toolBar->addAction(createActionIcon(":/icons/icon_done.png", "Toggle current region done (d)", "d", &MainWindow::on_actionDone));
 
