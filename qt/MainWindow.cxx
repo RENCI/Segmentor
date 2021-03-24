@@ -127,6 +127,9 @@ MainWindow::MainWindow() {
 	QObject::connect(toggleView, &QShortcut::activated, this, &MainWindow::on_toggleView);
 	QObject::connect(showBothViews, &QShortcut::activated, this, &MainWindow::on_showBothViews);
 
+	// Disable most menu items until we have data	
+	enableMenus(false);
+
 	qApp->installEventFilter(this);
 }
 
@@ -200,6 +203,8 @@ void MainWindow::on_actionOpen_Image_File_triggered() {
 	if (errorCode == VisualizationContainer::Success) {
 		setImageNameLabel(fileName);
 		setSegmentationNameLabel("");
+
+		enableMenus();
 	}
 	else {
 		QMessageBox errorMessage;
@@ -264,6 +269,8 @@ void MainWindow::on_actionOpen_Image_Stack_triggered() {
 	if (errorCode == VisualizationContainer::Success) {
 		setImageNameLabel(directoryName);
 		setSegmentationNameLabel("");
+
+		enableMenus();
 	}
 	else {
 		QMessageBox errorMessage;
@@ -707,15 +714,15 @@ void MainWindow::on_actionFilterRegions(bool checked) {
 }
 
 void MainWindow::on_actionViewX() {
-	visualizationContainer->GetSliceView()->GetInteractorStyle()->SetOrientationX();
+	visualizationContainer->GetSliceView()->SetOrientationX();
 }
 
 void MainWindow::on_actionViewY() {
-	visualizationContainer->GetSliceView()->GetInteractorStyle()->SetOrientationY();
+	visualizationContainer->GetSliceView()->SetOrientationY();
 }
 
 void MainWindow::on_actionViewZ() {
-	visualizationContainer->GetSliceView()->GetInteractorStyle()->SetOrientationZ();
+	visualizationContainer->GetSliceView()->SetOrientationZ();
 }
 
 void MainWindow::on_actionResetView() {
@@ -1060,6 +1067,16 @@ QLabel* MainWindow::createLabel(const QString& text, int topMargin, int bottomMa
 	label->setStyleSheet(style);
 
 	return label;
+}
+
+void MainWindow::enableMenus(bool enable) {
+	menuEdit->setEnabled(enable);
+	menuAnalyze->setEnabled(enable);
+	menuView->setEnabled(enable);
+	menuSettings->setEnabled(enable);
+
+	modeBarWidget->setEnabled(enable);
+	toolBarWidget->setEnabled(enable);
 }
 
 void MainWindow::closeEvent(QCloseEvent* event) {

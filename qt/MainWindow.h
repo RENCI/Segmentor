@@ -168,6 +168,9 @@ protected:
 
 	InteractionMode navEditMode;
 
+	// Disable menus
+	void enableMenus(bool enable = true);
+
 	void closeEvent(QCloseEvent* event);
 };
 

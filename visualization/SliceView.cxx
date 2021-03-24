@@ -549,3 +549,59 @@ void SliceView::DoAutoRescale() {
 		}
 	}
 }
+
+void SliceView::SetOrientationX() {
+	const double right[3] = { 0, 0, 1 };
+	const double up[3] = { 0, 1, 0 };
+
+	SetOrientation(right, up);
+}
+
+void SliceView::SetOrientationY() {
+	const double right[3] = { 1, 0, 0 };
+	const double up[3] = { 0, 0, 1 };
+
+	SetOrientation(right, up);
+}
+
+void SliceView::SetOrientationZ() {
+	const double right[3] = { 1, 0, 0 };
+	const double up[3] = { 0, 1, 0 };
+
+	SetOrientation(right, up);
+}
+
+void SliceView::SetOrientation(const double leftToRight[3], const double viewUp[3]) {
+	// Adapted from vtkInteractorStyleImage
+	vtkCamera *camera = renderer->GetActiveCamera();
+
+	// the cross product points out of the screen
+	double vector[3];
+	vtkMath::Cross(leftToRight, viewUp, vector);
+
+	// Flip if current view matches
+	double camProj[3];
+	double camUp[3];
+	camera->GetDirectionOfProjection(camProj);
+	camera->GetViewUp(camUp);
+	if (vector[0] == -camProj[0] && vector[1] == -camProj[1] && vector[2] == -camProj[2] &&
+		viewUp[0] == camUp[0] && viewUp[1] == camUp[1] && viewUp[2] == camUp[2]) {
+		vector[0] *= -1;
+		vector[1] *= -1;
+		vector[2] *= -1;
+	}
+
+	double focus[3];
+	camera->GetFocalPoint(focus);
+	double d = camera->GetDistance();
+	camera->SetPosition(
+		focus[0] + d * vector[0],
+		focus[1] + d * vector[1],
+		focus[2] + d * vector[2]
+	);
+	camera->SetFocalPoint(focus);
+	camera->SetViewUp(viewUp);
+	
+	renderer->ResetCameraClippingRange();
+	Render();
+}

@@ -73,6 +73,10 @@ public:
 
 	void SetBrushRadius(int radius);
 
+	void SetOrientationX();
+	void SetOrientationY();
+	void SetOrientationZ();
+
 	void Render();
 
 	vtkSmartPointer<vtkRenderer> GetRenderer();
@@ -140,6 +144,8 @@ protected:
 	void ResetCamera();
 
 	void DoAutoRescale();
+
+	void SetOrientation(const double leftToRight[3], const double viewUp[3]);
 
 	vtkSmartPointer<vtkImageData> GetSlice();
 
