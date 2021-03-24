@@ -664,8 +664,6 @@ void VisualizationContainer::Paint(double point[3], bool overwrite) {
 	PointToIndex(point, ijk);
 
 	Paint(ijk[0], ijk[1], ijk[2], overwrite);
-
-	PushHistory();
 }
 
 void VisualizationContainer::Paint(int i, int j, int k, bool overwrite, bool useBrush) {
@@ -724,8 +722,6 @@ void VisualizationContainer::Erase(double point[3]) {
 	PointToIndex(point, ijk);
 
 	Erase(ijk[0], ijk[1], ijk[2]);
-
-	PushHistory();
 }
 
 void VisualizationContainer::Erase(int i, int j, int k, bool useBrush) {
@@ -769,6 +765,8 @@ void VisualizationContainer::Erase(int i, int j, int k, bool useBrush) {
 void VisualizationContainer::EndPaint() {
 	if (currentRegion) {
 		qtWindow->updateRegion(currentRegion, regions);
+
+		PushHistory();
 	}
 }
 
@@ -776,12 +774,16 @@ void VisualizationContainer::EndErase() {
 	if (currentRegion) {
 		currentRegion->ShrinkExtent();
 
+		PushHistory();
+
 		qtWindow->updateRegion(currentRegion, regions);
 	}
 }
 
 void VisualizationContainer::EndOverwrite() {
 	if (currentRegion) {
+		PushHistory();
+
 		qtWindow->updateRegion(currentRegion, regions);
 
 		for (auto region : overwriteRegions) {
