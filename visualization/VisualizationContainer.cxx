@@ -18,6 +18,7 @@
 #include <vtkImageChangeInformation.h>
 #include <vtkImageThresholdConnectivity.h>
 #include <vtkImageToImageStencil.h>
+#include <vtkImageShiftScale.h>
 #include <vtkImageStencil.h>
 #include <vtkIntArray.h>
 #include <vtkKMeansStatistics.h>
@@ -404,11 +405,13 @@ VisualizationContainer::FileErrorCode VisualizationContainer::SaveImageData(cons
 	else if (extension == "tif" || extension == "tiff") {
 		std::string prefix = fileName.substr(0, fileName.find_last_of("."));
 
+		vtkSmartPointer<vtkImageShiftScale> shiftScale = vtkSmartPointer<vtkImageShiftScale>::New();
+		shiftScale->SetOutputScalarTypeToUnsignedShort();
+		shiftScale->SetInputDataObject(data);
+
 		vtkSmartPointer<vtkTIFFWriter> writer = vtkSmartPointer<vtkTIFFWriter>::New();
-		writer->SetFilePrefix(prefix.c_str());
-		writer->SetFilePattern("%s_%04d.tif");
-		writer->SetFileDimensionality(2);
-		writer->SetInputDataObject(data);
+		writer->SetFileName(fileName.c_str());
+		writer->SetInputConnection(shiftScale->GetOutputPort());
 		writer->Update();
 	}
 	else {
@@ -443,12 +446,8 @@ VisualizationContainer::FileErrorCode VisualizationContainer::SaveSegmentationDa
 		writer->Update();
 	}
 	else if (extension == "tif" || extension == "tiff") {
-		std::string prefix = fileName.substr(0, fileName.find_last_of("."));
-
 		vtkSmartPointer<vtkTIFFWriter> writer = vtkSmartPointer<vtkTIFFWriter>::New();
-		writer->SetFilePrefix(prefix.c_str());
-		writer->SetFilePattern("%s_%04d.tif");
-		writer->SetFileDimensionality(2);
+		writer->SetFileName(fileName.c_str());
 		writer->SetInputDataObject(labels);
 		writer->Update();
 	}
