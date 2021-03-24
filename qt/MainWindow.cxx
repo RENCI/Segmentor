@@ -979,20 +979,13 @@ void MainWindow::createToolBar() {
 	toolBar->setMovable(true);
 	toolBar->setOrientation(Qt::Vertical);
 
-	// Rescale toggle
-	QAction* actionToggleAutoRescale = new QAction("auto");
-	actionToggleAutoRescale->setCheckable(true);
-	actionToggleAutoRescale->setChecked(visualizationContainer->GetSliceView()->GetAutoRescale());
-
-	QObject::connect(actionToggleAutoRescale, &QAction::triggered, this, &MainWindow::on_actionToggleAutoRescale);
-
 	// Add widgets to tool bar
 	toolBar->addWidget(createLabel("2D"));
 	toolBar->addAction(createActionIcon(":/icons/icon_overlay.png", "Show overlay (q)", "q", visualizationContainer->GetSliceView()->GetShowLabelSlice(), &MainWindow::on_actionOverlay));
 	toolBar->addAction(createActionIcon(":/icons/icon_outline.png", "Show outlines (e)", "e", visualizationContainer->GetSliceView()->GetShowRegionOutlines(), &MainWindow::on_actionOutline));
 	toolBar->addAction(createActionIcon(":/icons/icon_rescale_full.png", "Rescale full (=)", "=", &MainWindow::on_actionRescaleFull));
 	toolBar->addAction(createActionIcon(":/icons/icon_rescale_partial.png", "Rescale partial (-)", "-", &MainWindow::on_actionRescalePartial));
-	toolBar->addAction(actionToggleAutoRescale);
+	toolBar->addAction(createActionIcon(":/icons/icon_rescale_auto.png", "Rescale auto ([)", "[", visualizationContainer->GetSliceView()->GetAutoRescale(), &MainWindow::on_actionToggleAutoRescale));
 	toolBar->addSeparator();
 	toolBar->addWidget(createLabel("3D"));
 	toolBar->addAction(createActionIcon(":/icons/icon_smooth_normals.png", "Smooth normals (n)", "n", visualizationContainer->GetVolumeView()->GetSmoothShading(), &MainWindow::on_actionSmoothNormals));
