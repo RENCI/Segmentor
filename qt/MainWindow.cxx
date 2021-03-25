@@ -1077,6 +1077,9 @@ void MainWindow::enableMenus(bool enable) {
 
 	modeBarWidget->setEnabled(enable);
 	toolBarWidget->setEnabled(enable);
+
+	sliceDownButton->setEnabled(enable);
+	sliceUpButton->setEnabled(enable);
 }
 
 void MainWindow::closeEvent(QCloseEvent* event) {
