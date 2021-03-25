@@ -74,8 +74,8 @@ public:
 
 	double GetXYDistance(int x, int y, int z);
 
-	bool GetSeed(int ijk[3]);
-	bool GetSeed(int ijk[3], int z);
+	bool GetSeed(double point[3]);
+	bool GetSeed(double point[3], int z);
 
 	void SetInfo(const RegionInfo& info);
 

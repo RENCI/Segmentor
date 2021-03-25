@@ -1081,10 +1081,9 @@ void VisualizationContainer::CleanCurrentRegion() {
 	vtkIdTypeArray* componentLabels = connectivity->GetExtractedRegionLabels();
 	vtkIntArray* componentExtents = connectivity->GetExtractedRegionExtents();
 	vtkImageData* connectivityOutput = connectivity->GetOutput();
-
+	
 	if (numComponents > 1) {
 		currentRegion->SetModified(true);
-		currentRegion->SetVisible(true);
 
 		for (int i = 0; i < numComponents; i++) {
 			// Get the extent for this component
@@ -1099,27 +1098,24 @@ void VisualizationContainer::CleanCurrentRegion() {
 				currentRegion->SetExtent(extent);
 			}
 			else {
-				// Label from the connectivity filter
-				unsigned short componentLabel = (unsigned short)componentLabels->GetTuple1(i);
-
 				// Update label data
 				for (int i = extent[0]; i <= extent[1]; i++) {
 					for (int j = extent[2]; j <= extent[3]; j++) {
 						for (int k = extent[4]; k <= extent[5]; k++) {
-							unsigned short* labelData = static_cast<unsigned short*>(labels->GetScalarPointer(i, j, k));
-							unsigned short* connectivityData = static_cast<unsigned short*>(connectivityOutput->GetScalarPointer(i, j, k));
+							unsigned short* labelData = static_cast<unsigned short*>(labels->GetScalarPointer(i, j, k));						
 
-							if (*connectivityData == componentLabel) *labelData = 0;
+							if (*labelData == label) *labelData = 0;							
 						}
 					}
 				}
 			}
 		}
 
+		labels->Modified();
 	}
 
 	// Fill holes
-	int seed[3];
+	double seed[3];
 	if (currentRegion->GetSeed(seed)) {
 		// XXX: Convert to point from index?
 		vtkSmartPointer<vtkPoints> seedPoints = vtkSmartPointer<vtkPoints>::New();
@@ -1636,7 +1632,7 @@ void VisualizationContainer::FillCurrentRegionSlice() {
 	int z = ijk[2];
 
 	// Fill holes
-	int seed[3];
+	double seed[3];
 	if (currentRegion->GetSeed(seed, z)) {
 		// XXX: Convert to point from index?
 		vtkSmartPointer<vtkPoints> seedPoints = vtkSmartPointer<vtkPoints>::New();

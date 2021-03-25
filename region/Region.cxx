@@ -498,7 +498,7 @@ double Region::GetXYDistance(int x, int y, int z) {
 	return sqrt(distance2);
 }
 
-bool Region::GetSeed(int ijk[3]) {
+bool Region::GetSeed(double point[3]) {
 	int extent[6];
 	voi->GetOutput()->GetExtent(extent);
 
@@ -507,9 +507,10 @@ bool Region::GetSeed(int ijk[3]) {
 			for (int k = extent[4]; k <= extent[5]; k++) {
 				unsigned short* p = static_cast<unsigned short*>(data->GetScalarPointer(i, j, k));
 				if (*p == 0) {
-					ijk[0] = i;
-					ijk[1] = j;
-					ijk[2] = k;
+					int ijk[3] = { i, j, k };
+
+					vtkIdType id = voi->GetOutput()->ComputePointId(ijk);
+					voi->GetOutput()->GetPoint(id, point);
 
 					return true;
 				}
@@ -520,7 +521,7 @@ bool Region::GetSeed(int ijk[3]) {
 	return false;
 }
 
-bool Region::GetSeed(int ijk[3], int z) {
+bool Region::GetSeed(double point[3], int z) {
 	int extent[6];
 	voi->GetOutput()->GetExtent(extent);
 
@@ -528,9 +529,10 @@ bool Region::GetSeed(int ijk[3], int z) {
 		for (int j = extent[2]; j <= extent[3]; j++) {
 			unsigned short* p = static_cast<unsigned short*>(data->GetScalarPointer(i, j, z));
 			if (*p == 0) {
-				ijk[0] = i;
-				ijk[1] = j;
-				ijk[2] = z;
+				int ijk[3] = { i, j, z };
+
+				vtkIdType id = voi->GetOutput()->ComputePointId(ijk);
+				voi->GetOutput()->GetPoint(id, point);
 
 				return true;
 			}
