@@ -157,6 +157,10 @@ protected:
 	void setImageNameLabel(QString name);
 	void setSegmentationNameLabel(QString name);
 
+	// File paths
+	QString imagePath;
+	QString segmentationPath;
+
 	// Toolbar
 	void createModeBar();
 	void createToolBar();

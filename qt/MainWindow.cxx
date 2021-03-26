@@ -194,14 +194,14 @@ void MainWindow::on_actionOpen_Image_File_triggered() {
 
 	setDefaultDirectory(defaultImageDirectoryKey, file);
 
-	// Get just the file name
-	QString fileName = QFileInfo(file).fileName();
-
 	// Load data
 	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->OpenImageFile(file.toStdString());
 
 	if (errorCode == VisualizationContainer::Success) {
-		setImageNameLabel(fileName);
+		imagePath = file;
+		segmentationPath = "";
+
+		setImageNameLabel(QFileInfo(file).fileName());
 		setSegmentationNameLabel("");
 
 		enableMenus();
@@ -243,9 +243,6 @@ void MainWindow::on_actionOpen_Image_Stack_triggered() {
 	QDir directory = fileInfo.absoluteDir();
 	QFileInfoList fileInfoList = fileInfo.absoluteDir().entryInfoList(QDir::Files, QDir::Name);
 
-	// Get just the directory name
-	QString directoryName = directory.dirName();
-
 	// Check for files
 	if (fileInfoList.length() == 0) {
 		QMessageBox errorMessage;
@@ -267,7 +264,10 @@ void MainWindow::on_actionOpen_Image_Stack_triggered() {
 	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->OpenImageStack(fileNames);
 
 	if (errorCode == VisualizationContainer::Success) {
-		setImageNameLabel(directoryName);
+		imagePath = directory.absolutePath();
+		segmentationPath = "";
+
+		setImageNameLabel(directory.dirName());
 		setSegmentationNameLabel("");
 
 		enableMenus();
@@ -304,14 +304,13 @@ void MainWindow::on_actionOpen_Segmentation_File_triggered() {
 
 	setDefaultDirectory(defaultSegmentationDirectoryKey, file);
 
-	// Get just the file name
-	QString fileName = QFileInfo(file).fileName();	
-
 	// Load segmentation data
 	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->OpenSegmentationFile(file.toStdString());
 
 	if (errorCode == VisualizationContainer::Success) {
-		setSegmentationNameLabel(fileName);
+		segmentationPath = file;
+
+		setSegmentationNameLabel(QFileInfo(file).fileName());
 	}
 	else {
 		QMessageBox errorMessage;
@@ -360,9 +359,6 @@ void MainWindow::on_actionOpen_Segmentation_Stack_triggered() {
 	QDir directory = fileInfo.absoluteDir();
 	QFileInfoList fileInfoList = fileInfo.absoluteDir().entryInfoList(QDir::Files, QDir::Name);
 
-	// Get just the directory name
-	QString directoryName = directory.dirName();
-
 	// Check for files
 	if (fileInfoList.length() == 0) {
 		QMessageBox errorMessage;
@@ -384,7 +380,9 @@ void MainWindow::on_actionOpen_Segmentation_Stack_triggered() {
 	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->OpenSegmentationStack(fileNames);
 
 	if (errorCode == VisualizationContainer::Success) {
-		setSegmentationNameLabel(directoryName);
+		segmentationPath = directory.absolutePath();
+
+		setSegmentationNameLabel(directory.dirName());
 	}
 	else {
 		QMessageBox errorMessage;
@@ -426,6 +424,15 @@ void MainWindow::on_actionSave_Image_Data_As_triggered() {
 		return;
 	}
 
+	// Check against segmentation file name
+	if (file == segmentationPath) {
+		if (QMessageBox::warning(this, "Warning", 
+			"About to save image data as current segmentation file.\n\nThis is probably a bad idea.\n\n Do you wish to proceed?", 
+			QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes) {
+			return;
+		}
+	}	
+
 	setDefaultDirectory(defaultImageDirectoryKey, file);
 
 	// Get just the file name
@@ -435,6 +442,8 @@ void MainWindow::on_actionSave_Image_Data_As_triggered() {
 	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->SaveImageData(file.toStdString());
 
 	if (errorCode == VisualizationContainer::Success) {
+		imagePath = file;
+
 		setImageNameLabel(fileName);
 	}
 	else {
@@ -491,6 +500,15 @@ void MainWindow::on_actionSave_Segmentation_Data_As_triggered() {
 	if (file == "") {
 		return;
 	}
+	
+	// Check against image file name
+	if (file == imagePath) {
+		if (QMessageBox::warning(this, "Warning",
+			"About to save segmentation data as current image file.\n\nThis is probably a bad idea.\n\n Do you wish to proceed?",
+			QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes) {
+			return;
+		}
+	}
 
 	setDefaultDirectory(defaultSegmentationDirectoryKey, file);
 
@@ -501,6 +519,8 @@ void MainWindow::on_actionSave_Segmentation_Data_As_triggered() {
 	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->SaveSegmentationData(file.toStdString());
 
 	if (errorCode == VisualizationContainer::Success) {
+		segmentationPath = file;
+
 		setSegmentationNameLabel(fileName);
 	}
 	else {
