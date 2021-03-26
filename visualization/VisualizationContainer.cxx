@@ -2231,6 +2231,8 @@ void VisualizationContainer::ExtractRegions(const std::vector<RegionInfo>& metad
 	// XXX: THIS IS CLEARING ALL VOXELS IN THE LABEL DATA
 	regions->RemoveAll();
 
+	int regionCount = 0;
+
 	// First try metadata
 	for (int i = 0; i < (int)metadata.size(); i++) {
 		Region* region = new Region(metadata[i], labels);	
@@ -2252,7 +2254,9 @@ void VisualizationContainer::ExtractRegions(const std::vector<RegionInfo>& metad
 			delete region;
 		}
 
-		qtWindow->updateProgress((double)(i + 1) / maxLabel);
+		regionCount++;
+
+		qtWindow->updateProgress((double)(regionCount + 1) / maxLabel);
 	}
 
 	// Add any remaining
@@ -2266,6 +2270,10 @@ void VisualizationContainer::ExtractRegions(const std::vector<RegionInfo>& metad
 			else {
 				delete region;
 			}
+
+			regionCount++;
+
+			qtWindow->updateProgress((double)(regionCount + 1) / maxLabel);
 		}
 	}
 
