@@ -89,6 +89,7 @@ public slots:
 	virtual void on_actionUpdate();
 	virtual void on_actionClean();
 	virtual void on_actionSplit();
+	virtual void on_actionSplitMultiple();
 	virtual void on_actionFill();
 
 	// Tool bar events
@@ -166,6 +167,7 @@ protected:
 	void createToolBar();
 	QAction* createAction(const QString& text, const QString& shortcut, void (MainWindow::*slot)());
 	QAction* createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, void (MainWindow::*slot)());
+	QAction* createActionIcon(const QString& fileName, const QString& text, const QKeySequence& shortcut, void (MainWindow::*slot)());
 	QAction* createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, bool checked, void (MainWindow::*slot)(bool));
 	QAction* createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, QActionGroup* group, bool checked, void (MainWindow::*slot)());
 	QLabel* createLabel(const QString& text, int topMargin = 10, int bottomMargin = 5, int leftMargin = 0, int rightMargin = 0);

@@ -24,6 +24,7 @@
 #include "CameraViewDialog.h"
 #include "SettingsDialog.h"
 #include "SegmentVolumeDialog.h"
+#include "SplitRegionDialog.h"
 #include "vtkInteractorStyleSlice.h"
 
 #include <vtkCallbackCommand.h>
@@ -665,8 +666,14 @@ void MainWindow::on_actionClean() {
 }
 
 void MainWindow::on_actionSplit() {
-	// Split in half for now, add interface for selecting number in future?
+	// Split in two
 	visualizationContainer->SplitCurrentRegion(2);
+}
+
+void MainWindow::on_actionSplitMultiple() {
+	SplitRegionDialog dialog(this, visualizationContainer);
+
+	dialog.exec();
 }
 
 void MainWindow::on_actionFill() {
@@ -994,6 +1001,7 @@ void MainWindow::createModeBar() {
 	toolBar->addAction(createActionIcon(":/icons/icon_update.png", "Update current region (u)", "u", &MainWindow::on_actionUpdate));
 	toolBar->addAction(createActionIcon(":/icons/icon_clean.png", "Clean current region (0)", "0", &MainWindow::on_actionClean));
 	toolBar->addAction(createActionIcon(":/icons/icon_split.png", "Split current region (/)", "/", &MainWindow::on_actionSplit));
+	toolBar->addAction(createActionIcon(":/icons/icon_split_multiple.png", "Split current region into multiple regions (Ctrl + /)", QKeySequence(Qt::CTRL + Qt::Key_Slash), &MainWindow::on_actionSplitMultiple));
 	toolBar->addAction(createActionIcon(":/icons/icon_done.png", "Toggle current region done (d)", "d", &MainWindow::on_actionDone));
 
 	modeBarWidget->layout()->addWidget(toolBar);
@@ -1049,6 +1057,16 @@ QAction* MainWindow::createAction(const QString& text, const QString& shortcut, 
 QAction* MainWindow::createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, void (MainWindow::*slot)()) {
 	QAction* action = new QAction(QIcon(fileName), text, this);
 	action->setShortcut(QKeySequence(shortcut));
+	action->setCheckable(false);
+
+	QObject::connect(action, &QAction::triggered, this, slot);
+
+	return action;
+}
+
+QAction* MainWindow::createActionIcon(const QString& fileName, const QString& text, const QKeySequence& shortcut, void (MainWindow::*slot)()) {
+	QAction* action = new QAction(QIcon(fileName), text, this);
+	action->setShortcut(shortcut);
 	action->setCheckable(false);
 
 	QObject::connect(action, &QAction::triggered, this, slot);
