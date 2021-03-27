@@ -98,11 +98,12 @@ Region::Region(const RegionInfo& info, vtkImageData* inputData) {
 
 	// Text
 	text = vtkSmartPointer<vtkBillboardTextActor3D>::New();
+
+	SetInfo(info);
+
 	text->SetInput(std::to_string(label).c_str());
 	text->GetTextProperty()->SetColor(color);
 	text->VisibilityOff();
-
-	SetInfo(info);
 
 	vtkSmartPointer<vtkImageDataCells> cells = vtkSmartPointer<vtkImageDataCells>::New();
 	cells->SetInputConnection(voi->GetOutputPort());
@@ -405,6 +406,7 @@ void Region::SetColor(double r, double g, double b) {
 	color[1] = g;
 	color[2] = b;
 	
+	text->GetTextProperty()->SetColor(color);
 	surface->GetActor()->GetProperty()->SetColor(color);
 	outline->GetActor()->GetProperty()->SetColor(color);
 	voxelOutlines->GetActor()->GetProperty()->SetColor(color);

@@ -2206,7 +2206,6 @@ void VisualizationContainer::ExtractRegions(vtkIntArray* extents) {
 
 		Region*	region = new Region(label, labelColors->GetTableValue(label), labels, extent);
 
-
 		if (region->GetNumVoxels() > 0) {
 			regions->Add(region);
 		}		
@@ -2249,6 +2248,12 @@ void VisualizationContainer::ExtractRegions(const std::vector<RegionInfo>& metad
 
 		if (region->GetNumVoxels() > 0) {
 			regions->Add(region);
+
+			// Update done status
+			if (region->GetDone()) {
+				region->SetDone(true);
+				labelColors->SetTableValue(region->GetLabel(), 0.5, 0.5, 0.5);
+			}
 		}
 		else {
 			delete region;
@@ -2258,6 +2263,8 @@ void VisualizationContainer::ExtractRegions(const std::vector<RegionInfo>& metad
 
 		qtWindow->updateProgress((double)(regionCount + 1) / maxLabel);
 	}
+
+	labelColors->Build();
 
 	// Add any remaining
 	for (int label = 1; label <= maxLabel; label++) {
