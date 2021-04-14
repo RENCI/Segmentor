@@ -67,6 +67,7 @@ public:
 
 	unsigned short GetLabel();
 	int GetNumVoxels();
+	int GetNumVoxels(int slice);
 	const int* GetExtent();
 	void GetExtent(int outExtent[6]);
 	double* GetCenter();

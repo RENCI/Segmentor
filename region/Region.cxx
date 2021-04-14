@@ -463,6 +463,19 @@ int Region::GetNumVoxels() {
 	return numVoxels;
 }
 
+int Region::GetNumVoxels(int slice) {
+	int numVoxels = 0;
+
+	for (int i = extent[0]; i <= extent[1]; i++) {
+		for (int j = extent[2]; j <= extent[3]; j++) {
+			unsigned short* p = static_cast<unsigned short*>(data->GetScalarPointer(i, j, slice));
+			if (*p == label) numVoxels++;
+		}
+	}
+
+	return numVoxels;
+}
+
 const int* Region::GetExtent() {
 	return extent;
 }

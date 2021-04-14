@@ -1694,6 +1694,23 @@ void VisualizationContainer::GrowCurrentRegion(double point[3]) {
 
 	bool grow = label == 0;
 
+	// Check for labels in this slice for growing
+	if (grow) {
+		int labelCount = currentRegion->GetNumVoxels(z);
+
+		if (labelCount == 0) {
+			Paint(x, y, z, false, false);
+
+			qtWindow->updateRegions(regions);
+
+			PushHistory();
+
+			Render();
+
+			return;
+		}
+	}
+
 	double growValue = 255;
 
 	vtkSmartPointer<vtkPointSource> seed = vtkSmartPointer<vtkPointSource>::New();
@@ -1807,6 +1824,8 @@ void VisualizationContainer::GrowCurrentRegion(double point[3]) {
 	}
 
 	labels->Modified();
+
+	qtWindow->updateRegions(regions);
 
 	PushHistory();
 
