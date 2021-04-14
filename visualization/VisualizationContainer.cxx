@@ -1604,6 +1604,7 @@ void VisualizationContainer::SplitRegionIntensity(Region* region, int numRegions
 
 		if (colorOffset > 0) {
 			double* color = LabelColors::GetColor(newLabel + colorOffset);
+			labelColors->SetTableValue(newLabel, color[0], color[1], color[2]);
 			newRegion->SetColor(color[0], color[1], color[2]);
 		}
 

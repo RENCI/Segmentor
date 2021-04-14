@@ -18,6 +18,8 @@ SplitRegionDialog::SplitRegionDialog(QWidget* parent, VisualizationContainer* vi
 	QObject::connect(numberSlider, &QSlider::valueChanged, numberSpinBox, &QSpinBox::setValue);
 	QObject::connect(numberSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), numberSlider, &QSlider::setValue);
 
+	numberSpinBox->setFocus();
+
 	visualizationContainer->PushTempHistory();
 }
 
