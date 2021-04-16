@@ -10,6 +10,8 @@ class SettingsDialog : public QDialog, private Ui::SettingsDialog {
 public:
 	SettingsDialog(QWidget* parent, VisualizationContainer* visualizationContainer);
 	virtual ~SettingsDialog();
+
+	void initializeSettings();
 	
 public slots:
 	// Menu events
@@ -35,21 +37,12 @@ public slots:
 	virtual void on_brushRadiusUp();
 	virtual void on_brushRadiusDown();	
 
-	virtual void on_reject();
+	virtual void on_windowLevelChanged(double window, double level);
+	virtual void on_overlayChanged(double value);
+	virtual void on_opacityChanged(double value);
+	virtual void on_brushRadiusChanged(int value);
 
 protected:
-	// Saved values for cancelling
-	double xSize;
-	double ySize;
-	double zSize;
-
-	double window;
-	double level;
-
-	double overlayOpacity;
-	double regionOpacity;
-	double brushRadius;
-
 	VisualizationContainer* visualizationContainer;
 };
 

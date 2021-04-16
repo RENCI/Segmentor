@@ -1971,6 +1971,10 @@ void VisualizationContainer::SetRegionColor(unsigned short label, double r, doub
 	Render();
 }
 
+void VisualizationContainer::SetWindowLevel(double window, double level) {
+	qtWindow->setWindowLevel(window, level);
+}
+
 void VisualizationContainer::SetVisibleOpacity(double opacity) {
 	volumeView->SetVisibleOpacity(opacity, filterRegions);
 }

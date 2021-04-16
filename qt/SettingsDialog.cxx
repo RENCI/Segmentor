@@ -11,64 +11,51 @@ SettingsDialog::SettingsDialog(QWidget* parent, VisualizationContainer* visualiz
 	setupUi(this);
 
 	setWindowFlag(Qt::WindowContextHelpButtonHint, false);	
-	
-	SliceView* sliceView = visualizationContainer->GetSliceView();
-	VolumeView* volumeView = visualizationContainer->GetVolumeView();
-
-	// Handle rejection :-(
-	QObject::connect(this, &SettingsDialog::rejected, this, &SettingsDialog::on_reject);
 
 	// Voxel size callbacks
 	QObject::connect(xSizeSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SettingsDialog::on_voxelSizeSpinBox);
 	QObject::connect(ySizeSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SettingsDialog::on_voxelSizeSpinBox);
 	QObject::connect(zSizeSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SettingsDialog::on_voxelSizeSpinBox);
+}
+
+SettingsDialog::~SettingsDialog() {
+}
+
+void SettingsDialog::initializeSettings() {
+	SliceView* sliceView = visualizationContainer->GetSliceView();
+	VolumeView* volumeView = visualizationContainer->GetVolumeView();
 
 	const double* voxelSize = visualizationContainer->GetVoxelSize();
 
-	xSize = voxelSize[0];
-	ySize = voxelSize[1];
-	zSize = voxelSize[2];
-
-	xSizeSpinBox->setValue(xSize);
-	ySizeSpinBox->setValue(ySize);
-	zSizeSpinBox->setValue(zSize);
+	xSizeSpinBox->setValue(voxelSize[0]);
+	ySizeSpinBox->setValue(voxelSize[1]);
+	zSizeSpinBox->setValue(voxelSize[2]);
 
 	// Window/level
 	const double* range = visualizationContainer->GetDataRange();
-
 	double step = (range[1] - range[0]) / 25;
-
-	window = sliceView->GetWindow();
-	level = sliceView->GetLevel();
-
 	double max = std::numeric_limits<double>::max();
 
 	windowSpinBox->setMinimum(-max);
 	windowSpinBox->setMaximum(max);
 	windowSpinBox->setSingleStep(step);
 	windowSpinBox->setDecimals(1);
-	windowSpinBox->setValue(window);
+	windowSpinBox->setValue(sliceView->GetWindow());
 
 	levelSpinBox->setMinimum(-max);
 	levelSpinBox->setMaximum(max);
 	levelSpinBox->setSingleStep(step);
 	levelSpinBox->setDecimals(1);
-	levelSpinBox->setValue(level);
+	levelSpinBox->setValue(sliceView->GetLevel());
 
 	// Overlay opacity
-	overlayOpacity = sliceView->GetOverlayOpacity();
-	overlaySpinBox->setValue(overlayOpacity);
+	overlaySpinBox->setValue(sliceView->GetOverlayOpacity());
 
 	// Region opacity
-	regionOpacity = volumeView->GetVisibleOpacity();
-	opacitySpinBox->setValue(regionOpacity);
+	opacitySpinBox->setValue(volumeView->GetVisibleOpacity());
 
 	// Brush radius
-	brushRadius = visualizationContainer->GetBrushRadius();
-	brushRadiusSpinBox->setValue(brushRadius);
-}
-
-SettingsDialog::~SettingsDialog() {
+	brushRadiusSpinBox->setValue(visualizationContainer->GetBrushRadius());
 }
 
 void SettingsDialog::on_windowSpinBox_valueChanged(double value) {
@@ -123,13 +110,19 @@ void SettingsDialog::on_brushRadiusDown() {
 	brushRadiusSpinBox->stepDown();
 }
 
-void SettingsDialog::on_reject() {
-	SliceView* sliceView = visualizationContainer->GetSliceView();
+void SettingsDialog::on_windowLevelChanged(double window, double level) {
+	windowSpinBox->setValue(window);
+	levelSpinBox->setValue(level);
+}
 
-	visualizationContainer->SetVoxelSize(xSize, ySize, zSize);
-	sliceView->SetWindow(window);
-	sliceView->SetLevel(level);
-	sliceView->SetOverlayOpacity(overlayOpacity);
-	visualizationContainer->SetVisibleOpacity(regionOpacity);
-	visualizationContainer->SetBrushRadius(brushRadius);
+void SettingsDialog::on_overlayChanged(double value) {
+	overlaySpinBox->setValue(value);
+}
+
+void SettingsDialog::on_opacityChanged(double value) {
+	opacitySpinBox->setValue(value);
+}
+
+void SettingsDialog::on_brushRadiusChanged(int value) {
+	brushRadiusSpinBox->setValue(value);
 }

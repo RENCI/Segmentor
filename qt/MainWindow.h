@@ -17,6 +17,7 @@ class VisualizationContainer;
 class Region;
 class RegionCollection;
 class RegionTable;
+class SettingsDialog;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
 	Q_OBJECT
@@ -27,6 +28,8 @@ public:
 	void updateRegions(RegionCollection* regions);
 	void updateRegion(Region* region, RegionCollection* regions);
 	void selectRegion(unsigned short label);
+
+	void setWindowLevel(double window, double level);
 
 	void setSlicePosition(double x, double y, double z);
 
@@ -133,6 +136,13 @@ public slots:
 	virtual void on_brushRadiusDown();
 	virtual void on_brushRadiusUp();
 
+signals:
+
+	void windowLevelChanged(double window, double value);
+	void overlayChanged(double value);
+	void opacityChanged(double value);
+	void brushRadiusChanged(int value);
+
 protected:
 	// The visualization container
 	VisualizationContainer* visualizationContainer;
@@ -173,6 +183,9 @@ protected:
 	QLabel* createLabel(const QString& text, int topMargin = 10, int bottomMargin = 5, int leftMargin = 0, int rightMargin = 0);
 
 	InteractionMode navEditMode;
+
+	// Settings dialog
+	SettingsDialog* settingsDialog;
 
 	// Disable menus
 	void enableMenus(bool enable = true);

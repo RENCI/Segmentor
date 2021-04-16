@@ -36,6 +36,10 @@
 
 // Constructor
 MainWindow::MainWindow() {
+	// Create the GUI from the Qt Designer file
+	setupUi(this);
+
+	// Progress bar
 	progressBar = new QProgressDialog(this);
 	progressBar->setWindowFlag(Qt::WindowContextHelpButtonHint, false);
 	progressBar->setWindowFlag(Qt::WindowCloseButtonHint, false);
@@ -45,9 +49,6 @@ MainWindow::MainWindow() {
 	progressBar->setMaximum(100);
 	progressBar->setMinimumDuration(1000);
 	progressBar->reset();
-
-	// Create the GUI from the Qt Designer file
-	setupUi(this);
 
 	// Set filenames
 	setImageNameLabel("");
@@ -85,6 +86,9 @@ MainWindow::MainWindow() {
 	QObject::connect(regionTable, &RegionTable::regionVisible, this, &MainWindow::on_regionVisible);
 	QObject::connect(regionTable, &RegionTable::regionColor, this, &MainWindow::on_regionColor);
 
+	// Settings dialog
+	settingsDialog = new SettingsDialog(this, visualizationContainer);
+
 	// Slice up and down
 	QAction* sliceUpAction = new QAction("+", this);
 	sliceUpAction->setShortcut(QKeySequence(Qt::Key_Up));
@@ -100,26 +104,32 @@ MainWindow::MainWindow() {
 
 	sliceDownButton->setDefaultAction(sliceDownAction);
 
+	// Window/level
+	QObject::connect(this, &MainWindow::windowLevelChanged, settingsDialog, &SettingsDialog::on_windowLevelChanged);
+
 	// Overlay opacity shortcut
 	QShortcut* overlayUp = new QShortcut(QKeySequence(Qt::Key_Right), this);
 	QShortcut* overlayDown = new QShortcut(QKeySequence(Qt::Key_Left), this);
 
 	QObject::connect(overlayUp, &QShortcut::activated, this, &MainWindow::on_overlayUp);
 	QObject::connect(overlayDown, &QShortcut::activated, this, &MainWindow::on_overlayDown);
+	QObject::connect(this, &MainWindow::overlayChanged, settingsDialog, &SettingsDialog::on_overlayChanged);
 
-	// Overlay opacity shortcut
+	// Region opacity shortcut
 	QShortcut* opacityUp = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Right), this);
 	QShortcut* opacityDown = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Left), this);
 
 	QObject::connect(opacityUp, &QShortcut::activated, this, &MainWindow::on_opacityUp);
 	QObject::connect(opacityDown, &QShortcut::activated, this, &MainWindow::on_opacityDown);
+	QObject::connect(this, &MainWindow::opacityChanged, settingsDialog, &SettingsDialog::on_opacityChanged);
 
-	// Overlay opacity shortcut
+	// Brush radius shortcut
 	QShortcut* brushRadiusUp = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Right), this);
-	QShortcut* brushRadiusDown = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Left), this);
+	QShortcut* brushRadiusDown = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Left), this);	
 
 	QObject::connect(brushRadiusUp, &QShortcut::activated, this, &MainWindow::on_brushRadiusUp);
 	QObject::connect(brushRadiusDown, &QShortcut::activated, this, &MainWindow::on_brushRadiusDown);
+	QObject::connect(this, &MainWindow::brushRadiusChanged, settingsDialog, &SettingsDialog::on_brushRadiusChanged);
 
 	// 2D/3D toggle
 	QShortcut* toggleView = new QShortcut(QKeySequence("t"), this);
@@ -155,6 +165,10 @@ void MainWindow::updateRegion(Region* region, RegionCollection* regions) {
 
 void MainWindow::selectRegion(unsigned short label) {
 	regionTable->selectRegionLabel(label);
+}
+
+void MainWindow::setWindowLevel(double window, double level) {
+	emit windowLevelChanged(window, level);
 }
 
 void MainWindow::setSlicePosition(double x, double y, double z) {
@@ -204,6 +218,8 @@ void MainWindow::on_actionOpen_Image_File_triggered() {
 
 		setImageNameLabel(QFileInfo(file).fileName());
 		setSegmentationNameLabel("");
+
+		settingsDialog->initializeSettings();
 
 		enableMenus();
 	}
@@ -270,6 +286,8 @@ void MainWindow::on_actionOpen_Image_Stack_triggered() {
 
 		setImageNameLabel(directory.dirName());
 		setSegmentationNameLabel("");
+
+		settingsDialog->initializeSettings();
 
 		enableMenus();
 	}
@@ -609,9 +627,15 @@ void MainWindow::on_actionShow_Region_Table_triggered(bool checked) {
 	regionTableContainer->setVisible(!regionTableContainer->isVisible());
 }
 
+
 void MainWindow::on_actionChange_Settings_triggered() {
-	SettingsDialog dialog(this, visualizationContainer);
-	dialog.exec();
+	//SettingsDialog dialog(this, visualizationContainer);
+	//dialog.exec();
+
+	settingsDialog->initializeSettings();
+	settingsDialog->show();
+	settingsDialog->raise();
+	settingsDialog->activateWindow();
 }
 
 void MainWindow::on_actionData_Loading_triggered() {
@@ -829,28 +853,54 @@ void MainWindow::on_regionColor(int label, QColor color) {
 
 void MainWindow::on_overlayDown() {
 	SliceView* sliceView = visualizationContainer->GetSliceView();
-	sliceView->SetOverlayOpacity(qMax(sliceView->GetOverlayOpacity() - 0.1, 0.0));
+
+	double value = qMax(sliceView->GetOverlayOpacity() - 0.1, 0.0);
+
+	sliceView->SetOverlayOpacity(value);
+
+	emit overlayChanged(value);
 }
 
 void MainWindow::on_overlayUp() {
 	SliceView* sliceView = visualizationContainer->GetSliceView();
-	sliceView->SetOverlayOpacity(qMin(sliceView->GetOverlayOpacity() + 0.1, 1.0));
+
+	double value = qMin(sliceView->GetOverlayOpacity() + 0.1, 1.0);
+
+	sliceView->SetOverlayOpacity(value);
+
+	emit overlayChanged(value);
 }
 
 void MainWindow::on_opacityDown() {
-	visualizationContainer->SetVisibleOpacity(qMax(visualizationContainer->GetVolumeView()->GetVisibleOpacity() - 0.1, 0.0));
+	double value = qMax(visualizationContainer->GetVolumeView()->GetVisibleOpacity() - 0.1, 0.0);
+
+	visualizationContainer->SetVisibleOpacity(value);
+
+	emit opacityChanged(value);
 }
 
 void MainWindow::on_opacityUp() {
-	visualizationContainer->SetVisibleOpacity(qMin(visualizationContainer->GetVolumeView()->GetVisibleOpacity() + 0.1, 1.0));
+	double value = qMin(visualizationContainer->GetVolumeView()->GetVisibleOpacity() + 0.1, 1.0);
+
+	visualizationContainer->SetVisibleOpacity(value);
+
+	emit opacityChanged(value);
 }
 
 void MainWindow::on_brushRadiusDown() {
-	visualizationContainer->SetBrushRadius(qMax(visualizationContainer->GetBrushRadius() - 1, 1));
+	int value = qMax(visualizationContainer->GetBrushRadius() - 1, 1);
+
+	visualizationContainer->SetBrushRadius(value);
+
+	emit brushRadiusChanged(value);
 }
 
 void MainWindow::on_brushRadiusUp() {
-	visualizationContainer->SetBrushRadius(qMin(visualizationContainer->GetBrushRadius() + 1, 5));
+	int value = qMin(visualizationContainer->GetBrushRadius() + 1, 5);
+
+	visualizationContainer->SetBrushRadius(value);
+
+	emit brushRadiusChanged(value);
 }
 
 void MainWindow::updateLabels(RegionCollection* regions) {

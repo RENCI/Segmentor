@@ -112,6 +112,8 @@ public:
 	void FillCurrentRegionSlice();
 	void GrowCurrentRegion(double point[3]);
 	void ToggleCurrentRegionDone();
+
+	void SetWindowLevel(double window, double level);
 	
 	void SliceUp();
 	void SliceDown();
