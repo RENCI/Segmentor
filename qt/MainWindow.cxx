@@ -172,10 +172,11 @@ void MainWindow::setWindowLevel(double window, double level) {
 }
 
 void MainWindow::setSlicePosition(double x, double y, double z) {
-	QString s = "Slice Position: (" + 
+	QString s = "(" + 
 		QString::number(x, 'f', 1) + ", " + 
 		QString::number(y, 'f', 1) + ", " + 
-		QString::number(z, 'f' , 1) + ")";
+		QString::number(z, 'f' , 1) + 
+		")";
 
 	slicePositionLabel->setText(s);
 }
@@ -992,6 +993,7 @@ void MainWindow::createModeBar() {
 	toolBar->setFloatable(true);
 	toolBar->setMovable(true);
 	toolBar->setOrientation(Qt::Horizontal);
+	toolBar->setIconSize(QSize(20, 20));
 
 	InteractionMode currentMode = visualizationContainer->GetInteractionMode();
 
@@ -1055,6 +1057,19 @@ void MainWindow::createModeBar() {
 	toolBar->addAction(createActionIcon(":/icons/icon_done.png", "Toggle current region done (d)", "d", &MainWindow::on_actionDone));
 
 	modeBarWidget->layout()->addWidget(toolBar);
+
+	// Add brush up/down buttons
+	QToolBar* brushToolBar = new QToolBar();
+	brushToolBar->setFloatable(true);
+	brushToolBar->setMovable(true);
+	brushToolBar->setOrientation(Qt::Vertical);
+	//brushToolBar->setSizePolicy(QSizePolicy::Minimum);
+	brushToolBar->setIconSize(QSize(10, 10));
+
+	brushToolBar->addAction(createActionIcon(":/icons/icon_brush_up.png", "Increase brush size (Ctrl + right arrow)", QKeySequence(Qt::CTRL + Qt::RightArrow), &MainWindow::on_brushRadiusUp));
+	brushToolBar->addAction(createActionIcon(":/icons/icon_brush_down.png", "Increase brush size (Ctrl + right arrow)", QKeySequence(Qt::CTRL + Qt::LeftArrow), &MainWindow::on_brushRadiusDown));
+
+	brushButtons->layout()->addWidget(brushToolBar);
 }
 
 void MainWindow::createToolBar() {
