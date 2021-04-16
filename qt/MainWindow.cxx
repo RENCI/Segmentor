@@ -1180,6 +1180,7 @@ void MainWindow::enableMenus(bool enable) {
 
 	modeBarWidget->setEnabled(enable);
 	toolBarWidget->setEnabled(enable);
+	brushButtons->setEnabled(enable);
 
 	sliceDownButton->setEnabled(enable);
 	sliceUpButton->setEnabled(enable);
