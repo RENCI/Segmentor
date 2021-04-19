@@ -117,6 +117,8 @@ public slots:
 	virtual void on_sliceUp();
 	virtual void on_sliceDown();
 
+	virtual void on_brushRadiusSpinBox_valueChanged(int value);
+
 	virtual void on_toggleView();
 	virtual void on_showBothViews();
 
@@ -141,7 +143,6 @@ signals:
 	void windowLevelChanged(double window, double value);
 	void overlayChanged(double value);
 	void opacityChanged(double value);
-	void brushRadiusChanged(int value);
 
 protected:
 	// The visualization container

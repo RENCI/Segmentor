@@ -25,7 +25,5 @@
   <file>icons/icon_show_neighbor_regions.png</file>
   <file>icons/icon_filter_regions.png</file>
   <file>icons/icon_reset_view.png</file>
-  <file>icons/icon_brush_up.png</file>
-  <file>icons/icon_brush_down.png</file>
 </qresource>
 </RCC>

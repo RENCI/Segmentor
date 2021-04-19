@@ -33,14 +33,9 @@ public slots:
 
 	virtual void on_voxelSizeSpinBox();
 
-	virtual void on_brushRadiusSpinBox_valueChanged(int value);
-	virtual void on_brushRadiusUp();
-	virtual void on_brushRadiusDown();	
-
 	virtual void on_windowLevelChanged(double window, double level);
 	virtual void on_overlayChanged(double value);
 	virtual void on_opacityChanged(double value);
-	virtual void on_brushRadiusChanged(int value);
 
 protected:
 	VisualizationContainer* visualizationContainer;

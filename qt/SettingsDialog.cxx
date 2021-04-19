@@ -53,9 +53,6 @@ void SettingsDialog::initializeSettings() {
 
 	// Region opacity
 	opacitySpinBox->setValue(volumeView->GetVisibleOpacity());
-
-	// Brush radius
-	brushRadiusSpinBox->setValue(visualizationContainer->GetBrushRadius());
 }
 
 void SettingsDialog::on_windowSpinBox_valueChanged(double value) {
@@ -98,18 +95,6 @@ void SettingsDialog::on_voxelSizeSpinBox() {
 	);
 }
 
-void SettingsDialog::on_brushRadiusSpinBox_valueChanged(int value) {
-	visualizationContainer->SetBrushRadius(value);
-}
-
-void SettingsDialog::on_brushRadiusUp() {
-	brushRadiusSpinBox->stepUp();
-}
-
-void SettingsDialog::on_brushRadiusDown() {
-	brushRadiusSpinBox->stepDown();
-}
-
 void SettingsDialog::on_windowLevelChanged(double window, double level) {
 	windowSpinBox->setValue(window);
 	levelSpinBox->setValue(level);
@@ -121,8 +106,4 @@ void SettingsDialog::on_overlayChanged(double value) {
 
 void SettingsDialog::on_opacityChanged(double value) {
 	opacitySpinBox->setValue(value);
-}
-
-void SettingsDialog::on_brushRadiusChanged(int value) {
-	brushRadiusSpinBox->setValue(value);
 }

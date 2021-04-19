@@ -107,9 +107,18 @@ MainWindow::MainWindow() {
 	// Window/level
 	QObject::connect(this, &MainWindow::windowLevelChanged, settingsDialog, &SettingsDialog::on_windowLevelChanged);
 
+	// Brush radius shortcut
+	QShortcut* brushRadiusUp = new QShortcut(QKeySequence(Qt::Key_Right), this);
+	QShortcut* brushRadiusDown = new QShortcut(QKeySequence(Qt::Key_Left), this);
+
+	QObject::connect(brushRadiusUp, &QShortcut::activated, this, &MainWindow::on_brushRadiusUp);
+	QObject::connect(brushRadiusDown, &QShortcut::activated, this, &MainWindow::on_brushRadiusDown);
+
+	brushRadiusSpinBox->setToolTip("Adjust brush radius (left / right arrow)");
+
 	// Overlay opacity shortcut
-	QShortcut* overlayUp = new QShortcut(QKeySequence(Qt::Key_Right), this);
-	QShortcut* overlayDown = new QShortcut(QKeySequence(Qt::Key_Left), this);
+	QShortcut* overlayUp = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Right), this);
+	QShortcut* overlayDown = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Left), this);
 
 	QObject::connect(overlayUp, &QShortcut::activated, this, &MainWindow::on_overlayUp);
 	QObject::connect(overlayDown, &QShortcut::activated, this, &MainWindow::on_overlayDown);
@@ -122,14 +131,6 @@ MainWindow::MainWindow() {
 	QObject::connect(opacityUp, &QShortcut::activated, this, &MainWindow::on_opacityUp);
 	QObject::connect(opacityDown, &QShortcut::activated, this, &MainWindow::on_opacityDown);
 	QObject::connect(this, &MainWindow::opacityChanged, settingsDialog, &SettingsDialog::on_opacityChanged);
-
-	// Brush radius shortcut
-	QShortcut* brushRadiusUp = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Right), this);
-	QShortcut* brushRadiusDown = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Left), this);	
-
-	QObject::connect(brushRadiusUp, &QShortcut::activated, this, &MainWindow::on_brushRadiusUp);
-	QObject::connect(brushRadiusDown, &QShortcut::activated, this, &MainWindow::on_brushRadiusDown);
-	QObject::connect(this, &MainWindow::brushRadiusChanged, settingsDialog, &SettingsDialog::on_brushRadiusChanged);
 
 	// 2D/3D toggle
 	QShortcut* toggleView = new QShortcut(QKeySequence("t"), this);
@@ -176,7 +177,7 @@ void MainWindow::setSlicePosition(double x, double y, double z) {
 		QString::number(x, 'f', 1) + ", " + 
 		QString::number(y, 'f', 1) + ", " + 
 		QString::number(z, 'f' , 1) + 
-		")";
+		") ";
 
 	slicePositionLabel->setText(s);
 }
@@ -790,6 +791,10 @@ void MainWindow::on_sliceDown() {
 	visualizationContainer->SliceDown();
 }
 
+void MainWindow::on_brushRadiusSpinBox_valueChanged(int value) {
+	visualizationContainer->SetBrushRadius(value);
+}
+
 void MainWindow::on_toggleView() {
 	if (qvtkWidgetLeft->isVisible()) {
 		qvtkWidgetLeft->setVisible(false);
@@ -889,19 +894,15 @@ void MainWindow::on_opacityUp() {
 }
 
 void MainWindow::on_brushRadiusDown() {
-	int value = qMax(visualizationContainer->GetBrushRadius() - 1, 1);
+	int value = qMax(visualizationContainer->GetBrushRadius() - 1, brushRadiusSpinBox->minimum());
 
-	visualizationContainer->SetBrushRadius(value);
-
-	emit brushRadiusChanged(value);
+	brushRadiusSpinBox->setValue(value);
 }
 
 void MainWindow::on_brushRadiusUp() {
-	int value = qMin(visualizationContainer->GetBrushRadius() + 1, 5);
+	int value = qMin(visualizationContainer->GetBrushRadius() + 1, brushRadiusSpinBox->maximum());
 
-	visualizationContainer->SetBrushRadius(value);
-
-	emit brushRadiusChanged(value);
+	brushRadiusSpinBox->setValue(value);
 }
 
 void MainWindow::updateLabels(RegionCollection* regions) {
@@ -1057,19 +1058,6 @@ void MainWindow::createModeBar() {
 	toolBar->addAction(createActionIcon(":/icons/icon_done.png", "Toggle current region done (d)", "d", &MainWindow::on_actionDone));
 
 	modeBarWidget->layout()->addWidget(toolBar);
-
-	// Add brush up/down buttons
-	QToolBar* brushToolBar = new QToolBar();
-	brushToolBar->setFloatable(true);
-	brushToolBar->setMovable(true);
-	brushToolBar->setOrientation(Qt::Vertical);
-	//brushToolBar->setSizePolicy(QSizePolicy::Minimum);
-	brushToolBar->setIconSize(QSize(10, 10));
-
-	brushToolBar->addAction(createActionIcon(":/icons/icon_brush_up.png", "Increase brush size (Ctrl + right arrow)", QKeySequence(Qt::CTRL + Qt::RightArrow), &MainWindow::on_brushRadiusUp));
-	brushToolBar->addAction(createActionIcon(":/icons/icon_brush_down.png", "Increase brush size (Ctrl + right arrow)", QKeySequence(Qt::CTRL + Qt::LeftArrow), &MainWindow::on_brushRadiusDown));
-
-	brushButtons->layout()->addWidget(brushToolBar);
 }
 
 void MainWindow::createToolBar() {
@@ -1078,6 +1066,7 @@ void MainWindow::createToolBar() {
 	toolBar->setFloatable(true);
 	toolBar->setMovable(true);
 	toolBar->setOrientation(Qt::Vertical);
+	toolBar->setIconSize(QSize(20, 20));
 
 	// Add widgets to tool bar
 	toolBar->addWidget(createLabel("2D"));
@@ -1180,7 +1169,6 @@ void MainWindow::enableMenus(bool enable) {
 
 	modeBarWidget->setEnabled(enable);
 	toolBarWidget->setEnabled(enable);
-	brushButtons->setEnabled(enable);
 
 	sliceDownButton->setEnabled(enable);
 	sliceUpButton->setEnabled(enable);
