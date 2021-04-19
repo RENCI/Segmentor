@@ -129,6 +129,7 @@ elseif(UNIX)
   " COMPONENT Segmentor)
 
   set(CPACK_GENERATOR STGZ)
+  set(CPACK_PACKAGE_VERSION ${SEGMENTOR_VERSION})
 endif()
 
 # CPack
