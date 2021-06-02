@@ -385,6 +385,38 @@ void VolumeView::SetBrushRadius(int radius) {
 	brush->GetActor()->SetVisibility(radius > 1);
 }
 
+void VolumeView::SetWindowLevel(double window, double level) {
+	UpdateVolumeRenderingTransferFunctions(level - window * 0.5, level + window * 0.5);
+}
+
+void VolumeView::UpdateVolumeRenderingTransferFunctions(double x1, double x2) {
+	// Opacity
+	volumeOpacity->RemoveAllPoints();
+	volumeOpacity->AddPoint(x1, 0.0);
+	volumeOpacity->AddPoint(x2, 1.0);
+
+	// Colors
+	// Paraview diverging
+	const int numColors = 3;
+	double colors[numColors][3] = {
+		{ 59, 76, 192 },
+		{ 221, 221, 221 },
+		{ 180, 4, 38 }
+	};
+
+	for (int i = 0; i < numColors; i++) {
+		for (int j = 0; j < 3; j++) {
+			colors[i][j] /= 255.0;
+		}
+	}
+
+	volumeColor->RemoveAllPoints();
+	for (int i = 0; i < numColors; i++) {
+		double x = x1 + (double)i / (numColors - 1) * (x2 - x1);
+		volumeColor->AddRGBPoint(x, colors[i][0], colors[i][1], colors[i][2]);
+	}
+}
+
 void VolumeView::Render() {
 	renderer->GetRenderWindow()->Render();
 }
@@ -431,46 +463,18 @@ void VolumeView::CreateVolumeRenderer() {
 	renderer->AddVolume(volume);
 }
 
-void VolumeView::UpdateVolumeRenderer(vtkImageData* data) {
-	double* range = data->GetScalarRange();
-	double w = range[1] - range[0];
-
-	double x0 = range[0];
-	double x1 = range[0] + w * 0.1;
-	double x2 = range[0] + w * 0.6;
-	double x3 = range[1];
-
-	// Opacity
-	volumeOpacity->RemoveAllPoints();
-	volumeOpacity->AddPoint(x0, 0.0);
-	volumeOpacity->AddPoint(x1, 0.0);
-	volumeOpacity->AddPoint(x2, 1.0);
-	volumeOpacity->AddPoint(x3, 1.0);
-
-	// Colors
-	// Paraview diverging
-	const int numColors = 3;
-	double colors[numColors][3] = {
-		{ 59, 76, 192 },
-		{ 221, 221, 221 },
-		{ 180, 4, 38 }
-	};
-
-	for (int i = 0; i < numColors; i++) {
-		for (int j = 0; j < 3; j++) {
-			colors[i][j] /= 255.0;
-		}
-	}
-	
-	volumeColor->RemoveAllPoints();
-	for (int i = 0; i < numColors; i++) {
-		double x = x1 + (double)i / (numColors - 1) * (x2 - x1);
-		volumeColor->AddRGBPoint(x, colors[i][0], colors[i][1], colors[i][2]);
-	}
-	
+void VolumeView::UpdateVolumeRenderer(vtkImageData* data) {	
 	// Set the volume data and turn on visibility
 	volumeMapper->SetInputData(data);
 	volume->SetVisibility(volumeRendering);
+
+	// Initialize window level
+	double* range = data->GetScalarRange();
+	double window = range[1] - range[0];
+	double level = range[0] + (range[1] - range[0]) / 2;
+
+	SetWindowLevel(window, level);
+	style->SetWindowLevel(window, level);
 }
 
 void VolumeView::CreatePlane() {

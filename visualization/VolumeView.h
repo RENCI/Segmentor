@@ -80,6 +80,8 @@ public:
 
 	void SetBrushRadius(int radius);
 
+	void SetWindowLevel(double window, double level);
+
 	void Render();
 
 	vtkRenderer* GetRenderer();	
@@ -135,6 +137,7 @@ protected:
 	vtkSmartPointer<vtkColorTransferFunction> volumeColor;
 	void CreateVolumeRenderer();
 	void UpdateVolumeRenderer(vtkImageData* data);
+	void UpdateVolumeRenderingTransferFunctions(double x1, double x2);
 	
 	double visibleOpacity;
 

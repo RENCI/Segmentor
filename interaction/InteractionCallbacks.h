@@ -34,6 +34,7 @@ public:
 	static void MouseMove(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 
 	static void WindowLevel(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
+	static void VolumeWindowLevel(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 
 private:
 	static bool firstCameraCallback;

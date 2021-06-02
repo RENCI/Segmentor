@@ -114,6 +114,7 @@ public:
 	void ToggleCurrentRegionDone();
 
 	void SetWindowLevel(double window, double level);
+	void SetVolumeWindowLevel(double window, double level);
 	
 	void SliceUp();
 	void SliceDown();
