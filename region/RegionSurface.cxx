@@ -53,6 +53,8 @@ RegionSurface::RegionSurface(Region* inputRegion, double color[3]) {
 	actor->GetProperty()->SetAmbient(0.1);
 	actor->GetProperty()->SetSpecular(0.0);
 
+	SetFrontfaceCulling(false);
+
 	UpdatePipeline();
 }
 	
@@ -76,6 +78,10 @@ void RegionSurface::SetSmoothShading(bool smooth) {
 	smoothShading = smooth;
 
 	UpdatePipeline();
+}
+
+void RegionSurface::SetFrontfaceCulling(bool cull) {
+	actor->GetProperty()->SetFrontfaceCulling(cull);
 }
 
 bool RegionSurface::IntersectsPlane(double p[3], double n[3]) {

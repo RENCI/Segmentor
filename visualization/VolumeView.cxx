@@ -323,6 +323,10 @@ void VolumeView::SetVolumeRendering(bool useVolumeRendering) {
 
 	volume->SetVisibility(volumeRendering);
 
+	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+		regions->Get(it)->GetSurface()->SetFrontfaceCulling(useVolumeRendering);
+	}
+
 	Render();
 }
 
@@ -429,12 +433,19 @@ void VolumeView::CreateVolumeRenderer() {
 
 void VolumeView::UpdateVolumeRenderer(vtkImageData* data) {
 	double* range = data->GetScalarRange();
+	double w = range[1] - range[0];
+
+	double x0 = range[0];
+	double x1 = range[0] + w * 0.1;
+	double x2 = range[0] + w * 0.6;
+	double x3 = range[1];
 
 	// Opacity
 	volumeOpacity->RemoveAllPoints();
-	volumeOpacity->AddPoint(range[0], 0.0);
-	volumeOpacity->AddPoint(range[0] + (range[1] - range[0]) * 0.05, 0.0);
-	volumeOpacity->AddPoint(range[1], 1.0);
+	volumeOpacity->AddPoint(x0, 0.0);
+	volumeOpacity->AddPoint(x1, 0.0);
+	volumeOpacity->AddPoint(x2, 1.0);
+	volumeOpacity->AddPoint(x3, 1.0);
 
 	// Colors
 	// Paraview diverging
@@ -453,7 +464,7 @@ void VolumeView::UpdateVolumeRenderer(vtkImageData* data) {
 	
 	volumeColor->RemoveAllPoints();
 	for (int i = 0; i < numColors; i++) {
-		double x = range[0] + (double)i / (numColors - 1) * (range[1] - range[0]);
+		double x = x1 + (double)i / (numColors - 1) * (x2 - x1);
 		volumeColor->AddRGBPoint(x, colors[i][0], colors[i][1], colors[i][2]);
 	}
 	
