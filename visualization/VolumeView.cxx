@@ -30,6 +30,15 @@
 #include "RegionHighlight3D.h"
 #include "RegionCollection.h"
 
+// Volume rendering
+#include <vtkColorTransferFunction.h>
+#include <vtkPiecewiseFunction.h>
+#include <vtkSmartVolumeMapper.h>
+#include <vtkVolume.h>
+#include <vtkVolumeProperty.h>
+
+#include <vector>
+
 double rescale(double value, double min, double max) {
 	return min + (max - min) * value;
 }
@@ -87,6 +96,9 @@ VolumeView::VolumeView(vtkRenderWindowInteractor* interactor) {
 	// Interaction mode label
 	CreateInteractionModeLabel();
 
+	// Volume rendering
+	CreateVolumeRenderer();
+
 	// Lighting
 	double lightPosition[3] = { 0, 0.5, 1 };	
 	double lightFocalPoint[3] = { 0, 0, 0 };
@@ -111,10 +123,14 @@ void VolumeView::Reset() {
 	plane->VisibilityOff();
 	corners->VisibilityOff();
 	interactionModeLabel->VisibilityOff();
+
+	volume->VisibilityOff();
 }
 
 void VolumeView::SetImageData(vtkImageData* data) {
 	brush->UpdateData(data);
+
+	UpdateVolumeRenderer(data);
 }
 
 void VolumeView::Enable(bool enable) {
@@ -369,6 +385,64 @@ void VolumeView::CreateInteractionModeLabel() {
 	interactionModeLabel->PickableOff();
 
 	renderer->AddActor2D(interactionModeLabel);
+}
+
+void VolumeView::CreateVolumeRenderer() {
+	volumeMapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
+	volumeMapper->SetBlendModeToComposite();
+
+	volumeOpacity = vtkSmartPointer<vtkPiecewiseFunction>::New();
+
+	volumeColor = vtkSmartPointer<vtkColorTransferFunction>::New();
+
+	vtkSmartPointer<vtkVolumeProperty> volumeProperty = vtkSmartPointer<vtkVolumeProperty>::New();
+	volumeProperty->ShadeOff();
+	volumeProperty->SetInterpolationTypeToLinear();
+	volumeProperty->SetScalarOpacity(volumeOpacity);
+	volumeProperty->SetColor(volumeColor);
+
+	volume = vtkSmartPointer<vtkVolume>::New();
+	volume->SetMapper(volumeMapper);
+	volume->SetProperty(volumeProperty);
+	volume->VisibilityOff();
+	volume->PickableOff();
+
+	renderer->AddVolume(volume);
+}
+
+void VolumeView::UpdateVolumeRenderer(vtkImageData* data) {
+	double* range = data->GetScalarRange();
+
+	// Opacity
+	volumeOpacity->RemoveAllPoints();
+	volumeOpacity->AddPoint(range[0], 0.0);
+	volumeOpacity->AddPoint(range[0] + (range[1] - range[0]) * 0.05, 0.0);
+	volumeOpacity->AddPoint(range[1], 1.0);
+
+	// Colors
+	// Paraview diverging
+	const int numColors = 3;
+	double colors[numColors][3] = {
+		{ 59, 76, 192 },
+		{ 221, 221, 221 },
+		{ 180, 4, 38 }
+	};
+
+	for (int i = 0; i < numColors; i++) {
+		for (int j = 0; j < 3; j++) {
+			colors[i][j] /= 255.0;
+		}
+	}
+	
+	volumeColor->RemoveAllPoints();
+	for (int i = 0; i < numColors; i++) {
+		double x = range[0] + (double)i / (numColors - 1) * (range[1] - range[0]);
+		volumeColor->AddRGBPoint(x, colors[i][0], colors[i][1], colors[i][2]);
+	}
+	
+	// Set the volume data and turn on visibility
+	volumeMapper->SetInputData(data);
+	volume->VisibilityOn();
 }
 
 void VolumeView::CreatePlane() {

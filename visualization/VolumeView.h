@@ -26,6 +26,12 @@ class Region;
 class RegionSurface;
 class RegionCollection;
 
+// Volume rendering
+class vtkSmartVolumeMapper;
+class vtkVolume;
+class vtkPiecewiseFunction;
+class vtkColorTransferFunction;
+
 class VolumeView {
 public:
 	VolumeView(vtkRenderWindowInteractor* interactor);
@@ -116,6 +122,14 @@ protected:
 	// Interaction mode label
 	vtkSmartPointer<vtkTextActor> interactionModeLabel;
 	void CreateInteractionModeLabel();
+
+	// Volume rendering
+	vtkSmartPointer<vtkSmartVolumeMapper> volumeMapper;
+	vtkSmartPointer<vtkVolume> volume;
+	vtkSmartPointer<vtkPiecewiseFunction> volumeOpacity;
+	vtkSmartPointer<vtkColorTransferFunction> volumeColor;
+	void CreateVolumeRenderer();
+	void UpdateVolumeRenderer(vtkImageData* data);
 	
 	double visibleOpacity;
 
