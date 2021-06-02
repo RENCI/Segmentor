@@ -65,6 +65,10 @@ public:
 	void SetSmoothShading(bool smooth);
 	void ToggleSmoothShading();
 
+	bool GetVolumeRendering();
+	void SetVolumeRendering(bool useVolumeRendering);
+	void ToggleVolumeRendering();
+
 	bool GetShowPlane();
 	void SetShowPlane(bool show);
 	void ToggleShowPlane();
@@ -84,6 +88,7 @@ public:
 protected:
 	bool smoothSurfaces;
 	bool smoothShading;
+	bool volumeRendering;
 	
 	Region* currentRegion;
 	Region* highlightRegion;

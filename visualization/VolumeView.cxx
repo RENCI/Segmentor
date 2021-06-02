@@ -52,6 +52,7 @@ void VolumeView::cameraChange(vtkObject* caller, unsigned long eventId, void* cl
 VolumeView::VolumeView(vtkRenderWindowInteractor* interactor) {
 	smoothSurfaces = false;
 	smoothShading = false;
+	volumeRendering = false;
 	
 	regions = nullptr;
 	currentRegion = nullptr;
@@ -313,6 +314,22 @@ void VolumeView::ToggleSmoothShading() {
 	SetSmoothShading(!smoothShading);
 }
 
+bool VolumeView::GetVolumeRendering() {
+	return volumeRendering;
+}
+
+void VolumeView::SetVolumeRendering(bool useVolumeRendering) {
+	volumeRendering = useVolumeRendering;
+
+	volume->SetVisibility(volumeRendering);
+
+	Render();
+}
+
+void VolumeView::ToggleVolumeRendering() {
+	SetVolumeRendering(!volumeRendering);
+}
+
 void VolumeView::UpdatePlane() {
 	vtkCamera* cam = renderer->GetActiveCamera();
 
@@ -442,7 +459,7 @@ void VolumeView::UpdateVolumeRenderer(vtkImageData* data) {
 	
 	// Set the volume data and turn on visibility
 	volumeMapper->SetInputData(data);
-	volume->VisibilityOn();
+	volume->SetVisibility(volumeRendering);
 }
 
 void VolumeView::CreatePlane() {
