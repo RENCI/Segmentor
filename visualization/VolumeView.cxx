@@ -29,6 +29,7 @@
 #include "RegionSurface.h"
 #include "RegionHighlight3D.h"
 #include "RegionCollection.h"
+#include "SegmentorMath.h"
 
 // Volume rendering
 #include <vtkColorTransferFunction.h>
@@ -470,9 +471,15 @@ void VolumeView::UpdateVolumeRenderer(vtkImageData* data) {
 	volume->SetVisibility(volumeRendering);
 
 	// Initialize window level
-	double* range = data->GetScalarRange();
-	double window = range[1] - range[0];
-	double level = range[0] + (range[1] - range[0]) / 2;
+	SegmentorMath::OtsuValues otsu = SegmentorMath::OtsuThreshold(data);
+
+	double minValue = otsu.backgroundMean;
+	double maxValue = otsu.foregroundMean;
+
+	double range = maxValue - minValue;;
+
+	double window = range;
+	double level = minValue + range / 2;
 
 	SetWindowLevel(window, level);
 	style->SetWindowLevel(window, level);
