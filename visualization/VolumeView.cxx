@@ -6,6 +6,7 @@
 #include <vtkColorTransferFunction.h>
 #include <vtkCubeAxesActor.h>
 #include <vtkCubeSource.h>
+#include <vtkExtractVOI.h>
 #include <vtkFixedPointVolumeRayCastMapper.h>
 #include <vtkImageData.h>
 #include <vtkInteractorStyle.h>
@@ -223,10 +224,15 @@ void VolumeView::SetCurrentRegion(Region* region) {
 		const double* color = region->GetColor();
 		probe->GetActor()->GetProperty()->SetColor(color[0], color[1], color[2]);
 		brush->GetActor()->GetProperty()->SetColor(color[0], color[1], color[2]);
+
+		const int* voi = currentRegion->GetExtent();
+		volumeClip->SetVOI(voi[0], voi[1], voi[2], voi[3], voi[4], voi[5]);
 	}
 	else {
 		probe->GetActor()->GetProperty()->SetColor(1, 1, 1);
 		brush->GetActor()->GetProperty()->SetColor(1, 1, 1);
+
+		if (volumeClip && volumeClip->GetInput()) volumeClip->SetVOI(volumeClip->GetImageDataInput(0)->GetExtent());
 	}
 }
 
@@ -441,6 +447,8 @@ void VolumeView::CreateInteractionModeLabel() {
 }
 
 void VolumeView::CreateVolumeRenderer() {
+	volumeClip = vtkSmartPointer<vtkExtractVOI>::New();
+
 	volumeMapper = vtkSmartPointer<vtkFixedPointVolumeRayCastMapper>::New();
 	volumeMapper->SetBlendModeToComposite();
 	volumeMapper->AutoAdjustSampleDistancesOn();
@@ -448,6 +456,7 @@ void VolumeView::CreateVolumeRenderer() {
 	volumeMapper->SetInteractiveSampleDistance(0.1);
 	volumeMapper->SetImageSampleDistance(0.5);
 	volumeMapper->SetMaximumImageSampleDistance(2);
+	volumeMapper->SetInputConnection(volumeClip->GetOutputPort());
 	
 	volumeOpacity = vtkSmartPointer<vtkPiecewiseFunction>::New();
 
@@ -468,9 +477,11 @@ void VolumeView::CreateVolumeRenderer() {
 	renderer->AddVolume(volume);
 }
 
-void VolumeView::UpdateVolumeRenderer(vtkImageData* data) {	
+void VolumeView::UpdateVolumeRenderer(vtkImageData* data) {		
 	// Set the volume data and turn on visibility
-	volumeMapper->SetInputData(data);
+	volumeClip->SetInputData(data);
+	volumeClip->SetVOI(data->GetExtent());
+
 	volume->SetVisibility(volumeRendering);
 
 	// Initialize window level

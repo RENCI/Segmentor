@@ -11,7 +11,8 @@ class vtkActor;
 class vtkBox;
 class vtkColorTransferFunction;
 class vtkCubeAxesActor;
-class vtkImageData; 
+class vtkImageData;
+class vtkExtractVOI;
 class vtkFixedPointVolumeRayCastMapper;
 class vtkPiecewiseFunction;
 class vtkPlaneSource;
@@ -129,6 +130,7 @@ protected:
 	void CreateInteractionModeLabel();
 
 	// Volume rendering
+	vtkSmartPointer<vtkExtractVOI> volumeClip;
 	vtkSmartPointer<vtkFixedPointVolumeRayCastMapper> volumeMapper;
 	vtkSmartPointer<vtkVolume> volume;
 	vtkSmartPointer<vtkPiecewiseFunction> volumeOpacity;
