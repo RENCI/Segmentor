@@ -393,7 +393,7 @@ void VolumeView::UpdateVolumeRenderingTransferFunctions(double x1, double x2) {
 	// Opacity
 	volumeOpacity->RemoveAllPoints();
 	volumeOpacity->AddPoint(x1, 0.0);
-	volumeOpacity->AddPoint(x2, 1.0);
+	volumeOpacity->AddPoint(x2, 0.5);
 
 	// Colors
 	// Paraview diverging
