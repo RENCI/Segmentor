@@ -3,12 +3,15 @@
 #include <vtkActor.h>
 #include <vtkCallbackCommand.h>
 #include <vtkCamera.h>
+#include <vtkColorTransferFunction.h>
 #include <vtkCubeAxesActor.h>
 #include <vtkCubeSource.h>
+#include <vtkFixedPointVolumeRayCastMapper.h>
 #include <vtkImageData.h>
 #include <vtkInteractorStyle.h>
 #include <vtkLight.h>
 #include <vtkOutlineCornerFilter.h>
+#include <vtkPiecewiseFunction.h>
 #include <vtkPlane.h>
 #include <vtkPlaneSource.h>
 #include <vtkPolyDataMapper.h>
@@ -19,6 +22,8 @@
 #include <vtkRenderWindowInteractor.h>
 #include <vtkTextActor.h>
 #include <vtkTextProperty.h>
+#include <vtkVolume.h>
+#include <vtkVolumeProperty.h>
 
 #include "vtkInteractorStyleVolume.h"
 
@@ -30,13 +35,6 @@
 #include "RegionHighlight3D.h"
 #include "RegionCollection.h"
 #include "SegmentorMath.h"
-
-// Volume rendering
-#include <vtkColorTransferFunction.h>
-#include <vtkPiecewiseFunction.h>
-#include <vtkSmartVolumeMapper.h>
-#include <vtkVolume.h>
-#include <vtkVolumeProperty.h>
 
 #include <vector>
 
@@ -443,9 +441,14 @@ void VolumeView::CreateInteractionModeLabel() {
 }
 
 void VolumeView::CreateVolumeRenderer() {
-	volumeMapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
+	volumeMapper = vtkSmartPointer<vtkFixedPointVolumeRayCastMapper>::New();
 	volumeMapper->SetBlendModeToComposite();
-
+	volumeMapper->AutoAdjustSampleDistancesOn();
+	volumeMapper->SetSampleDistance(0.1);
+	volumeMapper->SetInteractiveSampleDistance(0.1);
+	volumeMapper->SetImageSampleDistance(0.5);
+	volumeMapper->SetMaximumImageSampleDistance(2);
+	
 	volumeOpacity = vtkSmartPointer<vtkPiecewiseFunction>::New();
 
 	volumeColor = vtkSmartPointer<vtkColorTransferFunction>::New();

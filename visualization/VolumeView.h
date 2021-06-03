@@ -9,14 +9,18 @@
 
 class vtkActor;
 class vtkBox;
+class vtkColorTransferFunction;
 class vtkCubeAxesActor;
-class vtkImageData;
+class vtkImageData; 
+class vtkFixedPointVolumeRayCastMapper;
+class vtkPiecewiseFunction;
 class vtkPlaneSource;
 class vtkObject;
 class vtkOutlineCornerFilter;
 class vtkRenderer;
 class vtkRenderWindowInteractor;
 class vtkTextActor;
+class vtkVolume;
 
 class vtkInteractorStyleVolume;
 
@@ -25,12 +29,6 @@ class Probe;
 class Region;
 class RegionSurface;
 class RegionCollection;
-
-// Volume rendering
-class vtkSmartVolumeMapper;
-class vtkVolume;
-class vtkPiecewiseFunction;
-class vtkColorTransferFunction;
 
 class VolumeView {
 public:
@@ -131,7 +129,7 @@ protected:
 	void CreateInteractionModeLabel();
 
 	// Volume rendering
-	vtkSmartPointer<vtkSmartVolumeMapper> volumeMapper;
+	vtkSmartPointer<vtkFixedPointVolumeRayCastMapper> volumeMapper;
 	vtkSmartPointer<vtkVolume> volume;
 	vtkSmartPointer<vtkPiecewiseFunction> volumeOpacity;
 	vtkSmartPointer<vtkColorTransferFunction> volumeColor;
