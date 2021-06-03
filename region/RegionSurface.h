@@ -20,7 +20,14 @@ public:
 
 	void SetSmoothSurface(bool smooth);
 	void SetSmoothShading(bool smooth);
-	void SetWireframe(bool wireframe);
+
+	enum RenderMode {
+		Normal,
+		Wireframe,
+		CullFrontFace
+	};
+
+	void SetRenderMode(RenderMode mode);
 
 	bool IntersectsPlane(double p[3], double n[3]);
 

@@ -203,7 +203,7 @@ void VolumeView::AddRegion(Region* region) {
 
 	surface->SetSmoothSurface(smoothSurfaces);
 	surface->SetSmoothShading(smoothShading);
-	surface->SetWireframe(volumeRendering);
+	surface->SetRenderMode(volumeRendering ? RegionSurface::CullFrontFace : RegionSurface::Normal);
 
 	highlight->GetActor()->VisibilityOff();
 	highlight->SetCamera(renderer->GetActiveCamera());
@@ -324,7 +324,7 @@ void VolumeView::SetVolumeRendering(bool useVolumeRendering) {
 	volume->SetVisibility(volumeRendering);
 
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
-		regions->Get(it)->GetSurface()->SetWireframe(useVolumeRendering);
+		regions->Get(it)->GetSurface()->SetRenderMode(volumeRendering ? RegionSurface::CullFrontFace : RegionSurface::Normal);
 	}
 
 	Render();
