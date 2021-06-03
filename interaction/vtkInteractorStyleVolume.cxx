@@ -248,9 +248,9 @@ void vtkInteractorStyleVolume::WindowLevel()
 	// Compute normalized delta
 
 	double dx = (this->WindowLevelCurrentPosition[0] -
-		this->WindowLevelStartPosition[0]) * 4.0 / size[0];
+				this->WindowLevelStartPosition[0]) * 4.0 / size[0];
 	double dy = (this->WindowLevelStartPosition[1] -
-		this->WindowLevelCurrentPosition[1]) * 4.0 / size[1];
+				this->WindowLevelCurrentPosition[1]) * 4.0 / size[1];
 
 	// Scale by current values
 
@@ -388,6 +388,8 @@ void vtkInteractorStyleVolume::OnLeftButtonDown()
 	{
 		// If shift is held down, start window level
 		if (this->Interactor->GetShiftKey()) {
+			this->WindowLevelStartPosition[0] = x;
+			this->WindowLevelStartPosition[1] = y;
 			this->StartWindowLevel();
 		}
 

@@ -20,7 +20,7 @@ public:
 
 	void SetSmoothSurface(bool smooth);
 	void SetSmoothShading(bool smooth);
-	void SetFrontfaceCulling(bool cull);
+	void SetWireframe(bool wireframe);
 
 	bool IntersectsPlane(double p[3], double n[3]);
 
