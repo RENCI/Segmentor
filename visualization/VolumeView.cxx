@@ -8,10 +8,13 @@
 #include <vtkCubeSource.h>
 #include <vtkExtractVOI.h>
 #include <vtkFixedPointVolumeRayCastMapper.h>
+#include <vtkImageCast.h>
 #include <vtkImageData.h>
+#include <vtkImageMask.h>
 #include <vtkInteractorStyle.h>
 #include <vtkLight.h>
 #include <vtkOutlineCornerFilter.h>
+#include <vtkPassThrough.h>
 #include <vtkPiecewiseFunction.h>
 #include <vtkPlane.h>
 #include <vtkPlaneSource.h>
@@ -50,6 +53,9 @@ void VolumeView::cameraChange(vtkObject* caller, unsigned long eventId, void* cl
 }
 
 VolumeView::VolumeView(vtkRenderWindowInteractor* interactor) {
+	data = nullptr;
+	labels = nullptr;
+
 	smoothSurfaces = false;
 	smoothShading = false;
 	volumeRendering = false;
@@ -116,6 +122,9 @@ VolumeView::~VolumeView() {
 }
 
 void VolumeView::Reset() {
+	data = nullptr;
+	labels = nullptr;
+
 	SetCurrentRegion(nullptr);
 	HighlightRegion(nullptr);
 
@@ -128,10 +137,12 @@ void VolumeView::Reset() {
 	volume->VisibilityOff();
 }
 
-void VolumeView::SetImageData(vtkImageData* data) {
+void VolumeView::SetImageData(vtkImageData* imageData) {
+	data = imageData;
+
 	brush->UpdateData(data);
 
-	UpdateVolumeRenderer(data);
+	UpdateVolumeRenderer();
 }
 
 void VolumeView::Enable(bool enable) {
@@ -164,7 +175,8 @@ void VolumeView::UpdateVoxelSize(vtkImageData* data) {
 	UpdateAxes(data);
 }
 
-void VolumeView::SetRegions(vtkImageData* data, RegionCollection* newRegions) {
+void VolumeView::SetRegions(vtkImageData* imageLabels, RegionCollection* newRegions) {
+	labels = imageLabels;
 	regions = newRegions;
 
 	// Reset
@@ -226,13 +238,10 @@ void VolumeView::SetCurrentRegion(Region* region) {
 		brush->GetActor()->GetProperty()->SetColor(color[0], color[1], color[2]);
 
 		const int* voi = currentRegion->GetExtent();
-		volumeClip->SetVOI(voi[0], voi[1], voi[2], voi[3], voi[4], voi[5]);
 	}
 	else {
 		probe->GetActor()->GetProperty()->SetColor(1, 1, 1);
 		brush->GetActor()->GetProperty()->SetColor(1, 1, 1);
-
-		if (volumeClip && volumeClip->GetInput()) volumeClip->SetVOI(volumeClip->GetImageDataInput(0)->GetExtent());
 	}
 }
 
@@ -328,7 +337,7 @@ void VolumeView::SetVolumeRendering(bool useVolumeRendering) {
 	volumeRendering = useVolumeRendering;
 
 	volume->SetVisibility(volumeRendering);
-
+	
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
 		regions->Get(it)->GetSurface()->SetRenderMode(volumeRendering ? RegionSurface::CullFrontFace : RegionSurface::Normal);
 	}
@@ -384,6 +393,8 @@ void VolumeView::UpdateVisibleOpacity(bool apply) {
 
 		surface->GetActor()->GetProperty()->SetOpacity(o);
 	}
+
+	UpdateVolumeMask(apply);
 }
 
 void VolumeView::SetBrushRadius(int radius) {
@@ -393,6 +404,49 @@ void VolumeView::SetBrushRadius(int radius) {
 
 void VolumeView::SetWindowLevel(double window, double level) {
 	UpdateVolumeRenderingTransferFunctions(level - window * 0.5, level + window * 0.5);
+}
+
+void VolumeView::UpdateVolumeMask(bool filter) {
+	if (regions && filter) {
+		vtkSmartPointer<vtkImageData> mask = volumeCopy->GetOutput();
+
+		const int* extent = mask->GetExtent();
+
+		for (int i = extent[0]; i <= extent[1]; i++) {
+			for (int j = extent[2]; j <= extent[3]; j++) {
+				for (int k = extent[4]; k <= extent[5]; k++) {
+					unsigned char* p = static_cast<unsigned char*>(mask->GetScalarPointer(i, j, k));
+					*p = 0;
+				}
+			}
+		}
+
+		for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+			Region* region = regions->Get(it);
+			const int* extent = region->GetExtent();
+			
+			if (region == currentRegion || region->GetVisible()) {
+				for (int i = extent[0]; i <= extent[1]; i++) {
+					for (int j = extent[2]; j <= extent[3]; j++) {
+						for (int k = extent[4]; k <= extent[5]; k++) {
+							// Current label
+							unsigned char* p = static_cast<unsigned char*>(mask->GetScalarPointer(i, j, k));
+							*p = 1;
+						}
+					}
+				}
+			}
+		}
+
+		mask->Modified();
+
+		volumeMask->SetMaskInputData(mask);
+		
+		volumeMapper->SetInputConnection(volumeMask->GetOutputPort());
+	}
+	else {
+		volumeMapper->SetInputDataObject(data);
+	}
 }
 
 void VolumeView::UpdateVolumeRenderingTransferFunctions(double x1, double x2) {
@@ -447,7 +501,11 @@ void VolumeView::CreateInteractionModeLabel() {
 }
 
 void VolumeView::CreateVolumeRenderer() {
-	volumeClip = vtkSmartPointer<vtkExtractVOI>::New();
+	volumeCopy = vtkSmartPointer<vtkImageCast>::New();
+	volumeCopy->SetOutputScalarTypeToUnsignedChar();
+
+	volumeMask = vtkSmartPointer<vtkImageMask>::New();
+	volumeMask->SetMaskInputData(volumeCopy->GetOutput());
 
 	volumeMapper = vtkSmartPointer<vtkFixedPointVolumeRayCastMapper>::New();
 	volumeMapper->SetBlendModeToComposite();
@@ -456,7 +514,6 @@ void VolumeView::CreateVolumeRenderer() {
 	volumeMapper->SetInteractiveSampleDistance(0.1);
 	volumeMapper->SetImageSampleDistance(0.5);
 	volumeMapper->SetMaximumImageSampleDistance(2);
-	volumeMapper->SetInputConnection(volumeClip->GetOutputPort());
 	
 	volumeOpacity = vtkSmartPointer<vtkPiecewiseFunction>::New();
 
@@ -477,13 +534,18 @@ void VolumeView::CreateVolumeRenderer() {
 	renderer->AddVolume(volume);
 }
 
-void VolumeView::UpdateVolumeRenderer(vtkImageData* data) {		
-	// Set the volume data and turn on visibility
-	volumeClip->SetInputData(data);
-	volumeClip->SetVOI(data->GetExtent());
+void VolumeView::UpdateVolumeRenderer() {		
+	if (!data) return;
 
-	volume->SetVisibility(volumeRendering);
+	// Start with full volume
+	volumeCopy->SetInputDataObject(data);
+	volumeCopy->Update();
 
+	volumeMask->SetInputDataObject(data);
+
+	volumeMapper->SetInputDataObject(data);
+	volume->SetVisibility(volumeRendering);	
+		
 	// Initialize window level
 	SegmentorMath::OtsuValues otsu = SegmentorMath::OtsuThreshold(data);
 

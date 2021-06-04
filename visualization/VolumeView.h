@@ -11,13 +11,17 @@ class vtkActor;
 class vtkBox;
 class vtkColorTransferFunction;
 class vtkCubeAxesActor;
+class vtkImageCast;
 class vtkImageData;
-class vtkExtractVOI;
+class vtkLookupTable;
+class vtkImageMapToColors;
+class vtkImageMask;
 class vtkFixedPointVolumeRayCastMapper;
 class vtkPiecewiseFunction;
 class vtkPlaneSource;
 class vtkObject;
 class vtkOutlineCornerFilter;
+class vtkPassThrough;
 class vtkRenderer;
 class vtkRenderWindowInteractor;
 class vtkTextActor;
@@ -36,8 +40,8 @@ public:
 	VolumeView(vtkRenderWindowInteractor* interactor);
 	~VolumeView();
 
-	void SetImageData(vtkImageData* data);
-	void SetRegions(vtkImageData* data, RegionCollection* newRegions);
+	void SetImageData(vtkImageData* imageData);
+	void SetRegions(vtkImageData* imageLabels, RegionCollection* newRegions);
 	void AddRegion(Region* region);
 
 	void Reset();
@@ -81,12 +85,18 @@ public:
 
 	void SetWindowLevel(double window, double level);
 
+	void UpdateVolumeMask(bool filter);
+
 	void Render();
 
 	vtkRenderer* GetRenderer();	
 	vtkInteractorStyleVolume* GetInteractorStyle();
 
 protected:
+	// Data
+	vtkSmartPointer<vtkImageData> data;
+	vtkSmartPointer<vtkImageData> labels;
+
 	bool smoothSurfaces;
 	bool smoothShading;
 	bool volumeRendering;
@@ -130,13 +140,14 @@ protected:
 	void CreateInteractionModeLabel();
 
 	// Volume rendering
-	vtkSmartPointer<vtkExtractVOI> volumeClip;
+	vtkSmartPointer<vtkImageCast> volumeCopy;
+	vtkSmartPointer<vtkImageMask> volumeMask;
 	vtkSmartPointer<vtkFixedPointVolumeRayCastMapper> volumeMapper;
 	vtkSmartPointer<vtkVolume> volume;
 	vtkSmartPointer<vtkPiecewiseFunction> volumeOpacity;
 	vtkSmartPointer<vtkColorTransferFunction> volumeColor;
 	void CreateVolumeRenderer();
-	void UpdateVolumeRenderer(vtkImageData* data);
+	void UpdateVolumeRenderer();
 	void UpdateVolumeRenderingTransferFunctions(double x1, double x2);
 	
 	double visibleOpacity;
