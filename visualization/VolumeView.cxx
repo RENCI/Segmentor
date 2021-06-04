@@ -407,7 +407,7 @@ void VolumeView::SetWindowLevel(double window, double level) {
 }
 
 void VolumeView::UpdateVolumeMask(bool filter) {
-	if (regions && filter) {
+	if (regions && currentRegion && filter) {
 		vtkSmartPointer<vtkImageData> mask = volumeCopy->GetOutput();
 
 		const int* extent = mask->GetExtent();
