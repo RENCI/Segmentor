@@ -9,14 +9,23 @@
 
 class vtkActor;
 class vtkBox;
+class vtkColorTransferFunction;
 class vtkCubeAxesActor;
+class vtkImageCast;
 class vtkImageData;
+class vtkLookupTable;
+class vtkImageMapToColors;
+class vtkImageMask;
+class vtkFixedPointVolumeRayCastMapper;
+class vtkPiecewiseFunction;
 class vtkPlaneSource;
 class vtkObject;
 class vtkOutlineCornerFilter;
+class vtkPassThrough;
 class vtkRenderer;
 class vtkRenderWindowInteractor;
 class vtkTextActor;
+class vtkVolume;
 
 class vtkInteractorStyleVolume;
 
@@ -31,8 +40,8 @@ public:
 	VolumeView(vtkRenderWindowInteractor* interactor);
 	~VolumeView();
 
-	void SetImageData(vtkImageData* data);
-	void SetRegions(vtkImageData* data, RegionCollection* newRegions);
+	void SetImageData(vtkImageData* imageData);
+	void SetRegions(vtkImageData* imageLabels, RegionCollection* newRegions);
 	void AddRegion(Region* region);
 
 	void Reset();
@@ -59,6 +68,10 @@ public:
 	void SetSmoothShading(bool smooth);
 	void ToggleSmoothShading();
 
+	bool GetVolumeRendering();
+	void SetVolumeRendering(bool useVolumeRendering);
+	void ToggleVolumeRendering();
+
 	bool GetShowPlane();
 	void SetShowPlane(bool show);
 	void ToggleShowPlane();
@@ -70,14 +83,23 @@ public:
 
 	void SetBrushRadius(int radius);
 
+	void SetWindowLevel(double window, double level);
+
+	void UpdateVolumeMask(bool filter);
+
 	void Render();
 
 	vtkRenderer* GetRenderer();	
 	vtkInteractorStyleVolume* GetInteractorStyle();
 
 protected:
+	// Data
+	vtkSmartPointer<vtkImageData> data;
+	vtkSmartPointer<vtkImageData> labels;
+
 	bool smoothSurfaces;
 	bool smoothShading;
+	bool volumeRendering;
 	
 	Region* currentRegion;
 	Region* highlightRegion;
@@ -116,6 +138,17 @@ protected:
 	// Interaction mode label
 	vtkSmartPointer<vtkTextActor> interactionModeLabel;
 	void CreateInteractionModeLabel();
+
+	// Volume rendering
+	vtkSmartPointer<vtkImageCast> volumeCopy;
+	vtkSmartPointer<vtkImageMask> volumeMask;
+	vtkSmartPointer<vtkFixedPointVolumeRayCastMapper> volumeMapper;
+	vtkSmartPointer<vtkVolume> volume;
+	vtkSmartPointer<vtkPiecewiseFunction> volumeOpacity;
+	vtkSmartPointer<vtkColorTransferFunction> volumeColor;
+	void CreateVolumeRenderer();
+	void UpdateVolumeRenderer();
+	void UpdateVolumeRenderingTransferFunctions(double x1, double x2);
 	
 	double visibleOpacity;
 

@@ -191,6 +191,11 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	windowLevelCallback->SetCallback(InteractionCallbacks::WindowLevel);
 	windowLevelCallback->SetClientData(this);
 	sliceView->GetInteractorStyle()->AddObserver(vtkCommand::WindowLevelEvent, windowLevelCallback);
+
+	vtkSmartPointer<vtkCallbackCommand> volumeWindowLevelCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+	volumeWindowLevelCallback->SetCallback(InteractionCallbacks::VolumeWindowLevel);
+	volumeWindowLevelCallback->SetClientData(this);
+	volumeView->GetInteractorStyle()->AddObserver(vtkCommand::WindowLevelEvent, volumeWindowLevelCallback);
 }
 
 VisualizationContainer::~VisualizationContainer() {
@@ -1975,6 +1980,10 @@ void VisualizationContainer::SetWindowLevel(double window, double level) {
 	qtWindow->setWindowLevel(window, level);
 }
 
+void VisualizationContainer::SetVolumeWindowLevel(double window, double level) {
+	volumeView->SetWindowLevel(window, level);
+}
+
 void VisualizationContainer::SetVisibleOpacity(double opacity) {
 	volumeView->SetVisibleOpacity(opacity, filterRegions);
 }
@@ -2089,7 +2098,9 @@ void VisualizationContainer::PopTempHistory() {
 
 	volumeView->SetRegions(labels, regions);
 	sliceView->SetSegmentationData(labels, regions);
+	SetCurrentRegion(currentRegion);
 	qtWindow->updateRegions(regions);
+
 	Render();
 }
 

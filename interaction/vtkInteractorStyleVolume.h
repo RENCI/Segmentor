@@ -18,6 +18,7 @@ class vtkCellPicker;
 #define VTKIS_SLICE_VOLUME 2051
 #define VTKIS_MERGE_VOLUME 2052
 #define VTKIS_VISIBLE_VOLUME 2053
+#define VTKIS_WINDOW_LEVEL_VOLUME 2054
 
 class vtkInteractorStyleVolume : public vtkInteractorStyleTrackballCamera {
 public:
@@ -53,17 +54,27 @@ public:
 	virtual void EndMerge();
 	virtual void StartVisible();
 	virtual void EndVisible();
+	virtual void StartWindowLevel();
+	virtual void EndWindowLevel();
+
+	virtual void WindowLevel();
+	virtual void SetWindowLevel(double window, double level);
+	virtual double GetWindow();
+	virtual double GetLevel();
 
 	enum VolumeEventIds {
 		SelectLabelEvent = vtkCommand::UserEvent + 1,
 		StartPaintEvent,
 		PaintEvent,
-		EndPaintEvent, 
+		EndPaintEvent,
 		StartEraseEvent,
 		EraseEvent,
 		EndEraseEvent,
 		MergeEvent,
-		VisibleEvent
+		VisibleEvent,
+		StartWindowLevelEvent,
+		WindowLevelEvent,
+		EndWindowLevelEvent
 	};
 
 protected:
@@ -75,6 +86,11 @@ protected:
 	enum InteractionMode Mode;
 
 	vtkSmartPointer<vtkCellPicker> Picker;
+
+	int WindowLevelStartPosition[2];
+	int WindowLevelCurrentPosition[2];
+	double WindowLevelInitial[2];
+	double WindowLevelCurrent[2];
 
 	void SetOrientation(const double leftToRight[3], const double viewUp[3]);
 

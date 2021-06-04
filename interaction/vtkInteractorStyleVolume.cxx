@@ -17,7 +17,18 @@ vtkStandardNewMacro(vtkInteractorStyleVolume);
 vtkInteractorStyleVolume::vtkInteractorStyleVolume() 
 {
 	this->MouseMoved = false;
+
 	this->Mode = NavigationMode;
+
+	this->WindowLevelStartPosition[0] = 0;
+	this->WindowLevelStartPosition[1] = 0;
+
+	this->WindowLevelCurrentPosition[0] = 0;
+	this->WindowLevelCurrentPosition[1] = 0;
+
+	this->WindowLevelCurrent[0] = this->WindowLevelInitial[0] = 1.0;
+	this->WindowLevelCurrent[1] = this->WindowLevelInitial[1] = 0.5;
+
 	this->Picker = vtkSmartPointer<vtkCellPicker>::New();
 }
 
@@ -184,6 +195,127 @@ void vtkInteractorStyleVolume::EndVisible()
 }
 
 //----------------------------------------------------------------------------
+void vtkInteractorStyleVolume::StartWindowLevel()
+{
+	if (this->State != VTKIS_NONE)
+	{
+		return;
+	}
+	this->StartState(VTKIS_WINDOW_LEVEL_VOLUME);
+
+	if (this->HandleObservers)
+	{
+		this->InvokeEvent(StartWindowLevelEvent, nullptr);
+	}
+
+	this->WindowLevelInitial[0] = this->WindowLevelCurrent[0];
+	this->WindowLevelInitial[1] = this->WindowLevelCurrent[1];
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleVolume::EndWindowLevel()
+{
+	if (this->State != VTKIS_WINDOW_LEVEL_VOLUME)
+	{
+		return;
+	}
+	if (this->HandleObservers)
+	{
+		this->InvokeEvent(EndWindowLevelEvent, nullptr);
+	}
+	this->StopState();
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleVolume::WindowLevel()
+{
+	vtkRenderWindowInteractor *rwi = this->Interactor;
+
+	this->WindowLevelCurrentPosition[0] = rwi->GetEventPosition()[0];
+	this->WindowLevelCurrentPosition[1] = rwi->GetEventPosition()[1];
+
+	if (this->HandleObservers &&
+		this->HasObserver(vtkCommand::WindowLevelEvent))
+	{
+		this->InvokeEvent(vtkCommand::WindowLevelEvent, this);
+	}
+
+	int *size = this->CurrentRenderer->GetSize();
+
+	double window = this->WindowLevelInitial[0];
+	double level = this->WindowLevelInitial[1];
+
+	// Compute normalized delta
+
+	double dx = (this->WindowLevelCurrentPosition[0] -
+				this->WindowLevelStartPosition[0]) * 4.0 / size[0];
+	double dy = (this->WindowLevelStartPosition[1] -
+				this->WindowLevelCurrentPosition[1]) * 4.0 / size[1];
+
+	// Scale by current values
+
+	if (fabs(window) > 0.01)
+	{
+		dx = dx * window;
+	}
+	else
+	{
+		dx = dx * (window < 0 ? -0.01 : 0.01);
+	}
+	if (fabs(level) > 0.01)
+	{
+		dy = dy * level;
+	}
+	else
+	{
+		dy = dy * (level < 0 ? -0.01 : 0.01);
+	}
+
+	// Abs so that direction does not flip
+
+	if (window < 0.0)
+	{
+		dx = -1 * dx;
+	}
+	if (level < 0.0)
+	{
+		dy = -1 * dy;
+	}
+
+	// Compute new window level
+
+	double newWindow = dx + window;
+	double newLevel = level - dy;
+
+	if (newWindow < 0.01)
+	{
+		newWindow = 0.01;
+	}
+	
+	this->WindowLevelCurrent[0] = newWindow;
+	this->WindowLevelCurrent[1] = newLevel;
+
+	this->Interactor->Render();
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleVolume::SetWindowLevel(double window, double level) {
+	this->WindowLevelCurrent[0] = this->WindowLevelInitial[0] = window;
+	this->WindowLevelCurrent[1] = this->WindowLevelInitial[1] = level;
+}
+
+
+//----------------------------------------------------------------------------
+double vtkInteractorStyleVolume::GetWindow() {
+	return this->WindowLevelCurrent[0];
+}
+
+//----------------------------------------------------------------------------
+double vtkInteractorStyleVolume::GetLevel() {
+	return this->WindowLevelCurrent[1];
+}
+
+//----------------------------------------------------------------------------
 void vtkInteractorStyleVolume::OnMouseMove() 
 {
 	this->MouseMoved = true;
@@ -204,6 +336,11 @@ void vtkInteractorStyleVolume::OnMouseMove()
 	case VTKIS_SLICE_VOLUME:
 		this->FindPokedRenderer(x, y);
 		this->Slice();
+		break;
+
+	case VTKIS_WINDOW_LEVEL_VOLUME:
+		this->WindowLevel();
+		this->InvokeEvent(WindowLevelEvent, nullptr);
 		break;
 	}
 
@@ -246,11 +383,21 @@ void vtkInteractorStyleVolume::OnLeftButtonDown()
 	else if (this->Mode == VisibleMode)
 	{
 		this->StartVisible();
-	}
+	}	
 	else
 	{
-		// Rotate
-		this->StartRotate();
+		// If shift is held down, start window level
+		if (this->Interactor->GetShiftKey()) {
+			this->WindowLevelStartPosition[0] = x;
+			this->WindowLevelStartPosition[1] = y;
+			this->StartWindowLevel();
+		}
+
+		// Otherwise rotate
+		else
+		{
+			this->StartRotate();
+		}
 	}
 }
 
@@ -290,6 +437,10 @@ void vtkInteractorStyleVolume::OnLeftButtonUp()
 		
 	case VTKIS_VISIBLE_VOLUME:
 		this->EndVisible();
+		break;
+
+	case VTKIS_WINDOW_LEVEL_VOLUME:
+		this->EndWindowLevel();
 		break;
 	}
 
@@ -364,6 +515,11 @@ void vtkInteractorStyleVolume::OnRightButtonDown()
 	if (this->Interactor->GetControlKey())
 	{
 		this->StartSlice();
+	}
+	// Transfer function if shift is held down
+	else if (this->Interactor->GetShiftKey())
+	{
+		this->StartWindowLevel();
 	}
 	else
 	{

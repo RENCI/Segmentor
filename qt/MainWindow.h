@@ -103,6 +103,7 @@ public slots:
 	virtual void on_actionToggleAutoRescale(bool checked);
 	virtual void on_actionSmoothNormals(bool checked);
 	virtual void on_actionSmoothSurfaces(bool checked);
+	virtual void on_actionVolumeRendering(bool checked);
 	virtual void on_actionShowPlane(bool checked);
 	virtual void on_actionClearRegionVisibilities();
 	virtual void on_actionShowPlaneRegions();

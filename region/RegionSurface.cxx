@@ -45,13 +45,16 @@ RegionSurface::RegionSurface(Region* inputRegion, double color[3]) {
 
 	mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	mapper->ScalarVisibilityOff();
-
+	
 	actor = vtkSmartPointer<vtkActor>::New();
 	actor->SetMapper(mapper);
+	
 	actor->GetProperty()->SetColor(color);
 	actor->GetProperty()->SetDiffuse(1.0);
 	actor->GetProperty()->SetAmbient(0.1);
 	actor->GetProperty()->SetSpecular(0.0);
+
+	SetRenderMode(Normal);
 
 	UpdatePipeline();
 }
@@ -76,6 +79,31 @@ void RegionSurface::SetSmoothShading(bool smooth) {
 	smoothShading = smooth;
 
 	UpdatePipeline();
+}
+
+void RegionSurface::SetRenderMode(RenderMode mode) {
+	switch (mode) {
+	case Normal:
+		actor->GetProperty()->SetRepresentationToSurface();
+		actor->GetProperty()->FrontfaceCullingOff();
+		actor->GetProperty()->LightingOn();
+
+		break;
+
+	case Wireframe:
+		actor->GetProperty()->SetRepresentationToWireframe();
+		actor->GetProperty()->FrontfaceCullingOff();
+		actor->GetProperty()->LightingOn();
+
+		break;
+
+	case CullFrontFace:
+		actor->GetProperty()->SetRepresentationToSurface();
+		actor->GetProperty()->FrontfaceCullingOn();
+		actor->GetProperty()->LightingOff();
+
+		break;
+	}
 }
 
 bool RegionSurface::IntersectsPlane(double p[3], double n[3]) {

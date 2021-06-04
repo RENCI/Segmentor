@@ -746,6 +746,10 @@ void MainWindow::on_actionSmoothSurfaces(bool checked) {
 	visualizationContainer->GetVolumeView()->SetSmoothSurfaces(checked);
 }
 
+void MainWindow::on_actionVolumeRendering(bool checked) {
+	visualizationContainer->GetVolumeView()->SetVolumeRendering(checked);
+}
+
 void MainWindow::on_actionShowPlane(bool checked) {
 	visualizationContainer->GetVolumeView()->SetShowPlane(checked);
 }
@@ -1079,6 +1083,7 @@ void MainWindow::createToolBar() {
 	toolBar->addWidget(createLabel("3D"));
 	toolBar->addAction(createActionIcon(":/icons/icon_smooth_normals.png", "Smooth normals (n)", "n", visualizationContainer->GetVolumeView()->GetSmoothShading(), &MainWindow::on_actionSmoothNormals));
 	toolBar->addAction(createActionIcon(":/icons/icon_smooth_surface.png", "Smooth surfaces (s)", "s", visualizationContainer->GetVolumeView()->GetSmoothSurfaces(), &MainWindow::on_actionSmoothSurfaces));
+	toolBar->addAction(createActionIcon(":/icons/icon_volume_render.png", "Volume rendering (])", "]", visualizationContainer->GetVolumeView()->GetVolumeRendering(), &MainWindow::on_actionVolumeRendering));
 	toolBar->addAction(createActionIcon(":/icons/icon_plane.png", "Show plane (o)", "o", visualizationContainer->GetVolumeView()->GetShowPlane(), &MainWindow::on_actionShowPlane));
 	toolBar->addSeparator();
 	toolBar->addWidget(createLabel("Filter"));

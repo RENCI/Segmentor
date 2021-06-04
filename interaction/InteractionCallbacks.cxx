@@ -13,6 +13,7 @@
 #include "VolumeView.h"
 #include "SliceView.h"
 #include "vtkInteractorStyleSlice.h"
+#include "vtkInteractorStyleVolume.h"
 
 bool InteractionCallbacks::firstCameraCallback = true;
 
@@ -293,4 +294,11 @@ void InteractionCallbacks::WindowLevel(vtkObject* caller, unsigned long eventId,
 	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
 
 	vis->SetWindowLevel(style->GetWindow(), style->GetLevel());
+}
+
+void InteractionCallbacks::VolumeWindowLevel(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+	vtkInteractorStyleVolume* style = static_cast<vtkInteractorStyleVolume*>(caller);
+	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
+
+	vis->SetVolumeWindowLevel(style->GetWindow(), style->GetLevel());
 }
