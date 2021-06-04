@@ -236,8 +236,6 @@ void VolumeView::SetCurrentRegion(Region* region) {
 		const double* color = region->GetColor();
 		probe->GetActor()->GetProperty()->SetColor(color[0], color[1], color[2]);
 		brush->GetActor()->GetProperty()->SetColor(color[0], color[1], color[2]);
-
-		const int* voi = currentRegion->GetExtent();
 	}
 	else {
 		probe->GetActor()->GetProperty()->SetColor(1, 1, 1);
@@ -383,15 +381,15 @@ void VolumeView::SetVisibleOpacity(double opacity, bool apply) {
 }
 
 void VolumeView::UpdateVisibleOpacity(bool apply) {
-	if (!regions) return;
+	if (regions) {
+		for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+			Region* region = regions->Get(it);
+			RegionSurface* surface = region->GetSurface();
 
-	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
-		Region* region = regions->Get(it);
-		RegionSurface* surface = region->GetSurface();
+			double o = !apply || region == currentRegion ? 1 : visibleOpacity;
 
-		double o = !apply || region == currentRegion ? 1 : visibleOpacity;
-
-		surface->GetActor()->GetProperty()->SetOpacity(o);
+			surface->GetActor()->GetProperty()->SetOpacity(o);
+		}
 	}
 
 	UpdateVolumeMask(apply);

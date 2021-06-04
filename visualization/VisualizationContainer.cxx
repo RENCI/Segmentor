@@ -2098,7 +2098,9 @@ void VisualizationContainer::PopTempHistory() {
 
 	volumeView->SetRegions(labels, regions);
 	sliceView->SetSegmentationData(labels, regions);
+	SetCurrentRegion(currentRegion);
 	qtWindow->updateRegions(regions);
+
 	Render();
 }
 
