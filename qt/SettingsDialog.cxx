@@ -49,10 +49,10 @@ void SettingsDialog::initializeSettings() {
 	levelSpinBox->setValue(sliceView->GetLevel());
 
 	// Overlay opacity
-	overlaySpinBox->setValue(sliceView->GetOverlayOpacity());
+	overlayOpacitySpinBox->setValue(sliceView->GetOverlayOpacity());
 
-	// Region opacity
-	opacitySpinBox->setValue(volumeView->GetVisibleOpacity());
+	// Surface opacity
+	surfaceOpacitySpinBox->setValue(volumeView->GetVisibleOpacity());
 }
 
 void SettingsDialog::on_windowSpinBox_valueChanged(double value) {
@@ -63,28 +63,28 @@ void SettingsDialog::on_levelSpinBox_valueChanged(double value) {
 	visualizationContainer->GetSliceView()->SetLevel(value);
 }
 
-void SettingsDialog::on_overlaySpinBox_valueChanged(double value) {
+void SettingsDialog::on_overlayOpacitySpinBox_valueChanged(double value) {
 	visualizationContainer->GetSliceView()->SetOverlayOpacity(value);
 }
 
-void SettingsDialog::on_overlayUp() {
-	overlaySpinBox->stepUp();
+void SettingsDialog::on_overlayOpacityUp() {
+	overlayOpacitySpinBox->stepUp();
 }
 
-void SettingsDialog::on_overlayDown() {
-	overlaySpinBox->stepDown();
+void SettingsDialog::on_overlayOpacityDown() {
+	overlayOpacitySpinBox->stepDown();
 }
 
-void SettingsDialog::on_opacitySpinBox_valueChanged(double value) {
+void SettingsDialog::on_surfaceOpacitySpinBox_valueChanged(double value) {
 	visualizationContainer->SetVisibleOpacity(value);
 }
 
-void SettingsDialog::on_opacityUp() {
-	opacitySpinBox->stepUp();
+void SettingsDialog::on_surfaceOpacityUp() {
+	surfaceOpacitySpinBox->stepUp();
 }
 
-void SettingsDialog::on_opacityDown() {
-	opacitySpinBox->stepDown();
+void SettingsDialog::on_surfaceOpacityDown() {
+	surfaceOpacitySpinBox->stepDown();
 }
 
 void SettingsDialog::on_voxelSizeSpinBox() {
@@ -100,10 +100,18 @@ void SettingsDialog::on_windowLevelChanged(double window, double level) {
 	levelSpinBox->setValue(level);
 }
 
-void SettingsDialog::on_overlayChanged(double value) {
-	overlaySpinBox->setValue(value);
+void SettingsDialog::on_overlayOpacityChanged(double value) {
+	overlayOpacitySpinBox->setValue(value);
 }
 
-void SettingsDialog::on_opacityChanged(double value) {
-	opacitySpinBox->setValue(value);
+void SettingsDialog::on_surfaceOpacityChanged(double value) {
+	surfaceOpacitySpinBox->setValue(value);
+}
+
+void SettingsDialog::on_gradientOpacityCheckBox_stateChanged(int state) {
+	visualizationContainer->GetVolumeView()->SetVolumeRenderingGradientOpacity(state != 0);
+}
+
+void SettingsDialog::on_autoAdjustSamplingCheckBox_stateChanged(int state) {
+	visualizationContainer->GetVolumeView()->SetVolumeRenderingAutoAdjustSampling(state != 0);
 }

@@ -117,20 +117,20 @@ MainWindow::MainWindow() {
 	brushRadiusSpinBox->setToolTip("Adjust brush radius (left / right arrow)");
 
 	// Overlay opacity shortcut
-	QShortcut* overlayUp = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Right), this);
-	QShortcut* overlayDown = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Left), this);
+	QShortcut* overlayOpacityUp = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Right), this);
+	QShortcut* overlayOpacityDown = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Left), this);
 
-	QObject::connect(overlayUp, &QShortcut::activated, this, &MainWindow::on_overlayUp);
-	QObject::connect(overlayDown, &QShortcut::activated, this, &MainWindow::on_overlayDown);
-	QObject::connect(this, &MainWindow::overlayChanged, settingsDialog, &SettingsDialog::on_overlayChanged);
+	QObject::connect(overlayOpacityUp, &QShortcut::activated, this, &MainWindow::on_overlayOpacityUp);
+	QObject::connect(overlayOpacityDown, &QShortcut::activated, this, &MainWindow::on_overlayOpacityDown);
+	QObject::connect(this, &MainWindow::overlayOpacityChanged, settingsDialog, &SettingsDialog::on_overlayOpacityChanged);
 
-	// Region opacity shortcut
-	QShortcut* opacityUp = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Right), this);
-	QShortcut* opacityDown = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Left), this);
+	// Surface opacity shortcut
+	QShortcut* surfaceOpacityUp = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Right), this);
+	QShortcut* surfaceOpacityDown = new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Left), this);
 
-	QObject::connect(opacityUp, &QShortcut::activated, this, &MainWindow::on_opacityUp);
-	QObject::connect(opacityDown, &QShortcut::activated, this, &MainWindow::on_opacityDown);
-	QObject::connect(this, &MainWindow::opacityChanged, settingsDialog, &SettingsDialog::on_opacityChanged);
+	QObject::connect(surfaceOpacityUp, &QShortcut::activated, this, &MainWindow::on_surfaceOpacityUp);
+	QObject::connect(surfaceOpacityDown, &QShortcut::activated, this, &MainWindow::on_surfaceOpacityDown);
+	QObject::connect(this, &MainWindow::surfaceOpacityChanged, settingsDialog, &SettingsDialog::on_surfaceOpacityChanged);
 
 	// 2D/3D toggle
 	QShortcut* toggleView = new QShortcut(QKeySequence("t"), this);
@@ -861,40 +861,40 @@ void MainWindow::on_regionColor(int label, QColor color) {
 	visualizationContainer->SetRegionColor((unsigned short)label, color.redF(), color.greenF(), color.blueF());
 }
 
-void MainWindow::on_overlayDown() {
+void MainWindow::on_overlayOpacityDown() {
 	SliceView* sliceView = visualizationContainer->GetSliceView();
 
 	double value = qMax(sliceView->GetOverlayOpacity() - 0.1, 0.0);
 
 	sliceView->SetOverlayOpacity(value);
 
-	emit overlayChanged(value);
+	emit overlayOpacityChanged(value);
 }
 
-void MainWindow::on_overlayUp() {
+void MainWindow::on_overlayOpacityUp() {
 	SliceView* sliceView = visualizationContainer->GetSliceView();
 
 	double value = qMin(sliceView->GetOverlayOpacity() + 0.1, 1.0);
 
 	sliceView->SetOverlayOpacity(value);
 
-	emit overlayChanged(value);
+	emit overlayOpacityChanged(value);
 }
 
-void MainWindow::on_opacityDown() {
+void MainWindow::on_surfaceOpacityDown() {
 	double value = qMax(visualizationContainer->GetVolumeView()->GetVisibleOpacity() - 0.1, 0.0);
 
 	visualizationContainer->SetVisibleOpacity(value);
 
-	emit opacityChanged(value);
+	emit surfaceOpacityChanged(value);
 }
 
-void MainWindow::on_opacityUp() {
+void MainWindow::on_surfaceOpacityUp() {
 	double value = qMin(visualizationContainer->GetVolumeView()->GetVisibleOpacity() + 0.1, 1.0);
 
 	visualizationContainer->SetVisibleOpacity(value);
 
-	emit opacityChanged(value);
+	emit surfaceOpacityChanged(value);
 }
 
 void MainWindow::on_brushRadiusDown() {

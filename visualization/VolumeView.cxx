@@ -7,7 +7,6 @@
 #include <vtkCubeAxesActor.h>
 #include <vtkCubeSource.h>
 #include <vtkExtractVOI.h>
-#include <vtkFixedPointVolumeRayCastMapper.h>
 #include <vtkImageCast.h>
 #include <vtkImageData.h>
 #include <vtkImageMask.h>
@@ -24,6 +23,7 @@
 #include <vtkRendererCollection.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
+#include <vtkSmartVolumeMapper.h>
 #include <vtkTextActor.h>
 #include <vtkTextProperty.h>
 #include <vtkVolume.h>
@@ -447,11 +447,35 @@ void VolumeView::UpdateVolumeMask(bool filter) {
 	}
 }
 
+void VolumeView::SetVolumeRenderingGradientOpacity(bool gradientOpacity) {
+	volume->GetProperty()->SetDisableGradientOpacity(!gradientOpacity);
+
+	Render();
+}
+
+bool VolumeView::GetVolumeRenderingGradientOpacity() {
+	return !volume->GetProperty()->GetDisableGradientOpacity();
+}
+
+void VolumeView::SetVolumeRenderingAutoAdjustSampling(bool autoAdjust) {
+	volumeMapper->SetAutoAdjustSampleDistances(autoAdjust);
+	volumeMapper->SetInteractiveAdjustSampleDistances(autoAdjust);
+}
+
 void VolumeView::UpdateVolumeRenderingTransferFunctions(double x1, double x2) {
+	vtkPiecewiseFunction* opacity = volume->GetProperty()->GetScalarOpacity();
+	vtkPiecewiseFunction* gradientOpacity = volume->GetProperty()->GetStoredGradientOpacity();
+	vtkColorTransferFunction* color = volume->GetProperty()->GetRGBTransferFunction();
+
 	// Opacity
-	volumeOpacity->RemoveAllPoints();
-	volumeOpacity->AddPoint(x1, 0.0);
-	volumeOpacity->AddPoint(x2, 0.5);
+	opacity->RemoveAllPoints();
+	opacity->AddPoint(x1, 0.0);
+	opacity->AddPoint(x2, 0.5);
+
+	// Gradient opacity
+	gradientOpacity->RemoveAllPoints();
+	gradientOpacity->AddPoint(0, 0.0);
+	gradientOpacity->AddPoint((x2 - x1) / 2, 1.0);
 
 	// Colors
 	// Paraview diverging
@@ -468,10 +492,10 @@ void VolumeView::UpdateVolumeRenderingTransferFunctions(double x1, double x2) {
 		}
 	}
 
-	volumeColor->RemoveAllPoints();
+	color->RemoveAllPoints();
 	for (int i = 0; i < numColors; i++) {
 		double x = x1 + (double)i / (numColors - 1) * (x2 - x1);
-		volumeColor->AddRGBPoint(x, colors[i][0], colors[i][1], colors[i][2]);
+		color->AddRGBPoint(x, colors[i][0], colors[i][1], colors[i][2]);
 	}
 }
 
@@ -505,23 +529,24 @@ void VolumeView::CreateVolumeRenderer() {
 	volumeMask = vtkSmartPointer<vtkImageMask>::New();
 	volumeMask->SetMaskInputData(volumeCopy->GetOutput());
 
-	volumeMapper = vtkSmartPointer<vtkFixedPointVolumeRayCastMapper>::New();
+	volumeMapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
 	volumeMapper->SetBlendModeToComposite();
 	volumeMapper->AutoAdjustSampleDistancesOn();
 	volumeMapper->SetSampleDistance(0.1);
-	volumeMapper->SetInteractiveSampleDistance(0.1);
-	volumeMapper->SetImageSampleDistance(0.5);
-	volumeMapper->SetMaximumImageSampleDistance(2);
+	volumeMapper->SetAutoAdjustSampleDistances(false);
+	volumeMapper->SetInteractiveAdjustSampleDistances(false);
 	
-	volumeOpacity = vtkSmartPointer<vtkPiecewiseFunction>::New();
-
-	volumeColor = vtkSmartPointer<vtkColorTransferFunction>::New();
+	vtkSmartPointer<vtkPiecewiseFunction> opacity = vtkSmartPointer<vtkPiecewiseFunction>::New();
+	vtkSmartPointer<vtkPiecewiseFunction> gradientOpacity = vtkSmartPointer<vtkPiecewiseFunction>::New();
+	vtkSmartPointer<vtkColorTransferFunction> color = vtkSmartPointer<vtkColorTransferFunction>::New();
 
 	vtkSmartPointer<vtkVolumeProperty> volumeProperty = vtkSmartPointer<vtkVolumeProperty>::New();
 	volumeProperty->ShadeOff();
 	volumeProperty->SetInterpolationTypeToLinear();
-	volumeProperty->SetScalarOpacity(volumeOpacity);
-	volumeProperty->SetColor(volumeColor);
+	volumeProperty->SetScalarOpacity(opacity);
+	volumeProperty->SetGradientOpacity(gradientOpacity);
+	volumeProperty->SetDisableGradientOpacity(true);
+	volumeProperty->SetColor(color);
 
 	volume = vtkSmartPointer<vtkVolume>::New();
 	volume->SetMapper(volumeMapper);

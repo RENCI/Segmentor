@@ -16,14 +16,14 @@ class vtkImageData;
 class vtkLookupTable;
 class vtkImageMapToColors;
 class vtkImageMask;
-class vtkFixedPointVolumeRayCastMapper;
 class vtkPiecewiseFunction;
 class vtkPlaneSource;
 class vtkObject;
 class vtkOutlineCornerFilter;
 class vtkPassThrough;
 class vtkRenderer;
-class vtkRenderWindowInteractor;
+class vtkRenderWindowInteractor; 
+class vtkSmartVolumeMapper;
 class vtkTextActor;
 class vtkVolume;
 
@@ -83,9 +83,13 @@ public:
 
 	void SetBrushRadius(int radius);
 
+	// Volume rendering
 	void SetWindowLevel(double window, double level);
-
 	void UpdateVolumeMask(bool filter);
+	void SetVolumeRenderingGradientOpacity(bool gradientOpacity);
+	bool GetVolumeRenderingGradientOpacity();
+	void SetVolumeRenderingAutoAdjustSampling(bool autoAdjust);
+	bool GetVolumeRenderingAutoAdjustSampling();
 
 	void Render();
 
@@ -142,10 +146,8 @@ protected:
 	// Volume rendering
 	vtkSmartPointer<vtkImageCast> volumeCopy;
 	vtkSmartPointer<vtkImageMask> volumeMask;
-	vtkSmartPointer<vtkFixedPointVolumeRayCastMapper> volumeMapper;
+	vtkSmartPointer<vtkSmartVolumeMapper> volumeMapper;
 	vtkSmartPointer<vtkVolume> volume;
-	vtkSmartPointer<vtkPiecewiseFunction> volumeOpacity;
-	vtkSmartPointer<vtkColorTransferFunction> volumeColor;
 	void CreateVolumeRenderer();
 	void UpdateVolumeRenderer();
 	void UpdateVolumeRenderingTransferFunctions(double x1, double x2);

@@ -23,19 +23,22 @@ public slots:
 	virtual void on_windowSpinBox_valueChanged(double value);
 	virtual void on_levelSpinBox_valueChanged(double value);
 
-	virtual void on_overlaySpinBox_valueChanged(double value);
-	virtual void on_overlayUp();
-	virtual void on_overlayDown();
+	virtual void on_overlayOpacitySpinBox_valueChanged(double value);
+	virtual void on_overlayOpacityUp();
+	virtual void on_overlayOpacityDown();
 
-	virtual void on_opacitySpinBox_valueChanged(double value);
-	virtual void on_opacityUp();
-	virtual void on_opacityDown();
+	virtual void on_surfaceOpacitySpinBox_valueChanged(double value);
+	virtual void on_surfaceOpacityUp();
+	virtual void on_surfaceOpacityDown();
 
 	virtual void on_voxelSizeSpinBox();
 
 	virtual void on_windowLevelChanged(double window, double level);
-	virtual void on_overlayChanged(double value);
-	virtual void on_opacityChanged(double value);
+	virtual void on_overlayOpacityChanged(double value);
+	virtual void on_surfaceOpacityChanged(double value);
+
+	virtual void on_gradientOpacityCheckBox_stateChanged(int state);
+	virtual void on_autoAdjustSamplingCheckBox_stateChanged(int state);
 
 protected:
 	VisualizationContainer* visualizationContainer;
