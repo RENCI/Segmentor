@@ -87,7 +87,7 @@ MainWindow::MainWindow() {
 	QObject::connect(regionTable, &RegionTable::regionColor, this, &MainWindow::on_regionColor);
 
 	// Settings dialog
-	settingsDialog = new SettingsDialog(this, visualizationContainer);
+	settingsDialog = new SettingsDialog(this, visualizationContainer, regionTable);
 
 	// Slice up and down
 	QAction* sliceUpAction = new QAction("+", this);

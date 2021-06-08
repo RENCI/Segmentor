@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>314</width>
-    <height>367</height>
+    <height>423</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -326,6 +326,22 @@
          </widget>
         </item>
        </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_5">
+     <property name="title">
+      <string>Training feedback</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_5">
+      <item>
+       <widget class="QCheckBox" name="showFeedbackCheckBox">
+        <property name="text">
+         <string>Show feedback</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

@@ -12,9 +12,13 @@ class RegionTable : public QTableWidget {
 public:
 	RegionTable(QWidget* parent = 0);
 
+	void update();
 	void update(RegionCollection* regions);
 	void update(Region* region);
 	void selectRegionLabel(unsigned short label);
+
+	void setShowFeedbackColumns(bool show);
+	bool getShowFeedbackColumns();
 
 public slots:
 	void on_removeRegion(int label);
@@ -30,6 +34,8 @@ signals:
 	void regionColor(int label, QColor color);
 
 protected:
+	RegionCollection* regions;
+
 	int currentRegionLabel;
 
 	void leaveEvent(QEvent *event);
@@ -38,6 +44,8 @@ protected:
 
 	void disableSorting();
 	void enableSorting();
+
+	bool showFeedbackColumns;
 
 	enum ColumnType {
 		Id = 0,

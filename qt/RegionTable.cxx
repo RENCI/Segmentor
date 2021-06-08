@@ -26,14 +26,20 @@ RegionTable::RegionTable(QWidget* parent)
 	setMouseTracking(true);
 	setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
+	regions = nullptr;
+
 	currentRegionLabel = 0;
+
+	showFeedbackColumns = false;
 
 	QObject::connect(this, &RegionTable::removeRegion, this, &RegionTable::on_removeRegion);
 	QObject::connect(this, &RegionTable::cellEntered, this, &RegionTable::on_cellEntered);
 	QObject::connect(this, &RegionTable::cellClicked, this, &RegionTable::on_cellClicked);
 }
 
-void RegionTable::update(RegionCollection* regions) {
+void RegionTable::update() {
+	if (!regions) return;
+
 	disableSorting();
 
 	int numRegions = regions->Size();
@@ -118,7 +124,7 @@ void RegionTable::update(RegionCollection* regions) {
 		QObject::connect(removeButton, &QPushButton::clicked, [this, label]() {
 			removeRegion(label);
 		});
-		
+
 		setItem(i, Id, idItem);
 		setItem(i, Color, colorItem);
 		setItem(i, Size, sizeItem);
@@ -139,6 +145,12 @@ void RegionTable::update(RegionCollection* regions) {
 	enableSorting();
 
 	selectRegionLabel(currentRegionLabel);
+}
+
+void RegionTable::update(RegionCollection* regionCollection) {
+	regions = regionCollection;
+
+	update();
 }
 
 void RegionTable::update(Region* region) {
@@ -197,6 +209,16 @@ void RegionTable::selectRegionLabel(unsigned short label) {
 			ti->setTextColor(QColor("black"));
 		}
 	}
+}
+
+void RegionTable::setShowFeedbackColumns(bool show) {
+	showFeedbackColumns = show;
+
+	update();
+}
+
+bool RegionTable::getShowFeedbackColumns() {
+	return showFeedbackColumns;
 }
 
 void RegionTable::on_removeRegion(int label) {
