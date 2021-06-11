@@ -11,6 +11,7 @@
 #include <QCheckBox>
 #include <QColorDialog>
 
+#include "LabelColors.h"
 #include "Region.h"
 #include "RegionCollection.h"
 
@@ -50,9 +51,6 @@ void RegionTable::update() {
 	QIcon removeIcon = style->standardIcon(QStyle::SP_DialogCloseButton);
 	QIcon refiningIcon = style->standardIcon(QStyle::SP_MessageBoxWarning);
 
-	// Grey color
-	double grey[3] = { 0.5, 0.5, 0.5 };
-
 	// Add rows for each region
 	int i = 0;
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++, i++) {
@@ -66,7 +64,7 @@ void RegionTable::update() {
 		idItem->setFlags(Qt::ItemIsSelectable);
 
 		// Color
-		const double* col = region->GetDone() ? grey : region->GetColor();
+		const double* col = region->GetDone() ? LabelColors::doneColor : region->GetColor();
 		QColor color(col[0] * 255, col[1] * 255, col[2] * 255);
 		QTableWidgetItem* colorItem = new QTableWidgetItem();
 		colorItem->setBackgroundColor(color);
@@ -165,6 +163,11 @@ void RegionTable::update(Region* region) {
 		QTableWidgetItem* ti = item(i, 0);
 
 		if (ti->text() == labelString) {
+			// Color
+			const double* col = region->GetDone() ? LabelColors::doneColor : region->GetColor();
+			QColor color(col[0] * 255, col[1] * 255, col[2] * 255);
+			item(i, Color)->setBackgroundColor(color);
+
 			// Size
 			item(i, Size)->setData(0, region->GetNumVoxels());
 

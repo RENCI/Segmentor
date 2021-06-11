@@ -109,6 +109,8 @@ protected:
 
 	void ClearLabels();
 
+	void UpdateColor();
+
 	friend class RegionInfo;
 };
 

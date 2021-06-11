@@ -2,6 +2,8 @@
 
 #include "vtkLookupTable.h"
 
+double LabelColors::doneColor[3] = { 1.0, 1.0, 1.0 };
+
 // Colors from ColorBrewer
 const int numColors = 12;
 double LabelColors::colors[numColors][3] = {

@@ -19,6 +19,7 @@
 
 #include "vtkImageDataCells.h"
 
+#include "LabelColors.h"
 #include "RegionInfo.h"
 #include "RegionSurface.h"
 #include "RegionOutline.h"
@@ -391,26 +392,32 @@ bool Region::GetDone() {
 void Region::SetDone(bool isDone) {
 	done = isDone;
 
-	if (done) {
-		outline->GetActor()->GetProperty()->SetColor(0.5, 0.5, 0.5);
-		surface->GetActor()->GetProperty()->SetColor(0.5, 0.5, 0.5);
-	}
-	else {
-		outline->GetActor()->GetProperty()->SetColor(color);
-		surface->GetActor()->GetProperty()->SetColor(color);
-	}
+	UpdateColor();
 }
 
 void Region::SetColor(double r, double g, double b) {
 	color[0] = r;
 	color[1] = g;
 	color[2] = b;
-	
-	text->GetTextProperty()->SetColor(color);
-	surface->GetActor()->GetProperty()->SetColor(color);
-	outline->GetActor()->GetProperty()->SetColor(color);
-	voxelOutlines->GetActor()->GetProperty()->SetColor(color);
-	highlight3D->GetActor()->GetProperty()->SetColor(color);	
+
+	UpdateColor();	
+}
+
+void Region::UpdateColor() {
+	if (done) {
+		text->GetTextProperty()->SetColor(LabelColors::doneColor);
+		surface->GetActor()->GetProperty()->SetColor(LabelColors::doneColor);
+		outline->GetActor()->GetProperty()->SetColor(LabelColors::doneColor);
+		voxelOutlines->GetActor()->GetProperty()->SetColor(LabelColors::doneColor);
+		highlight3D->GetActor()->GetProperty()->SetColor(LabelColors::doneColor);
+	}
+	else {
+		text->GetTextProperty()->SetColor(color);
+		surface->GetActor()->GetProperty()->SetColor(color);
+		outline->GetActor()->GetProperty()->SetColor(color);
+		voxelOutlines->GetActor()->GetProperty()->SetColor(color);
+		highlight3D->GetActor()->GetProperty()->SetColor(color);
+	}
 }
 
 void Region::ShowText(bool show) {

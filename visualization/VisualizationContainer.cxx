@@ -1867,7 +1867,7 @@ Region* VisualizationContainer::SetRegionDone(unsigned short label, bool done) {
 
 	if (done) {
 		// Set to grey
-		labelColors->SetTableValue(label, 0.5, 0.5, 0.5);
+		labelColors->SetTableValue(label, LabelColors::doneColor);
 		labelColors->Build();
 	}
 	else {
@@ -2287,7 +2287,7 @@ void VisualizationContainer::ExtractRegions(const std::vector<RegionInfo>& metad
 			// Update done status
 			if (region->GetDone()) {
 				region->SetDone(true);
-				labelColors->SetTableValue(region->GetLabel(), 0.5, 0.5, 0.5);
+				labelColors->SetTableValue(region->GetLabel(), LabelColors::doneColor);
 			}
 		}
 		else {
