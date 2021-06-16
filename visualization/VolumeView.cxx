@@ -440,10 +440,27 @@ void VolumeView::UpdateVolumeMask(bool filter) {
 
 		volumeMask->SetMaskInputData(mask);
 		
-		volumeMapper->SetInputConnection(volumeMask->GetOutputPort());
+		//volumeMapper->SetInputConnection(volumeMask->GetOutputPort());
 	}
 	else {
-		volumeMapper->SetInputDataObject(data);
+		vtkSmartPointer<vtkImageData> mask = volumeCopy->GetOutput();
+
+		const int* extent = mask->GetExtent();
+
+		for (int i = extent[0]; i <= extent[1]; i++) {
+			for (int j = extent[2]; j <= extent[3]; j++) {
+				for (int k = extent[4]; k <= extent[5]; k++) {
+					unsigned char* p = static_cast<unsigned char*>(mask->GetScalarPointer(i, j, k));
+					*p = 1;
+				}
+			}
+		}
+
+		mask->Modified();
+
+		volumeMask->SetMaskInputData(mask);
+
+		//volumeMapper->SetInputConnection(volumeMask->GetOutputPort());
 	}
 }
 
@@ -535,6 +552,7 @@ void VolumeView::CreateVolumeRenderer() {
 	volumeMapper->SetSampleDistance(0.1);
 	volumeMapper->SetAutoAdjustSampleDistances(false);
 	volumeMapper->SetInteractiveAdjustSampleDistances(false);
+	volumeMapper->SetInputConnection(volumeMask->GetOutputPort());
 	
 	vtkSmartPointer<vtkPiecewiseFunction> opacity = vtkSmartPointer<vtkPiecewiseFunction>::New();
 	vtkSmartPointer<vtkPiecewiseFunction> gradientOpacity = vtkSmartPointer<vtkPiecewiseFunction>::New();
@@ -566,7 +584,6 @@ void VolumeView::UpdateVolumeRenderer() {
 
 	volumeMask->SetInputDataObject(data);
 
-	volumeMapper->SetInputDataObject(data);
 	volume->SetVisibility(volumeRendering);	
 		
 	// Initialize window level
