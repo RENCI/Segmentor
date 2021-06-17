@@ -19,6 +19,7 @@
 
 #include "vtkImageDataCells.h"
 
+#include "Feedback.h"
 #include "LabelColors.h"
 #include "RegionInfo.h"
 #include "RegionSurface.h"
@@ -30,6 +31,8 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 	visible = false;
 	modified = false;
 	done = false;
+
+	feedback = new Feedback();
 
 	// Input data info
 	data = inputData;
@@ -138,6 +141,8 @@ Region::~Region() {
 	delete outline;
 	delete voxelOutlines;
 	delete highlight3D;
+
+	delete feedback;
 }
 
 vtkAlgorithmOutput* Region::GetOutput() {
@@ -581,6 +586,10 @@ void Region::SetInfo(const RegionInfo& info) {
 	visible = info.visible;
 	modified = info.modified;
 	done = info.done;
+}
+
+Feedback* Region::GetFeedback() {
+	return feedback;
 }
 
 void Region::ClearLabels() {

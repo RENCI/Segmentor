@@ -1,13 +1,12 @@
 #include "SettingsDialog.h"
 
-#include "RegionTable.h"
 #include "VisualizationContainer.h"
 #include "SliceView.h"
 #include "VolumeView.h"
 
 // Constructor
-SettingsDialog::SettingsDialog(QWidget* parent, VisualizationContainer* visualizationContainer, RegionTable* regionTable)
-: QDialog(parent), visualizationContainer(visualizationContainer), regionTable(regionTable) {
+SettingsDialog::SettingsDialog(QWidget* parent, VisualizationContainer* visualizationContainer)
+: QDialog(parent), visualizationContainer(visualizationContainer) {
 	// Create the GUI from the Qt Designer file
 	setupUi(this);
 
@@ -115,8 +114,4 @@ void SettingsDialog::on_gradientOpacityCheckBox_stateChanged(int state) {
 
 void SettingsDialog::on_autoAdjustSamplingCheckBox_stateChanged(int state) {
 	visualizationContainer->GetVolumeView()->SetVolumeRenderingAutoAdjustSampling(state != 0);
-}
-
-void SettingsDialog::on_showFeedbackCheckBox_stateChanged(int state) {
-	regionTable->setShowFeedbackColumns(state != 0);
 }

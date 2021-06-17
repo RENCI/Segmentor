@@ -3,13 +3,12 @@
 
 #include "ui_SettingsDialog.h"
 
-class RegionTable;
 class VisualizationContainer;
 
 class SettingsDialog : public QDialog, private Ui::SettingsDialog {
 	Q_OBJECT
 public:
-	SettingsDialog(QWidget* parent, VisualizationContainer* visualizationContainer, RegionTable* regionTable);
+	SettingsDialog(QWidget* parent, VisualizationContainer* visualizationContainer);
 	virtual ~SettingsDialog();
 
 	void initializeSettings();
@@ -41,11 +40,8 @@ public slots:
 	virtual void on_gradientOpacityCheckBox_stateChanged(int state);
 	virtual void on_autoAdjustSamplingCheckBox_stateChanged(int state);
 
-	virtual void on_showFeedbackCheckBox_stateChanged(int state);
-
 protected:
 	VisualizationContainer* visualizationContainer;
-	RegionTable* regionTable;
 };
 
 #endif

@@ -17,9 +17,6 @@ public:
 	void update(Region* region);
 	void selectRegionLabel(unsigned short label);
 
-	void setShowFeedbackColumns(bool show);
-	bool getShowFeedbackColumns();
-
 public slots:
 	void on_removeRegion(int label);
 	void on_cellEntered(int row, int column);
@@ -44,8 +41,6 @@ protected:
 
 	void disableSorting();
 	void enableSorting();
-
-	bool showFeedbackColumns;
 
 	enum ColumnType {
 		Id = 0,

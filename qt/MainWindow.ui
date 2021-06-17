@@ -438,11 +438,18 @@
     </property>
     <addaction name="actionChange_Settings"/>
    </widget>
+   <widget class="QMenu" name="menuTraining">
+    <property name="title">
+     <string>Training</string>
+    </property>
+    <addaction name="actionShow_Feedback"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuAnalyze"/>
    <addaction name="menuView"/>
    <addaction name="menuSettings"/>
+   <addaction name="menuTraining"/>
    <addaction name="menuHelp"/>
    <addaction name="menuAbout"/>
   </widget>
@@ -598,6 +605,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+T</string>
+   </property>
+  </action>
+  <action name="actionShow_Feedback">
+   <property name="text">
+    <string>Show Feedback</string>
    </property>
   </action>
  </widget>

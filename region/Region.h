@@ -23,6 +23,7 @@ class RegionSurface;
 class RegionOutline;
 class RegionVoxelOutlines;
 class RegionHighlight3D;
+class Feedback;
 
 class Region {
 public:
@@ -80,6 +81,16 @@ public:
 
 	void SetInfo(const RegionInfo& info);
 
+	enum FeedbackType {
+		Undertraced = 0,
+		Overtraced,
+		AddToSlice,
+		RemoveId,
+		CorrectSplitMerge
+	};
+
+	Feedback* GetFeedback();
+
 protected:
 	unsigned short label;
 	double color[3];
@@ -88,6 +99,8 @@ protected:
 	bool visible;
 	bool modified;
 	bool done;
+
+	Feedback* feedback;
 
 	vtkSmartPointer<vtkImageData> data;
 	vtkSmartPointer<vtkExtractVOI> voi;

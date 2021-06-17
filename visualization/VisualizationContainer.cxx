@@ -40,6 +40,7 @@
 #include "vtkInteractorStyleSlice.h"
 #include "vtkInteractorStyleVolume.h"
 
+#include "Feedback.h"
 #include "History.h"
 #include "InteractionEnums.h"
 #include "InteractionCallbacks.h"
@@ -1976,6 +1977,14 @@ void VisualizationContainer::SetRegionColor(unsigned short label, double r, doub
 	Render();
 }
 
+void VisualizationContainer::SetRegionFeedback(unsigned short label, Feedback::FeedbackType type, bool value) {
+	Region* region = regions->Get(label);
+
+	if (!region) return;
+
+	region->GetFeedback()->SetValue(type, value);
+}
+
 void VisualizationContainer::SetWindowLevel(double window, double level) {
 	qtWindow->setWindowLevel(window, level);
 }
@@ -2063,6 +2072,10 @@ void VisualizationContainer::Redo() {
 
 bool VisualizationContainer::NeedToSave() {
 	return numEdits > 0;
+}
+
+RegionCollection* VisualizationContainer::GetRegions() {
+	return regions;
 }
 
 VolumeView* VisualizationContainer::GetVolumeView() {

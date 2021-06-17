@@ -31,8 +31,6 @@ RegionTable::RegionTable(QWidget* parent)
 
 	currentRegionLabel = 0;
 
-	showFeedbackColumns = false;
-
 	QObject::connect(this, &RegionTable::removeRegion, this, &RegionTable::on_removeRegion);
 	QObject::connect(this, &RegionTable::cellEntered, this, &RegionTable::on_cellEntered);
 	QObject::connect(this, &RegionTable::cellClicked, this, &RegionTable::on_cellClicked);
@@ -212,16 +210,6 @@ void RegionTable::selectRegionLabel(unsigned short label) {
 			ti->setTextColor(QColor("black"));
 		}
 	}
-}
-
-void RegionTable::setShowFeedbackColumns(bool show) {
-	showFeedbackColumns = show;
-
-	update();
-}
-
-bool RegionTable::getShowFeedbackColumns() {
-	return showFeedbackColumns;
 }
 
 void RegionTable::on_removeRegion(int label) {
