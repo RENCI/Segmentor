@@ -15,9 +15,11 @@ FeedbackDialog::FeedbackDialog(QWidget* parent, VisualizationContainer* visualiz
 	// Create table
 	table = new FeedbackTable(this);
 	table->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+	table->update(visualizationContainer->GetRegions());
 	tableContainer->layout()->addWidget(table);
 	
 	QObject::connect(table, &FeedbackTable::regionFeedback, this, &FeedbackDialog::on_regionFeedback);
+	QObject::connect(table, &FeedbackTable::highlightRegion, this, &FeedbackDialog::on_highlightRegion);
 
 	updateRegions();
 }
@@ -32,4 +34,8 @@ void FeedbackDialog::updateRegions() {
 
 void FeedbackDialog::on_regionFeedback(int label, Feedback::FeedbackType type, bool value) {
 	visualizationContainer->SetRegionFeedback(label, type, value);
+}
+
+void FeedbackDialog::on_highlightRegion(int label) {
+	visualizationContainer->HighlightRegion((unsigned short)label);
 }

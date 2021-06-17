@@ -28,6 +28,7 @@ FeedbackTable::FeedbackTable(QWidget* parent) : QTableWidget(parent) {
 
 	currentRegionLabel = 0;
 
+	QObject::connect(this, &FeedbackTable::cellEntered, this, &FeedbackTable::on_cellEntered);
 	QObject::connect(this, &FeedbackTable::cellClicked, this, &FeedbackTable::on_cellClicked);
 }
 
@@ -54,11 +55,11 @@ void FeedbackTable::update(RegionCollection* regions) {
 		setItem(i, Id, idItem);
 
 		// Check boxes
-		addCheckWidget(i, Undertraced, false);
-		addCheckWidget(i, Overtraced, false);
-		addCheckWidget(i, AddToSlice, false);
-		addCheckWidget(i, RemoveId, false);
-		addCheckWidget(i, CorrectSplitMerge, false);
+		addCheckWidget(i, Undertraced, region->GetFeedback()->GetValue(Feedback::Undertraced));
+		addCheckWidget(i, Overtraced, region->GetFeedback()->GetValue(Feedback::Overtraced));
+		addCheckWidget(i, AddToSlice, region->GetFeedback()->GetValue(Feedback::AddToSlice));
+		addCheckWidget(i, RemoveId, region->GetFeedback()->GetValue(Feedback::RemoveId));
+		addCheckWidget(i, CorrectSplitMerge, region->GetFeedback()->GetValue(Feedback::CorrectSplitMerge));
 	}
 
 	enableSorting();
@@ -132,10 +133,9 @@ void FeedbackTable::selectRegionLabel(unsigned short label) {
 }
 
 void FeedbackTable::on_cellEntered(int row, int column) {
-/*
 	QString labelString = QString::number(currentRegionLabel);
 
-	if (column == Id || column == Color || column == Size) {
+	if (column == Id) {
 		// Highlight
 		for (int i = 0; i < rowCount(); i++) {
 			QTableWidgetItem* ti = item(i, 0);
@@ -164,7 +164,6 @@ void FeedbackTable::on_cellEntered(int row, int column) {
 
 		emit(highlightRegion(0));
 	}
-*/
 }
 
 void FeedbackTable::on_cellClicked(int row, int column) {

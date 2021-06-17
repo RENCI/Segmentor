@@ -17,9 +17,11 @@ public:
 	void SetValue(FeedbackType type, bool value);
 	bool GetValue(FeedbackType type);
 
+	void Copy(const Feedback& other);
+
 protected:
-	bool underTraced;
-	bool overTraced;
+	bool undertraced;
+	bool overtraced;
 	bool addToSlice;
 	bool removeId;
 	bool correctSplitMerge;

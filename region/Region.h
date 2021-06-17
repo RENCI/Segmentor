@@ -81,14 +81,6 @@ public:
 
 	void SetInfo(const RegionInfo& info);
 
-	enum FeedbackType {
-		Undertraced = 0,
-		Overtraced,
-		AddToSlice,
-		RemoveId,
-		CorrectSplitMerge
-	};
-
 	Feedback* GetFeedback();
 
 protected:

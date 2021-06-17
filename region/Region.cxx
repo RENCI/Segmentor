@@ -103,6 +103,8 @@ Region::Region(const RegionInfo& info, vtkImageData* inputData) {
 	// Text
 	text = vtkSmartPointer<vtkBillboardTextActor3D>::New();
 
+	feedback = new Feedback();
+
 	SetInfo(info);
 
 	text->SetInput(std::to_string(label).c_str());
@@ -586,6 +588,8 @@ void Region::SetInfo(const RegionInfo& info) {
 	visible = info.visible;
 	modified = info.modified;
 	done = info.done;
+
+	feedback->Copy(info.feedback);
 }
 
 Feedback* Region::GetFeedback() {

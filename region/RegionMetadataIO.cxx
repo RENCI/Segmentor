@@ -2,7 +2,6 @@
 
 #include <QFile>
 #include <QJsonDocument>
-#include <QJsonObject>
 #include <QJsonArray>
 
 #include <iostream>
@@ -70,6 +69,16 @@ std::vector<RegionInfo> RegionMetadataIO::Read(std::string fileName) {
 					}
 				}
 
+				if (regionObject.contains("feedback") && regionObject["feedback"].isObject()) {
+					QJsonObject feedback = regionObject["feedback"].toObject();
+
+					SetFeedbackValue(region, feedback, Feedback::Undertraced, "undertraced");
+					SetFeedbackValue(region, feedback, Feedback::Overtraced, "overtraced");
+					SetFeedbackValue(region, feedback, Feedback::AddToSlice, "addToSlice");
+					SetFeedbackValue(region, feedback, Feedback::RemoveId, "removeId");
+					SetFeedbackValue(region, feedback, Feedback::CorrectSplitMerge, "correctSplitMerge");
+				}
+
 				regionData.push_back(region);
 			}
 		}
@@ -110,6 +119,14 @@ bool RegionMetadataIO::Write(std::string fileName, std::vector<RegionInfo> regio
 		}
 		regionObject["extent"] = extent;
 
+		QJsonObject feedback;
+		feedback["undertraced"] = regions[i].feedback.GetValue(Feedback::Undertraced);
+		feedback["overtraced"] = regions[i].feedback.GetValue(Feedback::Overtraced);
+		feedback["addToSlice"] = regions[i].feedback.GetValue(Feedback::AddToSlice);
+		feedback["removeId"] = regions[i].feedback.GetValue(Feedback::RemoveId);
+		feedback["correctSplitMerge"] = regions[i].feedback.GetValue(Feedback::CorrectSplitMerge);
+		regionObject["feedback"] = feedback;
+
 		regionObjects.append(regionObject);
 	}
 
@@ -121,4 +138,10 @@ bool RegionMetadataIO::Write(std::string fileName, std::vector<RegionInfo> regio
 	file.write(document.toJson());
 
 	return true;
+}
+
+void RegionMetadataIO::SetFeedbackValue(RegionInfo& region, const QJsonObject& feedback, Feedback::FeedbackType type, const char* key) {
+	if (feedback.contains(key) && feedback[key].isBool()) {
+		region.feedback.SetValue(type, feedback[key].toBool());
+	}
 }
