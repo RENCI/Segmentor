@@ -11,11 +11,15 @@ public:
 		Overtraced,
 		AddToSlice,
 		RemoveId,
+		Split,
+		Merge,
 		CorrectSplitMerge
 	};
 
 	void SetValue(FeedbackType type, bool value);
 	bool GetValue(FeedbackType type);
+
+	bool HasFeedback();
 
 	void Copy(const Feedback& other);
 
@@ -24,6 +28,8 @@ protected:
 	bool overtraced;
 	bool addToSlice;
 	bool removeId;
+	bool split;
+	bool merge;
 	bool correctSplitMerge;
 };
 

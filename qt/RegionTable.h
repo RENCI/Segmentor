@@ -13,7 +13,7 @@ public:
 	RegionTable(QWidget* parent = 0);
 
 	void update();
-	void update(RegionCollection* regions);
+	void update(RegionCollection* regionCollection);
 	void update(Region* region);
 	void selectRegionLabel(unsigned short label);
 

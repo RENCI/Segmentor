@@ -17,6 +17,12 @@ public:
 	void updateRegions();
 	
 public slots:
+	// Use Qt's auto-connect magic to tie GUI widgets to slots,
+	// removing the need to call connect() explicitly.
+	// Names of the methods must follow the naming convention
+	// on_<widget name>_<signal name>(<signal parameters>).
+	void on_filterCheckBox_stateChanged(int state);
+
 	void on_regionFeedback(int label, Feedback::FeedbackType type, bool value);
 	void on_highlightRegion(int label);
 

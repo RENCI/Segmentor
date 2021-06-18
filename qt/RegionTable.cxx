@@ -15,9 +15,7 @@
 #include "Region.h"
 #include "RegionCollection.h"
 
-RegionTable::RegionTable(QWidget* parent)
-	: QTableWidget(parent) 
-{
+RegionTable::RegionTable(QWidget* parent) : QTableWidget(parent) {
 	QStringList headers;
 	headers << "Id" << "Color" << "Size" << "Refining" << "Visible" << "Done" << "Remove";
 	setColumnCount(headers.length());

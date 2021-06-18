@@ -32,6 +32,12 @@ void FeedbackDialog::updateRegions() {
 	table->update(visualizationContainer->GetRegions());
 }
 
+void FeedbackDialog::on_filterCheckBox_stateChanged(int state) {
+	printf("%d\n", state);
+
+	table->setFilter(state != 0);
+}
+
 void FeedbackDialog::on_regionFeedback(int label, Feedback::FeedbackType type, bool value) {
 	visualizationContainer->SetRegionFeedback(label, type, value);
 }

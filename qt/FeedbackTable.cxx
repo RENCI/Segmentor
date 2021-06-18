@@ -18,7 +18,7 @@
 
 FeedbackTable::FeedbackTable(QWidget* parent) : QTableWidget(parent) {
 	QStringList headers;
-	headers << "Id" << "Undertraced" << "Overtraced" << "Add to Slice" << "Remove Id" << "Correct from Split/Merge";
+	headers << "Id" << "Undertraced" << "Overtraced" << "Add to Slice" << "Remove Id" << "Split" << "Merge" << "Correct from Split/Merge";
 	setColumnCount(headers.length());
 	setHorizontalHeaderLabels(headers);
 	verticalHeader()->setVisible(false);
@@ -26,24 +26,37 @@ FeedbackTable::FeedbackTable(QWidget* parent) : QTableWidget(parent) {
 	setMouseTracking(true);
 	setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
+	regions = nullptr;
+
 	currentRegionLabel = 0;
+
+	filter = false;
 
 	QObject::connect(this, &FeedbackTable::cellEntered, this, &FeedbackTable::on_cellEntered);
 	QObject::connect(this, &FeedbackTable::cellClicked, this, &FeedbackTable::on_cellClicked);
 }
 
-void FeedbackTable::update(RegionCollection* regions) {
+void FeedbackTable::update() {
 	if (!regions) return;
 
 	disableSorting();
 
-	int numRegions = regions->Size();
+	std::vector<Region*> displayRegions;
+
+	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+		Region* region = regions->Get(it);
+
+		if (!filter || region->GetFeedback()->HasFeedback()) {
+			displayRegions.push_back(region);
+		}
+	}
+	
+	int numRegions = (int)displayRegions.size();
 	setRowCount(numRegions);
 
 	// Add rows for each region
-	int i = 0;
-	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++, i++) {
-		Region* region = regions->Get(it);
+	for (int i = 0; i < numRegions; i++) {
+		Region* region = displayRegions[i];
 		int label = (int)region->GetLabel();
 
 		// Id
@@ -59,6 +72,8 @@ void FeedbackTable::update(RegionCollection* regions) {
 		addCheckWidget(i, Overtraced, region->GetFeedback()->GetValue(Feedback::Overtraced));
 		addCheckWidget(i, AddToSlice, region->GetFeedback()->GetValue(Feedback::AddToSlice));
 		addCheckWidget(i, RemoveId, region->GetFeedback()->GetValue(Feedback::RemoveId));
+		addCheckWidget(i, Split, region->GetFeedback()->GetValue(Feedback::Split));
+		addCheckWidget(i, Merge, region->GetFeedback()->GetValue(Feedback::Merge));
 		addCheckWidget(i, CorrectSplitMerge, region->GetFeedback()->GetValue(Feedback::CorrectSplitMerge));
 	}
 
@@ -67,49 +82,10 @@ void FeedbackTable::update(RegionCollection* regions) {
 	selectRegionLabel(currentRegionLabel);
 }
 
-void FeedbackTable::update(Region* region) {
-/*
-	disableSorting();
+void FeedbackTable::update(RegionCollection* regionCollection) {
+	regions = regionCollection;
 
-	QStyle* style = QApplication::style();
-	QIcon refiningIcon = style->standardIcon(QStyle::SP_MessageBoxWarning);
-
-	QString labelString = QString::number(region->GetLabel());
-
-	for (int i = 0; i < rowCount(); i++) {
-		QTableWidgetItem* ti = item(i, 0);
-
-		if (ti->text() == labelString) {
-			// Color
-			const double* col = region->GetDone() ? LabelColors::doneColor : region->GetColor();
-			QColor color(col[0] * 255, col[1] * 255, col[2] * 255);
-			item(i, Color)->setBackgroundColor(color);
-
-			// Size
-			item(i, Size)->setData(0, region->GetNumVoxels());
-
-			// Refining
-			bool refining = region->GetModified() && !region->GetDone();
-			item(i, Refining)->setData(0, refining);
-			((QPushButton*)cellWidget(i, Refining))->setIcon(refining ? refiningIcon : QIcon());
-
-			// Visible
-			item(i, Visible)->setData(0, region->GetVisible());
-			((QCheckBox*)cellWidget(i, Visible))->setChecked(region->GetVisible());
-
-			// Done
-			item(i, Done)->setData(0, region->GetDone());
-			((QCheckBox*)cellWidget(i, Done))->setChecked(region->GetDone());
-
-			// Remove
-			((QPushButton*)cellWidget(i, Remove))->setEnabled(!region->GetDone());
-
-			break;
-		}
-	}
-
-	enableSorting();
-*/
+	update();
 }
 
 void FeedbackTable::selectRegionLabel(unsigned short label) {
@@ -130,6 +106,12 @@ void FeedbackTable::selectRegionLabel(unsigned short label) {
 			ti->setTextColor(QColor("black"));
 		}
 	}
+}
+
+void FeedbackTable::setFilter(bool filterRows) {
+	filter = filterRows;
+
+	update();
 }
 
 void FeedbackTable::on_cellEntered(int row, int column) {
@@ -219,7 +201,7 @@ void FeedbackTable::addCheckWidget(int row, int column, bool checked) {
 
 	QCheckBox* checkBox = new QCheckBox();
 	checkBox->setChecked(checked);
-	checkBox->setStyleSheet("margin-left:10%;margin-right:5%;");
+	checkBox->setStyleSheet("margin-left:auto;margin-right:auto;");
 	checkBox->setAttribute(Qt::WA_TransparentForMouseEvents);
 
 	setItem(row, column, item);
@@ -228,11 +210,13 @@ void FeedbackTable::addCheckWidget(int row, int column, bool checked) {
 
 Feedback::FeedbackType FeedbackTable::columnToFeedback(int column) {
 	switch (column) {
-	case Feedback::Undertraced: return Feedback::Undertraced;
-	case Feedback::Overtraced: return Feedback::Overtraced;
-	case Feedback::AddToSlice: return Feedback::AddToSlice;
-	case Feedback::RemoveId: return Feedback::RemoveId;
-	case Feedback::CorrectSplitMerge: return Feedback::CorrectSplitMerge;
+	case Undertraced: return Feedback::Undertraced;
+	case Overtraced: return Feedback::Overtraced;
+	case AddToSlice: return Feedback::AddToSlice;
+	case RemoveId: return Feedback::RemoveId;
+	case Split: return Feedback::Split;
+	case Merge: return Feedback::Merge;
+	case CorrectSplitMerge: return Feedback::CorrectSplitMerge;
 	default: return Feedback::Undertraced;
 	}
 }

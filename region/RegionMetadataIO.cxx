@@ -76,6 +76,8 @@ std::vector<RegionInfo> RegionMetadataIO::Read(std::string fileName) {
 					SetFeedbackValue(region, feedback, Feedback::Overtraced, "overtraced");
 					SetFeedbackValue(region, feedback, Feedback::AddToSlice, "addToSlice");
 					SetFeedbackValue(region, feedback, Feedback::RemoveId, "removeId");
+					SetFeedbackValue(region, feedback, Feedback::Split, "split");
+					SetFeedbackValue(region, feedback, Feedback::Merge, "merge");
 					SetFeedbackValue(region, feedback, Feedback::CorrectSplitMerge, "correctSplitMerge");
 				}
 
@@ -124,6 +126,8 @@ bool RegionMetadataIO::Write(std::string fileName, std::vector<RegionInfo> regio
 		feedback["overtraced"] = regions[i].feedback.GetValue(Feedback::Overtraced);
 		feedback["addToSlice"] = regions[i].feedback.GetValue(Feedback::AddToSlice);
 		feedback["removeId"] = regions[i].feedback.GetValue(Feedback::RemoveId);
+		feedback["split"] = regions[i].feedback.GetValue(Feedback::Split);
+		feedback["merge"] = regions[i].feedback.GetValue(Feedback::Merge);
 		feedback["correctSplitMerge"] = regions[i].feedback.GetValue(Feedback::CorrectSplitMerge);
 		regionObject["feedback"] = feedback;
 

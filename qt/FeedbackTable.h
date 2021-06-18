@@ -13,10 +13,12 @@ class FeedbackTable : public QTableWidget {
   Q_OBJECT
 public:
 	FeedbackTable(QWidget* parent = 0);	
-	
-	void update(RegionCollection* regions);
-	void update(Region* region);
+
+	void update();
+	void update(RegionCollection* regionCollection);
 	void selectRegionLabel(unsigned short label);
+
+	void setFilter(bool filterRows);
 
 public slots:
 	void on_cellEntered(int row, int column);
@@ -27,7 +29,11 @@ signals:
 	void highlightRegion(int label);
 
 protected:
+	RegionCollection * regions;
+
 	int currentRegionLabel;
+
+	bool filter;
 
 	int rowLabel(int row);
 
@@ -40,6 +46,8 @@ protected:
 		Overtraced,
 		AddToSlice,
 		RemoveId,
+		Split,
+		Merge,
 		CorrectSplitMerge
 	};
 
