@@ -40,6 +40,7 @@
 #include "vtkInteractorStyleSlice.h"
 #include "vtkInteractorStyleVolume.h"
 
+#include "Feedback.h"
 #include "History.h"
 #include "InteractionEnums.h"
 #include "InteractionCallbacks.h"
@@ -1867,7 +1868,7 @@ Region* VisualizationContainer::SetRegionDone(unsigned short label, bool done) {
 
 	if (done) {
 		// Set to grey
-		labelColors->SetTableValue(label, 0.5, 0.5, 0.5);
+		labelColors->SetTableValue(label, LabelColors::doneColor);
 		labelColors->Build();
 	}
 	else {
@@ -1976,6 +1977,14 @@ void VisualizationContainer::SetRegionColor(unsigned short label, double r, doub
 	Render();
 }
 
+void VisualizationContainer::SetRegionFeedback(unsigned short label, Feedback::FeedbackType type, bool value) {
+	Region* region = regions->Get(label);
+
+	if (!region) return;
+
+	region->GetFeedback()->SetValue(type, value);
+}
+
 void VisualizationContainer::SetWindowLevel(double window, double level) {
 	qtWindow->setWindowLevel(window, level);
 }
@@ -2063,6 +2072,10 @@ void VisualizationContainer::Redo() {
 
 bool VisualizationContainer::NeedToSave() {
 	return numEdits > 0;
+}
+
+RegionCollection* VisualizationContainer::GetRegions() {
+	return regions;
 }
 
 VolumeView* VisualizationContainer::GetVolumeView() {
@@ -2287,7 +2300,7 @@ void VisualizationContainer::ExtractRegions(const std::vector<RegionInfo>& metad
 			// Update done status
 			if (region->GetDone()) {
 				region->SetDone(true);
-				labelColors->SetTableValue(region->GetLabel(), 0.5, 0.5, 0.5);
+				labelColors->SetTableValue(region->GetLabel(), LabelColors::doneColor);
 			}
 		}
 		else {

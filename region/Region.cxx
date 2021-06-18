@@ -19,6 +19,8 @@
 
 #include "vtkImageDataCells.h"
 
+#include "Feedback.h"
+#include "LabelColors.h"
 #include "RegionInfo.h"
 #include "RegionSurface.h"
 #include "RegionOutline.h"
@@ -29,6 +31,8 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 	visible = false;
 	modified = false;
 	done = false;
+
+	feedback = new Feedback();
 
 	// Input data info
 	data = inputData;
@@ -99,6 +103,8 @@ Region::Region(const RegionInfo& info, vtkImageData* inputData) {
 	// Text
 	text = vtkSmartPointer<vtkBillboardTextActor3D>::New();
 
+	feedback = new Feedback();
+
 	SetInfo(info);
 
 	text->SetInput(std::to_string(label).c_str());
@@ -137,6 +143,8 @@ Region::~Region() {
 	delete outline;
 	delete voxelOutlines;
 	delete highlight3D;
+
+	delete feedback;
 }
 
 vtkAlgorithmOutput* Region::GetOutput() {
@@ -391,26 +399,32 @@ bool Region::GetDone() {
 void Region::SetDone(bool isDone) {
 	done = isDone;
 
-	if (done) {
-		outline->GetActor()->GetProperty()->SetColor(0.5, 0.5, 0.5);
-		surface->GetActor()->GetProperty()->SetColor(0.5, 0.5, 0.5);
-	}
-	else {
-		outline->GetActor()->GetProperty()->SetColor(color);
-		surface->GetActor()->GetProperty()->SetColor(color);
-	}
+	UpdateColor();
 }
 
 void Region::SetColor(double r, double g, double b) {
 	color[0] = r;
 	color[1] = g;
 	color[2] = b;
-	
-	text->GetTextProperty()->SetColor(color);
-	surface->GetActor()->GetProperty()->SetColor(color);
-	outline->GetActor()->GetProperty()->SetColor(color);
-	voxelOutlines->GetActor()->GetProperty()->SetColor(color);
-	highlight3D->GetActor()->GetProperty()->SetColor(color);	
+
+	UpdateColor();	
+}
+
+void Region::UpdateColor() {
+	if (done) {
+		text->GetTextProperty()->SetColor(LabelColors::doneColor);
+		surface->GetActor()->GetProperty()->SetColor(LabelColors::doneColor);
+		outline->GetActor()->GetProperty()->SetColor(LabelColors::doneColor);
+		voxelOutlines->GetActor()->GetProperty()->SetColor(LabelColors::doneColor);
+		highlight3D->GetActor()->GetProperty()->SetColor(LabelColors::doneColor);
+	}
+	else {
+		text->GetTextProperty()->SetColor(color);
+		surface->GetActor()->GetProperty()->SetColor(color);
+		outline->GetActor()->GetProperty()->SetColor(color);
+		voxelOutlines->GetActor()->GetProperty()->SetColor(color);
+		highlight3D->GetActor()->GetProperty()->SetColor(color);
+	}
 }
 
 void Region::ShowText(bool show) {
@@ -574,6 +588,12 @@ void Region::SetInfo(const RegionInfo& info) {
 	visible = info.visible;
 	modified = info.modified;
 	done = info.done;
+
+	feedback->Copy(info.feedback);
+}
+
+Feedback* Region::GetFeedback() {
+	return feedback;
 }
 
 void Region::ClearLabels() {

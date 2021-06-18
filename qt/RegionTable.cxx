@@ -11,12 +11,11 @@
 #include <QCheckBox>
 #include <QColorDialog>
 
+#include "LabelColors.h"
 #include "Region.h"
 #include "RegionCollection.h"
 
-RegionTable::RegionTable(QWidget* parent)
-	: QTableWidget(parent) 
-{
+RegionTable::RegionTable(QWidget* parent) : QTableWidget(parent) {
 	QStringList headers;
 	headers << "Id" << "Color" << "Size" << "Refining" << "Visible" << "Done" << "Remove";
 	setColumnCount(headers.length());
@@ -26,6 +25,8 @@ RegionTable::RegionTable(QWidget* parent)
 	setMouseTracking(true);
 	setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
+	regions = nullptr;
+
 	currentRegionLabel = 0;
 
 	QObject::connect(this, &RegionTable::removeRegion, this, &RegionTable::on_removeRegion);
@@ -33,7 +34,9 @@ RegionTable::RegionTable(QWidget* parent)
 	QObject::connect(this, &RegionTable::cellClicked, this, &RegionTable::on_cellClicked);
 }
 
-void RegionTable::update(RegionCollection* regions) {
+void RegionTable::update() {
+	if (!regions) return;
+
 	disableSorting();
 
 	int numRegions = regions->Size();
@@ -43,9 +46,6 @@ void RegionTable::update(RegionCollection* regions) {
 	QStyle* style = QApplication::style();
 	QIcon removeIcon = style->standardIcon(QStyle::SP_DialogCloseButton);
 	QIcon refiningIcon = style->standardIcon(QStyle::SP_MessageBoxWarning);
-
-	// Grey color
-	double grey[3] = { 0.5, 0.5, 0.5 };
 
 	// Add rows for each region
 	int i = 0;
@@ -60,7 +60,7 @@ void RegionTable::update(RegionCollection* regions) {
 		idItem->setFlags(Qt::ItemIsSelectable);
 
 		// Color
-		const double* col = region->GetDone() ? grey : region->GetColor();
+		const double* col = region->GetDone() ? LabelColors::doneColor : region->GetColor();
 		QColor color(col[0] * 255, col[1] * 255, col[2] * 255);
 		QTableWidgetItem* colorItem = new QTableWidgetItem();
 		colorItem->setBackgroundColor(color);
@@ -118,7 +118,7 @@ void RegionTable::update(RegionCollection* regions) {
 		QObject::connect(removeButton, &QPushButton::clicked, [this, label]() {
 			removeRegion(label);
 		});
-		
+
 		setItem(i, Id, idItem);
 		setItem(i, Color, colorItem);
 		setItem(i, Size, sizeItem);
@@ -141,6 +141,12 @@ void RegionTable::update(RegionCollection* regions) {
 	selectRegionLabel(currentRegionLabel);
 }
 
+void RegionTable::update(RegionCollection* regionCollection) {
+	regions = regionCollection;
+
+	update();
+}
+
 void RegionTable::update(Region* region) {
 	disableSorting();
 
@@ -153,6 +159,11 @@ void RegionTable::update(Region* region) {
 		QTableWidgetItem* ti = item(i, 0);
 
 		if (ti->text() == labelString) {
+			// Color
+			const double* col = region->GetDone() ? LabelColors::doneColor : region->GetColor();
+			QColor color(col[0] * 255, col[1] * 255, col[2] * 255);
+			item(i, Color)->setBackgroundColor(color);
+
 			// Size
 			item(i, Size)->setData(0, region->GetNumVoxels());
 

@@ -26,6 +26,7 @@
 #include "SegmentVolumeDialog.h"
 #include "SplitRegionDialog.h"
 #include "vtkInteractorStyleSlice.h"
+#include "FeedbackDialog.h"
 
 #include <vtkCallbackCommand.h>
 #include <vtkCamera.h>
@@ -89,6 +90,9 @@ MainWindow::MainWindow() {
 	// Settings dialog
 	settingsDialog = new SettingsDialog(this, visualizationContainer);
 
+	// Feedback dialog
+	feedbackDialog = new FeedbackDialog(this, visualizationContainer);
+	
 	// Slice up and down
 	QAction* sliceUpAction = new QAction("+", this);
 	sliceUpAction->setShortcut(QKeySequence(Qt::Key_Up));
@@ -629,15 +633,18 @@ void MainWindow::on_actionShow_Region_Table_triggered(bool checked) {
 	regionTableContainer->setVisible(!regionTableContainer->isVisible());
 }
 
-
 void MainWindow::on_actionChange_Settings_triggered() {
-	//SettingsDialog dialog(this, visualizationContainer);
-	//dialog.exec();
-
 	settingsDialog->initializeSettings();
 	settingsDialog->show();
 	settingsDialog->raise();
 	settingsDialog->activateWindow();
+}
+
+void MainWindow::on_actionShow_Feedback_triggered() {
+	feedbackDialog->updateRegions();
+	feedbackDialog->show();
+	feedbackDialog->raise();
+	feedbackDialog->activateWindow();
 }
 
 void MainWindow::on_actionData_Loading_triggered() {
@@ -1171,6 +1178,7 @@ void MainWindow::enableMenus(bool enable) {
 	menuAnalyze->setEnabled(enable);
 	menuView->setEnabled(enable);
 	menuSettings->setEnabled(enable);
+	menuTraining->setEnabled(enable);
 
 	modeBarWidget->setEnabled(enable);
 	toolBarWidget->setEnabled(enable);

@@ -18,6 +18,7 @@ class Region;
 class RegionCollection;
 class RegionTable;
 class SettingsDialog;
+class FeedbackDialog;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
 	Q_OBJECT
@@ -72,6 +73,8 @@ public slots:
 	virtual void on_actionShow_Region_Table_triggered(bool checked);
 
 	virtual void on_actionChange_Settings_triggered();
+
+	virtual void on_actionShow_Feedback_triggered();
 
 	virtual void on_actionData_Loading_triggered();
 	virtual void on_actionControls_triggered();
@@ -186,8 +189,9 @@ protected:
 
 	InteractionMode navEditMode;
 
-	// Settings dialog
+	// Dialogs
 	SettingsDialog* settingsDialog;
+	FeedbackDialog* feedbackDialog;
 
 	// Disable menus
 	void enableMenus(bool enable = true);

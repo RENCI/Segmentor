@@ -10,6 +10,8 @@ public:
 	static void Initialize();
 	static double* GetColor(int index);
 
+	static double doneColor[3];
+
 protected:
 	static double colors[][3];
 

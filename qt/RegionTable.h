@@ -12,7 +12,8 @@ class RegionTable : public QTableWidget {
 public:
 	RegionTable(QWidget* parent = 0);
 
-	void update(RegionCollection* regions);
+	void update();
+	void update(RegionCollection* regionCollection);
 	void update(Region* region);
 	void selectRegionLabel(unsigned short label);
 
@@ -30,6 +31,8 @@ signals:
 	void regionColor(int label, QColor color);
 
 protected:
+	RegionCollection* regions;
+
 	int currentRegionLabel;
 
 	void leaveEvent(QEvent *event);
