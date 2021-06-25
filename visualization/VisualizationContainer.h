@@ -203,6 +203,9 @@ protected:
 	void SplitRegionKMeans(Region* region, int numRegions);
 	void SplitRegionIntensity(Region* region, int numRegions);
 
+	bool CheckRegionConnected(Region* region);
+	bool CheckRegionHoles(Region* region);
+
 	// Region metadata
 	void LoadRegionMetadata(std::string fileName);
 	void SaveRegionMetadata(std::string fileName);

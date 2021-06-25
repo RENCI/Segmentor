@@ -1049,6 +1049,7 @@ void VisualizationContainer::RelabelCurrentRegion() {
 
 				UpdateColors(newLabel);
 
+
 				// Create new region
 				Region* newRegion = new Region(newLabel, labelColors->GetTableValue(newLabel), labels, extent);
 				newRegion->SetVisible(true);
@@ -1628,6 +1629,65 @@ void VisualizationContainer::SplitRegionIntensity(Region* region, int numRegions
 	qtWindow->updateProgress(1.0);
 }
 
+bool VisualizationContainer::CheckRegionHoles(Region* region) {
+	unsigned short label = region->GetLabel();
+
+	double seed[3];
+	if (currentRegion->GetSeed(seed)) {
+		// XXX: Convert to point from index?
+		vtkSmartPointer<vtkPoints> seedPoints = vtkSmartPointer<vtkPoints>::New();
+		seedPoints->SetNumberOfPoints(1);
+		seedPoints->SetPoint(0, seed[0], seed[1], seed[2]);
+
+		vtkSmartPointer<vtkImageThreshold> threshold = vtkSmartPointer<vtkImageThreshold>::New();
+		threshold->ThresholdBetween(label, label);
+		threshold->ReplaceInOff();
+		threshold->ReplaceOutOn();
+		threshold->SetOutValue(0);
+		threshold->SetInputConnection(currentRegion->GetOutput());
+
+		vtkSmartPointer<vtkImageThresholdConnectivity> floodFill = vtkSmartPointer<vtkImageThresholdConnectivity>::New();
+		floodFill->SetSeedPoints(seedPoints);
+		floodFill->ThresholdBetween(0, 0);
+		floodFill->ReplaceInOff();
+		floodFill->ReplaceOutOn();
+		floodFill->SetOutValue(label);
+		floodFill->SetInputConnection(threshold->GetOutputPort());
+		floodFill->Update();
+
+		vtkImageData* floodFillOutput = floodFill->GetOutput();
+
+		int extent[6];
+		floodFillOutput->GetExtent(extent);
+
+		// Update label data
+		for (int i = extent[0]; i <= extent[1]; i++) {
+			for (int j = extent[2]; j <= extent[3]; j++) {
+				for (int k = extent[4]; k <= extent[5]; k++) {
+					unsigned short* labelData = static_cast<unsigned short*>(labels->GetScalarPointer(i, j, k));
+					unsigned short* floodFillData = static_cast<unsigned short*>(floodFillOutput->GetScalarPointer(i, j, k));
+
+					if (*floodFillData == label && *labelData != label) return true;
+				}
+			}
+		}
+	}
+
+	return false;
+}
+
+bool VisualizationContainer::CheckRegionConnected(Region* region) {
+	unsigned short label = region->GetLabel();
+
+	// Test to make sure the region is contiguous
+	vtkSmartPointer<vtkImageConnectivityFilter> connectivity = vtkSmartPointer<vtkImageConnectivityFilter>::New();
+	connectivity->SetScalarRange(label, label);
+	connectivity->SetInputDataObject(labels);
+	connectivity->Update();
+
+	return connectivity->GetNumberOfExtractedRegions() == 1;
+}
+
 void VisualizationContainer::FillCurrentRegionSlice() {
 	if (!currentRegion || currentRegion->GetDone()) return;
 
@@ -1851,17 +1911,21 @@ Region* VisualizationContainer::SetRegionDone(unsigned short label, bool done) {
 	if (!region) return nullptr;
 
 	if (done) {
-		// Test to make sure the region is contiguous
-		vtkSmartPointer<vtkImageConnectivityFilter> connectivity = vtkSmartPointer<vtkImageConnectivityFilter>::New();
-		connectivity->SetScalarRange(label, label);
-		connectivity->SetInputDataObject(labels);
-		connectivity->Update();
+		// Check for problems
+		bool connected = CheckRegionConnected(region);
+		bool holes = CheckRegionHoles(region);
 
-		if (connectivity->GetNumberOfExtractedRegions() > 1) {
-			qtWindow->showMessage("Region is not contiguous. Please fix before marking as \"done\"");
-
-			return region;
+		if (!connected && holes) {
+			qtWindow->showMessage("Region is not contiguous and has holes. Please fix before marking as \"done\"");
 		}
+		else if (!connected) {
+			qtWindow->showMessage("Region is not contiguous. Please fix before marking as \"done\"");
+		}
+		else if (holes) {
+			qtWindow->showMessage("Region is has holes. Please fix before marking as \"done\"");
+		}
+
+		if (!connected || holes) return region;
 	}
 
 	region->SetDone(done);
