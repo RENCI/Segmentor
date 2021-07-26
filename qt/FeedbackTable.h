@@ -27,6 +27,7 @@ public slots:
 signals:
 	void regionFeedback(int label, Feedback::FeedbackType type, bool value);
 	void highlightRegion(int label);
+	void countChanged(int count);
 
 protected:
 	RegionCollection * regions;

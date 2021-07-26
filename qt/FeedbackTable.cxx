@@ -80,6 +80,8 @@ void FeedbackTable::update() {
 	enableSorting();
 
 	selectRegionLabel(currentRegionLabel);
+
+	emit(countChanged(numRegions));
 }
 
 void FeedbackTable::update(RegionCollection* regionCollection) {

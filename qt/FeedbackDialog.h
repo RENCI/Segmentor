@@ -25,6 +25,7 @@ public slots:
 
 	void on_regionFeedback(int label, Feedback::FeedbackType type, bool value);
 	void on_highlightRegion(int label);
+	void on_countChanged(int count);
 
 protected:
 	FeedbackTable* table;
