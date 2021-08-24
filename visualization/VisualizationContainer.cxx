@@ -2420,8 +2420,14 @@ int VisualizationContainer::SetLabel(int x, int y, int z, unsigned short label, 
 
 	unsigned short old = *p;
 
+	Region* oldRegion = regions->Get(old);
+
+	// Check for done
+	if (overwrite && oldRegion && oldRegion->GetDone()) {
+		return -1;
+	}
 	// Restrict painting to no label and erasing to current label, unless overwrite is true
-	if (overwrite ||
+	else if (overwrite ||
 		(label != 0 && old == 0) ||
 		(label == 0 && old == currentRegion->GetLabel())) {
 		*p = label;
