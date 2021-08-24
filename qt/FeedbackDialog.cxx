@@ -20,6 +20,7 @@ FeedbackDialog::FeedbackDialog(QWidget* parent, VisualizationContainer* visualiz
 	
 	QObject::connect(table, &FeedbackTable::regionFeedback, this, &FeedbackDialog::on_regionFeedback);
 	QObject::connect(table, &FeedbackTable::highlightRegion, this, &FeedbackDialog::on_highlightRegion);
+	QObject::connect(table, &FeedbackTable::countChanged, this, &FeedbackDialog::on_countChanged);
 
 	updateRegions();
 }
@@ -44,4 +45,8 @@ void FeedbackDialog::on_regionFeedback(int label, Feedback::FeedbackType type, b
 
 void FeedbackDialog::on_highlightRegion(int label) {
 	visualizationContainer->HighlightRegion((unsigned short)label);
+}
+
+void FeedbackDialog::on_countChanged(int count) {
+	countLabel->setText("Count: " + QString::number(count));
 }
