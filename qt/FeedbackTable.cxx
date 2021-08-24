@@ -3,22 +3,18 @@
 #include <QApplication>
 #include <QHeaderView>
 #include <QTableWidgetItem>
-#include <QIcon>
-#include <QLabel>
 #include <QStyle>
-#include <QPushButton>
 #include <QSignalMapper>
 #include <QCheckBox>
-#include <QColorDialog>
+#include <QTextEdit>
 
 #include "Feedback.h"
-#include "LabelColors.h"
 #include "Region.h"
 #include "RegionCollection.h"
 
 FeedbackTable::FeedbackTable(QWidget* parent) : QTableWidget(parent) {
 	QStringList headers;
-	headers << "Id" << "Undertraced" << "Overtraced" << "Add to Slice" << "Remove Id" << "Split" << "Merge" << "Correct from Split/Merge";
+	headers << "Id" << "Comment" << "Status";
 	setColumnCount(headers.length());
 	setHorizontalHeaderLabels(headers);
 	verticalHeader()->setVisible(false);
@@ -33,7 +29,7 @@ FeedbackTable::FeedbackTable(QWidget* parent) : QTableWidget(parent) {
 	filter = false;
 
 	QObject::connect(this, &FeedbackTable::cellEntered, this, &FeedbackTable::on_cellEntered);
-	QObject::connect(this, &FeedbackTable::cellClicked, this, &FeedbackTable::on_cellClicked);
+//	QObject::connect(this, &FeedbackTable::cellClicked, this, &FeedbackTable::on_cellClicked);
 }
 
 void FeedbackTable::update() {
@@ -67,14 +63,31 @@ void FeedbackTable::update() {
 
 		setItem(i, Id, idItem);
 
-		// Check boxes
-		addCheckWidget(i, Undertraced, region->GetFeedback()->GetValue(Feedback::Undertraced));
-		addCheckWidget(i, Overtraced, region->GetFeedback()->GetValue(Feedback::Overtraced));
-		addCheckWidget(i, AddToSlice, region->GetFeedback()->GetValue(Feedback::AddToSlice));
-		addCheckWidget(i, RemoveId, region->GetFeedback()->GetValue(Feedback::RemoveId));
-		addCheckWidget(i, Split, region->GetFeedback()->GetValue(Feedback::Split));
-		addCheckWidget(i, Merge, region->GetFeedback()->GetValue(Feedback::Merge));
-		addCheckWidget(i, CorrectSplitMerge, region->GetFeedback()->GetValue(Feedback::CorrectSplitMerge));
+		// Comment
+		QTableWidgetItem* commentItem = new QTableWidgetItem();
+		commentItem->setFlags(Qt::ItemIsSelectable);
+		commentItem->setData(0, "comment");
+
+		QTextEdit* edit = new QTextEdit();
+		edit->setText("");
+		edit->setAttribute(Qt::WA_TransparentForMouseEvents);
+
+		setItem(i, Comment, commentItem);
+		setCellWidget(i, Comment, edit);
+
+		// Status
+		QTableWidgetItem* statusItem = new QTableWidgetItem();
+		statusItem->setFlags(Qt::ItemIsSelectable);
+		statusItem->setData(0, true);
+		statusItem->setTextColor(QColor("white"));
+
+		QCheckBox* checkBox = new QCheckBox();
+		checkBox->setChecked(true);
+		checkBox->setStyleSheet("margin-left:auto;margin-right:auto;");
+		checkBox->setAttribute(Qt::WA_TransparentForMouseEvents);
+
+		setItem(i, Status, statusItem);
+		setCellWidget(i, Status, checkBox);
 	}
 
 	enableSorting();
@@ -150,18 +163,20 @@ void FeedbackTable::on_cellEntered(int row, int column) {
 	}
 }
 
+
 void FeedbackTable::on_cellClicked(int row, int column) {
-	if (column == Id) return;
+	if (column != Status) return;
 
 	disableSorting();
 
 	QCheckBox * checkBox = (QCheckBox*)cellWidget(row, column);
 	checkBox->toggle();
 
-	emit(regionFeedback(rowLabel(row), columnToFeedback(column), checkBox->isChecked()));
+	emit(regionFeedback(rowLabel(row), Feedback::Status, checkBox->isChecked()));
 
 	enableSorting();
 }
+
 
 /*
 void FeedbackTable::leaveEvent(QEvent* event) {
@@ -193,32 +208,4 @@ void FeedbackTable::enableSorting() {
 	setSortingEnabled(true);
 	QObject::connect(horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &QTableWidget::resizeColumnsToContents);
 	resizeColumnsToContents();
-}
-
-void FeedbackTable::addCheckWidget(int row, int column, bool checked) {
-	QTableWidgetItem* item = new QTableWidgetItem();
-	item->setFlags(Qt::ItemIsSelectable);
-	item->setData(0, checked);
-	item->setTextColor(QColor("white"));
-
-	QCheckBox* checkBox = new QCheckBox();
-	checkBox->setChecked(checked);
-	checkBox->setStyleSheet("margin-left:auto;margin-right:auto;");
-	checkBox->setAttribute(Qt::WA_TransparentForMouseEvents);
-
-	setItem(row, column, item);
-	setCellWidget(row, column, checkBox);
-}
-
-Feedback::FeedbackType FeedbackTable::columnToFeedback(int column) {
-	switch (column) {
-	case Undertraced: return Feedback::Undertraced;
-	case Overtraced: return Feedback::Overtraced;
-	case AddToSlice: return Feedback::AddToSlice;
-	case RemoveId: return Feedback::RemoveId;
-	case Split: return Feedback::Split;
-	case Merge: return Feedback::Merge;
-	case CorrectSplitMerge: return Feedback::CorrectSplitMerge;
-	default: return Feedback::Undertraced;
-	}
 }

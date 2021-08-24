@@ -43,13 +43,8 @@ protected:
 
 	enum ColumnType {
 		Id = 0,
-		Undertraced,
-		Overtraced,
-		AddToSlice,
-		RemoveId,
-		Split,
-		Merge,
-		CorrectSplitMerge
+		Comment,
+		Status
 	};
 
 	void addCheckWidget(int row, int column, bool checked);

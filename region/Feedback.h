@@ -7,13 +7,8 @@ public:
 	~Feedback();
 
 	enum FeedbackType {
-		Undertraced = 0,
-		Overtraced,
-		AddToSlice,
-		RemoveId,
-		Split,
-		Merge,
-		CorrectSplitMerge
+		Comment = 0,
+		Status
 	};
 
 	void SetValue(FeedbackType type, bool value);
