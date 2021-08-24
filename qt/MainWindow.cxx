@@ -55,9 +55,8 @@ MainWindow::MainWindow() {
 	setImageNameLabel("");
 	setSegmentationNameLabel("");
 
-	// Default directory keys
-	defaultImageDirectoryKey = "default_image_directory";
-	defaultSegmentationDirectoryKey = "default_segmentation_directory";
+	// Default directory key
+	defaultDirectoryKey = "default_directory";
 
 	// Create render windows
 	vtkNew<vtkGenericOpenGLRenderWindow> renderWindowLeft;
@@ -205,7 +204,7 @@ void MainWindow::on_actionOpen_Image_File_triggered() {
 	// Open a file dialog to read the file
 	QString file = QFileDialog::getOpenFileName(this,
 		"Open Volume",
-		getDefaultDirectory(defaultImageDirectoryKey),
+		getDefaultDirectory(defaultDirectoryKey),
 		"All files (*.*);;NIfTI (*.nii);;TIFF (*.tif *.tiff);;VTK XML ImageData (*.vti)");
 
 	// Check for file
@@ -213,7 +212,7 @@ void MainWindow::on_actionOpen_Image_File_triggered() {
 		return;
 	}
 
-	setDefaultDirectory(defaultImageDirectoryKey, file);
+	setDefaultDirectory(defaultDirectoryKey, file);
 
 	// Load data
 	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->OpenImageFile(file.toStdString());
@@ -251,7 +250,7 @@ void MainWindow::on_actionOpen_Image_Stack_triggered() {
 	// Open a file dialog to read the file
 	QString file = QFileDialog::getOpenFileName(this,
 		"Open Volume",
-		getDefaultDirectory(defaultImageDirectoryKey),
+		getDefaultDirectory(defaultDirectoryKey),
 		"All files (*.*);;TIFF (*.tif *.tiff)");
 
 	// Check for file
@@ -259,7 +258,7 @@ void MainWindow::on_actionOpen_Image_Stack_triggered() {
 		return;
 	}
 
-	setDefaultDirectory(defaultImageDirectoryKey, file);
+	setDefaultDirectory(defaultDirectoryKey, file);
 
 	// Get all files in directory
 	QFileInfo fileInfo(file);
@@ -319,7 +318,7 @@ void MainWindow::on_actionOpen_Segmentation_File_triggered() {
 	// Open a file dialog to read the file
 	QString file = QFileDialog::getOpenFileName(this,
 		"Open Segmentation Data",
-		getDefaultDirectory(defaultSegmentationDirectoryKey),
+		getDefaultDirectory(defaultDirectoryKey),
 		"All files (*.*);;NIfTI (*.nii);;TIFF (*.tif *.tiff);;VTK XML ImageData (*.vti)");
 
 	// Check for file
@@ -327,7 +326,7 @@ void MainWindow::on_actionOpen_Segmentation_File_triggered() {
 		return;
 	}
 
-	setDefaultDirectory(defaultSegmentationDirectoryKey, file);
+	setDefaultDirectory(defaultDirectoryKey, file);
 
 	// Load segmentation data
 	VisualizationContainer::FileErrorCode errorCode = visualizationContainer->OpenSegmentationFile(file.toStdString());
@@ -369,7 +368,7 @@ void MainWindow::on_actionOpen_Segmentation_Stack_triggered() {
 	// Open a file dialog to read the file
 	QString file = QFileDialog::getOpenFileName(this,
 		"Open Segmentation Data",
-		getDefaultDirectory(defaultSegmentationDirectoryKey),
+		getDefaultDirectory(defaultDirectoryKey),
 		"All files (*.*);;TIFF (*.tif *.tiff)");
 
 	// Check for file
@@ -377,7 +376,7 @@ void MainWindow::on_actionOpen_Segmentation_Stack_triggered() {
 		return;
 	}
 
-	setDefaultDirectory(defaultSegmentationDirectoryKey, file);
+	setDefaultDirectory(defaultDirectoryKey, file);
 
 	// Get all files in directory
 	QFileInfo fileInfo(file);
@@ -441,7 +440,7 @@ void MainWindow::on_actionSave_Image_Data_As_triggered() {
 	// Open a file dialog to save the file
 	QString file = QFileDialog::getSaveFileName(this,
 		"Save Image Data",
-		getDefaultDirectory(defaultImageDirectoryKey),
+		getDefaultDirectory(defaultDirectoryKey),
 		"All files (*.*);;TIFF (*.tif);;NIfTI (*.nii);;VTK XML ImageData (*.vti)");
 
 	// Check for file
@@ -458,7 +457,7 @@ void MainWindow::on_actionSave_Image_Data_As_triggered() {
 		}
 	}	
 
-	setDefaultDirectory(defaultImageDirectoryKey, file);
+	setDefaultDirectory(defaultDirectoryKey, file);
 
 	// Get just the file name
 	QString fileName = QFileInfo(file).fileName();
@@ -518,7 +517,7 @@ void MainWindow::on_actionSave_Segmentation_Data_As_triggered() {
 	// Open a file dialog to save the file
 	QString file = QFileDialog::getSaveFileName(this,
 		"Save Segmentation Data",
-		getDefaultDirectory(defaultSegmentationDirectoryKey),
+		getDefaultDirectory(defaultDirectoryKey),
 		"All files (*.*);;TIFF (*.tif);;NIfTI (*.nii);;VTK XML ImageData (*.vti)");
 
 	// Check for file
@@ -535,7 +534,7 @@ void MainWindow::on_actionSave_Segmentation_Data_As_triggered() {
 		}
 	}
 
-	setDefaultDirectory(defaultSegmentationDirectoryKey, file);
+	setDefaultDirectory(defaultDirectoryKey, file);
 
 	// Get just the file name
 	QString fileName = QFileInfo(file).fileName();
