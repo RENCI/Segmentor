@@ -6,9 +6,8 @@
 #include <QStyle>
 #include <QSignalMapper>
 #include <QCheckBox>
-#include <QTextEdit>
+#include <QLineEdit>
 
-#include "Feedback.h"
 #include "Region.h"
 #include "RegionCollection.h"
 
@@ -42,7 +41,7 @@ void FeedbackTable::update() {
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
 		Region* region = regions->Get(it);
 
-		if (!filter || region->GetFeedback()->HasFeedback()) {
+		if (!filter || region->HasComment()) {
 			displayRegions.push_back(region);
 		}
 	}
@@ -66,11 +65,12 @@ void FeedbackTable::update() {
 		// Comment
 		QTableWidgetItem* commentItem = new QTableWidgetItem();
 		commentItem->setFlags(Qt::ItemIsSelectable);
-		commentItem->setData(0, "comment");
 
-		QTextEdit* edit = new QTextEdit();
-		edit->setText("");
-		edit->setAttribute(Qt::WA_TransparentForMouseEvents);
+		QLineEdit* edit = new QLineEdit();
+		edit->setText(QString::fromStdString(region->GetComment()));
+		QObject::connect(edit, &QLineEdit::editingFinished, [this, label, edit]() {
+			emit regionComment(label, edit->text());
+		});
 
 		setItem(i, Comment, commentItem);
 		setCellWidget(i, Comment, edit);
@@ -172,7 +172,7 @@ void FeedbackTable::on_cellClicked(int row, int column) {
 	QCheckBox * checkBox = (QCheckBox*)cellWidget(row, column);
 	checkBox->toggle();
 
-	emit(regionFeedback(rowLabel(row), Feedback::Status, checkBox->isChecked()));
+//	emit(regionFeedback(rowLabel(row), Feedback::Status, checkBox->isChecked()));
 
 	enableSorting();
 }

@@ -81,7 +81,9 @@ public:
 
 	void SetInfo(const RegionInfo& info);
 
-	Feedback* GetFeedback();
+	bool HasComment();
+	const std::string& GetComment();
+	void SetComment(const std::string& commentString);
 
 protected:
 	unsigned short label;
@@ -91,8 +93,7 @@ protected:
 	bool visible;
 	bool modified;
 	bool done;
-
-	Feedback* feedback;
+	std::string comment;
 
 	vtkSmartPointer<vtkImageData> data;
 	vtkSmartPointer<vtkExtractVOI> voi;

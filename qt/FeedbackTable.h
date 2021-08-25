@@ -4,8 +4,6 @@
 #include <QTableWidget>
 #include <QColor>
 
-#include "Feedback.h"
-
 class Region;
 class RegionCollection;
 
@@ -22,10 +20,10 @@ public:
 
 public slots:
 	void on_cellEntered(int row, int column);
-	void on_cellClicked(int row, int column); 
+	void on_cellClicked(int row, int column);
 
 signals:
-	void regionFeedback(int label, Feedback::FeedbackType type, bool value);
+	void regionComment(int label, QString comment);
 	void highlightRegion(int label);
 	void countChanged(int count);
 
@@ -46,9 +44,6 @@ protected:
 		Comment,
 		Status
 	};
-
-	void addCheckWidget(int row, int column, bool checked);
-	Feedback::FeedbackType columnToFeedback(int column);
 };
 
 #endif

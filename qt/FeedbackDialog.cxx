@@ -1,14 +1,19 @@
 #include "FeedbackDialog.h"
 
-#include "Feedback.h"
 #include "FeedbackTable.h"
 #include "VisualizationContainer.h"
+
+#include <QDialogButtonBox>
+#include <QPushButton>
 
 // Constructor
 FeedbackDialog::FeedbackDialog(QWidget* parent, VisualizationContainer* visualizationContainer)
 : QDialog(parent), visualizationContainer(visualizationContainer) {
 	// Create the GUI from the Qt Designer file
 	setupUi(this);
+
+
+	buttonBox->button(QDialogButtonBox::Close)->setAutoDefault(false);
 
 	setWindowFlag(Qt::WindowContextHelpButtonHint, false);	
 
@@ -18,7 +23,7 @@ FeedbackDialog::FeedbackDialog(QWidget* parent, VisualizationContainer* visualiz
 	table->update(visualizationContainer->GetRegions());
 	tableContainer->layout()->addWidget(table);
 	
-	QObject::connect(table, &FeedbackTable::regionFeedback, this, &FeedbackDialog::on_regionFeedback);
+	QObject::connect(table, &FeedbackTable::regionComment, this, &FeedbackDialog::on_regionComment);
 	QObject::connect(table, &FeedbackTable::highlightRegion, this, &FeedbackDialog::on_highlightRegion);
 	QObject::connect(table, &FeedbackTable::countChanged, this, &FeedbackDialog::on_countChanged);
 
@@ -39,8 +44,8 @@ void FeedbackDialog::on_filterCheckBox_stateChanged(int state) {
 	table->setFilter(state != 0);
 }
 
-void FeedbackDialog::on_regionFeedback(int label, Feedback::FeedbackType type, bool value) {
-	visualizationContainer->SetRegionFeedback(label, type, value);
+void FeedbackDialog::on_regionComment(int label, QString comment) {
+	visualizationContainer->SetRegionComment(label, comment.toStdString());
 }
 
 void FeedbackDialog::on_highlightRegion(int label) {

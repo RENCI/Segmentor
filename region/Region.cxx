@@ -19,7 +19,6 @@
 
 #include "vtkImageDataCells.h"
 
-#include "Feedback.h"
 #include "LabelColors.h"
 #include "RegionInfo.h"
 #include "RegionSurface.h"
@@ -31,8 +30,6 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 	visible = false;
 	modified = false;
 	done = false;
-
-	feedback = new Feedback();
 
 	// Input data info
 	data = inputData;
@@ -103,8 +100,6 @@ Region::Region(const RegionInfo& info, vtkImageData* inputData) {
 	// Text
 	text = vtkSmartPointer<vtkBillboardTextActor3D>::New();
 
-	feedback = new Feedback();
-
 	SetInfo(info);
 
 	text->SetInput(std::to_string(label).c_str());
@@ -143,8 +138,6 @@ Region::~Region() {
 	delete outline;
 	delete voxelOutlines;
 	delete highlight3D;
-
-	delete feedback;
 }
 
 vtkAlgorithmOutput* Region::GetOutput() {
@@ -588,12 +581,21 @@ void Region::SetInfo(const RegionInfo& info) {
 	visible = info.visible;
 	modified = info.modified;
 	done = info.done;
-
-	feedback->Copy(info.feedback);
+	comment = info.comment;
 }
 
-Feedback* Region::GetFeedback() {
-	return feedback;
+bool Region::HasComment() {
+	return comment.size() > 0;
+}
+
+const std::string& Region::GetComment() {
+	return comment;
+}
+
+void Region::SetComment(const std::string& commentString) {
+	comment = commentString;
+
+	std::cout << comment << std::endl;
 }
 
 void Region::ClearLabels() {

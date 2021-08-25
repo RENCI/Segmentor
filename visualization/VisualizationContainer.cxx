@@ -40,7 +40,6 @@
 #include "vtkInteractorStyleSlice.h"
 #include "vtkInteractorStyleVolume.h"
 
-#include "Feedback.h"
 #include "History.h"
 #include "InteractionEnums.h"
 #include "InteractionCallbacks.h"
@@ -2041,12 +2040,12 @@ void VisualizationContainer::SetRegionColor(unsigned short label, double r, doub
 	Render();
 }
 
-void VisualizationContainer::SetRegionFeedback(unsigned short label, Feedback::FeedbackType type, bool value) {
+void VisualizationContainer::SetRegionComment(unsigned short label, const std::string comment) {
 	Region* region = regions->Get(label);
 
 	if (!region) return;
 
-	region->GetFeedback()->SetValue(type, value);
+	region->SetComment(comment);
 }
 
 void VisualizationContainer::SetWindowLevel(double window, double level) {

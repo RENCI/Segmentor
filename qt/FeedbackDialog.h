@@ -3,8 +3,6 @@
 
 #include "ui_FeedbackDialog.h"
 
-#include "Feedback.h"
-
 class FeedbackTable;
 class VisualizationContainer;
 
@@ -23,7 +21,7 @@ public slots:
 	// on_<widget name>_<signal name>(<signal parameters>).
 	void on_filterCheckBox_stateChanged(int state);
 
-	void on_regionFeedback(int label, Feedback::FeedbackType type, bool value);
+	void on_regionComment(int label, QString comment);
 	void on_highlightRegion(int label);
 	void on_countChanged(int count);
 
