@@ -1632,7 +1632,7 @@ bool VisualizationContainer::CheckRegionHoles(Region* region) {
 	unsigned short label = region->GetLabel();
 
 	double seed[3];
-	if (currentRegion->GetSeed(seed)) {
+	if (region->GetSeed(seed)) {
 		// XXX: Convert to point from index?
 		vtkSmartPointer<vtkPoints> seedPoints = vtkSmartPointer<vtkPoints>::New();
 		seedPoints->SetNumberOfPoints(1);
@@ -1643,7 +1643,7 @@ bool VisualizationContainer::CheckRegionHoles(Region* region) {
 		threshold->ReplaceInOff();
 		threshold->ReplaceOutOn();
 		threshold->SetOutValue(0);
-		threshold->SetInputConnection(currentRegion->GetOutput());
+		threshold->SetInputConnection(region->GetOutput());
 
 		vtkSmartPointer<vtkImageThresholdConnectivity> floodFill = vtkSmartPointer<vtkImageThresholdConnectivity>::New();
 		floodFill->SetSeedPoints(seedPoints);
