@@ -9,7 +9,7 @@
 #include <vtkPlane.h>
 #include <vtkProperty.h>
 #include <vtkTable.h>
-#include <vtkBillboardTextActor3D.h>
+#include <vtkTextActor.h>
 #include <vtkRenderer.h>
 #include <vtkTextProperty.h>
 #include <vtkThreshold.h>
@@ -42,10 +42,18 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 	color[1] = regionColor[1];
 	color[2] = regionColor[2];
 
+	// Coordinate system for text
+	vtkSmartPointer<vtkCoordinate> coord = vtkSmartPointer<vtkCoordinate>::New();
+	coord->SetCoordinateSystemToNormalizedViewport();
+	coord->SetValue(0, 1);
+
 	// Text
-	text = vtkSmartPointer<vtkBillboardTextActor3D>::New();
-	text->SetInput(std::to_string(label).c_str());
+	text = vtkSmartPointer<vtkTextActor>::New();
+	text->SetInput(LabelString().c_str());
+	text->GetTextProperty()->SetFontSize(18);
 	text->GetTextProperty()->SetColor(color);
+	text->GetPositionCoordinate()->SetReferenceCoordinate(coord);
+	text->SetPosition(10, -30);
 	text->VisibilityOff();
 
 	voi = vtkSmartPointer<vtkExtractVOI>::New();
@@ -98,11 +106,11 @@ Region::Region(const RegionInfo& info, vtkImageData* inputData) {
 	voi->SetInputDataObject(data);
 
 	// Text
-	text = vtkSmartPointer<vtkBillboardTextActor3D>::New();
+	text = vtkSmartPointer<vtkTextActor>::New();
 
 	SetInfo(info);
 
-	text->SetInput(std::to_string(label).c_str());
+	text->SetInput(LabelString().c_str());
 	text->GetTextProperty()->SetColor(color);
 	text->VisibilityOff();
 
@@ -199,7 +207,7 @@ RegionHighlight3D* Region::GetHighlight3D() {
 	return highlight3D;
 }
 
-vtkSmartPointer<vtkBillboardTextActor3D> Region::GetText() {
+vtkSmartPointer<vtkTextActor> Region::GetText() {
 	return text;
 }
 
@@ -339,15 +347,17 @@ void Region::UpdateExtent() {
 //		(padExtent[3] - padExtent[2]) / 2
 //	);
 
+	/*
 	double bounds[6];
 	voi->Update();
 	voi->GetOutput()->GetBounds(bounds);
-
+	
 	text->SetPosition(
 		(bounds[1] - bounds[0]) / 2,
 		(bounds[3] - bounds[2]) / 2,
 		(bounds[5] - bounds[4]) / 2
 	);
+	*/
 }
 
 void Region::InitializeExtent(const int* regionExtent) {
@@ -424,6 +434,7 @@ void Region::ShowText(bool show) {
 	if (!text) return;
 
 	if (show) {
+/*
 		double bounds[6];
 		voi->GetOutput()->GetBounds(bounds);
 		
@@ -432,6 +443,7 @@ void Region::ShowText(bool show) {
 			bounds[3],
 			bounds[4] + (bounds[5] - bounds[4]) / 2
 		);
+*/
 		text->VisibilityOn();
 
 #ifdef SHOW_REGION_BOX
@@ -595,7 +607,7 @@ const std::string& Region::GetComment() {
 void Region::SetComment(const std::string& commentString) {
 	comment = commentString;
 
-	std::cout << comment << std::endl;
+	text->SetInput(LabelString().c_str());
 }
 
 void Region::ClearLabels() {
@@ -609,4 +621,14 @@ void Region::ClearLabels() {
 	}
 
 	data->Modified();
+}
+
+std::string Region::LabelString() {
+	std::string s = std::to_string(label).c_str();
+
+	if (comment.length() > 0) {
+		s += ": " + comment;
+	}
+
+	return s;
 }
