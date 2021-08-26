@@ -13,13 +13,12 @@
 
 FeedbackTable::FeedbackTable(QWidget* parent) : QTableWidget(parent) {
 	QStringList headers;
-	headers << "Id" << "Comment" << "Status";
+	headers << "Id" << "Comment" << "Done" << "Verified";
 	setColumnCount(headers.length());
 	setHorizontalHeaderLabels(headers);
 	verticalHeader()->setVisible(false);
 	enableSorting();
 	setMouseTracking(true);
-	setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
 	regions = nullptr;
 
@@ -28,7 +27,7 @@ FeedbackTable::FeedbackTable(QWidget* parent) : QTableWidget(parent) {
 	filter = false;
 
 	QObject::connect(this, &FeedbackTable::cellEntered, this, &FeedbackTable::on_cellEntered);
-//	QObject::connect(this, &FeedbackTable::cellClicked, this, &FeedbackTable::on_cellClicked);
+	QObject::connect(this, &FeedbackTable::cellClicked, this, &FeedbackTable::on_cellClicked);
 }
 
 void FeedbackTable::update() {
@@ -75,19 +74,9 @@ void FeedbackTable::update() {
 		setItem(i, Comment, commentItem);
 		setCellWidget(i, Comment, edit);
 
-		// Status
-		QTableWidgetItem* statusItem = new QTableWidgetItem();
-		statusItem->setFlags(Qt::ItemIsSelectable);
-		statusItem->setData(0, true);
-		statusItem->setTextColor(QColor("white"));
-
-		QCheckBox* checkBox = new QCheckBox();
-		checkBox->setChecked(true);
-		checkBox->setStyleSheet("margin-left:auto;margin-right:auto;");
-		checkBox->setAttribute(Qt::WA_TransparentForMouseEvents);
-
-		setItem(i, Status, statusItem);
-		setCellWidget(i, Status, checkBox);
+		// Checkboxes
+		addCheckWidget(i, Done, region->GetDone());
+		addCheckWidget(i, Verified, region->GetVerified());
 	}
 
 	enableSorting();
@@ -95,6 +84,8 @@ void FeedbackTable::update() {
 	selectRegionLabel(currentRegionLabel);
 
 	emit(countChanged(numRegions));
+
+	horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
 }
 
 void FeedbackTable::update(RegionCollection* regionCollection) {
@@ -165,16 +156,21 @@ void FeedbackTable::on_cellEntered(int row, int column) {
 
 
 void FeedbackTable::on_cellClicked(int row, int column) {
-	if (column != Status) return;
+	if (column == Id) {
+		emit(selectRegion(rowLabel(row)));
+	}
+	else if (column == Done) {
+		QCheckBox* checkBox = (QCheckBox*)cellWidget(row, column);
+		checkBox->toggle();
 
-	disableSorting();
+		emit(regionDone(rowLabel(row), checkBox->isChecked()));
+	}
+	else if (column == Verified) {		
+		QCheckBox* checkBox = (QCheckBox*)cellWidget(row, column);
+		checkBox->toggle();
 
-	QCheckBox * checkBox = (QCheckBox*)cellWidget(row, column);
-	checkBox->toggle();
-
-//	emit(regionFeedback(rowLabel(row), Feedback::Status, checkBox->isChecked()));
-
-	enableSorting();
+		emit(regionVerified(rowLabel(row), checkBox->isChecked()));
+	}
 }
 
 
@@ -208,4 +204,19 @@ void FeedbackTable::enableSorting() {
 	setSortingEnabled(true);
 	QObject::connect(horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &QTableWidget::resizeColumnsToContents);
 	resizeColumnsToContents();
+}
+
+void FeedbackTable::addCheckWidget(int row, int column, bool checked) {
+	QTableWidgetItem* item = new QTableWidgetItem();
+	item->setFlags(Qt::ItemIsSelectable);
+	item->setData(0, checked);
+	item->setTextColor(QColor("white"));
+
+	QCheckBox* checkBox = new QCheckBox();
+	checkBox->setChecked(checked);
+	checkBox->setStyleSheet("margin-left:auto;margin-right:auto;");
+	checkBox->setAttribute(Qt::WA_TransparentForMouseEvents);
+
+	setItem(row, column, item);
+	setCellWidget(row, column, checkBox);
 }

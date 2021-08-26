@@ -23,7 +23,10 @@ public slots:
 	void on_cellClicked(int row, int column);
 
 signals:
+	void selectRegion(int label);
 	void regionComment(int label, QString comment);
+	void regionDone(int label, bool done);
+	void regionVerified(int label, bool verified);
 	void highlightRegion(int label);
 	void countChanged(int count);
 
@@ -42,8 +45,11 @@ protected:
 	enum ColumnType {
 		Id = 0,
 		Comment,
-		Status
+		Done,
+		Verified
 	};
+
+	void addCheckWidget(int row, int column, bool checked);
 };
 
 #endif

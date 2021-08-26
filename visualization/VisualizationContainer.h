@@ -104,6 +104,7 @@ public:
 	void SetRegionVisibility(unsigned short label, bool visible);
 	void SetRegionColor(unsigned short label, double r, double g, double b);
 	void SetRegionComment(unsigned short label, const std::string comment);
+	void SetRegionVerified(unsigned short label, bool verified);
 
 	void CreateNewRegion(double point[3]);
 	void RelabelCurrentRegion();

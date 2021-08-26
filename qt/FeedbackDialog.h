@@ -22,6 +22,9 @@ public slots:
 	void on_filterCheckBox_stateChanged(int state);
 
 	void on_regionComment(int label, QString comment);
+	void on_regionDone(int label, bool done);
+	void on_regionVerified(int label, bool verified);
+	void on_selectRegion(int label);
 	void on_highlightRegion(int label);
 	void on_countChanged(int count);
 

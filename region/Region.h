@@ -61,6 +61,9 @@ public:
 	bool GetDone();
 	void SetDone(bool isDone);
 
+	bool GetVerified();
+	void SetVerified(bool isVerified);
+
 	void SetColor(double r, double g, double b);
 	const double* GetColor();
 
@@ -93,6 +96,7 @@ protected:
 	bool visible;
 	bool modified;
 	bool done;
+	bool verified;
 	std::string comment;
 
 	vtkSmartPointer<vtkImageData> data;

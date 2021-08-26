@@ -30,6 +30,7 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 	visible = false;
 	modified = false;
 	done = false;
+	verified = false;
 
 	// Input data info
 	data = inputData;
@@ -403,6 +404,14 @@ void Region::SetDone(bool isDone) {
 	done = isDone;
 
 	UpdateColor();
+}
+
+bool Region::GetVerified() {
+	return verified;
+}
+
+void Region::SetVerified(bool isVerified) {
+	verified = isVerified;
 }
 
 void Region::SetColor(double r, double g, double b) {

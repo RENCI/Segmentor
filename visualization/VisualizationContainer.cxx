@@ -2048,6 +2048,14 @@ void VisualizationContainer::SetRegionComment(unsigned short label, const std::s
 	region->SetComment(comment);
 }
 
+void VisualizationContainer::SetRegionVerified(unsigned short label, bool verified) {
+	Region* region = regions->Get(label);
+
+	if (!region) return;
+
+	region->SetVerified(verified);
+}
+
 void VisualizationContainer::SetWindowLevel(double window, double level) {
 	qtWindow->setWindowLevel(window, level);
 }
