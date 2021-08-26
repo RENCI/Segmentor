@@ -27,6 +27,7 @@ public slots:
 	void on_selectRegion(int label);
 	void on_highlightRegion(int label);
 	void on_countChanged(int count);
+	void on_verifiedShortcut();
 
 protected:
 	FeedbackTable* table;

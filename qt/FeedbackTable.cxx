@@ -10,6 +10,7 @@
 
 #include "Region.h"
 #include "RegionCollection.h"
+#include "LineEditDelegate.h"
 
 FeedbackTable::FeedbackTable(QWidget* parent) : QTableWidget(parent) {
 	QStringList headers;
@@ -20,6 +21,9 @@ FeedbackTable::FeedbackTable(QWidget* parent) : QTableWidget(parent) {
 	enableSorting();
 	setMouseTracking(true);
 
+	lineEdit = new LineEditDelegate(this);
+	setItemDelegateForColumn(1, lineEdit);
+
 	regions = nullptr;
 
 	currentRegionLabel = 0;
@@ -28,6 +32,8 @@ FeedbackTable::FeedbackTable(QWidget* parent) : QTableWidget(parent) {
 
 	QObject::connect(this, &FeedbackTable::cellEntered, this, &FeedbackTable::on_cellEntered);
 	QObject::connect(this, &FeedbackTable::cellClicked, this, &FeedbackTable::on_cellClicked);
+
+	QObject::connect(this, &FeedbackTable::cellChanged, this, &FeedbackTable::on_cellChanged);
 }
 
 void FeedbackTable::update() {
@@ -63,16 +69,19 @@ void FeedbackTable::update() {
 
 		// Comment
 		QTableWidgetItem* commentItem = new QTableWidgetItem();
-		commentItem->setFlags(Qt::ItemIsSelectable);
-
+		commentItem->setData(0, "Hello");
+		//commentItem->setFlags(Qt::ItemIsSelectable);
+		/*
 		QLineEdit* edit = new QLineEdit();
 		edit->setText(QString::fromStdString(region->GetComment()));
 		QObject::connect(edit, &QLineEdit::editingFinished, [this, label, edit]() {
 			emit regionComment(label, edit->text());
 		});
+		*/
 
 		setItem(i, Comment, commentItem);
-		setCellWidget(i, Comment, edit);
+		//setCellWidget(i, Comment, edit);
+
 
 		// Checkboxes
 		addCheckWidget(i, Done, region->GetDone());
@@ -170,6 +179,14 @@ void FeedbackTable::on_cellClicked(int row, int column) {
 		checkBox->toggle();
 
 		emit(regionVerified(rowLabel(row), checkBox->isChecked()));
+	}
+}
+
+void FeedbackTable::on_cellChanged(int row, int column) {
+	if (column == Comment) {
+		QTableWidgetItem* ti = item(row, Comment);
+
+		emit(regionComment(rowLabel(row), ti->data(0).toString()));
 	}
 }
 

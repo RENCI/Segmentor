@@ -6,6 +6,7 @@
 
 class Region;
 class RegionCollection;
+class LineEditDelegate;
 
 class FeedbackTable : public QTableWidget {
   Q_OBJECT
@@ -21,6 +22,7 @@ public:
 public slots:
 	void on_cellEntered(int row, int column);
 	void on_cellClicked(int row, int column);
+	void on_cellChanged(int row, int column);
 
 signals:
 	void selectRegion(int label);
@@ -50,6 +52,8 @@ protected:
 	};
 
 	void addCheckWidget(int row, int column, bool checked);
+
+	LineEditDelegate* lineEdit;
 };
 
 #endif

@@ -5,6 +5,7 @@
 
 #include <QDialogButtonBox>
 #include <QPushButton>
+#include <QShortcut>
 
 // Constructor
 FeedbackDialog::FeedbackDialog(QWidget* parent, VisualizationContainer* visualizationContainer)
@@ -28,6 +29,10 @@ FeedbackDialog::FeedbackDialog(QWidget* parent, VisualizationContainer* visualiz
 	QObject::connect(table, &FeedbackTable::selectRegion, this, &FeedbackDialog::on_selectRegion);
 	QObject::connect(table, &FeedbackTable::highlightRegion, this, &FeedbackDialog::on_highlightRegion);
 	QObject::connect(table, &FeedbackTable::countChanged, this, &FeedbackDialog::on_countChanged);
+
+	// Shortcut
+	QShortcut* shortcut = new QShortcut(QKeySequence(Qt::ALT + Qt::Key_V), this);
+	QObject::connect(shortcut, &QShortcut::activated, this, &FeedbackDialog::on_verifiedShortcut);
 
 	updateRegions();
 }
@@ -66,4 +71,8 @@ void FeedbackDialog::on_highlightRegion(int label) {
 
 void FeedbackDialog::on_countChanged(int count) {
 	countLabel->setText("Count: " + QString::number(count));
+}
+
+void FeedbackDialog::on_verifiedShortcut() {
+	printf("DLKJF");
 }
