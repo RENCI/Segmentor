@@ -66,6 +66,7 @@ public:
 
 	void SetColor(double r, double g, double b);
 	const double* GetColor();
+	const double* GetDisplayedColor();
 
 	void ShowText(bool show);
 

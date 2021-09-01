@@ -401,7 +401,9 @@ bool Region::GetVerified() {
 }
 
 void Region::SetVerified(bool isVerified) {
-	verified = isVerified;
+	verified = done && isVerified;
+
+	UpdateColor();
 }
 
 void Region::SetColor(double r, double g, double b) {
@@ -413,20 +415,16 @@ void Region::SetColor(double r, double g, double b) {
 }
 
 void Region::UpdateColor() {
-	if (done) {
-		text->GetTextProperty()->SetColor(LabelColors::doneColor);
-		surface->GetActor()->GetProperty()->SetColor(LabelColors::doneColor);
-		outline->GetActor()->GetProperty()->SetColor(LabelColors::doneColor);
-		voxelOutlines->GetActor()->GetProperty()->SetColor(LabelColors::doneColor);
-		highlight3D->GetActor()->GetProperty()->SetColor(LabelColors::doneColor);
-	}
-	else {
-		text->GetTextProperty()->SetColor(color);
-		surface->GetActor()->GetProperty()->SetColor(color);
-		outline->GetActor()->GetProperty()->SetColor(color);
-		voxelOutlines->GetActor()->GetProperty()->SetColor(color);
-		highlight3D->GetActor()->GetProperty()->SetColor(color);
-	}
+	double* currentColor = 
+		verified ? LabelColors::verifiedColor :
+		done ? LabelColors::doneColor :
+		color;
+
+	text->GetTextProperty()->SetColor(currentColor);
+	surface->GetActor()->GetProperty()->SetColor(currentColor);
+	outline->GetActor()->GetProperty()->SetColor(currentColor);
+	voxelOutlines->GetActor()->GetProperty()->SetColor(currentColor);
+	highlight3D->GetActor()->GetProperty()->SetColor(currentColor);
 }
 
 void Region::ShowText(bool show) {
@@ -464,6 +462,10 @@ unsigned short Region::GetLabel() {
 
 const double* Region::GetColor() {
 	return color;
+}
+
+const double* Region::GetDisplayedColor() {
+	return surface->GetActor()->GetProperty()->GetColor();
 }
 
 int Region::GetNumVoxels() {

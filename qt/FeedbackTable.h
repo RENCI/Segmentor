@@ -52,7 +52,7 @@ protected:
 		Verified
 	};
 
-	void addCheckWidget(int row, int column, bool checked);
+	void addCheckWidget(int row, int column, bool checked, bool enabled = true);
 };
 
 #endif

@@ -2054,6 +2054,20 @@ void VisualizationContainer::SetRegionVerified(unsigned short label, bool verifi
 	if (!region) return;
 
 	region->SetVerified(verified);
+
+	if (verified) {
+		// Set to grey
+		labelColors->SetTableValue(label, LabelColors::verifiedColor);
+		labelColors->Build();
+	}
+	else {
+		// Set to color map
+		UpdateColors(label);
+	}
+
+	qtWindow->updateRegion(region, regions);
+
+	Render();
 }
 
 void VisualizationContainer::SetWindowLevel(double window, double level) {

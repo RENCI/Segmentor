@@ -11,6 +11,7 @@ public:
 	static double* GetColor(int index);
 
 	static double doneColor[3];
+	static double verifiedColor[3];
 
 protected:
 	static double colors[][3];

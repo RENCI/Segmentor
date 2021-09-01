@@ -63,7 +63,7 @@ void RegionTable::update() {
 		setItem(i, Id, idItem);
 
 		// Color
-		const double* col = region->GetDone() ? LabelColors::doneColor : region->GetColor();
+		const double* col = region->GetDisplayedColor();
 		QColor color(col[0] * 255, col[1] * 255, col[2] * 255);
 		QTableWidgetItem* colorItem = new QTableWidgetItem();
 		colorItem->setBackgroundColor(color);
@@ -141,7 +141,7 @@ void RegionTable::update(Region* region) {
 
 		if (ti->text() == labelString) {
 			// Color
-			const double* col = region->GetDone() ? LabelColors::doneColor : region->GetColor();
+			const double* col = region->GetDisplayedColor();
 			QColor color(col[0] * 255, col[1] * 255, col[2] * 255);
 			item(i, Color)->setBackgroundColor(color);
 
