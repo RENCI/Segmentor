@@ -121,6 +121,8 @@ protected:
 
 	void UpdateColor();
 
+	void CreateText();
+
 	std::string LabelString();
 
 	friend class RegionInfo;

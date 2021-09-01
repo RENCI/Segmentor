@@ -51,6 +51,8 @@ protected:
 		Done,
 		Remove
 	};
+
+	void addCheckWidget(int row, int column, bool checked);
 };
 
 #endif

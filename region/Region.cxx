@@ -43,19 +43,10 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 	color[1] = regionColor[1];
 	color[2] = regionColor[2];
 
-	// Coordinate system for text
-	vtkSmartPointer<vtkCoordinate> coord = vtkSmartPointer<vtkCoordinate>::New();
-	coord->SetCoordinateSystemToNormalizedViewport();
-	coord->SetValue(0, 1);
-
 	// Text
-	text = vtkSmartPointer<vtkTextActor>::New();
+	CreateText();
 	text->SetInput(LabelString().c_str());
-	text->GetTextProperty()->SetFontSize(18);
 	text->GetTextProperty()->SetColor(color);
-	text->GetPositionCoordinate()->SetReferenceCoordinate(coord);
-	text->SetPosition(10, -30);
-	text->VisibilityOff();
 
 	voi = vtkSmartPointer<vtkExtractVOI>::New();
 	voi->SetInputDataObject(data);
@@ -107,13 +98,12 @@ Region::Region(const RegionInfo& info, vtkImageData* inputData) {
 	voi->SetInputDataObject(data);
 
 	// Text
-	text = vtkSmartPointer<vtkTextActor>::New();
+	CreateText();
 
 	SetInfo(info);
 
 	text->SetInput(LabelString().c_str());
 	text->GetTextProperty()->SetColor(color);
-	text->VisibilityOff();
 
 	vtkSmartPointer<vtkImageDataCells> cells = vtkSmartPointer<vtkImageDataCells>::New();
 	cells->SetInputConnection(voi->GetOutputPort());
@@ -630,6 +620,20 @@ void Region::ClearLabels() {
 	}
 
 	data->Modified();
+}
+
+void Region::CreateText() {
+	// Coordinate system for text
+	vtkSmartPointer<vtkCoordinate> coord = vtkSmartPointer<vtkCoordinate>::New();
+	coord->SetCoordinateSystemToNormalizedViewport();
+	coord->SetValue(0, 1);
+
+	// Text
+	text = vtkSmartPointer<vtkTextActor>::New();
+	text->GetTextProperty()->SetFontSize(18);
+	text->GetPositionCoordinate()->SetReferenceCoordinate(coord);
+	text->SetPosition(10, -30);
+	text->VisibilityOff();
 }
 
 std::string Region::LabelString() {

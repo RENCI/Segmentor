@@ -6,7 +6,6 @@
 
 class Region;
 class RegionCollection;
-class LineEditDelegate;
 
 class FeedbackTable : public QTableWidget {
   Q_OBJECT
@@ -39,6 +38,8 @@ protected:
 
 	bool filter;
 
+	void leaveEvent(QEvent *event);
+
 	int rowLabel(int row);
 
 	void disableSorting();
@@ -52,8 +53,6 @@ protected:
 	};
 
 	void addCheckWidget(int row, int column, bool checked);
-
-	LineEditDelegate* lineEdit;
 };
 
 #endif

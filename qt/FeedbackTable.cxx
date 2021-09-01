@@ -1,12 +1,11 @@
 #include "FeedbackTable.h"
 
 #include <QApplication>
+#include <QCheckBox>
 #include <QHeaderView>
 #include <QTableWidgetItem>
 #include <QStyle>
 #include <QSignalMapper>
-#include <QCheckBox>
-#include <QLineEdit>
 
 #include "Region.h"
 #include "RegionCollection.h"
@@ -21,7 +20,7 @@ FeedbackTable::FeedbackTable(QWidget* parent) : QTableWidget(parent) {
 	enableSorting();
 	setMouseTracking(true);
 
-	lineEdit = new LineEditDelegate(this);
+	LineEditDelegate* lineEdit = new LineEditDelegate(this);
 	setItemDelegateForColumn(1, lineEdit);
 
 	regions = nullptr;
@@ -32,7 +31,6 @@ FeedbackTable::FeedbackTable(QWidget* parent) : QTableWidget(parent) {
 
 	QObject::connect(this, &FeedbackTable::cellEntered, this, &FeedbackTable::on_cellEntered);
 	QObject::connect(this, &FeedbackTable::cellClicked, this, &FeedbackTable::on_cellClicked);
-
 	QObject::connect(this, &FeedbackTable::cellChanged, this, &FeedbackTable::on_cellChanged);
 }
 
@@ -69,22 +67,13 @@ void FeedbackTable::update() {
 
 		// Comment
 		QTableWidgetItem* commentItem = new QTableWidgetItem();
-		commentItem->setData(0, "Hello");
-		//commentItem->setFlags(Qt::ItemIsSelectable);
-		/*
-		QLineEdit* edit = new QLineEdit();
-		edit->setText(QString::fromStdString(region->GetComment()));
-		QObject::connect(edit, &QLineEdit::editingFinished, [this, label, edit]() {
-			emit regionComment(label, edit->text());
-		});
-		*/
-
+		commentItem->setData(0, QString::fromStdString(region->GetComment()));
 		setItem(i, Comment, commentItem);
-		//setCellWidget(i, Comment, edit);
 
-
-		// Checkboxes
+		// Done
 		addCheckWidget(i, Done, region->GetDone());
+
+		// Verified
 		addCheckWidget(i, Verified, region->GetVerified());
 	}
 
@@ -171,10 +160,10 @@ void FeedbackTable::on_cellClicked(int row, int column) {
 	else if (column == Done) {
 		QCheckBox* checkBox = (QCheckBox*)cellWidget(row, column);
 		checkBox->toggle();
-
+		
 		emit(regionDone(rowLabel(row), checkBox->isChecked()));
 	}
-	else if (column == Verified) {		
+	else if (column == Verified) {
 		QCheckBox* checkBox = (QCheckBox*)cellWidget(row, column);
 		checkBox->toggle();
 
@@ -190,8 +179,6 @@ void FeedbackTable::on_cellChanged(int row, int column) {
 	}
 }
 
-
-/*
 void FeedbackTable::leaveEvent(QEvent* event) {
 	// Clear highlight
 	QString labelString = QString::number(currentRegionLabel);
@@ -206,7 +193,6 @@ void FeedbackTable::leaveEvent(QEvent* event) {
 
 	emit(highlightRegion(0));
 }
-*/
 
 int FeedbackTable::rowLabel(int row) {
 	return item(row, 0)->text().toInt();
@@ -223,15 +209,15 @@ void FeedbackTable::enableSorting() {
 	resizeColumnsToContents();
 }
 
+
 void FeedbackTable::addCheckWidget(int row, int column, bool checked) {
 	QTableWidgetItem* item = new QTableWidgetItem();
 	item->setFlags(Qt::ItemIsSelectable);
-	item->setData(0, checked);
 	item->setTextColor(QColor("white"));
 
 	QCheckBox* checkBox = new QCheckBox();
 	checkBox->setChecked(checked);
-	checkBox->setStyleSheet("margin-left:auto;margin-right:auto;");
+	checkBox->setStyleSheet("margin-left:15%;margin-right:10%;padding-left:0;padding-right:0");
 	checkBox->setAttribute(Qt::WA_TransparentForMouseEvents);
 
 	setItem(row, column, item);

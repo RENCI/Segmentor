@@ -10,6 +10,7 @@
 #include <QSignalMapper>
 #include <QCheckBox>
 #include <QColorDialog>
+#include <QHBoxLayout>
 
 #include "LabelColors.h"
 #include "Region.h"
@@ -59,6 +60,8 @@ void RegionTable::update() {
 		idItem->setTextAlignment(Qt::AlignCenter);
 		idItem->setFlags(Qt::ItemIsSelectable);
 
+		setItem(i, Id, idItem);
+
 		// Color
 		const double* col = region->GetDone() ? LabelColors::doneColor : region->GetColor();
 		QColor color(col[0] * 255, col[1] * 255, col[2] * 255);
@@ -66,12 +69,16 @@ void RegionTable::update() {
 		colorItem->setBackgroundColor(color);
 		colorItem->setFlags(Qt::ItemIsSelectable);
 
+		setItem(i, Color, colorItem);
+
 		// Size
 		QTableWidgetItem* sizeItem = new QTableWidgetItem();
 		sizeItem->setData(0, region->GetNumVoxels());
 		sizeItem->setTextAlignment(Qt::AlignCenter);
 		sizeItem->setFlags(Qt::ItemIsSelectable);
 		sizeItem->setTextColor(QColor("black"));
+
+		setItem(i, Size, sizeItem);
 
 		// Refining
 		bool refining = region->GetModified() && !region->GetDone();
@@ -86,27 +93,14 @@ void RegionTable::update() {
 		refiningButton->setEnabled(false);
 		refiningButton->setStyleSheet("background-color: transparent; border: none;");
 
-		// Visible
-		QTableWidgetItem* visibleItem = new QTableWidgetItem();
-		visibleItem->setFlags(Qt::ItemIsSelectable);
-		visibleItem->setData(0, region->GetVisible());
-		visibleItem->setTextColor(QColor("white"));
+		setItem(i, Refining, refiningItem);
+		setCellWidget(i, Refining, refiningButton);
 
-		QCheckBox* visibleCheckbox = new QCheckBox();
-		visibleCheckbox->setChecked(region->GetVisible());
-		visibleCheckbox->setStyleSheet("margin-left:10%;margin-right:5%;");
-		visibleCheckbox->setAttribute(Qt::WA_TransparentForMouseEvents);
+		// Visible
+		addCheckWidget(i, Visible, region->GetVisible());
 
 		// Done
-		QTableWidgetItem* doneItem = new QTableWidgetItem();
-		doneItem->setFlags(Qt::ItemIsSelectable);
-		doneItem->setData(0, region->GetDone());
-		doneItem->setTextColor(QColor("white"));
-
-		QCheckBox* doneCheckBox = new QCheckBox();
-		doneCheckBox->setChecked(region->GetDone());
-		doneCheckBox->setStyleSheet("margin-left:10%;margin-right:5%;");
-		doneCheckBox->setAttribute(Qt::WA_TransparentForMouseEvents);
+		addCheckWidget(i, Done, region->GetDone());		
 
 		// Remove button
 		QTableWidgetItem* removeItem = new QTableWidgetItem();
@@ -118,19 +112,6 @@ void RegionTable::update() {
 		QObject::connect(removeButton, &QPushButton::clicked, [this, label]() {
 			removeRegion(label);
 		});
-
-		setItem(i, Id, idItem);
-		setItem(i, Color, colorItem);
-		setItem(i, Size, sizeItem);
-
-		setItem(i, Refining, refiningItem);
-		setCellWidget(i, Refining, refiningButton);
-
-		setItem(i, Visible, visibleItem);
-		setCellWidget(i, Visible, visibleCheckbox);
-
-		setItem(i, Done, doneItem);
-		setCellWidget(i, Done, doneCheckBox);
 
 		setItem(i, Remove, removeItem);
 		setCellWidget(i, Remove, removeButton);
@@ -322,4 +303,18 @@ void RegionTable::enableSorting() {
 	setSortingEnabled(true);
 	QObject::connect(horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &QTableWidget::resizeColumnsToContents);
 	resizeColumnsToContents();
+}
+
+void RegionTable::addCheckWidget(int row, int column, bool checked) {
+	QTableWidgetItem* item = new QTableWidgetItem();
+	item->setFlags(Qt::ItemIsSelectable);
+	item->setTextColor(QColor("white"));
+
+	QCheckBox* checkBox = new QCheckBox();
+	checkBox->setChecked(checked);
+	checkBox->setStyleSheet("margin-left:15%;margin-right:10%;padding-left:0;padding-right:0");
+	checkBox->setAttribute(Qt::WA_TransparentForMouseEvents);
+
+	setItem(row, column, item);
+	setCellWidget(row, column, checkBox);
 }
