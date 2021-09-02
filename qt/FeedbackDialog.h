@@ -3,6 +3,8 @@
 
 #include "ui_FeedbackDialog.h"
 
+class QStandardItemModel;
+
 class FeedbackTable;
 class VisualizationContainer;
 class Region;
@@ -15,12 +17,14 @@ public:
 
 	void updateRegions();
 	void updateRegion(Region* region);
+	void selectRegionLabel(unsigned short label);
 	
 public slots:
 	// Use Qt's auto-connect magic to tie GUI widgets to slots,
 	// removing the need to call connect() explicitly.
 	// Names of the methods must follow the naming convention
 	// on_<widget name>_<signal name>(<signal parameters>).
+	void on_searchLineEdit_editingFinished();
 	void on_filterCheckBox_stateChanged(int state);
 
 	void on_regionComment(int label, QString comment);
@@ -34,6 +38,8 @@ public slots:
 protected:
 	FeedbackTable* table;
 	VisualizationContainer* visualizationContainer;
+
+	QStandardItemModel* labelModel;
 };
 
 #endif

@@ -1,11 +1,15 @@
 #include "FeedbackDialog.h"
 
 #include "FeedbackTable.h"
+#include "Region.h"
+#include "RegionCollection.h"
 #include "VisualizationContainer.h"
 
+#include <QCompleter>
 #include <QDialogButtonBox>
 #include <QPushButton>
 #include <QShortcut>
+#include <QStandardItemModel>
 
 // Constructor
 FeedbackDialog::FeedbackDialog(QWidget* parent, VisualizationContainer* visualizationContainer)
@@ -16,6 +20,11 @@ FeedbackDialog::FeedbackDialog(QWidget* parent, VisualizationContainer* visualiz
 	buttonBox->button(QDialogButtonBox::Close)->setAutoDefault(false);
 
 	setWindowFlag(Qt::WindowContextHelpButtonHint, false);	
+
+	// Search autocomplete
+	labelModel = new QStandardItemModel(this);
+	QCompleter* completer = new QCompleter(labelModel, this);
+	searchLineEdit->setCompleter(completer);
 
 	// Create table
 	table = new FeedbackTable(this);
@@ -42,11 +51,34 @@ FeedbackDialog::~FeedbackDialog() {
 }
 
 void FeedbackDialog::updateRegions() {
-	table->update(visualizationContainer->GetRegions());
+	RegionCollection* regions = visualizationContainer->GetRegions();
+
+	// Update table
+	table->update(regions);
+
+	// Update autocomplete
+	labelModel->clear();
+	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+		Region* region = regions->Get(it);
+
+		QStandardItem* item = new QStandardItem(QString::number(region->GetLabel()));
+
+		labelModel->appendRow(item);
+	}
 }
 
 void FeedbackDialog::updateRegion(Region* region) {
 	table->update(region);
+}
+
+void FeedbackDialog::selectRegionLabel(unsigned short label) {
+	table->selectRegionLabel(label);
+}
+
+void FeedbackDialog::on_searchLineEdit_editingFinished() {
+	unsigned short label = searchLineEdit->text().toInt();
+
+	visualizationContainer->SelectRegion(label);
 }
 
 void FeedbackDialog::on_filterCheckBox_stateChanged(int state) {
@@ -78,5 +110,5 @@ void FeedbackDialog::on_countChanged(int count) {
 }
 
 void FeedbackDialog::on_verifiedShortcut() {
-	printf("DLKJF");
+	//printf("DLKJF");
 }

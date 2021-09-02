@@ -1992,6 +1992,8 @@ void VisualizationContainer::HighlightRegion(unsigned short label) {
 void VisualizationContainer::SelectRegion(unsigned short label, bool flyTo) {
 	Region* region = regions->Get(label);
 
+	if (!region) return;
+
 	SetCurrentRegion(region);
 
 	if (flyTo) volumeView->GetInteractorStyle()->FlyTo(region->GetCenter());

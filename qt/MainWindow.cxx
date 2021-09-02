@@ -170,6 +170,7 @@ void MainWindow::updateRegion(Region* region, RegionCollection* regions) {
 
 void MainWindow::selectRegion(unsigned short label) {
 	regionTable->selectRegionLabel(label);
+	feedbackDialog->selectRegionLabel(label);
 }
 
 void MainWindow::setWindowLevel(double window, double level) {

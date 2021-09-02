@@ -179,7 +179,6 @@ void FeedbackTable::on_cellEntered(int row, int column) {
 	}
 }
 
-
 void FeedbackTable::on_cellClicked(int row, int column) {
 	if (column == Id) {
 		emit(selectRegion(rowLabel(row)));
