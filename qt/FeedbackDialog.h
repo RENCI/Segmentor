@@ -5,6 +5,7 @@
 
 class FeedbackTable;
 class VisualizationContainer;
+class Region;
 
 class FeedbackDialog : public QDialog, private Ui::FeedbackDialog {
 	Q_OBJECT
@@ -13,6 +14,7 @@ public:
 	virtual ~FeedbackDialog();
 
 	void updateRegions();
+	void updateRegion(Region* region);
 	
 public slots:
 	// Use Qt's auto-connect magic to tie GUI widgets to slots,

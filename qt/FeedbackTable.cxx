@@ -92,6 +92,33 @@ void FeedbackTable::update(RegionCollection* regionCollection) {
 	update();
 }
 
+void FeedbackTable::update(Region* region) {
+	QString labelString = QString::number(region->GetLabel());
+
+	for (int i = 0; i < rowCount(); i++) {
+		QTableWidgetItem* ti = item(i, 0);
+
+		if (ti->text() == labelString) {
+			// Comment
+			item(i, Comment)->setData(0, QString::fromStdString(region->GetComment()));
+
+			// Done
+			item(i, Done)->setData(0, region->GetDone());
+			QCheckBox* doneCheck = (QCheckBox*)cellWidget(i, Done);
+			doneCheck->setChecked(region->GetDone());
+			doneCheck->setEnabled(!region->GetVerified());
+
+			// Verified
+			item(i, Verified)->setData(0, region->GetVerified());
+			QCheckBox* verifiedCheck = (QCheckBox*)cellWidget(i, Verified);
+			verifiedCheck->setChecked(region->GetVerified());
+			verifiedCheck->setEnabled(region->GetDone());
+
+			break;
+		}
+	}
+}
+
 void FeedbackTable::selectRegionLabel(unsigned short label) {
 	currentRegionLabel = label;
 	QString labelString = QString::number(currentRegionLabel);
@@ -158,33 +185,27 @@ void FeedbackTable::on_cellClicked(int row, int column) {
 		emit(selectRegion(rowLabel(row)));
 	}
 	else if (column == Done) {
-		QCheckBox* doneCheckBox = (QCheckBox*)cellWidget(row, Done);
-		QCheckBox* verifiedCheckBox = (QCheckBox*)cellWidget(row, Verified);
+		QCheckBox* checkBox = (QCheckBox*)cellWidget(row, column);
 
-		bool verified = verifiedCheckBox->isChecked();
+		if (checkBox->isEnabled()) {
+			checkBox->toggle();
 
-		if (!verified) {
-			doneCheckBox->toggle();
+			bool done = checkBox->isChecked();
 
-			bool done = doneCheckBox->isChecked();
-
-			verifiedCheckBox->setEnabled(done);
+			((QCheckBox*)cellWidget(row, Verified))->setEnabled(done);
 
 			emit(regionDone(rowLabel(row), done));
 		}
 	}
 	else if (column == Verified) {
-		QCheckBox* doneCheckBox = (QCheckBox*)cellWidget(row, Done);
-		QCheckBox* verifiedCheckBox = (QCheckBox*)cellWidget(row, Verified);
+		QCheckBox* checkBox = (QCheckBox*)cellWidget(row, column);
 
-		bool done = doneCheckBox->isChecked();
+		if (checkBox->isEnabled()) {
+			checkBox->toggle();
 
-		if (done) {
-			verifiedCheckBox->toggle();
+			bool verified = checkBox->isChecked();
 
-			bool verified = verifiedCheckBox->isChecked();
-
-			doneCheckBox->setEnabled(!verified);
+			((QCheckBox*)cellWidget(row, Done))->setEnabled(!verified);
 
 			emit(regionVerified(rowLabel(row), verified));
 		}

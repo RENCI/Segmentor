@@ -14,6 +14,7 @@ public:
 
 	void update();
 	void update(RegionCollection* regionCollection);
+	void update(Region* region);
 	void selectRegionLabel(unsigned short label);
 
 	void setFilter(bool filterRows);

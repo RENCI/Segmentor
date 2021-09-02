@@ -163,6 +163,7 @@ void MainWindow::updateRegions(RegionCollection* regions) {
 
 void MainWindow::updateRegion(Region* region, RegionCollection* regions) {
 	regionTable->update(region);
+	feedbackDialog->updateRegion(region);
 
 	updateLabels(regions);
 }

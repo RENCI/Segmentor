@@ -45,6 +45,10 @@ void FeedbackDialog::updateRegions() {
 	table->update(visualizationContainer->GetRegions());
 }
 
+void FeedbackDialog::updateRegion(Region* region) {
+	table->update(region);
+}
+
 void FeedbackDialog::on_filterCheckBox_stateChanged(int state) {
 	table->setFilter(state != 0);
 }

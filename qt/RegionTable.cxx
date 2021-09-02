@@ -100,7 +100,7 @@ void RegionTable::update() {
 		addCheckWidget(i, Visible, region->GetVisible());
 
 		// Done
-		addCheckWidget(i, Done, region->GetDone());		
+		addCheckWidget(i, Done, region->GetDone(), !region->GetVerified());		
 
 		// Remove button
 		QTableWidgetItem* removeItem = new QTableWidgetItem();
@@ -159,7 +159,9 @@ void RegionTable::update(Region* region) {
 
 			// Done
 			item(i, Done)->setData(0, region->GetDone());
-			((QCheckBox*)cellWidget(i, Done))->setChecked(region->GetDone());
+			QCheckBox* doneCheck = (QCheckBox*)cellWidget(i, Done);
+			doneCheck->setChecked(region->GetDone());
+			doneCheck->setEnabled(!region->GetVerified());
 
 			// Remove
 			((QPushButton*)cellWidget(i, Remove))->setEnabled(!region->GetDone());
@@ -243,14 +245,18 @@ void RegionTable::on_cellClicked(int row, int column) {
 	disableSorting();
 
 	if (column == Color) {
-		QTableWidgetItem* colorItem = (QTableWidgetItem*)item(row, column);
+		bool done = ((QCheckBox*)cellWidget(row, Done))->isChecked();
+		
+		if (!done) {
+			QTableWidgetItem* colorItem = (QTableWidgetItem*)item(row, column);
 
-		QColor color = QColorDialog::getColor(colorItem->backgroundColor());
+			QColor color = QColorDialog::getColor(colorItem->backgroundColor());
 
-		if (color.isValid()) {
-			colorItem->setBackgroundColor(color);
+			if (color.isValid()) {
+				colorItem->setBackgroundColor(color);
 
-			emit(regionColor(rowLabel(row), color));
+				emit(regionColor(rowLabel(row), color));
+			}
 		}
 	}
 	else if (column == Visible) {
@@ -261,12 +267,15 @@ void RegionTable::on_cellClicked(int row, int column) {
 	}
 	else if (column == Done) {
 		QCheckBox* checkBox = (QCheckBox*)cellWidget(row, column);
-		checkBox->toggle();
 
-		QPushButton* button = (QPushButton*)cellWidget(row, Remove);
-		button->setEnabled(!checkBox->isChecked());
+		if (checkBox->isEnabled()) {
+			checkBox->toggle();
 
-		emit(regionDone(rowLabel(row), checkBox->isChecked()));
+			QPushButton* button = (QPushButton*)cellWidget(row, Remove);
+			button->setEnabled(!checkBox->isChecked());
+
+			emit(regionDone(rowLabel(row), checkBox->isChecked()));
+		}
 	}
 	else {
 		emit(selectRegion(rowLabel(row)));
@@ -305,13 +314,14 @@ void RegionTable::enableSorting() {
 	resizeColumnsToContents();
 }
 
-void RegionTable::addCheckWidget(int row, int column, bool checked) {
+void RegionTable::addCheckWidget(int row, int column, bool checked, bool enabled) {
 	QTableWidgetItem* item = new QTableWidgetItem();
 	item->setFlags(Qt::ItemIsSelectable);
 	item->setTextColor(QColor("white"));
 
 	QCheckBox* checkBox = new QCheckBox();
 	checkBox->setChecked(checked);
+	checkBox->setEnabled(enabled);
 	checkBox->setStyleSheet("margin-left:15%;margin-right:10%;padding-left:0;padding-right:0");
 	checkBox->setAttribute(Qt::WA_TransparentForMouseEvents);
 
