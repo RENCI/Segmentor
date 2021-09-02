@@ -594,6 +594,7 @@ void Region::SetInfo(const RegionInfo& info) {
 	visible = info.visible;
 	modified = info.modified;
 	done = info.done;
+	verified = info.verified;
 	comment = info.comment;
 }
 

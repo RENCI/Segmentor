@@ -53,6 +53,11 @@ std::vector<RegionInfo> RegionMetadataIO::Read(std::string fileName) {
 					region.done = regionObject["done"].toBool();
 				}
 
+				if (regionObject.contains("verified") && regionObject["verified"].isBool()) {
+					// Check done before setting as verified
+					region.verified = region.done && regionObject["verified"].toBool();
+				}
+
 				if (regionObject.contains("color") && regionObject["color"].isArray()) {
 					QJsonArray color = regionObject["color"].toArray();
 
@@ -100,6 +105,7 @@ bool RegionMetadataIO::Write(std::string fileName, std::vector<RegionInfo> regio
 		regionObject["visible"] = regions[i].visible;
 		regionObject["modified"] = regions[i].modified;
 		regionObject["done"] = regions[i].done;
+		regionObject["verified"] = regions[i].verified;
 
 		QJsonArray color;
 		for (int j = 0; j < 3; j++) {

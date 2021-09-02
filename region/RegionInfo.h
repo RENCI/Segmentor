@@ -20,6 +20,7 @@ protected:
 	bool visible;
 	bool modified;
 	bool done;
+	bool verified;
 	std::string comment;
 
 	friend class Region;

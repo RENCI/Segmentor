@@ -158,21 +158,36 @@ void FeedbackTable::on_cellClicked(int row, int column) {
 		emit(selectRegion(rowLabel(row)));
 	}
 	else if (column == Done) {
-		QCheckBox* checkBox = (QCheckBox*)cellWidget(row, column);
-		checkBox->toggle();
-
-		bool done = checkBox->isChecked();
-
+		QCheckBox* doneCheckBox = (QCheckBox*)cellWidget(row, Done);
 		QCheckBox* verifiedCheckBox = (QCheckBox*)cellWidget(row, Verified);
-		verifiedCheckBox->setEnabled(done);
-		
-		emit(regionDone(rowLabel(row), checkBox->isChecked()));
+
+		bool verified = verifiedCheckBox->isChecked();
+
+		if (!verified) {
+			doneCheckBox->toggle();
+
+			bool done = doneCheckBox->isChecked();
+
+			verifiedCheckBox->setEnabled(done);
+
+			emit(regionDone(rowLabel(row), done));
+		}
 	}
 	else if (column == Verified) {
-		QCheckBox* checkBox = (QCheckBox*)cellWidget(row, column);
-		checkBox->toggle();
+		QCheckBox* doneCheckBox = (QCheckBox*)cellWidget(row, Done);
+		QCheckBox* verifiedCheckBox = (QCheckBox*)cellWidget(row, Verified);
 
-		emit(regionVerified(rowLabel(row), checkBox->isChecked()));
+		bool done = doneCheckBox->isChecked();
+
+		if (done) {
+			verifiedCheckBox->toggle();
+
+			bool verified = verifiedCheckBox->isChecked();
+
+			doneCheckBox->setEnabled(!verified);
+
+			emit(regionVerified(rowLabel(row), verified));
+		}
 	}
 }
 

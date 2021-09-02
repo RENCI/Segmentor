@@ -21,6 +21,7 @@ RegionInfo::RegionInfo(Region* region) {
 	visible = region->visible;
 	modified = region->modified;
 	done = region->done;
+	verified = region->verified;
 	comment = region->comment;
 }
 	
