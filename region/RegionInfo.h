@@ -3,8 +3,6 @@
 
 #include <vtkSmartPointer.h>
 
-#include "Feedback.h"
-
 class Region;
 class RegionMetadataIO;
 
@@ -22,8 +20,8 @@ protected:
 	bool visible;
 	bool modified;
 	bool done;
-
-	Feedback feedback;
+	bool verified;
+	std::string comment;
 
 	friend class Region;
 	friend class RegionMetadataIO;

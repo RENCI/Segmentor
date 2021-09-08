@@ -21,8 +21,8 @@ RegionInfo::RegionInfo(Region* region) {
 	visible = region->visible;
 	modified = region->modified;
 	done = region->done;
-
-	feedback.Copy(*region->GetFeedback());
+	verified = region->verified;
+	comment = region->comment;
 }
 	
 RegionInfo::~RegionInfo() {

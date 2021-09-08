@@ -3,6 +3,7 @@
 #include "vtkLookupTable.h"
 
 double LabelColors::doneColor[3] = { 1.0, 1.0, 1.0 };
+double LabelColors::verifiedColor[3] = { 136 / 255.0, 139 / 255.0, 141 / 255.0 };
 
 // Colors from ColorBrewer
 const int numColors = 12;

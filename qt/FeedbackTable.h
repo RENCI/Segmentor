@@ -4,8 +4,6 @@
 #include <QTableWidget>
 #include <QColor>
 
-#include "Feedback.h"
-
 class Region;
 class RegionCollection;
 
@@ -16,16 +14,21 @@ public:
 
 	void update();
 	void update(RegionCollection* regionCollection);
+	void update(Region* region);
 	void selectRegionLabel(unsigned short label);
 
 	void setFilter(bool filterRows);
 
 public slots:
 	void on_cellEntered(int row, int column);
-	void on_cellClicked(int row, int column); 
+	void on_cellClicked(int row, int column);
+	void on_cellChanged(int row, int column);
 
 signals:
-	void regionFeedback(int label, Feedback::FeedbackType type, bool value);
+	void selectRegion(int label);
+	void regionComment(int label, QString comment);
+	void regionDone(int label, bool done);
+	void regionVerified(int label, bool verified);
 	void highlightRegion(int label);
 	void countChanged(int count);
 
@@ -36,6 +39,8 @@ protected:
 
 	bool filter;
 
+	void leaveEvent(QEvent *event);
+
 	int rowLabel(int row);
 
 	void disableSorting();
@@ -43,17 +48,12 @@ protected:
 
 	enum ColumnType {
 		Id = 0,
-		Undertraced,
-		Overtraced,
-		AddToSlice,
-		RemoveId,
-		Split,
-		Merge,
-		CorrectSplitMerge
+		Comment,
+		Done,
+		Verified
 	};
 
-	void addCheckWidget(int row, int column, bool checked);
-	Feedback::FeedbackType columnToFeedback(int column);
+	void addCheckWidget(int row, int column, bool checked, bool enabled = true);
 };
 
 #endif
