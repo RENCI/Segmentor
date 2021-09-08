@@ -1899,7 +1899,7 @@ void VisualizationContainer::GrowCurrentRegion(double point[3]) {
 }
 
 void VisualizationContainer::ToggleCurrentRegionDone() {
-	if (!currentRegion) return;
+	if (!currentRegion || currentRegion->GetVerified()) return;
 
 	SetRegionDone(currentRegion->GetLabel(), !currentRegion->GetDone());
 }
@@ -2384,10 +2384,15 @@ void VisualizationContainer::ExtractRegions(const std::vector<RegionInfo>& metad
 		if (region->GetNumVoxels() > 0) {
 			regions->Add(region);
 
-			// Update done status
+			// Update done and verified status
 			if (region->GetDone()) {
 				region->SetDone(true);
 				labelColors->SetTableValue(region->GetLabel(), LabelColors::doneColor);
+			}
+
+			if (region->GetVerified()) {
+				region->SetVerified(true);
+				labelColors->SetTableValue(region->GetLabel(), LabelColors::verifiedColor);
 			}
 		}
 		else {
