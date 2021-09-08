@@ -13,7 +13,7 @@ class vtkExtractVOI;
 class vtkImageData;
 class vtkPlane;
 class vtkTable;
-class vtkBillboardTextActor3D;
+class vtkTextActor;
 class vtkThreshold;
 
 class vtkImageDataCells;
@@ -40,7 +40,7 @@ public:
 	RegionOutline* GetOutline();
 	RegionVoxelOutlines* GetVoxelOutlines();
 	RegionHighlight3D* GetHighlight3D();
-	vtkSmartPointer<vtkBillboardTextActor3D> GetText();
+	vtkSmartPointer<vtkTextActor> GetText();
 	vtkSmartPointer<vtkImageData> GetZSlice(int z);
 
 #ifdef SHOW_REGION_BOX
@@ -61,8 +61,12 @@ public:
 	bool GetDone();
 	void SetDone(bool isDone);
 
+	bool GetVerified();
+	void SetVerified(bool isVerified);
+
 	void SetColor(double r, double g, double b);
 	const double* GetColor();
+	const double* GetDisplayedColor();
 
 	void ShowText(bool show);
 
@@ -81,7 +85,9 @@ public:
 
 	void SetInfo(const RegionInfo& info);
 
-	Feedback* GetFeedback();
+	bool HasComment();
+	const std::string& GetComment();
+	void SetComment(const std::string& commentString);
 
 protected:
 	unsigned short label;
@@ -91,8 +97,8 @@ protected:
 	bool visible;
 	bool modified;
 	bool done;
-
-	Feedback* feedback;
+	bool verified;
+	std::string comment;
 
 	vtkSmartPointer<vtkImageData> data;
 	vtkSmartPointer<vtkExtractVOI> voi;
@@ -102,7 +108,7 @@ protected:
 	RegionOutline* outline;
 	RegionVoxelOutlines* voxelOutlines;
 	RegionHighlight3D* highlight3D;
-	vtkSmartPointer<vtkBillboardTextActor3D> text;
+	vtkSmartPointer<vtkTextActor> text;
 
 #ifdef SHOW_REGION_BOX
 	vtkSmartPointer<vtkActor> box;
@@ -115,6 +121,10 @@ protected:
 	void ClearLabels();
 
 	void UpdateColor();
+
+	void CreateText();
+
+	std::string LabelString();
 
 	friend class RegionInfo;
 };

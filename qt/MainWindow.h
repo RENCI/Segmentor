@@ -162,9 +162,8 @@ protected:
 
 	bool eventFilter(QObject* obj, QEvent* event);
 
-	// Default directories
-	QString defaultImageDirectoryKey;
-	QString defaultSegmentationDirectoryKey;
+	// Default directory
+	QString defaultDirectoryKey;
 
 	QString getDefaultDirectory(QString key);
 	void setDefaultDirectory(QString key, QString fileName);

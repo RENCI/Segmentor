@@ -9,7 +9,7 @@
 #include <vtkPlane.h>
 #include <vtkProperty.h>
 #include <vtkTable.h>
-#include <vtkBillboardTextActor3D.h>
+#include <vtkTextActor.h>
 #include <vtkRenderer.h>
 #include <vtkTextProperty.h>
 #include <vtkThreshold.h>
@@ -19,7 +19,6 @@
 
 #include "vtkImageDataCells.h"
 
-#include "Feedback.h"
 #include "LabelColors.h"
 #include "RegionInfo.h"
 #include "RegionSurface.h"
@@ -31,8 +30,7 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 	visible = false;
 	modified = false;
 	done = false;
-
-	feedback = new Feedback();
+	verified = false;
 
 	// Input data info
 	data = inputData;
@@ -46,10 +44,9 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 	color[2] = regionColor[2];
 
 	// Text
-	text = vtkSmartPointer<vtkBillboardTextActor3D>::New();
-	text->SetInput(std::to_string(label).c_str());
+	CreateText();
+	text->SetInput(LabelString().c_str());
 	text->GetTextProperty()->SetColor(color);
-	text->VisibilityOff();
 
 	voi = vtkSmartPointer<vtkExtractVOI>::New();
 	voi->SetInputDataObject(data);
@@ -101,15 +98,12 @@ Region::Region(const RegionInfo& info, vtkImageData* inputData) {
 	voi->SetInputDataObject(data);
 
 	// Text
-	text = vtkSmartPointer<vtkBillboardTextActor3D>::New();
-
-	feedback = new Feedback();
+	CreateText();
 
 	SetInfo(info);
 
-	text->SetInput(std::to_string(label).c_str());
+	text->SetInput(LabelString().c_str());
 	text->GetTextProperty()->SetColor(color);
-	text->VisibilityOff();
 
 	vtkSmartPointer<vtkImageDataCells> cells = vtkSmartPointer<vtkImageDataCells>::New();
 	cells->SetInputConnection(voi->GetOutputPort());
@@ -143,8 +137,6 @@ Region::~Region() {
 	delete outline;
 	delete voxelOutlines;
 	delete highlight3D;
-
-	delete feedback;
 }
 
 vtkAlgorithmOutput* Region::GetOutput() {
@@ -206,7 +198,7 @@ RegionHighlight3D* Region::GetHighlight3D() {
 	return highlight3D;
 }
 
-vtkSmartPointer<vtkBillboardTextActor3D> Region::GetText() {
+vtkSmartPointer<vtkTextActor> Region::GetText() {
 	return text;
 }
 
@@ -346,15 +338,17 @@ void Region::UpdateExtent() {
 //		(padExtent[3] - padExtent[2]) / 2
 //	);
 
+	/*
 	double bounds[6];
 	voi->Update();
 	voi->GetOutput()->GetBounds(bounds);
-
+	
 	text->SetPosition(
 		(bounds[1] - bounds[0]) / 2,
 		(bounds[3] - bounds[2]) / 2,
 		(bounds[5] - bounds[4]) / 2
 	);
+	*/
 }
 
 void Region::InitializeExtent(const int* regionExtent) {
@@ -402,6 +396,16 @@ void Region::SetDone(bool isDone) {
 	UpdateColor();
 }
 
+bool Region::GetVerified() {
+	return verified;
+}
+
+void Region::SetVerified(bool isVerified) {
+	verified = done && isVerified;
+
+	UpdateColor();
+}
+
 void Region::SetColor(double r, double g, double b) {
 	color[0] = r;
 	color[1] = g;
@@ -411,26 +415,23 @@ void Region::SetColor(double r, double g, double b) {
 }
 
 void Region::UpdateColor() {
-	if (done) {
-		text->GetTextProperty()->SetColor(LabelColors::doneColor);
-		surface->GetActor()->GetProperty()->SetColor(LabelColors::doneColor);
-		outline->GetActor()->GetProperty()->SetColor(LabelColors::doneColor);
-		voxelOutlines->GetActor()->GetProperty()->SetColor(LabelColors::doneColor);
-		highlight3D->GetActor()->GetProperty()->SetColor(LabelColors::doneColor);
-	}
-	else {
-		text->GetTextProperty()->SetColor(color);
-		surface->GetActor()->GetProperty()->SetColor(color);
-		outline->GetActor()->GetProperty()->SetColor(color);
-		voxelOutlines->GetActor()->GetProperty()->SetColor(color);
-		highlight3D->GetActor()->GetProperty()->SetColor(color);
-	}
+	double* currentColor = 
+		verified ? LabelColors::verifiedColor :
+		done ? LabelColors::doneColor :
+		color;
+
+	text->GetTextProperty()->SetColor(currentColor);
+	surface->GetActor()->GetProperty()->SetColor(currentColor);
+	outline->GetActor()->GetProperty()->SetColor(currentColor);
+	voxelOutlines->GetActor()->GetProperty()->SetColor(currentColor);
+	highlight3D->GetActor()->GetProperty()->SetColor(currentColor);
 }
 
 void Region::ShowText(bool show) {
 	if (!text) return;
 
 	if (show) {
+/*
 		double bounds[6];
 		voi->GetOutput()->GetBounds(bounds);
 		
@@ -439,6 +440,7 @@ void Region::ShowText(bool show) {
 			bounds[3],
 			bounds[4] + (bounds[5] - bounds[4]) / 2
 		);
+*/
 		text->VisibilityOn();
 
 #ifdef SHOW_REGION_BOX
@@ -460,6 +462,10 @@ unsigned short Region::GetLabel() {
 
 const double* Region::GetColor() {
 	return color;
+}
+
+const double* Region::GetDisplayedColor() {
+	return surface->GetActor()->GetProperty()->GetColor();
 }
 
 int Region::GetNumVoxels() {
@@ -588,12 +594,22 @@ void Region::SetInfo(const RegionInfo& info) {
 	visible = info.visible;
 	modified = info.modified;
 	done = info.done;
-
-	feedback->Copy(info.feedback);
+	verified = info.verified;
+	comment = info.comment;
 }
 
-Feedback* Region::GetFeedback() {
-	return feedback;
+bool Region::HasComment() {
+	return comment.size() > 0;
+}
+
+const std::string& Region::GetComment() {
+	return comment;
+}
+
+void Region::SetComment(const std::string& commentString) {
+	comment = commentString;
+
+	text->SetInput(LabelString().c_str());
 }
 
 void Region::ClearLabels() {
@@ -607,4 +623,28 @@ void Region::ClearLabels() {
 	}
 
 	data->Modified();
+}
+
+void Region::CreateText() {
+	// Coordinate system for text
+	vtkSmartPointer<vtkCoordinate> coord = vtkSmartPointer<vtkCoordinate>::New();
+	coord->SetCoordinateSystemToNormalizedViewport();
+	coord->SetValue(0, 1);
+
+	// Text
+	text = vtkSmartPointer<vtkTextActor>::New();
+	text->GetTextProperty()->SetFontSize(18);
+	text->GetPositionCoordinate()->SetReferenceCoordinate(coord);
+	text->SetPosition(10, -30);
+	text->VisibilityOff();
+}
+
+std::string Region::LabelString() {
+	std::string s = std::to_string(label).c_str();
+
+	if (comment.length() > 0) {
+		s += ": " + comment;
+	}
+
+	return s;
 }

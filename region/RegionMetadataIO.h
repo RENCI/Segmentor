@@ -6,8 +6,6 @@
 
 #include <QJsonObject>
 
-#include "Feedback.h"
-
 class RegionInfo;
 
 class RegionMetadataIO {
@@ -18,8 +16,6 @@ public:
 private:
 	RegionMetadataIO();
 	~RegionMetadataIO();
-
-	static void SetFeedbackValue(RegionInfo& region, const QJsonObject& feedback, Feedback::FeedbackType type, const char* key);
 };
 
 #endif

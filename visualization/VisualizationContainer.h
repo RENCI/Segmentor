@@ -7,7 +7,6 @@
 
 #include <vtkSmartPointer.h>
 
-#include "Feedback.h"
 #include "InteractionEnums.h"
 #include "RegionMetadataIO.h"
 
@@ -104,7 +103,8 @@ public:
 	void SelectRegion(unsigned short label, bool flyTo = true);
 	void SetRegionVisibility(unsigned short label, bool visible);
 	void SetRegionColor(unsigned short label, double r, double g, double b);
-	void SetRegionFeedback(unsigned short label, Feedback::FeedbackType type, bool value);
+	void SetRegionComment(unsigned short label, const std::string comment);
+	void SetRegionVerified(unsigned short label, bool verified);
 
 	void CreateNewRegion(double point[3]);
 	void RelabelCurrentRegion();

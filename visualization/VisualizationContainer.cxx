@@ -40,7 +40,6 @@
 #include "vtkInteractorStyleSlice.h"
 #include "vtkInteractorStyleVolume.h"
 
-#include "Feedback.h"
 #include "History.h"
 #include "InteractionEnums.h"
 #include "InteractionCallbacks.h"
@@ -1633,7 +1632,7 @@ bool VisualizationContainer::CheckRegionHoles(Region* region) {
 	unsigned short label = region->GetLabel();
 
 	double seed[3];
-	if (currentRegion->GetSeed(seed)) {
+	if (region->GetSeed(seed)) {
 		// XXX: Convert to point from index?
 		vtkSmartPointer<vtkPoints> seedPoints = vtkSmartPointer<vtkPoints>::New();
 		seedPoints->SetNumberOfPoints(1);
@@ -1644,7 +1643,7 @@ bool VisualizationContainer::CheckRegionHoles(Region* region) {
 		threshold->ReplaceInOff();
 		threshold->ReplaceOutOn();
 		threshold->SetOutValue(0);
-		threshold->SetInputConnection(currentRegion->GetOutput());
+		threshold->SetInputConnection(region->GetOutput());
 
 		vtkSmartPointer<vtkImageThresholdConnectivity> floodFill = vtkSmartPointer<vtkImageThresholdConnectivity>::New();
 		floodFill->SetSeedPoints(seedPoints);
@@ -1900,7 +1899,7 @@ void VisualizationContainer::GrowCurrentRegion(double point[3]) {
 }
 
 void VisualizationContainer::ToggleCurrentRegionDone() {
-	if (!currentRegion) return;
+	if (!currentRegion || currentRegion->GetVerified()) return;
 
 	SetRegionDone(currentRegion->GetLabel(), !currentRegion->GetDone());
 }
@@ -1993,6 +1992,8 @@ void VisualizationContainer::HighlightRegion(unsigned short label) {
 void VisualizationContainer::SelectRegion(unsigned short label, bool flyTo) {
 	Region* region = regions->Get(label);
 
+	if (!region) return;
+
 	SetCurrentRegion(region);
 
 	if (flyTo) volumeView->GetInteractorStyle()->FlyTo(region->GetCenter());
@@ -2041,12 +2042,34 @@ void VisualizationContainer::SetRegionColor(unsigned short label, double r, doub
 	Render();
 }
 
-void VisualizationContainer::SetRegionFeedback(unsigned short label, Feedback::FeedbackType type, bool value) {
+void VisualizationContainer::SetRegionComment(unsigned short label, const std::string comment) {
 	Region* region = regions->Get(label);
 
 	if (!region) return;
 
-	region->GetFeedback()->SetValue(type, value);
+	region->SetComment(comment);
+}
+
+void VisualizationContainer::SetRegionVerified(unsigned short label, bool verified) {
+	Region* region = regions->Get(label);
+
+	if (!region) return;
+
+	region->SetVerified(verified);
+
+	if (verified) {
+		// Set to grey
+		labelColors->SetTableValue(label, LabelColors::verifiedColor);
+		labelColors->Build();
+	}
+	else {
+		// Set to color map
+		UpdateColors(label);
+	}
+
+	qtWindow->updateRegion(region, regions);
+
+	Render();
 }
 
 void VisualizationContainer::SetWindowLevel(double window, double level) {
@@ -2361,10 +2384,15 @@ void VisualizationContainer::ExtractRegions(const std::vector<RegionInfo>& metad
 		if (region->GetNumVoxels() > 0) {
 			regions->Add(region);
 
-			// Update done status
+			// Update done and verified status
 			if (region->GetDone()) {
 				region->SetDone(true);
 				labelColors->SetTableValue(region->GetLabel(), LabelColors::doneColor);
+			}
+
+			if (region->GetVerified()) {
+				region->SetVerified(true);
+				labelColors->SetTableValue(region->GetLabel(), LabelColors::verifiedColor);
 			}
 		}
 		else {
@@ -2420,8 +2448,14 @@ int VisualizationContainer::SetLabel(int x, int y, int z, unsigned short label, 
 
 	unsigned short old = *p;
 
+	Region* oldRegion = regions->Get(old);
+
+	// Check for done
+	if (overwrite && oldRegion && oldRegion->GetDone()) {
+		return -1;
+	}
 	// Restrict painting to no label and erasing to current label, unless overwrite is true
-	if (overwrite ||
+	else if (overwrite ||
 		(label != 0 && old == 0) ||
 		(label == 0 && old == currentRegion->GetLabel())) {
 		*p = label;
