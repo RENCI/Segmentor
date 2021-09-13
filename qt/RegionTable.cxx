@@ -316,6 +316,7 @@ void RegionTable::enableSorting() {
 
 void RegionTable::addCheckWidget(int row, int column, bool checked, bool enabled) {
 	QTableWidgetItem* item = new QTableWidgetItem();
+	item->setData(0, checked);
 	item->setFlags(Qt::ItemIsSelectable);
 	item->setTextColor(QColor("white"));
 
