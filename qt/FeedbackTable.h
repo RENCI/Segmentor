@@ -23,6 +23,7 @@ public slots:
 	void on_cellEntered(int row, int column);
 	void on_cellClicked(int row, int column);
 	void on_cellChanged(int row, int column);
+	void on_sortingChanged();
 
 signals:
 	void selectRegion(int label);
@@ -45,6 +46,7 @@ protected:
 
 	void disableSorting();
 	void enableSorting();
+	void setColumnSizes();
 
 	enum ColumnType {
 		Id = 0,

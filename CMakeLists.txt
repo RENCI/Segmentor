@@ -4,7 +4,7 @@ if(POLICY CMP0020)
   cmake_policy(SET CMP0020 NEW)
 endif()
 
-set(SEGMENTOR_VERSION 0.4.2)
+set(SEGMENTOR_VERSION 0.4.3)
 
 project(Segmentor VERSION ${SEGMENTOR_VERSION})
 
