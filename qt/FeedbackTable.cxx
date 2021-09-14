@@ -222,6 +222,14 @@ void FeedbackTable::on_cellChanged(int row, int column) {
 	}
 }
 
+void FeedbackTable::on_cellChanged(int row, int column) {
+	if (column == Comment) {
+		QTableWidgetItem* ti = item(row, Comment);
+
+		emit(regionComment(rowLabel(row), ti->data(0).toString()));
+	}
+}
+
 void FeedbackTable::on_sortingChanged() {
 	// This is necessary or setColumnSizes won't work
 	horizontalHeader()->reset();
