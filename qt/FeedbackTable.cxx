@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <QCheckBox>
 #include <QHeaderView>
+#include <QLayout>
 #include <QTableWidgetItem>
 #include <QStyle>
 #include <QSignalMapper>
@@ -82,8 +83,6 @@ void FeedbackTable::update() {
 	selectRegionLabel(currentRegionLabel);
 
 	emit(countChanged(numRegions));
-
-	horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
 }
 
 void FeedbackTable::update(RegionCollection* regionCollection) {
@@ -180,6 +179,8 @@ void FeedbackTable::on_cellEntered(int row, int column) {
 }
 
 void FeedbackTable::on_cellClicked(int row, int column) {
+	disableSorting();
+
 	if (column == Id) {
 		emit(selectRegion(rowLabel(row)));
 	}
@@ -209,6 +210,8 @@ void FeedbackTable::on_cellClicked(int row, int column) {
 			emit(regionVerified(rowLabel(row), verified));
 		}
 	}
+
+	enableSorting();
 }
 
 void FeedbackTable::on_cellChanged(int row, int column) {
@@ -217,6 +220,13 @@ void FeedbackTable::on_cellChanged(int row, int column) {
 
 		emit(regionComment(rowLabel(row), ti->data(0).toString()));
 	}
+}
+
+void FeedbackTable::on_sortingChanged() {
+	// This is necessary or setColumnSizes won't work
+	horizontalHeader()->reset();
+
+	setColumnSizes();
 }
 
 void FeedbackTable::leaveEvent(QEvent* event) {
@@ -239,19 +249,24 @@ int FeedbackTable::rowLabel(int row) {
 }
 
 void FeedbackTable::disableSorting() {
-	QObject::disconnect(horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &QTableWidget::resizeColumnsToContents);
+	QObject::disconnect(horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &FeedbackTable::on_sortingChanged);
 	setSortingEnabled(false);
 }
 
 void FeedbackTable::enableSorting() {
 	setSortingEnabled(true);
-	QObject::connect(horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &QTableWidget::resizeColumnsToContents);
-	resizeColumnsToContents();
+	QObject::connect(horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &FeedbackTable::on_sortingChanged);
+	setColumnSizes();
 }
 
+void FeedbackTable::setColumnSizes() {
+	resizeColumnsToContents();
+	horizontalHeader()->setSectionResizeMode(Comment, QHeaderView::Stretch);
+}
 
 void FeedbackTable::addCheckWidget(int row, int column, bool checked, bool enabled) {
 	QTableWidgetItem* item = new QTableWidgetItem();
+	item->setData(0, checked);
 	item->setFlags(Qt::ItemIsSelectable);
 	item->setTextColor(QColor("white"));
 
