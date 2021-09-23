@@ -268,6 +268,7 @@ void SliceView::SetInteractionMode(enum InteractionMode mode) {
 		mode == MergeMode ? "Merge region" :
 		mode == GrowMode ? "Grow/shrink region" :
 		mode == VisibleMode ? "Toggle region visibility" :
+		mode == DotMode ? "Dot annotation mode" :
 		"";
 
 	interactionModeLabel->SetInput(s.c_str());
