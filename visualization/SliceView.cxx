@@ -35,6 +35,7 @@
 #include "Region.h"
 #include "RegionOutline.h"
 #include "RegionSurface.h"
+#include "RegionCenter2D.h"
 #include "RegionCollection.h"
 #include "SegmentorMath.h"
 #include "SliceLocation.h"
@@ -199,6 +200,9 @@ void SliceView::AddRegionActors(Region* region) {
 
 	//renderer->AddActor(region->GetText());
 	regionOutlinesRenderer->AddActor(region->GetText());
+
+	regionOutlinesRenderer->AddActor(region->GetCenter2D()->GetActor());
+	region->GetCenter2D()->Update(plane->GetOrigin()[2]);
 
 #ifdef SHOW_REGION_BOX
 	//regionOutlinesRenderer->AddActor(region->GetBox());
@@ -412,8 +416,17 @@ void SliceView::UpdatePlane() {
 
 	sliceLocation->UpdateView(cam, plane);
 
-	if (plane->GetOrigin()[2] != oldZ) {
+	double z = plane->GetOrigin()[2];
+
+	if (z != oldZ) {
 		DoAutoRescale();
+	}
+
+	if (regions) {
+		for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+			Region* region = regions->Get(it);
+			region->GetCenter2D()->Update(z);
+		}
 	}
 }
 

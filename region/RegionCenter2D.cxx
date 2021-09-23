@@ -1,4 +1,4 @@
-#include "RegionCenter3D.h"
+#include "RegionCenter2D.h"
 
 #include <vtkActor.h>
 #include <vtkSphereSource.h>
@@ -9,7 +9,7 @@
 
 #include "Region.h"
 
-RegionCenter3D::RegionCenter3D(Region* inputRegion, double color[3]) {
+RegionCenter2D::RegionCenter2D(Region* inputRegion, double color[3]) {
 	region = inputRegion;
 
 	sphere = vtkSmartPointer<vtkSphereSource>::New();
@@ -22,26 +22,36 @@ RegionCenter3D::RegionCenter3D(Region* inputRegion, double color[3]) {
 
 	actor = vtkSmartPointer<vtkActor>::New();
 	actor->SetMapper(mapper);
-	actor->SetScale(1.5);
 	actor->GetProperty()->SetColor(color);
-	actor->GetProperty()->SetDiffuse(1.0);
-	actor->GetProperty()->SetAmbient(0.0);
-	actor->GetProperty()->SetSpecular(0.0);	
+	actor->GetProperty()->SetDiffuse(0.0);
+	actor->GetProperty()->SetAmbient(1.0);
+	actor->GetProperty()->SetSpecular(0.0);
 	actor->PickableOff();
 
-	Update();
+	Update(region->GetCenter()[2]);
 }
 
-RegionCenter3D::~RegionCenter3D() {
+RegionCenter2D::~RegionCenter2D() {
 	while (actor->GetNumberOfConsumers() > 0) {
 		vtkRenderer::SafeDownCast(actor->GetConsumer(0))->RemoveActor(actor);
 	}
 }
 
-vtkSmartPointer<vtkActor> RegionCenter3D::GetActor() {
+vtkSmartPointer<vtkActor> RegionCenter2D::GetActor() {
 	return actor;
 }
 
-void RegionCenter3D::Update() {
-	actor->SetPosition(region->GetCenter());
+void RegionCenter2D::Update(double z) {
+	double r = 1.5;
+	double numSlices = 4.0;
+
+	double* c = region->GetCenter();
+
+	double d = fabs(z - c[2]);
+
+	double s = (numSlices - d) / numSlices;
+	if (s < 0) s = 0;
+
+	actor->SetPosition(c[0], c[1], z);
+	actor->SetScale(r * s);
 }

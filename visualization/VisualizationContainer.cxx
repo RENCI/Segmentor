@@ -1943,7 +1943,6 @@ void VisualizationContainer::SetDotAnnotation(double point[3]) {
 		newRegion->SetModified(true);
 	}
 
-
 	qtWindow->updateRegions(regions);
 
 	SetCurrentRegion(nullptr);

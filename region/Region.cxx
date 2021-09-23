@@ -26,6 +26,7 @@
 #include "RegionVoxelOutlines.h"
 #include "RegionHighlight3D.h"
 #include "RegionCenter3D.h"
+#include "RegionCenter2D.h"
 
 Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* inputData, const int* regionExtent) {
 	visible = false;
@@ -74,6 +75,7 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 	voxelOutlines = new RegionVoxelOutlines(this, color);
 	highlight3D = new RegionHighlight3D(this, color);
 	center3D = new RegionCenter3D(this, color);
+	center2D = new RegionCenter2D(this, color);
 
 #ifdef SHOW_REGION_BOX
 	// Outline for testing bounding box
@@ -121,6 +123,7 @@ Region::Region(const RegionInfo& info, vtkImageData* inputData) {
 	voxelOutlines = new RegionVoxelOutlines(this, color);
 	highlight3D = new RegionHighlight3D(this, color);
 	center3D = new RegionCenter3D(this, color);
+	center2D = new RegionCenter2D(this, color);
 }
 	
 Region::~Region() {
@@ -141,6 +144,7 @@ Region::~Region() {
 	delete voxelOutlines;
 	delete highlight3D;
 	delete center3D;
+	delete center2D;
 }
 
 vtkAlgorithmOutput* Region::GetOutput() {
@@ -204,6 +208,10 @@ RegionHighlight3D* Region::GetHighlight3D() {
 
 RegionCenter3D* Region::GetCenter3D() {
 	return center3D;
+}
+
+RegionCenter2D* Region::GetCenter2D() {
+	return center2D;
 }
 
 vtkSmartPointer<vtkTextActor> Region::GetText() {
@@ -434,6 +442,7 @@ void Region::UpdateColor() {
 	voxelOutlines->GetActor()->GetProperty()->SetColor(currentColor);
 	highlight3D->GetActor()->GetProperty()->SetColor(currentColor);
 	center3D->GetActor()->GetProperty()->SetColor(currentColor);
+	center2D->GetActor()->GetProperty()->SetColor(currentColor);
 }
 
 void Region::ShowText(bool show) {
