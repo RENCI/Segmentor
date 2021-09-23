@@ -43,7 +43,7 @@ vtkSmartPointer<vtkActor> RegionCenter2D::GetActor() {
 }
 
 void RegionCenter2D::Update(double z) {
-	double r = 1;
+	double r = 1.25;
 
 	double numSlices = 4.0;
 
@@ -56,4 +56,9 @@ void RegionCenter2D::Update(double z) {
 
 	actor->SetPosition(c[0], c[1], z);
 	actor->SetScale(r * s);
+	actor->SetOrientation(0, 0, z > c[2] ? 90 : -90);
+
+	// Use three segments to form a triangle if not in plane
+	double epsilon = 0.001;
+	sphere->SetThetaResolution(d < epsilon ? 16 : 3);
 }
