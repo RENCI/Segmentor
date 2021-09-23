@@ -23,6 +23,7 @@ class RegionSurface;
 class RegionOutline;
 class RegionVoxelOutlines;
 class RegionHighlight3D;
+class RegionCenter3D;
 class Feedback;
 
 class Region {
@@ -40,6 +41,7 @@ public:
 	RegionOutline* GetOutline();
 	RegionVoxelOutlines* GetVoxelOutlines();
 	RegionHighlight3D* GetHighlight3D();
+	RegionCenter3D* GetCenter3D();
 	vtkSmartPointer<vtkTextActor> GetText();
 	vtkSmartPointer<vtkImageData> GetZSlice(int z);
 
@@ -108,6 +110,7 @@ protected:
 	RegionOutline* outline;
 	RegionVoxelOutlines* voxelOutlines;
 	RegionHighlight3D* highlight3D;
+	RegionCenter3D* center3D;
 	vtkSmartPointer<vtkTextActor> text;
 
 #ifdef SHOW_REGION_BOX
