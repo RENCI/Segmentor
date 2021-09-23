@@ -27,6 +27,7 @@ RegionCenter2D::RegionCenter2D(Region* inputRegion, double color[3]) {
 	actor->GetProperty()->SetAmbient(1.0);
 	actor->GetProperty()->SetSpecular(0.0);
 	actor->PickableOff();
+	actor->VisibilityOff();
 
 	Update(region->GetCenter()[2]);
 }
@@ -42,8 +43,7 @@ vtkSmartPointer<vtkActor> RegionCenter2D::GetActor() {
 }
 
 void RegionCenter2D::Update(double z) {
-	//double r = 1.5;
-	double r = 0.75;
+	double r = 1;
 
 	double numSlices = 4.0;
 

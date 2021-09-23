@@ -474,6 +474,11 @@ void Region::ShowText(bool show) {
 	}
 }
 
+void Region::ShowCenter(bool show) {
+	center2D->GetActor()->SetVisibility(show);
+	center3D->GetActor()->SetVisibility(show);
+}
+
 unsigned short Region::GetLabel() {
 	return label;
 }
@@ -525,7 +530,10 @@ void Region::GetExtent(int outExtent[6]) {
 }
 
 double* Region::GetCenter() {
-	return voi->GetOutput()->GetCenter();
+	center[0] = (extent[0] + extent[1]) / 2.0;
+	center[1] = (extent[2] + extent[3]) / 2.0;
+	center[2] = (extent[4] + extent[5]) / 2.0;
+	return center;
 }
 
 double Region::GetLength() {
@@ -645,7 +653,11 @@ void Region::ApplyDot() {
 	data->Modified();
 
 	int ext[6] = { x, x, y, y, z, z, };
-	InitializeExtent(ext);
+	SetExtent(ext);
+	voi->Update();
+
+	center3D->Update();
+	center2D->Update(center2D->GetActor()->GetPosition()[2]);
 }
 
 void Region::ClearLabels() {

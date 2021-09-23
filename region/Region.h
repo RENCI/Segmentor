@@ -74,6 +74,8 @@ public:
 
 	void ShowText(bool show);
 
+	void ShowCenter(bool show);
+
 	unsigned short GetLabel();
 	int GetNumVoxels();
 	int GetNumVoxels(int slice);
@@ -99,6 +101,7 @@ protected:
 	unsigned short label;
 	double color[3];
 	int extent[6];
+	double center[3];
 
 	bool visible;
 	bool modified;

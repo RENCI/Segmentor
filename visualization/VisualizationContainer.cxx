@@ -647,6 +647,7 @@ void VisualizationContainer::SetInteractionMode(InteractionMode mode) {
 		for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
 			Region* region = regions->Get(it);
 			region->ApplyDot();
+			region->ShowCenter(true);
 		}
 
 		labels->Modified();
@@ -654,7 +655,10 @@ void VisualizationContainer::SetInteractionMode(InteractionMode mode) {
 		qtWindow->update();
 	}
 	else {
-		// XXX: Hide dots
+		for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+			Region* region = regions->Get(it);
+			region->ShowCenter(false);
+		}
 	}
 
 	UpdateVisibility();
@@ -1952,6 +1956,8 @@ void VisualizationContainer::SetDotAnnotation(double point[3]) {
 		// Create new region
 		int extent[6] = { x, x, y, y, z, z };
 		Region* newRegion = new Region(newLabel, labelColors->GetTableValue(newLabel), labels, extent);
+		newRegion->ShowCenter(true);
+
 		regions->Add(newRegion);
 		volumeView->AddRegion(newRegion);
 		sliceView->AddRegion(newRegion);
@@ -2574,7 +2580,7 @@ void VisualizationContainer::UpdateVisibility(Region* highlightRegion) {
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
 		Region* region = regions->Get(it);
 
-		bool show = /*interactionMode != DotMode && */(!filterRegions || region->GetVisible() || region == currentRegion || region == highlightRegion);
+		bool show = interactionMode != DotMode && (!filterRegions || region->GetVisible() || region == currentRegion || region == highlightRegion);
 
 		volumeView->ShowRegion(region, show);
 		sliceView->ShowRegion(region, show);
