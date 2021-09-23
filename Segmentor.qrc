@@ -26,5 +26,6 @@
   <file>icons/icon_filter_regions.png</file>
   <file>icons/icon_reset_view.png</file>
   <file>icons/icon_volume_render.png</file>
+  <file>icons/icon_dot.png</file>
 </qresource>
 </RCC>

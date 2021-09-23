@@ -691,6 +691,10 @@ void MainWindow::on_actionVisible() {
 	visualizationContainer->SetInteractionMode(VisibleMode);
 }
 
+void MainWindow::on_actionDot() {
+	visualizationContainer->SetInteractionMode(DotMode);
+}
+
 void MainWindow::on_actionUpdate() {
 	visualizationContainer->RelabelCurrentRegion();
 }
@@ -1059,6 +1063,7 @@ void MainWindow::createModeBar() {
 	toolBar->addAction(createActionIcon(":/icons/icon_merge.png", "Merge with current region (m)", "m", interactionModeGroup, currentMode == MergeMode, &MainWindow::on_actionMerge));
 	toolBar->addAction(createActionIcon(":/icons/icon_grow.png", "Grow / shrink region (g)", "g", interactionModeGroup, currentMode == GrowMode, &MainWindow::on_actionGrow));
 	toolBar->addAction(createActionIcon(":/icons/icon_visible.png", "Toggle region visibility (v)", "v", interactionModeGroup, currentMode == VisibleMode, &MainWindow::on_actionVisible));
+	toolBar->addAction(createActionIcon(":/icons/icon_dot.png", "Dot annotation mode (Ctrl + d)", QKeySequence(Qt::CTRL + Qt::Key_D), interactionModeGroup, currentMode == DotMode, &MainWindow::on_actionDot));
 	
 	toolBar->addSeparator();
 	toolBar->addWidget(createLabel("Actions", 0, 0, 5, 5));
@@ -1153,6 +1158,17 @@ QAction* MainWindow::createActionIcon(const QString& fileName, const QString& te
 }
 
 QAction* MainWindow::createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, QActionGroup* group, bool checked, void (MainWindow::*slot)()) {
+	QAction* action = new QAction(QIcon(fileName), text, group);
+	action->setShortcut(QKeySequence(shortcut));
+	action->setCheckable(true);
+	action->setChecked(checked);
+
+	QObject::connect(action, &QAction::triggered, this, slot);
+
+	return action;
+}
+
+QAction* MainWindow::createActionIcon(const QString& fileName, const QString& text, const QKeySequence& shortcut, QActionGroup* group, bool checked, void (MainWindow::*slot)()) {
 	QAction* action = new QAction(QIcon(fileName), text, group);
 	action->setShortcut(QKeySequence(shortcut));
 	action->setCheckable(true);
