@@ -93,6 +93,8 @@ public:
 	const std::string& GetComment();
 	void SetComment(const std::string& commentString);
 
+	void ApplyDot();
+
 protected:
 	unsigned short label;
 	double color[3];

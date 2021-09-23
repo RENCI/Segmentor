@@ -643,6 +643,22 @@ void VisualizationContainer::SetInteractionMode(InteractionMode mode) {
 	sliceView->SetInteractionMode(interactionMode);
 	volumeView->SetInteractionMode(interactionMode);
 
+	if (interactionMode == DotMode) {
+		for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+			Region* region = regions->Get(it);
+			region->ApplyDot();
+		}
+
+		labels->Modified();
+
+		qtWindow->update();
+	}
+	else {
+		// XXX: Hide dots
+	}
+
+	UpdateVisibility();
+
 	Render();
 }
 
@@ -2558,7 +2574,7 @@ void VisualizationContainer::UpdateVisibility(Region* highlightRegion) {
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
 		Region* region = regions->Get(it);
 
-		bool show = !filterRegions || region->GetVisible() || region == currentRegion || region == highlightRegion;
+		bool show = /*interactionMode != DotMode && */(!filterRegions || region->GetVisible() || region == currentRegion || region == highlightRegion);
 
 		volumeView->ShowRegion(region, show);
 		sliceView->ShowRegion(region, show);

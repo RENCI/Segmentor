@@ -630,6 +630,24 @@ void Region::SetComment(const std::string& commentString) {
 	text->SetInput(LabelString().c_str());
 }
 
+void Region::ApplyDot() {
+	double* c = GetCenter();
+	int x = (int)c[0];
+	int y = (int)c[1];
+	int z = (int)c[2];
+
+	ClearLabels();
+
+	unsigned short* p = static_cast<unsigned short*>(data->GetScalarPointer(x, y, z));
+
+	*p = label;
+
+	data->Modified();
+
+	int ext[6] = { x, x, y, y, z, z, };
+	InitializeExtent(ext);
+}
+
 void Region::ClearLabels() {
 	for (int i = extent[0]; i <= extent[1]; i++) {
 		for (int j = extent[2]; j <= extent[3]; j++) {

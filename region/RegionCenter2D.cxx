@@ -14,7 +14,7 @@ RegionCenter2D::RegionCenter2D(Region* inputRegion, double color[3]) {
 
 	sphere = vtkSmartPointer<vtkSphereSource>::New();
 	sphere->SetThetaResolution(16);
-	sphere->SetPhiResolution(16);
+	sphere->SetPhiResolution(3);
 
 	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	mapper->ScalarVisibilityOff();
@@ -42,7 +42,9 @@ vtkSmartPointer<vtkActor> RegionCenter2D::GetActor() {
 }
 
 void RegionCenter2D::Update(double z) {
-	double r = 1.5;
+	//double r = 1.5;
+	double r = 0.75;
+
 	double numSlices = 4.0;
 
 	double* c = region->GetCenter();
