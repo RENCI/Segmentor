@@ -5,7 +5,7 @@
 
 class vtkActor;
 class vtkCamera;
-class vtkSphereSource;
+class vtkMapper;
 
 class Region;
 
@@ -21,7 +21,8 @@ public:
 protected:
 	Region* region;
 
-	vtkSmartPointer<vtkSphereSource> sphere;
+	vtkSmartPointer<vtkMapper> coneMapper;
+	vtkSmartPointer<vtkMapper> sphereMapper;
 	vtkSmartPointer<vtkActor> actor;
 };
 
