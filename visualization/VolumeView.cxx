@@ -287,7 +287,6 @@ void VolumeView::SetInteractionMode(enum InteractionMode mode) {
 		mode == MergeMode ? "Merge region" :
 		mode == GrowMode ? "" :
 		mode == VisibleMode ? "Toggle region visibility" :
-		mode == DotMode ? "Dot annotation mode" :
 		"";
 
 	interactionModeLabel->SetInput(s.c_str());

@@ -26,8 +26,7 @@ RegionCenter3D::RegionCenter3D(Region* inputRegion, double color[3]) {
 	actor->GetProperty()->SetColor(color);
 	actor->GetProperty()->SetDiffuse(1.0);
 	actor->GetProperty()->SetAmbient(0.0);
-	actor->GetProperty()->SetSpecular(0.0);	
-	actor->PickableOff();
+	actor->GetProperty()->SetSpecular(0.0);
 	actor->VisibilityOff();
 
 	Update();

@@ -64,7 +64,7 @@ void RegionCenter2D::Update(double z) {
 	actor->SetPosition(c[0], c[1], z);
 	actor->SetScale(r * s);
 
-	double epsilon = 0.01;
+	double epsilon = 0.9;
 	if (d < epsilon) {
 		// Sphere
 		actor->SetMapper(sphereMapper);
