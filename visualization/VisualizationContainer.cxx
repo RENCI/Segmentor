@@ -2417,6 +2417,11 @@ void VisualizationContainer::ExtractRegions(vtkIntArray* extents) {
 			delete region;
 		}
 
+		if (interactionMode == DotMode) {
+			region->ApplyDot();
+			region->ShowCenter(true);
+		}
+
 		qtWindow->updateProgress((double)label / maxLabel);
 	}
 
@@ -2462,6 +2467,11 @@ void VisualizationContainer::ExtractRegions(const std::vector<RegionInfo>& metad
 			if (region->GetVerified()) {
 				region->SetVerified(true);
 				labelColors->SetTableValue(region->GetLabel(), LabelColors::verifiedColor);
+			}
+
+			if (interactionMode == DotMode) {
+				region->ApplyDot();
+				region->ShowCenter(true);
 			}
 		}
 		else {
