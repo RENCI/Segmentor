@@ -9,7 +9,8 @@ enum InteractionMode {
 	MergeMode,
 	SplitMode,
 	GrowMode,
-	VisibleMode
+	VisibleMode,
+	DotMode
 };
 
 enum FilterMode {

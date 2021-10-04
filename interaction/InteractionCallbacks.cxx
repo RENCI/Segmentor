@@ -246,6 +246,21 @@ void InteractionCallbacks::Visible(vtkObject* caller, unsigned long eventId, voi
 	}
 }
 
+void InteractionCallbacks::Dot(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
+	vtkRenderWindowInteractor* rwi = static_cast<vtkInteractorStyle*>(caller)->GetInteractor();
+	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);
+
+	// Pick at the mouse location provided by the interactor	
+	int pick = Pick(rwi);
+
+	if (pick) {
+		// Get the position for the pick event		
+		double p[3];
+		PickPosition(p);
+		vis->SetDotAnnotation(p);
+	}
+}
+
 void InteractionCallbacks::MouseMove(vtkObject* caller, unsigned long eventId, void* clientData, void *callData) {
 	vtkRenderWindowInteractor* rwi = static_cast<vtkRenderWindowInteractor*>(caller);
 	VisualizationContainer* vis = static_cast<VisualizationContainer*>(clientData);

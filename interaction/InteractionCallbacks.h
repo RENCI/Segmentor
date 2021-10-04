@@ -30,6 +30,7 @@ public:
 	static void Grow(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 	static void Done(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 	static void Visible(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
+	static void Dot(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 
 	static void MouseMove(vtkObject* caller, unsigned long eventId, void* clientData, void *callData);
 

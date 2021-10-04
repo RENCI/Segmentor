@@ -114,6 +114,8 @@ public:
 	void FillCurrentRegionSlice();
 	void GrowCurrentRegion(double point[3]);
 	void ToggleCurrentRegionDone();
+	void ToggleCurrentRegionVerified();
+	void SetDotAnnotation(double point[3]);
 
 	void SetWindowLevel(double window, double level);
 	void SetVolumeWindowLevel(double window, double level);

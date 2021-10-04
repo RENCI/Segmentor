@@ -179,6 +179,12 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	volumeView->GetInteractorStyle()->AddObserver(vtkInteractorStyleVolume::VisibleEvent, visibleCallback);
 	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::VisibleEvent, visibleCallback);
 
+	// Dot annotation
+	vtkSmartPointer<vtkCallbackCommand> dotCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+	dotCallback->SetCallback(InteractionCallbacks::Dot);
+	dotCallback->SetClientData(this);
+	sliceView->GetInteractorStyle()->AddObserver(vtkInteractorStyleSlice::DotEvent, dotCallback);
+
 	// Mouse move
 	vtkSmartPointer<vtkCallbackCommand> mouseMoveCallback = vtkSmartPointer<vtkCallbackCommand>::New();
 	mouseMoveCallback->SetCallback(InteractionCallbacks::MouseMove);
@@ -438,22 +444,57 @@ VisualizationContainer::FileErrorCode VisualizationContainer::SaveSegmentationDa
 VisualizationContainer::FileErrorCode VisualizationContainer::SaveSegmentationData(const std::string& fileName) {
 	std::string extension = fileName.substr(fileName.find_last_of(".") + 1);
 
+	vtkSmartPointer<vtkImageData> saveLabels;
+
+	if (interactionMode == DotMode) {
+		// Create temporary volume to save centers
+		vtkSmartPointer<vtkImageThreshold> threshold = vtkSmartPointer<vtkImageThreshold>::New();
+		threshold->ThresholdByUpper(0);
+		threshold->SetInValue(0);
+		threshold->SetOutValue(0);
+		threshold->ReplaceInOn();
+		threshold->ReplaceOutOn();
+		threshold->SetOutputScalarTypeToUnsignedShort();
+		threshold->SetInputDataObject(data);
+		threshold->Update();
+
+		saveLabels = threshold->GetOutput();
+
+		for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+			Region* region = regions->Get(it);
+
+			double* c = region->GetCenter();
+			int x = (int)c[0];
+			int y = (int)c[1];
+			int z = (int)c[2];
+			
+			unsigned short* p = static_cast<unsigned short*>(saveLabels->GetScalarPointer(x, y, z));
+
+			*p = region->GetLabel();
+		}
+
+		saveLabels->Modified();
+	}
+	else {
+		saveLabels = labels;
+	}
+
 	if (extension == "vti") {
 		vtkSmartPointer<vtkXMLImageDataWriter> writer = vtkSmartPointer<vtkXMLImageDataWriter>::New();
 		writer->SetFileName(fileName.c_str());
-		writer->SetInputDataObject(labels);
+		writer->SetInputDataObject(saveLabels);
 		writer->Update();
 	}
 	else if (extension == "nii") {
 		vtkSmartPointer<vtkNIFTIImageWriter> writer = vtkSmartPointer<vtkNIFTIImageWriter>::New();
 		writer->SetFileName(fileName.c_str());
-		writer->SetInputDataObject(labels);
+		writer->SetInputDataObject(saveLabels);
 		writer->Update();
 	}
 	else if (extension == "tif" || extension == "tiff") {
 		vtkSmartPointer<vtkTIFFWriter> writer = vtkSmartPointer<vtkTIFFWriter>::New();
 		writer->SetFileName(fileName.c_str());
-		writer->SetInputDataObject(labels);
+		writer->SetInputDataObject(saveLabels);
 		writer->Update();
 	}
 	else {
@@ -636,6 +677,26 @@ void VisualizationContainer::SetInteractionMode(InteractionMode mode) {
 
 	sliceView->SetInteractionMode(interactionMode);
 	volumeView->SetInteractionMode(interactionMode);
+
+	if (interactionMode == DotMode) {
+		for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+			Region* region = regions->Get(it);
+			//region->ApplyDot();
+			region->ShowCenter(true);
+		}
+
+		labels->Modified();
+
+		qtWindow->update();
+	}
+	else {
+		for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+			Region* region = regions->Get(it);
+			region->ShowCenter(false);
+		}
+	}
+
+	UpdateVisibility();
 
 	Render();
 }
@@ -1904,6 +1965,55 @@ void VisualizationContainer::ToggleCurrentRegionDone() {
 	SetRegionDone(currentRegion->GetLabel(), !currentRegion->GetDone());
 }
 
+void VisualizationContainer::ToggleCurrentRegionVerified() {
+	if (!currentRegion || !currentRegion->GetDone()) return;
+
+	SetRegionVerified(currentRegion->GetLabel(), !currentRegion->GetVerified());
+}
+
+void VisualizationContainer::SetDotAnnotation(double point[3]) {
+	int ijk[3];
+	PointToIndex(point, ijk);
+	int x = ijk[0];
+	int y = ijk[1];
+	int z = ijk[2];
+
+	// Get data at point
+	unsigned short* labelData = static_cast<unsigned short*>(labels->GetScalarPointer(x, y, z));
+
+	if (*labelData > 0) {
+		regions->Remove(*labelData);
+
+	}
+	else {
+		// Create new label
+		unsigned short newLabel = regions->GetNewLabel();
+
+		UpdateColors(newLabel);
+
+		// Set dot label
+		*labelData = newLabel;
+
+		// Create new region
+		int extent[6] = { x, x, y, y, z, z };
+		Region* newRegion = new Region(newLabel, labelColors->GetTableValue(newLabel), labels, extent);
+		newRegion->ShowCenter(true);
+
+		regions->Add(newRegion);
+		volumeView->AddRegion(newRegion);
+		sliceView->AddRegion(newRegion);
+
+		newRegion->SetModified(true);
+	}
+
+	qtWindow->updateRegions(regions);
+
+	SetCurrentRegion(nullptr);
+
+	labels->Modified();
+	Render();
+}
+
 Region* VisualizationContainer::SetRegionDone(unsigned short label, bool done) {
 	Region* region = regions->Get(label);
 
@@ -2348,6 +2458,11 @@ void VisualizationContainer::ExtractRegions(vtkIntArray* extents) {
 			delete region;
 		}
 
+		if (interactionMode == DotMode) {
+			region->ApplyDot();
+			region->ShowCenter(true);
+		}
+
 		qtWindow->updateProgress((double)label / maxLabel);
 	}
 
@@ -2393,6 +2508,11 @@ void VisualizationContainer::ExtractRegions(const std::vector<RegionInfo>& metad
 			if (region->GetVerified()) {
 				region->SetVerified(true);
 				labelColors->SetTableValue(region->GetLabel(), LabelColors::verifiedColor);
+			}
+
+			if (interactionMode == DotMode) {
+				region->ApplyDot();
+				region->ShowCenter(true);
 			}
 		}
 		else {
@@ -2511,7 +2631,7 @@ void VisualizationContainer::UpdateVisibility(Region* highlightRegion) {
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
 		Region* region = regions->Get(it);
 
-		bool show = !filterRegions || region->GetVisible() || region == currentRegion || region == highlightRegion;
+		bool show = interactionMode != DotMode && (!filterRegions || region->GetVisible() || region == currentRegion || region == highlightRegion);
 
 		volumeView->ShowRegion(region, show);
 		sliceView->ShowRegion(region, show);
