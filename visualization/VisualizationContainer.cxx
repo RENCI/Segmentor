@@ -1965,6 +1965,12 @@ void VisualizationContainer::ToggleCurrentRegionDone() {
 	SetRegionDone(currentRegion->GetLabel(), !currentRegion->GetDone());
 }
 
+void VisualizationContainer::ToggleCurrentRegionVerified() {
+	if (!currentRegion || !currentRegion->GetDone()) return;
+
+	SetRegionVerified(currentRegion->GetLabel(), !currentRegion->GetVerified());
+}
+
 void VisualizationContainer::SetDotAnnotation(double point[3]) {
 	int ijk[3];
 	PointToIndex(point, ijk);
