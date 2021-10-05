@@ -444,57 +444,22 @@ VisualizationContainer::FileErrorCode VisualizationContainer::SaveSegmentationDa
 VisualizationContainer::FileErrorCode VisualizationContainer::SaveSegmentationData(const std::string& fileName) {
 	std::string extension = fileName.substr(fileName.find_last_of(".") + 1);
 
-	vtkSmartPointer<vtkImageData> saveLabels;
-
-	if (interactionMode == DotMode) {
-		// Create temporary volume to save centers
-		vtkSmartPointer<vtkImageThreshold> threshold = vtkSmartPointer<vtkImageThreshold>::New();
-		threshold->ThresholdByUpper(0);
-		threshold->SetInValue(0);
-		threshold->SetOutValue(0);
-		threshold->ReplaceInOn();
-		threshold->ReplaceOutOn();
-		threshold->SetOutputScalarTypeToUnsignedShort();
-		threshold->SetInputDataObject(data);
-		threshold->Update();
-
-		saveLabels = threshold->GetOutput();
-
-		for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
-			Region* region = regions->Get(it);
-
-			double* c = region->GetCenter();
-			int x = (int)c[0];
-			int y = (int)c[1];
-			int z = (int)c[2];
-			
-			unsigned short* p = static_cast<unsigned short*>(saveLabels->GetScalarPointer(x, y, z));
-
-			*p = region->GetLabel();
-		}
-
-		saveLabels->Modified();
-	}
-	else {
-		saveLabels = labels;
-	}
-
 	if (extension == "vti") {
 		vtkSmartPointer<vtkXMLImageDataWriter> writer = vtkSmartPointer<vtkXMLImageDataWriter>::New();
 		writer->SetFileName(fileName.c_str());
-		writer->SetInputDataObject(saveLabels);
+		writer->SetInputDataObject(labels);
 		writer->Update();
 	}
 	else if (extension == "nii") {
 		vtkSmartPointer<vtkNIFTIImageWriter> writer = vtkSmartPointer<vtkNIFTIImageWriter>::New();
 		writer->SetFileName(fileName.c_str());
-		writer->SetInputDataObject(saveLabels);
+		writer->SetInputDataObject(labels);
 		writer->Update();
 	}
 	else if (extension == "tif" || extension == "tiff") {
 		vtkSmartPointer<vtkTIFFWriter> writer = vtkSmartPointer<vtkTIFFWriter>::New();
 		writer->SetFileName(fileName.c_str());
-		writer->SetInputDataObject(saveLabels);
+		writer->SetInputDataObject(labels);
 		writer->Update();
 	}
 	else {
@@ -681,13 +646,15 @@ void VisualizationContainer::SetInteractionMode(InteractionMode mode) {
 	if (interactionMode == DotMode) {
 		for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
 			Region* region = regions->Get(it);
-			//region->ApplyDot();
+			region->ApplyDot();
 			region->ShowCenter(true);
 		}
 
 		labels->Modified();
 
-		qtWindow->update();
+		qtWindow->updateRegions(regions);
+
+		PushHistory();
 	}
 	else {
 		for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
@@ -2012,6 +1979,18 @@ void VisualizationContainer::SetDotAnnotation(double point[3]) {
 
 	labels->Modified();
 	Render();
+}
+
+bool VisualizationContainer::CheckDots() {
+	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+		Region* region = regions->Get(it);
+
+		if (region->GetNumVoxels() > 1) {
+			return false;
+		}
+	}
+
+	return true;
 }
 
 Region* VisualizationContainer::SetRegionDone(unsigned short label, bool done) {

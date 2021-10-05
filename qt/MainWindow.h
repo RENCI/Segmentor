@@ -143,6 +143,8 @@ public slots:
 	virtual void on_brushRadiusDown();
 	virtual void on_brushRadiusUp();
 
+	virtual void on_enableDotAnnotationChanged(bool enable);
+
 signals:
 
 	void windowLevelChanged(double window, double value);

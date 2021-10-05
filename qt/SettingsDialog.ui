@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>314</width>
-    <height>367</height>
+    <height>425</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -322,6 +322,26 @@
          <widget class="QCheckBox" name="autoAdjustSamplingCheckBox">
           <property name="text">
            <string>Auto adjust sampling</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_5">
+     <property name="title">
+      <string>Dot annotation</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_5">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_8">
+        <item>
+         <widget class="QCheckBox" name="enableDotAnnotationCheckBox">
+          <property name="text">
+           <string>Enable dot annotation</string>
           </property>
          </widget>
         </item>

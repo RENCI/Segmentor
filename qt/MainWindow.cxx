@@ -88,6 +88,7 @@ MainWindow::MainWindow() {
 
 	// Settings dialog
 	settingsDialog = new SettingsDialog(this, visualizationContainer);
+	QObject::connect(settingsDialog, &SettingsDialog::enableDotAnnotationChanged, this, &MainWindow::on_enableDotAnnotationChanged);
 
 	// Feedback dialog
 	feedbackDialog = new FeedbackDialog(this, visualizationContainer);
@@ -692,7 +693,35 @@ void MainWindow::on_actionVisible() {
 }
 
 void MainWindow::on_actionDot() {
-	visualizationContainer->SetInteractionMode(DotMode);
+	if (!visualizationContainer->CheckDots()) {
+		QMessageBox message;
+		message.setIcon(QMessageBox::Warning);
+		message.setText("Dot annotation mode.");
+		message.setInformativeText(
+			"There are currently regions with more than one voxel. "
+			"Switching to dot annotation mode will replace these regions with a single voxel at the region center.\n\n"
+			"YOU WILL LOSE THIS WORK. Do you wish to continue?"
+		);
+		message.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		message.setDefaultButton(QMessageBox::Save);
+		int ret = message.exec();
+
+		switch (ret) {
+		case QMessageBox::Yes:
+			visualizationContainer->SetInteractionMode(DotMode);
+			break;
+
+		case QMessageBox::No:
+			break;
+
+		default:
+			// Should never be reached
+			break;
+		}
+	}
+	else {
+		visualizationContainer->SetInteractionMode(DotMode);
+	}
 }
 
 void MainWindow::on_actionUpdate() {
@@ -809,6 +838,18 @@ void MainWindow::on_sliceDown() {
 
 void MainWindow::on_brushRadiusSpinBox_valueChanged(int value) {
 	visualizationContainer->SetBrushRadius(value);
+}
+
+void MainWindow::on_enableDotAnnotationChanged(bool enable) {
+	QList<QAction*> actions = modeBarWidget->findChild<QToolBar*>()->actions();
+
+	for (int i = 0; i < actions.length(); i++) {
+		QAction* action = actions[i];
+		if (action->objectName() == "dotModeAction") {
+			action->setEnabled(enable);
+			break;
+		}
+	}
 }
 
 void MainWindow::on_toggleView() {
@@ -1063,7 +1104,11 @@ void MainWindow::createModeBar() {
 	toolBar->addAction(createActionIcon(":/icons/icon_merge.png", "Merge with current region (m)", "m", interactionModeGroup, currentMode == MergeMode, &MainWindow::on_actionMerge));
 	toolBar->addAction(createActionIcon(":/icons/icon_grow.png", "Grow / shrink region (g)", "g", interactionModeGroup, currentMode == GrowMode, &MainWindow::on_actionGrow));
 	toolBar->addAction(createActionIcon(":/icons/icon_visible.png", "Toggle region visibility (v)", "v", interactionModeGroup, currentMode == VisibleMode, &MainWindow::on_actionVisible));
-	toolBar->addAction(createActionIcon(":/icons/icon_dot.png", "Dot annotation mode (Ctrl + d)", QKeySequence(Qt::CTRL + Qt::Key_D), interactionModeGroup, currentMode == DotMode, &MainWindow::on_actionDot));
+
+	QAction* dotAction = createActionIcon(":/icons/icon_dot.png", "Dot annotation mode (Ctrl + d)", QKeySequence(Qt::CTRL + Qt::Key_D), interactionModeGroup, currentMode == DotMode, &MainWindow::on_actionDot);
+	dotAction->setObjectName("dotModeAction");
+	dotAction->setEnabled(false);
+	toolBar->addAction(dotAction);
 	
 	toolBar->addSeparator();
 	toolBar->addWidget(createLabel("Actions", 0, 0, 5, 5));
