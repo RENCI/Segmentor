@@ -341,7 +341,7 @@
         <item>
          <widget class="QCheckBox" name="enableDotAnnotationCheckBox">
           <property name="text">
-           <string>Enable</string>
+           <string>Enable dot annotation</string>
           </property>
          </widget>
         </item>

@@ -693,7 +693,35 @@ void MainWindow::on_actionVisible() {
 }
 
 void MainWindow::on_actionDot() {
-	visualizationContainer->SetInteractionMode(DotMode);
+	if (!visualizationContainer->CheckDots()) {
+		QMessageBox message;
+		message.setIcon(QMessageBox::Warning);
+		message.setText("Dot annotation mode.");
+		message.setInformativeText(
+			"There are currently regions with more than one voxel. "
+			"Switching to dot annotation mode will replace these regions with a single voxel at the region center.\n\n"
+			"YOU WILL LOSE THIS WORK. Do you wish to continue?"
+		);
+		message.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		message.setDefaultButton(QMessageBox::Save);
+		int ret = message.exec();
+
+		switch (ret) {
+		case QMessageBox::Yes:
+			visualizationContainer->SetInteractionMode(DotMode);
+			break;
+
+		case QMessageBox::No:
+			break;
+
+		default:
+			// Should never be reached
+			break;
+		}
+	}
+	else {
+		visualizationContainer->SetInteractionMode(DotMode);
+	}
 }
 
 void MainWindow::on_actionUpdate() {

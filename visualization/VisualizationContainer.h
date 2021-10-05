@@ -116,6 +116,7 @@ public:
 	void ToggleCurrentRegionDone();
 	void ToggleCurrentRegionVerified();
 	void SetDotAnnotation(double point[3]);
+	bool CheckDots();
 
 	void SetWindowLevel(double window, double level);
 	void SetVolumeWindowLevel(double window, double level);

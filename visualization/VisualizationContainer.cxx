@@ -2014,6 +2014,18 @@ void VisualizationContainer::SetDotAnnotation(double point[3]) {
 	Render();
 }
 
+bool VisualizationContainer::CheckDots() {
+	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+		Region* region = regions->Get(it);
+
+		if (region->GetNumVoxels() > 1) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 Region* VisualizationContainer::SetRegionDone(unsigned short label, bool done) {
 	Region* region = regions->Get(label);
 
