@@ -62,6 +62,7 @@ public slots:
 	virtual void on_actionRedo_triggered();
 
 	virtual void on_actionSegment_Volume_triggered();
+	virtual void on_actionApply_Dot_Annotation_triggered();
 
 	virtual void on_actionExit_triggered();
 

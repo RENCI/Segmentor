@@ -643,24 +643,9 @@ void VisualizationContainer::SetInteractionMode(InteractionMode mode) {
 	sliceView->SetInteractionMode(interactionMode);
 	volumeView->SetInteractionMode(interactionMode);
 
-	if (interactionMode == DotMode) {
-		for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
-			Region* region = regions->Get(it);
-			region->ApplyDot();
-			region->ShowCenter(true);
-		}
-
-		labels->Modified();
-
-		qtWindow->updateRegions(regions);
-
-		PushHistory();
-	}
-	else {
-		for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
-			Region* region = regions->Get(it);
-			region->ShowCenter(false);
-		}
+	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+		Region* region = regions->Get(it);
+		region->ShowCenter(interactionMode == DotMode);
 	}
 
 	UpdateVisibility();
@@ -1991,6 +1976,21 @@ bool VisualizationContainer::CheckDots() {
 	}
 
 	return true;
+}
+
+void VisualizationContainer::ApplyDotAnnotation() {
+	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+		Region* region = regions->Get(it);
+		region->ApplyDot();
+	}
+
+	labels->Modified();
+
+	qtWindow->updateRegions(regions);
+
+	Render();
+
+	PushHistory();
 }
 
 Region* VisualizationContainer::SetRegionDone(unsigned short label, bool done) {

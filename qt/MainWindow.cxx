@@ -589,6 +589,32 @@ void MainWindow::on_actionSegment_Volume_triggered() {
 	}
 }
 
+void MainWindow::on_actionApply_Dot_Annotation_triggered() {
+	QMessageBox message;
+	message.setIcon(QMessageBox::Warning);
+	message.setText("Apply dot annotation.");
+	message.setInformativeText(
+		"This operation will replace each region with a single voxel at the region center.\n\n"
+		"Do you wish to continue?"
+	);
+	message.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+	message.setDefaultButton(QMessageBox::Save);
+	int ret = message.exec();
+
+	switch (ret) {
+	case QMessageBox::Yes:
+		visualizationContainer->ApplyDotAnnotation();
+		break;
+
+	case QMessageBox::No:
+		break;
+
+	default:
+		// Should never be reached
+		break;
+	}
+}
+
 void MainWindow::on_actionExit_triggered() {
 	close();
 }
@@ -693,35 +719,7 @@ void MainWindow::on_actionVisible() {
 }
 
 void MainWindow::on_actionDot() {
-	if (!visualizationContainer->CheckDots()) {
-		QMessageBox message;
-		message.setIcon(QMessageBox::Warning);
-		message.setText("Dot annotation mode.");
-		message.setInformativeText(
-			"There are currently regions with more than one voxel. "
-			"Switching to dot annotation mode will replace these regions with a single voxel at the region center.\n\n"
-			"YOU WILL LOSE THIS WORK. Do you wish to continue?"
-		);
-		message.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-		message.setDefaultButton(QMessageBox::Save);
-		int ret = message.exec();
-
-		switch (ret) {
-		case QMessageBox::Yes:
-			visualizationContainer->SetInteractionMode(DotMode);
-			break;
-
-		case QMessageBox::No:
-			break;
-
-		default:
-			// Should never be reached
-			break;
-		}
-	}
-	else {
-		visualizationContainer->SetInteractionMode(DotMode);
-	}
+	visualizationContainer->SetInteractionMode(DotMode);
 }
 
 void MainWindow::on_actionUpdate() {
@@ -841,6 +839,10 @@ void MainWindow::on_brushRadiusSpinBox_valueChanged(int value) {
 }
 
 void MainWindow::on_enableDotAnnotationChanged(bool enable) {
+	// Enable apply dot annotation
+	actionApply_Dot_Annotation->setEnabled(enable);
+
+	// Enable dot mode
 	QList<QAction*> actions = modeBarWidget->findChild<QToolBar*>()->actions();
 
 	for (int i = 0; i < actions.length(); i++) {
