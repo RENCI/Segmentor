@@ -383,7 +383,7 @@ void vtkInteractorStyleVolume::OnLeftButtonDown()
 	else if (this->Mode == VisibleMode)
 	{
 		this->StartVisible();
-	}	
+	}
 	else
 	{
 		// If shift is held down, start window level

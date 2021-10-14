@@ -115,3 +115,8 @@ void SettingsDialog::on_gradientOpacityCheckBox_stateChanged(int state) {
 void SettingsDialog::on_autoAdjustSamplingCheckBox_stateChanged(int state) {
 	visualizationContainer->GetVolumeView()->SetVolumeRenderingAutoAdjustSampling(state != 0);
 }
+
+
+void SettingsDialog::on_enableDotAnnotationCheckBox_stateChanged(int state) {
+	emit enableDotAnnotationChanged(state != 0);
+}

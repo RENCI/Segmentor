@@ -243,6 +243,30 @@ void vtkInteractorStyleSlice::EndVisible()
 }
 
 //----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::StartDot()
+{
+	if (this->State != VTKIS_NONE)
+	{
+		return;
+	}
+	this->StartState(VTKIS_DOT_SLICE);
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleSlice::EndDot()
+{
+	if (this->State != VTKIS_DOT_SLICE)
+	{
+		return;
+	}
+	if (this->HandleObservers)
+	{
+		this->InvokeEvent(DotEvent, nullptr);
+	}
+	this->StopState();
+}
+
+//----------------------------------------------------------------------------
 void vtkInteractorStyleSlice::WindowLevel()
 {
 	vtkRenderWindowInteractor *rwi = this->Interactor;
@@ -414,6 +438,10 @@ void vtkInteractorStyleSlice::OnLeftButtonDown()
 		{
 			this->StartVisible();
 		}
+		else if (this->Mode == DotMode)
+		{
+			this->StartDot();
+		}
 		else
 		{
 			// Rotate
@@ -473,6 +501,10 @@ void vtkInteractorStyleSlice::OnLeftButtonUp() {
 
 	case VTKIS_VISIBLE_SLICE:
 		this->EndVisible();
+		break;
+
+	case VTKIS_DOT_SLICE:
+		this->EndDot();
 		break;
 	}
 

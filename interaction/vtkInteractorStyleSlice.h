@@ -20,6 +20,7 @@ class vtkCellPicker;
 #define VTKIS_MERGE_SLICE 2053
 #define VTKIS_GROW_SLICE 2054
 #define VTKIS_VISIBLE_SLICE 2055
+#define VTKIS_DOT_SLICE 2056
 
 class vtkInteractorStyleSlice : public vtkInteractorStyleImage {
 public:
@@ -56,6 +57,8 @@ public:
 	virtual void EndGrow();
 	virtual void StartVisible();
 	virtual void EndVisible();
+	virtual void StartDot();
+	virtual void EndDot();
 
 	virtual void WindowLevel() override;
 	double GetWindow();
@@ -79,7 +82,8 @@ public:
 		AddEvent,
 		MergeEvent,
 		GrowEvent,
-		VisibleEvent
+		VisibleEvent,
+		DotEvent
 	};
 
 protected:

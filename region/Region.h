@@ -23,6 +23,8 @@ class RegionSurface;
 class RegionOutline;
 class RegionVoxelOutlines;
 class RegionHighlight3D;
+class RegionCenter3D;
+class RegionCenter2D;
 class Feedback;
 
 class Region {
@@ -40,6 +42,8 @@ public:
 	RegionOutline* GetOutline();
 	RegionVoxelOutlines* GetVoxelOutlines();
 	RegionHighlight3D* GetHighlight3D();
+	RegionCenter3D* GetCenter3D();
+	RegionCenter2D* GetCenter2D();
 	vtkSmartPointer<vtkTextActor> GetText();
 	vtkSmartPointer<vtkImageData> GetZSlice(int z);
 
@@ -70,6 +74,8 @@ public:
 
 	void ShowText(bool show);
 
+	void ShowCenter(bool show);
+
 	unsigned short GetLabel();
 	int GetNumVoxels();
 	int GetNumVoxels(int slice);
@@ -89,10 +95,13 @@ public:
 	const std::string& GetComment();
 	void SetComment(const std::string& commentString);
 
+	void ApplyDot();
+
 protected:
 	unsigned short label;
 	double color[3];
 	int extent[6];
+	double center[3];
 
 	bool visible;
 	bool modified;
@@ -108,6 +117,8 @@ protected:
 	RegionOutline* outline;
 	RegionVoxelOutlines* voxelOutlines;
 	RegionHighlight3D* highlight3D;
+	RegionCenter3D* center3D;
+	RegionCenter2D* center2D;
 	vtkSmartPointer<vtkTextActor> text;
 
 #ifdef SHOW_REGION_BOX

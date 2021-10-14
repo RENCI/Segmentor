@@ -37,6 +37,7 @@
 #include "Region.h"
 #include "RegionSurface.h"
 #include "RegionHighlight3D.h"
+#include "RegionCenter3D.h"
 #include "RegionCollection.h"
 #include "SegmentorMath.h"
 
@@ -213,6 +214,7 @@ void VolumeView::SetRegions(vtkImageData* imageLabels, RegionCollection* newRegi
 void VolumeView::AddRegion(Region* region) {
 	RegionSurface* surface = region->GetSurface();
 	RegionHighlight3D* highlight = region->GetHighlight3D();
+	RegionCenter3D* center = region->GetCenter3D();
 
 	surface->SetSmoothSurface(smoothSurfaces);
 	surface->SetSmoothShading(smoothShading);
@@ -223,6 +225,7 @@ void VolumeView::AddRegion(Region* region) {
 
 	renderer->AddActor(surface->GetActor());
 	renderer->AddActor(highlight->GetActor());
+	renderer->AddActor(center->GetActor());
 
 #ifdef SHOW_REGION_BOX
 	renderer->AddActor(region->GetBox());

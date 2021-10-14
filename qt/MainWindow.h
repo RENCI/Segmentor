@@ -62,6 +62,7 @@ public slots:
 	virtual void on_actionRedo_triggered();
 
 	virtual void on_actionSegment_Volume_triggered();
+	virtual void on_actionApply_Dot_Annotation_triggered();
 
 	virtual void on_actionExit_triggered();
 
@@ -90,6 +91,7 @@ public slots:
 	virtual void on_actionGrow();
 	virtual void on_actionDone();
 	virtual void on_actionVisible();
+	virtual void on_actionDot();
 
 	// Action events
 	virtual void on_actionUpdate();
@@ -142,6 +144,8 @@ public slots:
 	virtual void on_brushRadiusDown();
 	virtual void on_brushRadiusUp();
 
+	virtual void on_enableDotAnnotationChanged(bool enable);
+
 signals:
 
 	void windowLevelChanged(double window, double value);
@@ -184,6 +188,7 @@ protected:
 	QAction* createActionIcon(const QString& fileName, const QString& text, const QKeySequence& shortcut, void (MainWindow::*slot)());
 	QAction* createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, bool checked, void (MainWindow::*slot)(bool));
 	QAction* createActionIcon(const QString& fileName, const QString& text, const QString& shortcut, QActionGroup* group, bool checked, void (MainWindow::*slot)());
+	QAction* createActionIcon(const QString& fileName, const QString& text, const QKeySequence& shortcut, QActionGroup* group, bool checked, void (MainWindow::*slot)());
 	QLabel* createLabel(const QString& text, int topMargin = 10, int bottomMargin = 5, int leftMargin = 0, int rightMargin = 0);
 
 	InteractionMode navEditMode;

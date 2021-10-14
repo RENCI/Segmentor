@@ -398,6 +398,7 @@
      <string>Analyze</string>
     </property>
     <addaction name="actionSegment_Volume"/>
+    <addaction name="actionApply_Dot_Annotation"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -610,6 +611,17 @@
   <action name="actionShow_Feedback">
    <property name="text">
     <string>Show Feedback</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionApply_Dot_Annotation">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Apply Dot Annotation</string>
    </property>
   </action>
  </widget>

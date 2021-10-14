@@ -40,6 +40,11 @@ public slots:
 	virtual void on_gradientOpacityCheckBox_stateChanged(int state);
 	virtual void on_autoAdjustSamplingCheckBox_stateChanged(int state);
 
+	virtual void on_enableDotAnnotationCheckBox_stateChanged(int state);
+
+signals:
+	void enableDotAnnotationChanged(bool enable);
+
 protected:
 	VisualizationContainer* visualizationContainer;
 };

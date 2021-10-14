@@ -25,6 +25,8 @@
 #include "RegionOutline.h"
 #include "RegionVoxelOutlines.h"
 #include "RegionHighlight3D.h"
+#include "RegionCenter3D.h"
+#include "RegionCenter2D.h"
 
 Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* inputData, const int* regionExtent) {
 	visible = false;
@@ -72,6 +74,8 @@ Region::Region(unsigned short regionLabel, double regionColor[3], vtkImageData* 
 	outline = new RegionOutline(this, color);
 	voxelOutlines = new RegionVoxelOutlines(this, color);
 	highlight3D = new RegionHighlight3D(this, color);
+	center3D = new RegionCenter3D(this, color);
+	center2D = new RegionCenter2D(this, color);
 
 #ifdef SHOW_REGION_BOX
 	// Outline for testing bounding box
@@ -118,6 +122,8 @@ Region::Region(const RegionInfo& info, vtkImageData* inputData) {
 	outline = new RegionOutline(this, color);
 	voxelOutlines = new RegionVoxelOutlines(this, color);
 	highlight3D = new RegionHighlight3D(this, color);
+	center3D = new RegionCenter3D(this, color);
+	center2D = new RegionCenter2D(this, color);
 }
 	
 Region::~Region() {
@@ -137,6 +143,8 @@ Region::~Region() {
 	delete outline;
 	delete voxelOutlines;
 	delete highlight3D;
+	delete center3D;
+	delete center2D;
 }
 
 vtkAlgorithmOutput* Region::GetOutput() {
@@ -196,6 +204,14 @@ RegionVoxelOutlines* Region::GetVoxelOutlines() {
 
 RegionHighlight3D* Region::GetHighlight3D() {
 	return highlight3D;
+}
+
+RegionCenter3D* Region::GetCenter3D() {
+	return center3D;
+}
+
+RegionCenter2D* Region::GetCenter2D() {
+	return center2D;
 }
 
 vtkSmartPointer<vtkTextActor> Region::GetText() {
@@ -425,6 +441,8 @@ void Region::UpdateColor() {
 	outline->GetActor()->GetProperty()->SetColor(currentColor);
 	voxelOutlines->GetActor()->GetProperty()->SetColor(currentColor);
 	highlight3D->GetActor()->GetProperty()->SetColor(currentColor);
+	center3D->GetActor()->GetProperty()->SetColor(currentColor);
+	center2D->GetActor()->GetProperty()->SetColor(currentColor);
 }
 
 void Region::ShowText(bool show) {
@@ -454,6 +472,11 @@ void Region::ShowText(bool show) {
 		box->VisibilityOff();
 #endif
 	}
+}
+
+void Region::ShowCenter(bool show) {
+	center2D->GetActor()->SetVisibility(show);
+	center3D->GetActor()->SetVisibility(show);
 }
 
 unsigned short Region::GetLabel() {
@@ -507,7 +530,10 @@ void Region::GetExtent(int outExtent[6]) {
 }
 
 double* Region::GetCenter() {
-	return voi->GetOutput()->GetCenter();
+	center[0] = (extent[0] + extent[1]) / 2.0;
+	center[1] = (extent[2] + extent[3]) / 2.0;
+	center[2] = (extent[4] + extent[5]) / 2.0;
+	return center;
 }
 
 double Region::GetLength() {
@@ -610,6 +636,28 @@ void Region::SetComment(const std::string& commentString) {
 	comment = commentString;
 
 	text->SetInput(LabelString().c_str());
+}
+
+void Region::ApplyDot() {
+	double* c = GetCenter();
+	int x = (int)c[0];
+	int y = (int)c[1];
+	int z = (int)c[2];
+
+	ClearLabels();
+
+	unsigned short* p = static_cast<unsigned short*>(data->GetScalarPointer(x, y, z));
+
+	*p = label;
+
+	data->Modified();
+
+	int ext[6] = { x, x, y, y, z, z, };
+	SetExtent(ext);
+	voi->Update();
+
+	center3D->Update();
+	center2D->Update(center2D->GetActor()->GetPosition()[2]);
 }
 
 void Region::ClearLabels() {

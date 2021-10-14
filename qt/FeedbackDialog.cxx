@@ -39,9 +39,12 @@ FeedbackDialog::FeedbackDialog(QWidget* parent, VisualizationContainer* visualiz
 	QObject::connect(table, &FeedbackTable::highlightRegion, this, &FeedbackDialog::on_highlightRegion);
 	QObject::connect(table, &FeedbackTable::countChanged, this, &FeedbackDialog::on_countChanged);
 
-	// Shortcut
-	QShortcut* shortcut = new QShortcut(QKeySequence(Qt::ALT + Qt::Key_V), this);
+	// Shortcuts
+	QShortcut* shortcut = new QShortcut(QKeySequence(Qt::Key_Period), this);
 	QObject::connect(shortcut, &QShortcut::activated, this, &FeedbackDialog::on_verifiedShortcut);
+
+	QShortcut* closeShortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_F), this);
+	QObject::connect(closeShortcut, &QShortcut::activated, this, &FeedbackDialog::close);
 
 	updateRegions();
 }
@@ -110,5 +113,5 @@ void FeedbackDialog::on_countChanged(int count) {
 }
 
 void FeedbackDialog::on_verifiedShortcut() {
-	//printf("DLKJF");
+	visualizationContainer->ToggleCurrentRegionVerified();
 }
