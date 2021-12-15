@@ -53,6 +53,9 @@ void SettingsDialog::initializeSettings() {
 
 	// Surface opacity
 	surfaceOpacitySpinBox->setValue(volumeView->GetVisibleOpacity());
+
+	// Neighbor radius
+	neighborRadiusSpinBox->setValue(visualizationContainer->GetNeighborRadius());
 }
 
 void SettingsDialog::on_windowSpinBox_valueChanged(double value) {
@@ -85,6 +88,10 @@ void SettingsDialog::on_surfaceOpacityUp() {
 
 void SettingsDialog::on_surfaceOpacityDown() {
 	surfaceOpacitySpinBox->stepDown();
+}
+
+void SettingsDialog::on_neighborRadiusSpinBox_valueChanged(double value) {
+	visualizationContainer->SetNeighborRadius(value);
 }
 
 void SettingsDialog::on_voxelSizeSpinBox() {

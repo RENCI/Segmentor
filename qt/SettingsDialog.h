@@ -31,6 +31,8 @@ public slots:
 	virtual void on_surfaceOpacityUp();
 	virtual void on_surfaceOpacityDown();
 
+	virtual void on_neighborRadiusSpinBox_valueChanged(double value);
+
 	virtual void on_voxelSizeSpinBox();
 
 	virtual void on_windowLevelChanged(double window, double level);

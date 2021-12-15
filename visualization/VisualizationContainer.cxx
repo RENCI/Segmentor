@@ -8,6 +8,7 @@
 #include <vtkCallbackCommand.h>
 #include <vtkCamera.h>
 #include <vtkExtractVOI.h>
+#include <vtkGeometryFilter.h>
 #include <vtkImageConnectivityFilter.h>
 #include <vtkImageDilateErode3D.h>
 #include <vtkImageGaussianSmooth.h>
@@ -65,6 +66,7 @@ VisualizationContainer::VisualizationContainer(vtkRenderWindowInteractor* volume
 	filterRegions = false;
 
 	brushRadius = 1;
+	neighborRadius = 0.0;
 
 	// Qt main window
 	qtWindow = mainWindow;
@@ -421,6 +423,7 @@ VisualizationContainer::FileErrorCode VisualizationContainer::SaveImageData(cons
 		shiftScale->SetInputDataObject(data);
 
 		vtkSmartPointer<vtkTIFFWriter> writer = vtkSmartPointer<vtkTIFFWriter>::New();
+		writer->SetCompressionToNoCompression();
 		writer->SetFileName(fileName.c_str());
 		writer->SetInputConnection(shiftScale->GetOutputPort());
 		writer->Update();
@@ -458,6 +461,7 @@ VisualizationContainer::FileErrorCode VisualizationContainer::SaveSegmentationDa
 	}
 	else if (extension == "tif" || extension == "tiff") {
 		vtkSmartPointer<vtkTIFFWriter> writer = vtkSmartPointer<vtkTIFFWriter>::New();
+		writer->SetCompressionToNoCompression();
 		writer->SetFileName(fileName.c_str());
 		writer->SetInputDataObject(labels);
 		writer->Update();
@@ -945,22 +949,70 @@ void VisualizationContainer::ShowPlaneRegions() {
 void VisualizationContainer::ShowNeighborRegions() {
 	if (!regions) return;
 
-	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
-		Region* region = regions->Get(it);
+	if (currentRegion) {
+		int extent[6];
+		currentRegion->GetExtent(extent);
 
-		if (currentRegion) {
-			double d = sqrt(vtkMath::Distance2BetweenPoints(currentRegion->GetCenter(), region->GetCenter()));
-			double r = (currentRegion->GetLength() + region->GetLength()) / 4;
+		double a[6];
+		a[0] = extent[0] - neighborRadius;
+		a[1] = extent[1] + neighborRadius;
+		a[2] = extent[2] - neighborRadius;
+		a[3] = extent[3] + neighborRadius;
+		a[4] = extent[4] - neighborRadius;
+		a[5] = extent[5] + neighborRadius;
+		
+		vtkSmartPointer<vtkGeometryFilter> aSurface = vtkSmartPointer<vtkGeometryFilter>::New();
+		aSurface->SetInputConnection(currentRegion->GetCells());
+		aSurface->Update();
 
-			if (d <= r * 1.05) {
-				region->SetVisible(true);
-				//surface->GetActor()->GetProperty()->SetOpacity(neighborOpacity);
+		for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+			Region* region = regions->Get(it);
+
+			int b[6];
+			region->GetExtent(b);
+
+			bool intersect = !(
+				b[0] > a[1] || b[1] < a[0] ||
+				b[2] > a[3] || b[3] < a[2] ||
+				b[4] > a[5] || b[5] < a[4]
+			);
+
+			if (intersect) {
+				vtkSmartPointer<vtkGeometryFilter> bSurface = vtkSmartPointer<vtkGeometryFilter>::New();
+				bSurface->SetInputConnection(region->GetCells());
+				bSurface->Update();
+
+				double min = VTK_DOUBLE_MAX;
+				for (int i = 0; i < aSurface->GetOutput()->GetNumberOfPoints(); i++) {
+					double a[3];
+					aSurface->GetOutput()->GetPoint(i, a);
+
+					for (int j = 0; j < bSurface->GetOutput()->GetNumberOfPoints(); j++) {
+						double b[3];
+						bSurface->GetOutput()->GetPoint(j, b);
+
+						double d = vtkMath::Distance2BetweenPoints(a, b);
+
+						if (d < min) min = d;
+					}
+				}
+
+				if (min <= neighborRadius) {
+					region->SetVisible(true);
+					//surface->GetActor()->GetProperty()->SetOpacity(neighborOpacity);
+				}
+				else {
+					region->SetVisible(false);
+				}
 			}
 			else {
 				region->SetVisible(false);
 			}
 		}
-		else {
+	}
+	else {
+		for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
+			Region* region = regions->Get(it);
 			region->SetVisible(false);
 		}
 	}
@@ -2209,6 +2261,14 @@ void VisualizationContainer::SetBrushRadius(int radius) {
 	volumeView->SetBrushRadius(radius);
 
 	Render();
+}
+
+double VisualizationContainer::GetNeighborRadius() {
+	return neighborRadius;
+}
+
+void VisualizationContainer::SetNeighborRadius(double radius) {
+	neighborRadius = radius;
 }
 
 void VisualizationContainer::Render() {

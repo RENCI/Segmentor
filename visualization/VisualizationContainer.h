@@ -130,6 +130,9 @@ public:
 	int GetBrushRadius();
 	void SetBrushRadius(int radius);
 
+	double GetNeighborRadius();
+	void SetNeighborRadius(double radius);
+
 	void Render();
 
 	void Undo();
@@ -190,6 +193,9 @@ protected:
 
 	// Brush radius
 	int brushRadius;
+
+	// Neighbor radius
+	double neighborRadius;
 
 	void SetImageData(vtkImageData* imageData);
 	bool SetLabelData(vtkImageData* labelData, const std::vector<RegionInfo>& metadata);
