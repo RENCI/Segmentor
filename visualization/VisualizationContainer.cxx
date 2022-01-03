@@ -1,3 +1,6 @@
+// Until we determine if this should be included as a control or not
+//#define FLIP_MASK_Y
+
 #include "VisualizationContainer.h"
 
 #include <algorithm>
@@ -11,6 +14,7 @@
 #include <vtkGeometryFilter.h>
 #include <vtkImageConnectivityFilter.h>
 #include <vtkImageDilateErode3D.h>
+#include <vtkImageFlip.h>
 #include <vtkImageGaussianSmooth.h>
 #include <vtkImageOpenClose3D.h>
 #include <vtkImageThreshold.h>
@@ -2243,6 +2247,19 @@ void VisualizationContainer::SliceStep(double amount) {
 	distance += amount;
 
 	cam->SetDistance(distance);
+
+	Render();
+}
+
+void VisualizationContainer::FlipAxis(int axis) {
+	vtkSmartPointer<vtkImageFlip> flip = vtkSmartPointer<vtkImageFlip>::New();
+	flip->SetFilteredAxis(axis);
+	flip->SetInputDataObject(labels);
+	flip->Update();
+
+	std::vector<RegionInfo> metadata;
+
+	SetLabelData(flip->GetOutput(), metadata);
 
 	Render();
 }

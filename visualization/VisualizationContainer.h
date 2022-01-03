@@ -125,6 +125,8 @@ public:
 	void SliceUp();
 	void SliceDown();
 
+	void FlipAxis(int axis);
+
 	void SetFocalPoint(double x, double y, double z);
 
 	int GetBrushRadius();

@@ -44,6 +44,8 @@ public slots:
 
 	virtual void on_enableDotAnnotationCheckBox_stateChanged(int state);
 
+	virtual void on_flipAxisButton(int axis);
+
 signals:
 	void enableDotAnnotationChanged(bool enable);
 
