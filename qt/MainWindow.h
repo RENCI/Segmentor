@@ -80,8 +80,8 @@ public slots:
 	virtual void on_actionData_Loading_triggered();
 	virtual void on_actionControls_triggered();
 	virtual void on_actionGithub_Repo_triggered();
-
 	virtual void on_actionProject_Website_triggered();
+	virtual void on_actionAbout_triggered();
 
 	// Mode events
 	virtual void on_actionNavigation();

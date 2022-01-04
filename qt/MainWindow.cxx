@@ -690,6 +690,17 @@ void MainWindow::on_actionProject_Website_triggered() {
 	QDesktopServices::openUrl(QUrl("https://www.nucleininja.org/"));
 }
 
+void MainWindow::on_actionAbout_triggered() {
+	QMessageBox about;
+
+	std::string title = "Segmentor v";
+	title += SEGMENTOR_VERSION;
+
+	about.setText(title.c_str());
+	about.setInformativeText("Built with Qt and VTK");
+	about.exec();
+}
+
 void MainWindow::on_actionNavigation() {
 	visualizationContainer->SetInteractionMode(NavigationMode);
 

@@ -425,13 +425,11 @@
     </property>
     <addaction name="actionData_Loading"/>
     <addaction name="actionControls"/>
-   </widget>
-   <widget class="QMenu" name="menuAbout">
-    <property name="title">
-     <string>About</string>
-    </property>
+    <addaction name="separator"/>
     <addaction name="actionProject_Website"/>
     <addaction name="actionGithub_Repo"/>
+    <addaction name="separator"/>
+    <addaction name="actionAbout"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="title">
@@ -452,7 +450,6 @@
    <addaction name="menuSettings"/>
    <addaction name="menuTraining"/>
    <addaction name="menuHelp"/>
-   <addaction name="menuAbout"/>
   </widget>
   <action name="actionOpen_Image_File">
    <property name="text">
@@ -590,16 +587,6 @@
     <string>Controls</string>
    </property>
   </action>
-  <action name="actionGithub_Repo">
-   <property name="text">
-    <string>Github Repo</string>
-   </property>
-  </action>
-  <action name="actionProject_Website">
-   <property name="text">
-    <string>Project Website</string>
-   </property>
-  </action>
   <action name="actionChange_Settings">
    <property name="text">
     <string>Change Settings</string>
@@ -622,6 +609,21 @@
    </property>
    <property name="text">
     <string>Apply Dot Annotation</string>
+   </property>
+  </action>
+  <action name="actionProject_Website">
+   <property name="text">
+    <string>Project Website</string>
+   </property>
+  </action>
+  <action name="actionGithub_Repo">
+   <property name="text">
+    <string>Github Repo</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
    </property>
   </action>
  </widget>
