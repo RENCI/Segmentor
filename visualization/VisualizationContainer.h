@@ -125,10 +125,15 @@ public:
 	void SliceUp();
 	void SliceDown();
 
+	void FlipAxis(int axis);
+
 	void SetFocalPoint(double x, double y, double z);
 
 	int GetBrushRadius();
 	void SetBrushRadius(int radius);
+
+	double GetNeighborRadius();
+	void SetNeighborRadius(double radius);
 
 	void Render();
 
@@ -190,6 +195,9 @@ protected:
 
 	// Brush radius
 	int brushRadius;
+
+	// Neighbor radius
+	double neighborRadius;
 
 	void SetImageData(vtkImageData* imageData);
 	bool SetLabelData(vtkImageData* labelData, const std::vector<RegionInfo>& metadata);

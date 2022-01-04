@@ -16,6 +16,11 @@ SettingsDialog::SettingsDialog(QWidget* parent, VisualizationContainer* visualiz
 	QObject::connect(xSizeSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SettingsDialog::on_voxelSizeSpinBox);
 	QObject::connect(ySizeSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SettingsDialog::on_voxelSizeSpinBox);
 	QObject::connect(zSizeSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SettingsDialog::on_voxelSizeSpinBox);
+
+	// Flip axis callbacks
+	QObject::connect(flipXButton, &QPushButton::clicked, this, [this]() { on_flipAxisButton(0); });
+	QObject::connect(flipYButton, &QPushButton::clicked, this, [this]() { on_flipAxisButton(1); });
+	QObject::connect(flipZButton, &QPushButton::clicked, this, [this]() { on_flipAxisButton(2); });
 }
 
 SettingsDialog::~SettingsDialog() {
@@ -53,6 +58,9 @@ void SettingsDialog::initializeSettings() {
 
 	// Surface opacity
 	surfaceOpacitySpinBox->setValue(volumeView->GetVisibleOpacity());
+
+	// Neighbor radius
+	neighborRadiusSpinBox->setValue(visualizationContainer->GetNeighborRadius());
 }
 
 void SettingsDialog::on_windowSpinBox_valueChanged(double value) {
@@ -87,6 +95,10 @@ void SettingsDialog::on_surfaceOpacityDown() {
 	surfaceOpacitySpinBox->stepDown();
 }
 
+void SettingsDialog::on_neighborRadiusSpinBox_valueChanged(double value) {
+	visualizationContainer->SetNeighborRadius(value);
+}
+
 void SettingsDialog::on_voxelSizeSpinBox() {
 	visualizationContainer->SetVoxelSize(
 		xSizeSpinBox->value(),
@@ -116,7 +128,10 @@ void SettingsDialog::on_autoAdjustSamplingCheckBox_stateChanged(int state) {
 	visualizationContainer->GetVolumeView()->SetVolumeRenderingAutoAdjustSampling(state != 0);
 }
 
-
 void SettingsDialog::on_enableDotAnnotationCheckBox_stateChanged(int state) {
 	emit enableDotAnnotationChanged(state != 0);
+}
+
+void SettingsDialog::on_flipAxisButton(int axis) {
+	visualizationContainer->FlipAxis(axis);
 }
