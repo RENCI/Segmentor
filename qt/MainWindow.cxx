@@ -697,7 +697,7 @@ void MainWindow::on_actionAbout_triggered() {
 	title += SEGMENTOR_VERSION;
 
 	about.setText(title.c_str());
-	about.setInformativeText("Built with Qt and VTK");
+	about.setInformativeText("Built with Qt, VTK, and Bootstrap Icons");
 	about.exec();
 }
 
