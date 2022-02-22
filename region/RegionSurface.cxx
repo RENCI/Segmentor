@@ -1,7 +1,6 @@
 #include "RegionSurface.h"
 
 #include <vtkActor.h>
-#include <vtkDiscreteFlyingEdges3D.h>
 #include <vtkLookupTable.h>
 #include <vtkPlane.h>
 #include <vtkPolyDataMapper.h>
@@ -11,6 +10,8 @@
 #include <vtkWindowedSincPolyDataFilter.h>
 
 #include "Region.h"
+#include "myDiscreteFlyingEdges3D.h"
+
 
 RegionSurface::RegionSurface(Region* inputRegion, double color[3]) {
 	smoothSurface = false;
@@ -18,7 +19,7 @@ RegionSurface::RegionSurface(Region* inputRegion, double color[3]) {
 
 	region = inputRegion;
 
-	contour = vtkSmartPointer<vtkDiscreteFlyingEdges3D>::New();
+	contour = vtkSmartPointer<myDiscreteFlyingEdges3D>::New();
 	contour->SetValue(0, region->GetLabel());
 	contour->ComputeNormalsOff();
 	contour->ComputeGradientsOff();
