@@ -4,7 +4,7 @@
 #include "vtkSmartPointer.h"
 
 class vtkActor;
-class vtkDiscreteFlyingEdges3D;
+class myDiscreteFlyingEdges3D;
 class vtkPolyDataMapper;
 class vtkPolyDataNormals;
 class vtkWindowedSincPolyDataFilter;
@@ -37,7 +37,7 @@ protected:
 	bool smoothSurface;
 	bool smoothShading;
 
-	vtkSmartPointer<vtkDiscreteFlyingEdges3D> contour;
+	vtkSmartPointer<myDiscreteFlyingEdges3D> contour;
 	vtkSmartPointer<vtkWindowedSincPolyDataFilter> smoother;
 	vtkSmartPointer<vtkPolyDataNormals> normals;
 	vtkSmartPointer<vtkPolyDataMapper> mapper;

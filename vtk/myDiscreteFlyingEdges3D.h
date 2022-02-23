@@ -1,7 +1,7 @@
 /*=========================================================================
 
 Program:   Visualization Toolkit
-Module:    vtkDiscreteFlyingEdges3D.h
+Module:    myDiscreteFlyingEdges3D.h
 
 Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
 All rights reserved.
@@ -13,10 +13,10 @@ PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
 /**
-* @class   vtkDiscreteFlyingEdges3D
+* @class   myDiscreteFlyingEdges3D
 * @brief   generate isosurface from 3D image data (volume)
 *
-* vtkDiscreteFlyingEdges3D creates output representations of label maps
+* myDiscreteFlyingEdges3D creates output representations of label maps
 * (e.g., segmented volumes) using a variation of the flying edges
 * algorithm. The input is a 3D image (volume( where each point is labeled
 * (integer labels are preferred to real values), and the output data is
@@ -44,23 +44,23 @@ PURPOSE.  See the above copyright notice for more information.
 * VTK_SMP_IMPLEMENTATION_TYPE) may improve performance significantly.
 *
 * @sa
-* vtkDiscreteMarchingCubes vtkDiscreteFlyingEdges2D vtkDiscreteFlyingEdges3D
+* vtkDiscreteMarchingCubes vtkDiscreteFlyingEdges2D myDiscreteFlyingEdges3D
 */
 
-#ifndef vtkDiscreteFlyingEdges3D_h
-#define vtkDiscreteFlyingEdges3D_h
+#ifndef myDiscreteFlyingEdges3D_h
+#define myDiscreteFlyingEdges3D_h
 
-#include "vtkContourValues.h"        // Passes calls through
 #include "vtkFiltersGeneralModule.h" // For export macro
 #include "vtkPolyDataAlgorithm.h"
+#include "vtkContourValues.h" // Passes calls through
 
 class vtkImageData;
 
-class VTKFILTERSGENERAL_EXPORT vtkDiscreteFlyingEdges3D : public vtkPolyDataAlgorithm
+class myDiscreteFlyingEdges3D : public vtkPolyDataAlgorithm
 {
 public:
-	static vtkDiscreteFlyingEdges3D* New();
-	vtkTypeMacro(vtkDiscreteFlyingEdges3D, vtkPolyDataAlgorithm);
+	static myDiscreteFlyingEdges3D *New();
+	vtkTypeMacro(myDiscreteFlyingEdges3D, vtkPolyDataAlgorithm);
 	void PrintSelf(ostream& os, vtkIndent indent) override;
 
 	/**
@@ -68,7 +68,7 @@ public:
 	*/
 	vtkMTimeType GetMTime() override;
 
-	///@{
+	//@{
 	/**
 	* Set/Get the computation of normals. Normal computation is fairly
 	* expensive in both time and storage. If the output data will be processed
@@ -78,9 +78,9 @@ public:
 	vtkSetMacro(ComputeNormals, int);
 	vtkGetMacro(ComputeNormals, int);
 	vtkBooleanMacro(ComputeNormals, int);
-	///@}
+	//@}
 
-	///@{
+	//@{
 	/**
 	* Set/Get the computation of gradients. Gradient computation is fairly
 	* expensive in both time and storage. Note that if ComputeNormals is on,
@@ -92,18 +92,18 @@ public:
 	vtkSetMacro(ComputeGradients, int);
 	vtkGetMacro(ComputeGradients, int);
 	vtkBooleanMacro(ComputeGradients, int);
-	///@}
+	//@}
 
-	///@{
+	//@{
 	/**
 	* Set/Get the computation of scalars.
 	*/
 	vtkSetMacro(ComputeScalars, int);
 	vtkGetMacro(ComputeScalars, int);
 	vtkBooleanMacro(ComputeScalars, int);
-	///@}
+	//@}
 
-	///@{
+	//@{
 	/**
 	* Indicate whether to interpolate other attribute data. That is, as the
 	* isosurface is generated, interpolate all point attribute data across
@@ -113,7 +113,7 @@ public:
 	vtkSetMacro(InterpolateAttributes, int);
 	vtkGetMacro(InterpolateAttributes, int);
 	vtkBooleanMacro(InterpolateAttributes, int);
-	///@}
+	//@}
 
 	/**
 	* Set a particular contour value at contour number i. The index i ranges
@@ -130,33 +130,38 @@ public:
 	* Get a pointer to an array of contour values. There will be
 	* GetNumberOfContours() values in the list.
 	*/
-	double* GetValues() { return this->ContourValues->GetValues(); }
+	double *GetValues() { return this->ContourValues->GetValues(); }
 
 	/**
 	* Fill a supplied list with contour values. There will be
 	* GetNumberOfContours() values in the list. Make sure you allocate
 	* enough memory to hold the list.
 	*/
-	void GetValues(double* contourValues) { this->ContourValues->GetValues(contourValues); }
+	void GetValues(double *contourValues) {
+		this->ContourValues->GetValues(contourValues);
+	}
 
 	/**
 	* Set the number of contours to place into the list. You only really
 	* need to use this method to reduce list size. The method SetValue()
 	* will automatically increase list size as needed.
 	*/
-	void SetNumberOfContours(int number) { this->ContourValues->SetNumberOfContours(number); }
+	void SetNumberOfContours(int number) {
+		this->ContourValues->SetNumberOfContours(number);
+	}
 
 	/**
 	* Get the number of contours in the list of contour values.
 	*/
-	vtkIdType GetNumberOfContours() { return this->ContourValues->GetNumberOfContours(); }
+	int GetNumberOfContours() {
+		return this->ContourValues->GetNumberOfContours();
+	}
 
 	/**
 	* Generate numContours equally spaced contour values between specified
 	* range. Contour values will include min/max range values.
 	*/
-	void GenerateValues(int numContours, double range[2])
-	{
+	void GenerateValues(int numContours, double range[2]) {
 		this->ContourValues->GenerateValues(numContours, range);
 	}
 
@@ -169,32 +174,34 @@ public:
 		this->ContourValues->GenerateValues(numContours, rangeStart, rangeEnd);
 	}
 
-	///@{
+	//@{
 	/**
 	* Set/get which component of the scalar array to contour on; defaults to 0.
 	*/
 	vtkSetMacro(ArrayComponent, int);
 	vtkGetMacro(ArrayComponent, int);
-	///@}
+	//@}
 
 protected:
-	vtkDiscreteFlyingEdges3D();
-	~vtkDiscreteFlyingEdges3D() override;
+	myDiscreteFlyingEdges3D();
+	~myDiscreteFlyingEdges3D() override;
 
 	int ComputeNormals;
 	int ComputeGradients;
 	int ComputeScalars;
 	int InterpolateAttributes;
 	int ArrayComponent;
-	vtkContourValues* ContourValues;
+	vtkContourValues *ContourValues;
 
-	int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
-	int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
-	int FillInputPortInformation(int port, vtkInformation* info) override;
+	int RequestData(vtkInformation *, vtkInformationVector **,
+		vtkInformationVector *) override;
+	int RequestUpdateExtent(vtkInformation *, vtkInformationVector **,
+		vtkInformationVector *) override;
+	int FillInputPortInformation(int port, vtkInformation *info) override;
 
 private:
-	vtkDiscreteFlyingEdges3D(const vtkDiscreteFlyingEdges3D&) = delete;
-	void operator=(const vtkDiscreteFlyingEdges3D&) = delete;
+	myDiscreteFlyingEdges3D(const myDiscreteFlyingEdges3D&) = delete;
+	void operator=(const myDiscreteFlyingEdges3D&) = delete;
 };
 
 #endif

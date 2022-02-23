@@ -347,7 +347,7 @@ void Region::UpdateExtent() {
 	padExtent[4] = std::max(dataExtent[4], extent[4] - padding);
 	padExtent[5] = std::min(dataExtent[5], extent[5] + padding);
 
-	voi->SetVOI(padExtent);
+//	voi->SetVOI(padExtent);
 
 	//text->SetPosition(
 //		(padExtent[1] - padExtent[0]) / 2,
