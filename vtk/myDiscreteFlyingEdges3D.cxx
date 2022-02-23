@@ -33,6 +33,83 @@ PURPOSE.  See the above copyright notice for more information.
 
 vtkStandardNewMacro(myDiscreteFlyingEdges3D);
 
+void printArray(const char* name, const vtkIdType a[], int n) {
+	printf("const %s = [\n", name);
+	for (int i = 0; i < n; i++) {
+		printf("  %d", a[i]);
+		if (i < n - 1) printf(",");
+		printf("\n");
+	}
+	printf("];\n\n");
+}
+
+void printArray(const char* name, const double a[], int n) {
+	printf("const %s = [\n", name);
+	for (int i = 0; i < n; i++) {
+		printf("  %f", a[i]);
+		if (i < n - 1) printf(",");
+		printf("\n");
+	}
+	printf("];\n\n");
+}
+
+void printArray(const char* name, const unsigned char a[], int n) {
+	printf("const %s = [\n", name);
+	for (int i = 0; i < n; i++) {
+		printf("  %d", a[i]);
+		if (i < n - 1) printf(",");
+		printf("\n");
+	}
+	printf("];\n\n");
+}
+
+void printArray2D(const char* name, const vtkIdType* a, int n, int m) {
+	printf("const %s = [\n", name);
+	for (int i = 0; i < n; i++) {
+		printf("  [");
+		for (int j = 0; j < m; j++) {
+			printf("%d", a[i * m + j]);
+			if (j < m - 1) printf(", ");
+		}
+		printf("]");
+		if (i < n - 1) printf(",");
+		printf("\n");
+	}
+	printf("];\n\n");
+}
+
+void printArray2D(const char* name, const double* a, int n, int m) {
+	printf("const %s = [\n", name);
+	for (int i = 0; i < n; i++) {
+		printf("  [");
+		for (int j = 0; j < m; j++) {
+			printf("%f", a[i * m + j]);
+			if (j < m - 1) printf(", ");
+		}
+		printf("]");
+		if (i < n - 1) printf(",");
+		printf("\n");
+	}
+	printf("];\n\n");
+}
+
+void printArray2D(const char* name, unsigned char* a, int n, int m) {
+	printf("const %s = [\n", name);
+	for (int i = 0; i < n; i++) {
+		printf("  [");
+		for (int j = 0; j < m; j++) {
+			printf("%d", a[i * m + j]);
+			if (j < m - 1) printf(", ");
+		}
+		printf("]");
+		if (i < n - 1) printf(",");
+		printf("\n");
+	}
+	printf("];\n\n");
+}
+
+
+
 //----------------------------------------------------------------------------
 namespace {
 	// This templated class implements the heart of the algorithm.
@@ -1175,6 +1252,22 @@ namespace {
 		algo.InterpolateAttributes = (self->GetInterpolateAttributes() &&
 			input->GetPointData()->GetNumberOfArrays() > 1) ? true : false;
 
+		printArray2D("EdgeCases", algo.EdgeCases[0], 256, 16);
+		printArray("EdgeMap", EdgeMap, 12);
+		//printArray2D("EdgeCases", algo.EdgeCases, 256, 16);
+		/*
+		unsigned char EdgeCases[256][16];
+		static const unsigned char EdgeMap[12];
+		static const unsigned char VertMap[12][2];
+		static const unsigned char VertOffsets[8][3];
+		unsigned char EdgeUses[256][12];
+		unsigned char IncludesAxes[256];
+		unsigned char *XCases;
+		vtkIdType *EdgeMetaData;
+		*/
+
+
+
 		// Loop across each contour value. This encompasses all three passes.
 		for (vidx = 0; vidx < numContours; vidx++)
 		{
@@ -1286,15 +1379,6 @@ namespace {
 			startYPts = numOutYPts;
 			startZPts = numOutZPts;
 			startTris = numOutTris;
-
-
-			newPts->GetData()->Print(std::cout);
-			
-			for (int i = 0; i < totalPts; i++) {
-				double* t = newPts->GetData()->GetTuple3(i);
-				printf("%d: %f, %f, %f\n", i, t[0], t[1], t[2]);
-			}
-
 		}// for all contour values
 
 		 // Clean up and return
