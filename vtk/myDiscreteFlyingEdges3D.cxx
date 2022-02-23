@@ -987,7 +987,7 @@ namespace {
 		eMD[2] = eMD[0] + this->Dims[1] * 6; //x-edge in +z direction
 		eMD[3] = eMD[2] + 6; //x-edge in +y+z direction
 
-		const bool TEST = row == 14 && slice == 0;
+		const bool TEST = row == 28 && slice == 0;
 
 							 // Determine whether this row of x-cells needs processing. If there are no
 							 // x-edge intersections, and the state of the four bounding x-edges is the
@@ -1012,7 +1012,9 @@ namespace {
 		zLoc = (slice >= (this->Dims[2] - 2) ? MaxBoundary : Interior);
 		yzLoc = (yLoc << 2) | (zLoc << 4);
 
-		if (TEST)printf("%d, %d, %d\n", yLoc, zLoc, yzLoc);
+		if (TEST) printf("%d, %d, %d\n", yLoc, zLoc, yzLoc);
+
+		if (TEST) printf("%d, %d, %d, %d\n", eMD[0] - this->EdgeMetaData, eMD[1] - this->EdgeMetaData, eMD[2] - this->EdgeMetaData, eMD[3] - this->EdgeMetaData);
 
 		// The trim edges may need adjustment if the contour travels between rows
 		// of x-edges (without intersecting these x-edges). This means checking
@@ -1093,7 +1095,7 @@ namespace {
 			ePtr[0]++; ePtr[1]++; ePtr[2]++; ePtr[3]++;
 		}//for all voxels along this x-edge
 
-		printf("%d\n", this->EdgeMetaData[87]);
+		printf("%d, %d, %d\n", row, slice, this->EdgeMetaData[170]);
 	}
 
 	//----------------------------------------------------------------------------
@@ -1282,13 +1284,16 @@ namespace {
 
 
 
-			printArray("EdgeMetaData", algo.EdgeMetaData, algo.NumberOfEdges * 6);
+			//printArray("EdgeMetaDataPass1", algo.EdgeMetaData, algo.NumberOfEdges * 6);
 
 			// PASS 2: Traverse all voxel x-rows and process voxel y&z edges.  The
 			// result is a count of the number of y- and z-intersections, as well as
 			// the number of triangles generated along these voxel rows.
 			Pass2<T> pass2(&algo);
 			vtkSMPTools::For(0, algo.Dims[2] - 1, pass2);
+
+
+			//printArray("EdgeMetaDataPass2", algo.EdgeMetaData, algo.NumberOfEdges * 6);
 
 			// PASS 3: Now allocate and generate output. First we have to update the
 			// edge meta data to partition the output into separate pieces so
@@ -1378,6 +1383,7 @@ namespace {
 				vtkSMPTools::For(0, algo.Dims[2] - 1, pass4);
 
 
+				//printArray("EdgeMetaDataPass4", algo.EdgeMetaData, algo.NumberOfEdges * 6);
 
 				//printArray("XCases", algo.XCases, (algo.Dims[0] - 1)*algo.NumberOfEdges);
 				//printArray("EdgeMetaData", algo.EdgeMetaData, algo.NumberOfEdges * 6);
