@@ -34,31 +34,28 @@ PURPOSE.  See the above copyright notice for more information.
 vtkStandardNewMacro(myDiscreteFlyingEdges3D);
 
 void printArray(const char* name, const vtkIdType a[], int n) {
-	printf("const %s = [\n", name);
+	printf("const %s = [", name);
 	for (int i = 0; i < n; i++) {
-		printf("  %d", a[i]);
-		if (i < n - 1) printf(",");
-		printf("\n");
+		printf("%d", a[i]);
+		if (i < n - 1) printf(", ");
 	}
 	printf("];\n\n");
 }
 
 void printArray(const char* name, const double a[], int n) {
-	printf("const %s = [\n", name);
+	printf("const %s = [", name);
 	for (int i = 0; i < n; i++) {
-		printf("  %f", a[i]);
-		if (i < n - 1) printf(",");
-		printf("\n");
+		printf("%f", a[i]);
+		if (i < n - 1) printf(", ");
 	}
 	printf("];\n\n");
 }
 
 void printArray(const char* name, const unsigned char a[], int n) {
-	printf("const %s = [\n", name);
+	printf("const %s = [", name);
 	for (int i = 0; i < n; i++) {
-		printf("  %d", a[i]);
-		if (i < n - 1) printf(",");
-		printf("\n");
+		printf("%d", a[i]);
+		if (i < n - 1) printf(", ");
 	}
 	printf("];\n\n");
 }
@@ -93,7 +90,7 @@ void printArray2D(const char* name, const double* a, int n, int m) {
 	printf("];\n\n");
 }
 
-void printArray2D(const char* name, unsigned char* a, int n, int m) {
+void printArray2D(const char* name, const unsigned char* a, int n, int m) {
 	printf("const %s = [\n", name);
 	for (int i = 0; i < n; i++) {
 		printf("  [");
@@ -990,6 +987,8 @@ namespace {
 		eMD[2] = eMD[0] + this->Dims[1] * 6; //x-edge in +z direction
 		eMD[3] = eMD[2] + 6; //x-edge in +y+z direction
 
+		const bool TEST = row == 14 && slice == 0;
+
 							 // Determine whether this row of x-cells needs processing. If there are no
 							 // x-edge intersections, and the state of the four bounding x-edges is the
 							 // same, then there is no need for processing.
@@ -1012,6 +1011,8 @@ namespace {
 		yLoc = (row >= (this->Dims[1] - 2) ? MaxBoundary : Interior);
 		zLoc = (slice >= (this->Dims[2] - 2) ? MaxBoundary : Interior);
 		yzLoc = (yLoc << 2) | (zLoc << 4);
+
+		if (TEST)printf("%d, %d, %d\n", yLoc, zLoc, yzLoc);
 
 		// The trim edges may need adjustment if the contour travels between rows
 		// of x-edges (without intersecting these x-edges). This means checking
@@ -1056,6 +1057,8 @@ namespace {
 			xR = eMD[0][5] = this->Dims[0] - 1;
 		}
 
+		if (TEST) printf("%d, %d, %d, %d, %d, %d\n", xL, xR, ec0, ec1, ec2, ec3);
+
 		// Okay run along the x-voxels and count the number of y- and
 		// z-intersections. Here we are just checking y,z edges that make up the
 		// voxel axes. Also check the number of primitives generated.
@@ -1065,6 +1068,7 @@ namespace {
 		for (i = xL; i < xR; ++i) //run along the trimmed x-voxels
 		{
 			eCase = this->GetEdgeCase(ePtr);
+
 			if ((numTris = this->GetNumberOfPrimitives(eCase)) > 0)
 			{
 				// Okay let's increment the triangle count.
@@ -1081,11 +1085,15 @@ namespace {
 				{
 					this->CountBoundaryYZInts(loc, edgeUses, eMD);
 				}
+
+				if (TEST) printf("%d\n", this->EdgeMetaData[87]);
 			}//if cell contains contour
 
 			 // advance the four pointers along voxel row
 			ePtr[0]++; ePtr[1]++; ePtr[2]++; ePtr[3]++;
 		}//for all voxels along this x-edge
+
+		printf("%d\n", this->EdgeMetaData[87]);
 	}
 
 	//----------------------------------------------------------------------------
@@ -1251,22 +1259,14 @@ namespace {
 		algo.NeedGradients = (newGradients || newNormals);
 		algo.InterpolateAttributes = (self->GetInterpolateAttributes() &&
 			input->GetPointData()->GetNumberOfArrays() > 1) ? true : false;
-
-		printArray2D("EdgeCases", algo.EdgeCases[0], 256, 16);
-		printArray("EdgeMap", EdgeMap, 12);
-		//printArray2D("EdgeCases", algo.EdgeCases, 256, 16);
 		/*
-		unsigned char EdgeCases[256][16];
-		static const unsigned char EdgeMap[12];
-		static const unsigned char VertMap[12][2];
-		static const unsigned char VertOffsets[8][3];
-		unsigned char EdgeUses[256][12];
-		unsigned char IncludesAxes[256];
-		unsigned char *XCases;
-		vtkIdType *EdgeMetaData;
+		printArray2D("EdgeCases", algo.EdgeCases[0], 256, 16);
+		printArray("EdgeMap", algo.EdgeMap, 12);
+		printArray2D("VertMap", algo.VertMap[0], 12, 2);
+		printArray2D("VertOffsets", algo.VertOffsets[0], 8, 3);
+		printArray2D("EdgeUses", algo.EdgeUses[0], 256, 12);
+		printArray("IncludesAxes", algo.IncludesAxes, 256);
 		*/
-
-
 
 		// Loop across each contour value. This encompasses all three passes.
 		for (vidx = 0; vidx < numContours; vidx++)
@@ -1279,6 +1279,10 @@ namespace {
 			// are counted).
 			Pass1<T> pass1(&algo, value);
 			vtkSMPTools::For(0, algo.Dims[2], pass1);
+
+
+
+			printArray("EdgeMetaData", algo.EdgeMetaData, algo.NumberOfEdges * 6);
 
 			// PASS 2: Traverse all voxel x-rows and process voxel y&z edges.  The
 			// result is a count of the number of y- and z-intersections, as well as
@@ -1372,6 +1376,14 @@ namespace {
 				// maximum performance.
 				Pass4<T> pass4(&algo, value);
 				vtkSMPTools::For(0, algo.Dims[2] - 1, pass4);
+
+
+
+				//printArray("XCases", algo.XCases, (algo.Dims[0] - 1)*algo.NumberOfEdges);
+				//printArray("EdgeMetaData", algo.EdgeMetaData, algo.NumberOfEdges * 6);
+
+
+
 			}//if anything generated
 
 			 // Handle multiple contours
