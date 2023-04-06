@@ -2037,7 +2037,7 @@ bool VisualizationContainer::CheckDots() {
 void VisualizationContainer::ApplyDotAnnotation() {
 	for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
 		Region* region = regions->Get(it);
-		region->ApplyDot();
+		region->ApplyDot(sliceView->GetDotSize());
 	}
 
 	labels->Modified();
@@ -2515,7 +2515,7 @@ void VisualizationContainer::ExtractRegions(vtkIntArray* extents) {
 		}
 
 		if (interactionMode == DotMode) {
-			region->ApplyDot();
+			region->ApplyDot(sliceView->GetDotSize());
 			region->ShowCenter(true);
 		}
 
@@ -2567,7 +2567,7 @@ void VisualizationContainer::ExtractRegions(const std::vector<RegionInfo>& metad
 			}
 
 			if (interactionMode == DotMode) {
-				region->ApplyDot();
+				region->ApplyDot(sliceView->GetDotSize());
 				region->ShowCenter(true);
 			}
 		}

@@ -43,6 +43,7 @@ public slots:
 	virtual void on_autoAdjustSamplingCheckBox_stateChanged(int state);
 
 	virtual void on_enableDotAnnotationCheckBox_stateChanged(int state);
+	virtual void on_dotSizeSpinBox_valueChanged(double value);
 
 	virtual void on_flipAxisButton(int axis);
 

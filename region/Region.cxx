@@ -638,7 +638,7 @@ void Region::SetComment(const std::string& commentString) {
 	text->SetInput(LabelString().c_str());
 }
 
-void Region::ApplyDot() {
+void Region::ApplyDot(double dotSize) {
 	double* c = GetCenter();
 	int x = (int)c[0];
 	int y = (int)c[1];
@@ -652,12 +652,12 @@ void Region::ApplyDot() {
 
 	data->Modified();
 
-	int ext[6] = { x, x, y, y, z, z, };
+	int ext[6] = { x, x, y, y, z, z };
 	SetExtent(ext);
 	voi->Update();
 
 	center3D->Update();
-	center2D->Update(center2D->GetActor()->GetPosition()[2]);
+	center2D->Update(center2D->GetActor()->GetPosition()[2], dotSize);
 }
 
 void Region::ClearLabels() {

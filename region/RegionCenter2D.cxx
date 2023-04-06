@@ -36,7 +36,7 @@ RegionCenter2D::RegionCenter2D(Region* inputRegion, double color[3]) {
 	actor->PickableOff();
 	actor->VisibilityOff();
 
-	Update(region->GetCenter()[2]);
+	Update(region->GetCenter()[2], 1.25);
 }
 
 RegionCenter2D::~RegionCenter2D() {
@@ -49,9 +49,7 @@ vtkSmartPointer<vtkActor> RegionCenter2D::GetActor() {
 	return actor;
 }
 
-void RegionCenter2D::Update(double z) {
-	double r = 1.25;
-
+void RegionCenter2D::Update(double z, double size) {
 	double numSlices = 4.0;
 
 	double* c = region->GetCenter();
@@ -62,7 +60,7 @@ void RegionCenter2D::Update(double z) {
 	if (s < 0) s = 0;
 
 	actor->SetPosition(c[0], c[1], z);
-	actor->SetScale(r * s);
+	actor->SetScale(size * s);
 
 	double epsilon = 0.9;
 	if (d < epsilon) {

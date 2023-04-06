@@ -73,6 +73,9 @@ public:
 
 	void SetBrushRadius(int radius);
 
+	double GetDotSize();
+	void SetDotSize(double size);
+
 	void SetOrientationX();
 	void SetOrientationY();
 	void SetOrientationZ();
@@ -85,6 +88,7 @@ public:
 protected:
 	FilterMode filterMode;
 	bool showRegionOutlines;
+	double dotSize;
 
 	enum RescaleMode {
 		Full,

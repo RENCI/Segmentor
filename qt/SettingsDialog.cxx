@@ -61,6 +61,9 @@ void SettingsDialog::initializeSettings() {
 
 	// Neighbor radius
 	neighborRadiusSpinBox->setValue(visualizationContainer->GetNeighborRadius());
+
+	// Dot size
+	dotSizeSpinBox->setValue(sliceView->GetDotSize());
 }
 
 void SettingsDialog::on_windowSpinBox_valueChanged(double value) {
@@ -130,6 +133,10 @@ void SettingsDialog::on_autoAdjustSamplingCheckBox_stateChanged(int state) {
 
 void SettingsDialog::on_enableDotAnnotationCheckBox_stateChanged(int state) {
 	emit enableDotAnnotationChanged(state != 0);
+}
+
+void SettingsDialog::on_dotSizeSpinBox_valueChanged(double value) {
+	visualizationContainer->GetSliceView()->SetDotSize(value);
 }
 
 void SettingsDialog::on_flipAxisButton(int axis) {

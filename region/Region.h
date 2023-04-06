@@ -95,7 +95,7 @@ public:
 	const std::string& GetComment();
 	void SetComment(const std::string& commentString);
 
-	void ApplyDot();
+	void ApplyDot(double dotSize);
 
 protected:
 	unsigned short label;

@@ -16,7 +16,7 @@ public:
 
 	vtkSmartPointer<vtkActor> GetActor();
 
-	void Update(double z);
+	void Update(double z, double size);
 
 protected:
 	Region* region;

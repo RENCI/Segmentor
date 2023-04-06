@@ -51,6 +51,7 @@ SliceView::SliceView(vtkRenderWindowInteractor* interactor, vtkLookupTable* lut)
 	showRegionOutlines = true;
 	rescaleMode = Full;
 	autoRescale = true;
+	dotSize = 1.25;
 
 	data = nullptr;
 	labels = nullptr;
@@ -202,7 +203,7 @@ void SliceView::AddRegionActors(Region* region) {
 	regionOutlinesRenderer->AddActor(region->GetText());
 
 	regionOutlinesRenderer->AddActor(region->GetCenter2D()->GetActor());
-	region->GetCenter2D()->Update(plane->GetOrigin()[2]);
+	region->GetCenter2D()->Update(plane->GetOrigin()[2], dotSize);
 
 #ifdef SHOW_REGION_BOX
 	//regionOutlinesRenderer->AddActor(region->GetBox());
@@ -425,7 +426,7 @@ void SliceView::UpdatePlane() {
 	if (regions) {
 		for (RegionCollection::Iterator it = regions->Begin(); it != regions->End(); it++) {
 			Region* region = regions->Get(it);
-			region->GetCenter2D()->Update(z);
+			region->GetCenter2D()->Update(z, dotSize);
 		}
 	}
 }
@@ -433,6 +434,17 @@ void SliceView::UpdatePlane() {
 void SliceView::SetBrushRadius(int radius) {
 	brush->SetRadius(radius);
 	brush->GetActor()->SetVisibility(radius > 1);
+}
+
+double SliceView::GetDotSize() {
+	return dotSize;
+}
+
+void SliceView::SetDotSize(double size) {
+	dotSize = size;
+	UpdatePlane();
+
+	Render();
 }
 
 void SliceView::Render() {
